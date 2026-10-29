@@ -503,7 +503,7 @@ function groupRequirements(requirements: RequirementDto[]): DocBlock[] {
   const blocks: DocBlock[] = [];
   for (const r of requirements) {
     if (r.oneOfGroup) {
-      const existing = blocks.find((b) => b.kind === "group" && b.group === r.oneOfGroup);
+      const existing = blocks.find((b): b is Extract<DocBlock, { kind: "group" }> => b.kind === "group" && b.group === r.oneOfGroup);
       if (existing) existing.reqs.push(r);
       else blocks.push({ kind: "group", group: r.oneOfGroup, reqs: [r] });
     } else {
@@ -594,7 +594,7 @@ function DocsStep({
         p_file_name: file.name,
         p_mime_type: prepared.mime,
         p_file_size: prepared.blob.size,
-        p_doc_number: docNumbers[code] || null,
+        p_doc_number: docNumbers[code] || undefined,
       });
       if (rpcErr) {
         setError(rpcErr.message);

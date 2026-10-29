@@ -87,13 +87,14 @@ function AskQuery() {
           attachmentName = file.name;
         }
       }
-      const { data: queryId, error: rpcErr } = await supabase.rpc("customer_raise_query", {
+      const rpcArgs: Record<string, string> = {
         p_subject: subj,
         p_message: body,
         p_context: context,
-        p_attachment_path: attachmentPath,
-        p_attachment_name: attachmentName,
-      });
+      };
+      if (attachmentPath) rpcArgs["p_attachment_path"] = attachmentPath;
+      if (attachmentName) rpcArgs["p_attachment_name"] = attachmentName;
+      const { data: queryId, error: rpcErr } = await supabase.rpc("customer_raise_query", rpcArgs);
       if (rpcErr) throw new Error(rpcErr.message);
       toast.success(t("queries.ask.sent"));
       await navigate({ to: "/queries/$id", params: { id: String(queryId) } });

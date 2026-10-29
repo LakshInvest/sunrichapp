@@ -138,7 +138,11 @@ function Account() {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const photoInput = useRef<HTMLInputElement>(null);
+  const [removing, setRemoving] = useState(false);
+  const [photoSheetOpen, setPhotoSheetOpen] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const cameraInput = useRef<HTMLInputElement>(null);
+  const galleryInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let active = true;

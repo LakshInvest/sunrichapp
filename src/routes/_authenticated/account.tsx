@@ -139,6 +139,11 @@ function Account() {
   const [removing, setRemoving] = useState(false);
   const [photoSheetOpen, setPhotoSheetOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteReason, setDeleteReason] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteDone, setDeleteDone] = useState(false);
   const cameraInput = useRef<HTMLInputElement>(null);
   const galleryInput = useRef<HTMLInputElement>(null);
 
@@ -273,6 +278,24 @@ function Account() {
     }
     await supabase.auth.signOut();
     await navigate({ to: "/auth", replace: true });
+  };
+
+  const requestDelete = async () => {
+    if (!deleteConfirm || deleting) return;
+    setDeleting(true);
+    try {
+      const { error } = await supabase.rpc("customer_raise_query", {
+        p_subject: t("account.deleteSubject"),
+        p_message: t("account.deleteMessage", { reason: deleteReason || "—" }),
+        p_context: "account_deletion",
+      });
+      if (error) throw error;
+      setDeleteDone(true);
+    } catch {
+      toast.error(t("queries.errSend"));
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const typeLabel = pl(customer?.typeName, lang);

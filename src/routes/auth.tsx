@@ -56,6 +56,8 @@ export const Route = createFileRoute("/auth")({
 });
 
 const RESEND_SECONDS = 30;
+/** Present while an OTP/PIN login is in progress; keeps the /auth beforeLoad redirect out of the flow. */
+const AUTH_FLOW_KEY = "sunrich.authflow";
 
 function WhatsAppIcon() {
   return (

@@ -17,3 +17,5 @@ Constraint: existing DB tables/RPCs/buckets only. No schema/policy changes.
 - [x] 13. Offline banner; cached catalogue read-only; disable Get OTP/Submit/Send/Save/Add while offline.
 - [x] 14. Swipe-down + back-button close for sheets; pull-to-refresh Home/Order/Queries; Home header city from customer address (already dynamic).
 - [ ] 15. QA at 360/390/768 × en/hi/mr via Playwright with a real customer session; fix and list.
+      - Fixed during QA: sticky add-to-cart bar on /product/$id sat under the bottom nav (unclippable) → moved above it; /auth signed-in redirect raced past the Set PIN screen on new devices → skipped by an in-flow sessionStorage guard; offline guards added to auth/queries/cart/registration/account; ProductCard image fallback; Home no-results Ask-Sunrich CTA; pull-to-refresh now reads window scroll; queries.ask fetches registration in an effect.
+      - Public screens verified at 360/390/768 in en/hi/mr. Live authenticated customer + PIN runs scheduled behind the OTP rate-limit window (background jobs qa3.py / qa_pin.py).

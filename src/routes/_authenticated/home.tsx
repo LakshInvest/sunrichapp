@@ -446,7 +446,8 @@ function Home() {
         <div className="relative z-10 flex items-start justify-between">
           <button
             type="button"
-            aria-label={`${t("home.locationLabel")}: ${t("home.locationArea")}`}
+            onClick={() => setAddressOpen(true)}
+            aria-label={`${t("home.locationLabel")}: ${areaLabel}`}
             className="flex min-h-11 items-start gap-1.5 text-left"
           >
             <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-white/80" />
@@ -455,18 +456,21 @@ function Home() {
                 {t("home.locationLabel")}
                 <ChevronDown className="h-4 w-4" />
               </span>
-              <span className={`block text-xs text-white/70 ${deva}`}>
-                {t("home.locationArea")}
-              </span>
+              <span className={`block text-xs text-white/70 ${deva}`}>{areaLabel}</span>
             </span>
           </button>
 
           <button
             type="button"
+            onClick={() => navigate({ to: "/account" })}
             aria-label={t("home.profile")}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/15 text-sm font-semibold text-white transition active:scale-95"
+            className="rounded-full transition active:scale-95"
           >
-            {initial}
+            <ProfileAvatar
+              src={profile.photoUrl}
+              name={profile.name}
+              className="h-10 w-10 border border-white/30 text-sm"
+            />
           </button>
         </div>
 
@@ -522,6 +526,21 @@ function Home() {
           >
             <Clock className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />
             {t("banner.underReview")}
+          </div>
+        )}
+        {openQuery && (
+          <div className="mx-5 mb-4 flex items-center gap-3 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-foreground">{t("home.needsAction")}</p>
+              <p className="truncate text-xs text-muted-foreground">{openQuery.subject}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/queries/$id", params: { id: openQuery.id } })}
+              className="min-h-10 shrink-0 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground transition active:scale-95"
+            >
+              {t("home.open")}
+            </button>
           </div>
         )}
         <div className="relative z-30 -mt-7 px-5">
@@ -581,6 +600,25 @@ function Home() {
           clear();
           setConfirmClear(false);
         }}
+      />
+
+      <AddressSheet
+        open={addressOpen}
+        onOpenChange={setAddressOpen}
+        address={
+          reg
+            ? {
+                line1: reg.addressLine1 ?? "",
+                line2: reg.addressLine2,
+                landmark: reg.landmark,
+                city: reg.city,
+                pincode: reg.pincode,
+                lat: reg.latitude,
+                lng: reg.longitude,
+              }
+            : null
+        }
+        typeLabel={typeLabel}
       />
 
       <BottomNav />

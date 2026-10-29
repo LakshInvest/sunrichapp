@@ -11,13 +11,13 @@ import { getMyCustomerId } from "@/lib/otp.functions";
  */
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) {
       throw redirect({ to: "/auth" });
     }
     const { customerId } = await getMyCustomerId();
-    if (!customerId) {
+    if (!customerId && location.pathname !== "/registration") {
       throw redirect({ to: "/registration" });
     }
   },

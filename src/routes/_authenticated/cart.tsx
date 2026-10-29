@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Droplets, Minus, Plus } from "lucide-react";
 import en from "@/locales/en.json";
@@ -8,6 +9,7 @@ import { SmartImage } from "@/components/SmartImage";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
+import { getMyRegistration } from "@/lib/registration.functions";
 import { homeContent, pick } from "@/data/homeContent";
 
 export const Route = createFileRoute("/_authenticated/cart")({
@@ -31,7 +33,19 @@ function Cart() {
   const { quantities, setQty, clear } = useCart();
   const [confirmClear, setConfirmClear] = useState(false);
   const [ordered, setOrdered] = useState(false);
+  const [pending, setPending] = useState(false);
+  const myReg = useServerFn(getMyRegistration);
   const deva = lang === "en" ? "" : "font-deva";
+
+  useEffect(() => {
+    let active = true;
+    void myReg().then((reg) => {
+      if (active) setPending(reg.status === "pending_approval");
+    });
+    return () => {
+      active = false;
+    };
+  }, [myReg]);
 
   const items = useMemo(
     () =>
@@ -146,13 +160,23 @@ function Cart() {
               </div>
             </section>
 
-            <button
-              type="button"
-              onClick={placeOrder}
-              className="mt-5 flex min-h-14 w-full items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98]"
-            >
-              {t("cart.placeOrder")}
-            </button>
+            {pending ? (
+              <button
+                type="button"
+                disabled
+                className="mt-5 flex min-h-14 w-full items-center justify-center rounded-xl bg-muted text-lg font-semibold text-muted-foreground"
+              >
+                {t("cart.orderingAfterApproval")}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={placeOrder}
+                className="mt-5 flex min-h-14 w-full items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98]"
+              >
+                {t("cart.placeOrder")}
+              </button>
+            )}
             {ordered && (
               <p className="mt-3 animate-in fade-in text-center text-sm font-medium text-secondary duration-300">
                 {t("cart.comingSoon")}

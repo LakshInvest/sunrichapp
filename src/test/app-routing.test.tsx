@@ -26,6 +26,10 @@ describe("App routing", () => {
     expect(lastRouteId("/registration")).toBe("/_authenticated/registration");
   });
 
+  it("matches the on-hold screen at /hold", () => {
+    expect(lastRouteId("/hold")).toBe("/_authenticated/hold");
+  });
+
   it("matches the four bottom-nav pages", () => {
     expect(lastRouteId("/home")).toBe("/_authenticated/home");
     expect(lastRouteId("/order")).toBe("/_authenticated/order");

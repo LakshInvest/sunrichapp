@@ -116,7 +116,7 @@ export function CatalogueImage({
   src?: string | null;
   alt: string;
   className?: string;
-  fallbackSrc?: string | null;
+  fallbackSrc?: string | null | undefined;
 }) {
   return <SmartImage src={src} alt={alt} className={className} fallbackSrc={fallbackSrc} />;
 }

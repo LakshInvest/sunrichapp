@@ -42,7 +42,7 @@ export function SmartImage({
 
   return (
     <img
-      src={showFallback ? fallbackSrc : src}
+      src={showFallback ? (fallbackSrc ?? undefined) : (src ?? undefined)}
       alt={alt}
       loading="lazy"
       onError={() => setFailed(true)}

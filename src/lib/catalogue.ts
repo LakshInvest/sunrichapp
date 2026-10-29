@@ -159,11 +159,11 @@ export async function fetchCatalogue(): Promise<CatalogData> {
   let customerTypeId: string | null = null;
   try {
     const { data: user } = await supabase.auth.getUser();
-    if (user.data.user) {
+    if (user?.user) {
       const { data: prof } = await supabase
         .from("user_profiles")
         .select("customer_id")
-        .eq("id", user.data.user.id)
+        .eq("id", user.user.id)
         .maybeSingle();
       if (prof?.customer_id) {
         const { data: c } = await supabase
@@ -184,33 +184,36 @@ export async function fetchCatalogue(): Promise<CatalogData> {
     .eq("is_active", true)
     .order("sort_order")).data ?? [])
     .filter((b: Record<string, unknown>) => {
-      const start = b.start_at ? new Date(String(b.start_at)).getTime() : null;
-      const end = b.end_at ? new Date(String(b.end_at)).getTime() : null;
+      const start = b["start_at"] ? new Date(String(b["start_at"])).getTime() : null;
+      const end = b["end_at"] ? new Date(String(b["end_at"])).getTime() : null;
       if (start !== null && start > now) return false;
       if (end !== null && end < now) return false;
-      const ids = Array.isArray(b.customer_type_ids) ? (b.customer_type_ids as string[]) : null;
+      const ids = Array.isArray(b["customer_type_ids"]) ? (b["customer_type_ids"] as string[]) : null;
       if (ids && ids.length > 0 && (!customerTypeId || !ids.includes(customerTypeId))) return false;
       return true;
     })
     .map((b: Record<string, unknown>) => ({
-      id: String(b.id),
-      imageUrl: (b.image_url as string) ?? null,
-      title: asLoc({ en: b.title, hi: b.title_hi, mr: b.title_mr }),
-      subtitle: b.subtitle ? asLoc({ en: b.subtitle, hi: b.subtitle_hi, mr: b.subtitle_mr }) : null,
-      tag: b.tag ? asLoc({ en: b.tag, hi: b.tag_hi, mr: b.tag_mr }) : null,
-      linkType: String(b.link_type ?? "none"),
-      linkValue: (b.link_value as string) ?? null,
-      sortOrder: num(b.sort_order) ?? 0,
+      id: String(b["id"]),
+      imageUrl: (b["image_url"] as string) ?? null,
+      title: asLoc({ ["en"]: b["title"], ["hi"]: b["title_hi"], ["mr"]: b["title_mr"] }),
+      subtitle: b["subtitle"] ? asLoc({ ["en"]: b["subtitle"], ["hi"]: b["subtitle_hi"], ["mr"]: b["subtitle_mr"] }) : null,
+      tag: b["tag"] ? asLoc({ ["en"]: b["tag"], ["hi"]: b["tag_hi"], ["mr"]: b["tag_mr"] }) : null,
+      linkType: String(b["link_type"] ?? "none"),
+      linkValue: (b["link_value"] as string) ?? null,
+      sortOrder: num(b["sort_order"]) ?? 0,
     }));
 
-  const hero = heroRows
+  const heroRow = heroRows as Record<string, unknown> | null;
+  const hero = heroRow
     ? {
-        greeting: heroRows.greeting ? asLoc({ en: heroRows.greeting, hi: heroRows.greeting_hi, mr: heroRows.greeting_mr }) : null,
-        deliveryLine: heroRows.delivery_line
-          ? asLoc({ en: heroRows.delivery_line, hi: heroRows.delivery_line_hi, mr: heroRows.delivery_line_mr })
+        greeting: heroRow["greeting"]
+          ? asLoc({ ["en"]: heroRow["greeting"], ["hi"]: heroRow["greeting_hi"], ["mr"]: heroRow["greeting_mr"] })
           : null,
-        backgroundImageUrl: heroRows.background_image_url ?? null,
-        productImageUrl: heroRows.product_image_url ?? null,
+        deliveryLine: heroRow["delivery_line"]
+          ? asLoc({ ["en"]: heroRow["delivery_line"], ["hi"]: heroRow["delivery_line_hi"], ["mr"]: heroRow["delivery_line_mr"] })
+          : null,
+        backgroundImageUrl: (heroRow["background_image_url"] as string) ?? null,
+        productImageUrl: (heroRow["product_image_url"] as string) ?? null,
       }
     : null;
 
@@ -219,12 +222,12 @@ export async function fetchCatalogue(): Promise<CatalogData> {
     sections: (sectionRows ?? []).map((s: { key: string }) => s.key),
     hero,
     categories: (categories ?? []).map((c: Record<string, unknown>) => ({
-      id: String(c.id),
-      code: String(c.code),
-      name: asLoc({ en: c.name, hi: c.name_hi, mr: c.name_mr }),
-      iconKey: String(c.icon_key ?? "grid"),
-      imageUrl: (c.image_url as string) ?? null,
-      sortOrder: num(c.sort_order) ?? 0,
+      id: String(c["id"]),
+      code: String(c["code"]),
+      name: asLoc({ ["en"]: c["name"], ["hi"]: c["name_hi"], ["mr"]: c["name_mr"] }),
+      iconKey: String(c["icon_key"] ?? "grid"),
+      imageUrl: (c["image_url"] as string) ?? null,
+      sortOrder: num(c["sort_order"]) ?? 0,
     })),
     banners,
     products: (catalogue ?? []).map((p: RawProduct) => mapProduct(p)),

@@ -33,6 +33,8 @@ export type OrderDto = {
   itemsTotal: number;
   depositTotal: number;
   grandTotal: number;
+  paidAmount: number;
+  paymentStatus: string | null;
   paymentMode: string | null;
   createdAt: string;
   dueDate: string | null;
@@ -55,7 +57,7 @@ export type OrderDto = {
 };
 
 const ORDER_SELECT =
-  "id, customer_id, order_no, status, hold_reason, cancel_reason, items_total, deposit_total, grand_total, payment_mode, created_at, due_date, delivery_date, delivery_slot, delivery_address_line1, delivery_address_line2, delivery_landmark, delivery_city, delivery_pincode, delivery_latitude, delivery_longitude, notes, fulfiller_customer_id, distributor_status, business_name, customer_mobile, order_lines(id, product_id, product_code, product_name, pack_label, qty, unit_price, mrp, line_total, deposit_total, new_containers, sort_order), order_status_history(to_status, changed_at, note)";
+  "id, customer_id, order_no, status, hold_reason, cancel_reason, items_total, deposit_total, grand_total, amount_paid, payment_status, payment_mode, created_at, due_date, delivery_date, delivery_slot, delivery_address_line1, delivery_address_line2, delivery_landmark, delivery_city, delivery_pincode, delivery_latitude, delivery_longitude, notes, fulfiller_customer_id, distributor_status, business_name, customer_mobile, order_lines(id, product_id, product_code, product_name, pack_label, qty, unit_price, mrp, line_total, deposit_total, new_containers, sort_order), order_status_history(to_status, changed_at, note)";
 
 function n(v: unknown): number {
   const num = Number(v);
@@ -73,6 +75,8 @@ function mapOrder(r: any): OrderDto {
     itemsTotal: n(r["items_total"]),
     depositTotal: n(r["deposit_total"]),
     grandTotal: n(r["grand_total"]),
+    paidAmount: n(r["amount_paid"]),
+    paymentStatus: (r["payment_status"] as string) ?? null,
     paymentMode: (r["payment_mode"] as string) ?? null,
     createdAt: String(r["created_at"] ?? ""),
     dueDate: (r["due_date"] as string) ?? null,

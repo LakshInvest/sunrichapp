@@ -8,6 +8,15 @@
   "changeLanguage": "भाषा बदला",
   "metaTitle": "सनरिच — पॅकेज्ड पिण्याचे पाणी ऑर्डर करा",
   "metaDescription": "दुकान, वितरण आणि घरासाठी सनरिच पाणी ऑर्डर करा.",
+  "offline": {
+    "title": "तुम्ही ऑफलाइन आहात",
+    "hint": "कनेक्शन नाही. ऑनलाइन आल्यावर पुन्हा प्रयत्न करा.",
+    "cartHint": "तुम्ही ऑफलाइन आहात — ऑनलाइन आल्यावर प्रमाण बदला."
+  },
+  "errors": {
+    "title": "काहीतरी चूक झाली",
+    "retry": "पुन्हा प्रयत्न करा"
+  },
   "auth": {
     "title": "WhatsApp ने लॉग इन करा",
     "subtitle": "आम्ही तुमच्या WhatsApp वर एक-वेळ कोड पाठवू",
@@ -94,6 +103,39 @@
     "needsAction": "Sunrich ला तुमच्याकडून काही हवे आहे",
     "open": "उघडा"
   },
+  "catalog": {
+    "priceOnRequest": "किंमत विचारा",
+    "save": "{{amount}} बचवा",
+    "depositLine": "+ {{amount}} जार डिपॉझिट (परत मिळणारे)",
+    "yourFavourites": "तुमचे आवडते",
+    "addFavourite": "आवडत्यांत जोडा",
+    "removeFavourite": "आवडत्यांतून काढा",
+    "favError": "आवडते अपडेट झाले नाहीत. कृपया पुन्हा प्रयत्न करा.",
+    "recentSearches": "अलीकडील शोध",
+    "clearSearch": "शोध पुसा",
+    "resultsCount_one": "{{count}} उत्पादन",
+    "resultsCount_other": "{{count}} उत्पादने",
+    "noResultsTitle": "काही सापडले नाही",
+    "noResultsBody": "हे उत्पादन सापडले नाही. Sunrich टीमला विचारा, आम्ही मदत करू.",
+    "sortLabel": "क्रम",
+    "sortPopular": "लोकप्रिय",
+    "sortPriceAsc": "किंमत कमी–जास्त",
+    "sortPriceDesc": "किंमत जास्त–कमी",
+    "emptyTitle": "अजून उत्पादने नाहीत",
+    "emptyBody": "Sunrich कॅटलॉग तयार होत आहे. कृपया थोड्या वेळाने पहा."
+  },
+  "product": {
+    "quantity": "प्रमाण",
+    "qtyLimits": "किमान {{min}}, कमाल {{max}} प्रति ऑर्डर",
+    "total": "एकूण",
+    "addToCart": "कार्टमध्ये जोडा",
+    "similar": "हे सुद्धा पहा",
+    "sellUnitInfo": "{{units}} चा {{unit}}",
+    "notFound": "उत्पादन उपलब्ध नाही",
+    "notFoundBody": "हे उत्पादन आता तुमच्या कॅटलॉगमध्ये नाही.",
+    "metaTitle": "सनरिच — उत्पादन",
+    "metaDescription": "तुमच्या Sunrich कॅटलॉगमधील उत्पादन तपशील आणि किंमत."
+  },
   "cart": {
     "title": "कार्ट",
     "metaTitle": "सनरिच — कार्ट",
@@ -111,11 +153,16 @@
     "free": "मोफत",
     "grandTotal": "एकूण रक्कम",
     "placeOrder": "ऑर्डर करा",
-    "comingSoon": "ऑर्डर करण्याची सुविधा लवकरच येत आहे.",
+    "comingSoon": "पुढील रिलीजमध्ये ऑर्डरिंग येत आहे — तुमचे कार्ट सेव्ह आहे.",
     "emptyTitle": "तुमचे कार्ट रिकामे आहे",
     "emptySubtitle": "सुरुवात करण्यासाठी जार आणि बाटल्या जोडा.",
     "browse": "उत्पादने पहा",
-    "orderingAfterApproval": "मंजुरीनंतर ऑर्डरिंग सुरू होईल"
+    "orderingAfterApproval": "मंजुरीनंतर ऑर्डरिंग सुरू होईल",
+    "jarDeposit": "जार डिपॉझिट (परत मिळणारे)",
+    "depositLine": "+ {{amount}} जार डिपॉझिट",
+    "priceUpdated": "किंमत अपडेट झाली",
+    "bulkNote": "घस्त्या ऑर्डरवर आमची टीम दर निश्चित करेल.",
+    "removedFromCatalogue": "काही वस्तू आता उपलब्ध नाहीत आणि कार्टमधून काढल्या."
   },
   "order": {
     "title": "ऑर्डर",
@@ -172,7 +219,23 @@
     "moreAddresses": "अधिक डिलिव्हरी पत्ते लवकरच येतील",
     "logoutTitle": "लॉग आउट करायचे?",
     "logoutBody": "तुम्हाला तुमच्या नंबरने पुन्हा लॉग इन करावे लागेल.",
-    "logoutConfirm": "लॉग आउट"
+    "logoutConfirm": "लॉग आउट",
+    "privacyPolicy": "गोपनीयता धोरण",
+    "termsOfUse": "वापराच्या अटी",
+    "madeBy": "Growth Story कडून बनवले",
+    "deleteAccount": "माझे खाते काढा",
+    "deleteBody": "Sunrich तुमचे खाते आणि वैयक्तिक माहिती 7 दिवसांत काढून टाकेल. GST कायद्यानुसार बिले आणि पेमेंट रेकॉर्ड ठेवले जातात.",
+    "deleteReason": "कारण (ऐच्छिक)",
+    "deleteReasonNone": "कारण निवडा",
+    "deleteReason1": "सेवेची गरज नाही",
+    "deleteReason2": "किंमत किंवा सेवेतील प्रश्न",
+    "deleteReason3": "अन्य",
+    "deleteConfirm": "मला समजले आहे की माझे खाते आणि वैयक्तिक माहिती 7 दिवसांत काढली जाईल.",
+    "deleteRequest": "काढण्याची विनंती करा",
+    "deleteSubject": "माझे खाते काढा",
+    "deleteMessage": "कृपया माझे खाते काढून टाका. कारण: {{reason}}",
+    "deleteSentTitle": "विनंती पाठवली",
+    "deleteSentBody": "विनंती पाठवली. Sunrich 7 दिवसांत तुमच्याशी संपर्क करेल."
   },
   "register": {
     "title": "तुमची नोंदणी पूर्ण करा",
@@ -238,7 +301,9 @@
     "rejectedTitle": "नोंदणीत बदल आवश्यक आहेत",
     "rejectedBody": "कारण: {{reason}}",
     "editAndResubmit": "बदला आणि पुन्हा पाठवा",
-    "yourName": "तुमचे नाव"
+    "yourName": "तुमचे नाव",
+    "state": "राज्य",
+    "statePlaceholder": "पिनकोडवरून भरले जाईल"
   },
   "status": {
     "active": "सक्रिय",
@@ -277,6 +342,21 @@
     "errSend": "पाठवता आले नाही. कृपया पुन्हा प्रयत्न करा.",
     "staffLabel": "{{name}} · सनरिच",
     "closeImage": "इमेज बंद करा",
-    "attachFailed": "अटॅचमेंट लोड झाले नाही"
+    "attachFailed": "अटॅचमेंट लोड झाले नाही",
+    "ask": {
+      "title": "प्रश्न विचारा",
+      "fab": "प्रश्न विचारा",
+      "topicLabel": "कशाबद्दल आहे?",
+      "topicGeneral": "सामान्य",
+      "topicOrder": "ऑर्डर",
+      "topicPayment": "पेमेंट",
+      "subjectLabel": "विषय",
+      "subjectPlaceholder": "थोडक्यात",
+      "messageLabel": "तुमचा प्रश्न",
+      "messagePlaceholder": "कशी मदत हवी आहे ते सांगा…",
+      "attachHint": "फोटो किंवा PDF (ऐच्छिक). फाइला खुल्या प्रश्नावर जोडता येते.",
+      "sendQuestion": "प्रश्न पाठवा",
+      "sent": "प्रश्न पाठवला — Sunrich टीम लवकरच उत्तर देईल."
+    }
   }
 }

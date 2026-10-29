@@ -238,6 +238,104 @@ export type Database = {
           },
         ]
       }
+      customer_queries: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          company_id: string
+          context: string
+          created_at: string
+          customer_id: string
+          id: string
+          raised_by: string | null
+          status: Database["public"]["Enums"]["query_status"]
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          company_id: string
+          context?: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          raised_by?: string | null
+          status?: Database["public"]["Enums"]["query_status"]
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          company_id?: string
+          context?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          raised_by?: string | null
+          status?: Database["public"]["Enums"]["query_status"]
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_queries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_queries_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_query_messages: {
+        Row: {
+          attachment_name: string | null
+          attachment_path: string | null
+          body: string | null
+          created_at: string
+          id: string
+          query_id: string
+          sender_id: string | null
+          sender_type: string
+        }
+        Insert: {
+          attachment_name?: string | null
+          attachment_path?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          query_id: string
+          sender_id?: string | null
+          sender_type: string
+        }
+        Update: {
+          attachment_name?: string | null
+          attachment_path?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          query_id?: string
+          sender_id?: string | null
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_query_messages_query_id_fkey"
+            columns: ["query_id"]
+            isOneToOne: false
+            referencedRelation: "customer_queries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_type_documents: {
         Row: {
           customer_type_id: string
@@ -953,6 +1051,15 @@ export type Database = {
         }
         Returns: string
       }
+      admin_raise_query: {
+        Args: {
+          p_context?: string
+          p_customer_id: string
+          p_message: string
+          p_subject: string
+        }
+        Returns: string
+      }
       approve_customer: { Args: { p_customer_id: string }; Returns: undefined }
       check_pin: {
         Args: { p_device_id: string; p_mobile: string; p_pin: string }
@@ -961,6 +1068,7 @@ export type Database = {
           out_user_id: string
         }[]
       }
+      close_query: { Args: { p_query_id: string }; Returns: undefined }
       current_session_id: { Args: never; Returns: string }
       force_logout: {
         Args: { p_reason?: string; p_user_id: string }
@@ -979,6 +1087,15 @@ export type Database = {
       record_logout: { Args: never; Returns: undefined }
       reject_customer: {
         Args: { p_customer_id: string; p_reason: string }
+        Returns: undefined
+      }
+      reply_query: {
+        Args: {
+          p_attachment_name?: string
+          p_attachment_path?: string
+          p_message?: string
+          p_query_id: string
+        }
         Returns: undefined
       }
       revoke_user_devices: { Args: { p_user_id: string }; Returns: number }
@@ -1025,6 +1142,7 @@ export type Database = {
       doc_requirement: "required" | "optional" | "one_of"
       otp_channel: "whatsapp" | "email"
       otp_purpose: "app_login" | "staff_2fa"
+      query_status: "open" | "answered" | "closed"
       unit_type: "plant" | "depot" | "copacker" | "jar_unit" | "office"
       user_type: "staff" | "customer"
     }
@@ -1164,6 +1282,7 @@ export const Constants = {
       doc_requirement: ["required", "optional", "one_of"],
       otp_channel: ["whatsapp", "email"],
       otp_purpose: ["app_login", "staff_2fa"],
+      query_status: ["open", "answered", "closed"],
       unit_type: ["plant", "depot", "copacker", "jar_unit", "office"],
       user_type: ["staff", "customer"],
     },

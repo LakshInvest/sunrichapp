@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { ArrowLeft, Camera, FileText, Paperclip, Send, X } from "lucide-react";
@@ -49,7 +49,15 @@ function AskQuery() {
   const cameraInput = useRef<HTMLInputElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
-  void myReg().then((reg) => setCustomerId(reg.customerId));
+  useEffect(() => {
+    let active = true;
+    void myReg().then((reg) => {
+      if (active) setCustomerId(reg.customerId);
+    });
+    return () => {
+      active = false;
+    };
+  }, [myReg]);
 
   const pick = (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];

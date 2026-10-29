@@ -98,11 +98,15 @@ export function EmptyState({
 export function NoResultsState() {
   const { t } = useTranslation();
   return (
-    <EmptyState
-      icon={SearchX}
-      title={t("catalog.noResultsTitle")}
-      body={t("catalog.noResultsBody")}
-    />
+    <div className="flex flex-col items-center px-8 py-10 text-center">
+      <EmptyState icon={SearchX} title={t("catalog.noResultsTitle")} body={t("catalog.noResultsBody")} />
+      <Link
+        to="/queries/ask"
+        className="mt-2 flex min-h-11 items-center rounded-xl bg-secondary px-5 text-sm font-semibold text-secondary-foreground shadow-sm transition active:scale-95"
+      >
+        {t("catalog.askUs")}
+      </Link>
+    </div>
   );
 }
 

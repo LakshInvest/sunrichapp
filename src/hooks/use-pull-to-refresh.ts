@@ -13,7 +13,8 @@ export function usePullToRefresh(onRefresh: () => Promise<unknown> | unknown) {
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     if (refreshing) return;
-    if ((e.currentTarget as HTMLElement).scrollTop <= 0) {
+    // These screens scroll on the window, not an inner container.
+    if (window.scrollY <= 0) {
       startY.current = e.touches[0]?.clientY ?? null;
     }
   }, [refreshing]);

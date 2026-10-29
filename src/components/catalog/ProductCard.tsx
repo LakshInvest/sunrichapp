@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Heart, Minus, Plus } from "lucide-react";
 import { SmartImage } from "@/components/SmartImage";
+import { fallbackImageFor } from "@/components/catalog/image-fallbacks";
 import { formatINR, loc, priceSave, type CatalogProduct } from "@/lib/catalogue";
 
 /** Price rules shared by cards, the detail screen and the cart. */
@@ -81,6 +82,7 @@ export function ProductCard({
       >
         <SmartImage
           src={product.imageUrl ?? product.images[0] ?? null}
+          fallbackSrc={fallbackImageFor(product)}
           alt={loc(product.name, lang)}
           className="aspect-square w-full object-cover"
         />

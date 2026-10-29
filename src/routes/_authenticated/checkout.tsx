@@ -59,7 +59,7 @@ function Checkout() {
   const [reg, setReg] = useState<RegistrationDto | null>(null);
   const [editingAddress, setEditingAddress] = useState(false);
   const [addr, setAddr] = useState({ line1: "", line2: "", landmark: "", city: "", pincode: "" });
-  const [loc_, setLoc_] = useState<LocationValue>({ lat: null, lng: null, accuracy: null });
+  const [loc_, setLoc_] = useState<LocationValue | null>(null);
   const [when, setWhen] = useState<"today" | "tomorrow" | "pick">("today");
   const [customDate, setCustomDate] = useState(isoDaysFromToday(2));
   const [slot, setSlot] = useState<(typeof SLOTS)[number]>("morning");

@@ -311,6 +311,11 @@ export async function cancelMyOrder(orderId: string, reason: string): Promise<vo
   if (error) throw new Error(error.message);
 }
 
+export async function distributorRespond(orderId: string, accept: boolean, reason?: string): Promise<void> {
+  const { error } = await supabase.rpc("distributor_respond", { p_order_id: orderId, p_accept: accept, p_reason: reason ? reason : undefined });
+  if (error) throw new Error(error.message);
+}
+
 export async function distributorMarkDelivered(orderId: string, delivered: boolean, reason?: string): Promise<void> {
   const { error } = await supabase.rpc("distributor_mark_delivered", {
     p_order_id: orderId,
@@ -407,8 +412,8 @@ export function useDistributorNav(): { isDistributor: boolean; newCount: number 
 
 /** "20 L Water Jar ×2 +1 more" style summary for a list card. */
 export function itemsSummary(lines: OrderLineDto[]): { first: string; more: number } {
-  if (lines.length === 0) return { first: "—", more: 0 };
   const first = lines[0];
+  if (!first) return { first: "—", more: 0 };
   const unit = first.qty === 1 ? "×1" : `×${first.qty}`;
   return { first: `${first.productName} ${unit}`, more: Math.max(0, lines.length - 1) };
 }

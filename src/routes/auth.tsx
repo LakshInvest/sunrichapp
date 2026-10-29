@@ -132,7 +132,7 @@ function PinBoxes({
           onKeyDown={(e) => onKey(i, e)}
           onPaste={(e) => onPaste(i, e)}
           onFocus={(e) => e.target.select()}
-          className="h-16 w-14 rounded-2xl border border-input bg-card text-center text-3xl font-bold text-primary outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30 disabled:opacity-60"
+          className="h-14 w-14 rounded-2xl border border-input bg-card text-center text-3xl font-bold text-primary outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30 disabled:opacity-60"
         />
       ))}
     </div>
@@ -571,24 +571,38 @@ function Login() {
               </p>
             </div>
             {pinPhase === "enter" ? (
-              <PinBoxes
-                value={pin}
-                onChange={setPin}
-                onComplete={onPinEntered}
-                disabled={busy}
-                shake={shaking}
-                label={t("auth.pin.group")}
-              />
+              <div className="flex flex-col gap-3">
+                <p className="text-center text-sm font-medium text-foreground">{t("auth.pin.enterRow")}</p>
+                <PinBoxes
+                  value={pin}
+                  onChange={setPin}
+                  onComplete={onPinEntered}
+                  disabled={busy}
+                  shake={shaking}
+                  label={t("auth.pin.group")}
+                />
+              </div>
             ) : (
-              <PinBoxes
-                value={confirm}
-                onChange={setConfirm}
-                onComplete={(c) => void submitSetPin(c)}
-                disabled={busy}
-                shake={shaking}
-                autoFocusFirst
-                label={t("auth.pin.group")}
-              />
+              <div className="flex flex-col gap-3">
+                <p className="text-center text-sm font-medium text-foreground">{t("auth.pin.enterRow")}</p>
+                <PinBoxes
+                  value={pin}
+                  onChange={() => {}}
+                  onComplete={() => {}}
+                  disabled
+                  label={t("auth.pin.group")}
+                />
+                <p className="mt-4 text-center text-sm font-medium text-foreground">{t("auth.pin.confirmRow")}</p>
+                <PinBoxes
+                  value={confirm}
+                  onChange={setConfirm}
+                  onComplete={(c) => void submitSetPin(c)}
+                  disabled={busy}
+                  shake={shaking}
+                  autoFocusFirst
+                  label={t("auth.pin.group")}
+                />
+              </div>
             )}
             {busy && (
               <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">

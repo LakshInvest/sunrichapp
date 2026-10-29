@@ -3,13 +3,14 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { ArrowLeft, Camera, FileText, Paperclip, Send, X } from "lucide-react";
+import { ArrowLeft, Camera, FileText, Paperclip, Send, TriangleAlert, X } from "lucide-react";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { QueryChip } from "@/components/QueryChip";
 import { useLang } from "@/hooks/use-lang";
 import { prepareUpload } from "@/lib/image-compress";
 import { getMyRegistration } from "@/lib/registration.functions";
+import { getStaffNames } from "@/lib/query-staff.functions";
 
 export const Route = createFileRoute("/_authenticated/queries/$id")({
   head: () => ({
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/_authenticated/queries/$id")({
 type Msg = {
   id: string;
   senderType: string;
+  senderId: string | null;
   body: string | null;
   attachmentPath: string | null;
   attachmentName: string | null;

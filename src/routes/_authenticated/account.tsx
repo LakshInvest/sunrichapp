@@ -471,7 +471,7 @@ function Account() {
               <button
                 type="button"
                 onClick={() => void removePhoto()}
-                disabled={removing}
+                disabled={removing || offline}
                 className="flex min-h-12 items-center gap-3 rounded-xl px-4 text-left text-[15px] font-medium text-destructive transition active:bg-destructive/5 disabled:opacity-50"
               >
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-destructive/10">

@@ -211,6 +211,7 @@ export const getDocumentRequirements = createServerFn({ method: "GET" })
           docTypeCode: dt.code,
           filePath: d.file_path,
           fileName: d.file_name ?? null,
+          mimeType: d.mime_type ?? null,
           docNumber: d.doc_number ?? null,
           status: d.status,
         } satisfies UploadedDocDto;

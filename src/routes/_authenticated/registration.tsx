@@ -107,12 +107,14 @@ function Wizard() {
   const [step, setStep] = useState<Step>(() => initialStep(reg0));
   const [typeCode, setTypeCode] = useState<string | null>(reg0.typeCode);
 
-  // Anyone already registered belongs on Home, not in the wizard.
+  // Anyone already registered belongs on Home, not in the wizard
+  // (but let the success screen show after a fresh signup).
   useEffect(() => {
+    if (step === "done") return;
     if (reg.customerId && (reg.status === "active" || reg.status === "pending_approval")) {
       void navigate({ to: "/home", replace: true });
     }
-  }, [reg.customerId, reg.status, navigate]);
+  }, [step, reg.customerId, reg.status, navigate]);
 
   const refresh = async (): Promise<RegistrationDto> => {
     const fresh = await reload();

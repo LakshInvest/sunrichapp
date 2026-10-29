@@ -35,6 +35,7 @@ export type OrderDto = {
   grandTotal: number;
   paymentMode: string | null;
   createdAt: string;
+  dueDate: string | null;
   deliveryDate: string | null;
   deliverySlot: string | null;
   deliveryAddressLine1: string | null;
@@ -54,7 +55,7 @@ export type OrderDto = {
 };
 
 const ORDER_SELECT =
-  "id, order_no, status, hold_reason, cancel_reason, items_total, deposit_total, grand_total, payment_mode, created_at, delivery_date, delivery_slot, delivery_address_line1, delivery_address_line2, delivery_landmark, delivery_city, delivery_pincode, delivery_latitude, delivery_longitude, notes, fulfiller_customer_id, distributor_status, business_name, customer_mobile, order_lines(id, product_id, product_code, product_name, pack_label, qty, unit_price, mrp, line_total, deposit_total, new_containers, sort_order), order_status_history(to_status, changed_at, note)";
+  "id, order_no, status, hold_reason, cancel_reason, items_total, deposit_total, grand_total, payment_mode, created_at, due_date, delivery_date, delivery_slot, delivery_address_line1, delivery_address_line2, delivery_landmark, delivery_city, delivery_pincode, delivery_latitude, delivery_longitude, notes, fulfiller_customer_id, distributor_status, business_name, customer_mobile, order_lines(id, product_id, product_code, product_name, pack_label, qty, unit_price, mrp, line_total, deposit_total, new_containers, sort_order), order_status_history(to_status, changed_at, note)";
 
 function n(v: unknown): number {
   const num = Number(v);
@@ -74,6 +75,7 @@ function mapOrder(r: any): OrderDto {
     grandTotal: n(r["grand_total"]),
     paymentMode: (r["payment_mode"] as string) ?? null,
     createdAt: String(r["created_at"] ?? ""),
+    dueDate: (r["due_date"] as string) ?? null,
     deliveryDate: (r["delivery_date"] as string) ?? null,
     deliverySlot: (r["delivery_slot"] as string) ?? null,
     deliveryAddressLine1: (r["delivery_address_line1"] as string) ?? null,
@@ -188,7 +190,15 @@ export function buildTimeline(status: string, history: OrderHistoryRow[]): { ste
     { key: "dispatched", time: timeFor("dispatched") },
     { key: "delivered", time: timeFor("delivered") },
   ];
-  const order = ACTIVE_STATUSES.indexOf(status);
+  const rank = (s: string): number => {
+    if (s === "placed" || s === "credit_hold") return 0;
+    if (s === "approved") return 1;
+    if (s === "processing") return 2;
+    if (s === "dispatched") return 3;
+    if (s === "delivered" || s === "closed") return 4;
+    return -1;
+  };
+  const order = rank(status);
   return { steps, reached: order < 0 ? 0 : order };
 }
 

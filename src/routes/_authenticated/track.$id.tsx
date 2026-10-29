@@ -170,7 +170,6 @@ function OrderDetail() {
           ) : (
             <ol className="mt-4">
               {steps.map((step, i) => {
-                const done = i < reached || (i === reached && step.time != null && reached !== i);
                 const current = i === reached;
                 const isLast = i === steps.length - 1;
                 const time = step.time ? dateLabel(step.time, lang) : null;

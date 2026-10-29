@@ -28,9 +28,12 @@ function safeEqual(a: string, b: string) {
 function makeOtp() {
   const arr = new Uint32Array(1);
   // Rejection sampling keeps the distribution uniform.
-  do crypto.getRandomValues(arr);
-  while (arr[0] >= 4294000000);
-  return String(arr[0] % 1_000_000).padStart(6, "0");
+  let n = 0;
+  do {
+    crypto.getRandomValues(arr);
+    n = arr[0] ?? 0;
+  } while (n >= 4294000000);
+  return String(n % 1_000_000).padStart(6, "0");
 }
 
 export const sendOtp = createServerFn({ method: "POST" })
@@ -59,12 +62,14 @@ export const sendOtp = createServerFn({ method: "POST" })
       .gte("created_at", hourAgo)
       .order("created_at", { ascending: false });
     const list = recent ?? [];
-    if (list.length) {
-      const since = (Date.now() - new Date(list[0].created_at).getTime()) / 1000;
+    const newest = list[0];
+    const oldestRow = list[list.length - 1];
+    if (newest) {
+      const since = (Date.now() - new Date(newest.created_at).getTime()) / 1000;
       if (since < 30) return { ok: false, code: "wait", seconds: Math.ceil(30 - since) };
     }
-    if (list.length >= 5) {
-      const oldest = new Date(list[list.length - 1].created_at).getTime();
+    if (list.length >= 5 && oldestRow) {
+      const oldest = new Date(oldestRow.created_at).getTime();
       return { ok: false, code: "hourly", seconds: Math.max(1, Math.ceil((oldest + 3600_000 - Date.now()) / 1000)) };
     }
 

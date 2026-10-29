@@ -40,6 +40,9 @@ export const Route = createFileRoute("/auth")({
     ],
   }),
   beforeLoad: async () => {
+    // While an OTP/PIN login is mid-flight (Set PIN screen pending) the session
+    // already exists — don't bounce the user out of the flow they're in.
+    if (sessionStorage.getItem(AUTH_FLOW_KEY)) return;
     const { data } = await supabase.auth.getUser();
     if (data.user) {
       const reg = await getMyRegistration();

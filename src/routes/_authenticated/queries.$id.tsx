@@ -164,12 +164,13 @@ function Thread() {
     setQuery({ subject: q.subject, status: q.status });
     const { data: msgs } = await supabase
       .from("customer_query_messages")
-      .select("id, sender_type, body, attachment_path, attachment_name, created_at")
+      .select("id, sender_type, sender_id, body, attachment_path, attachment_name, created_at")
       .eq("query_id", id)
       .order("created_at", { ascending: true });
     const list: Msg[] = (msgs ?? []).map((m) => ({
       id: m.id,
       senderType: m.sender_type,
+      senderId: m.sender_id,
       body: m.body,
       attachmentPath: m.attachment_path,
       attachmentName: m.attachment_name,
@@ -182,11 +183,12 @@ function Thread() {
         .map(async (m) => {
           const { data } = await supabase.storage
             .from("customer-docs")
-            .createSignedUrl(m.attachmentPath as string, 600);
+            .createSignedUrl(m.attachmentPath as string, 3600);
           return [m.id, data?.signedUrl ?? null] as const;
         }),
     );
     setUrls(Object.fromEntries(entries.filter(([, u]) => u !== null) as [string, string][]));
+    void staffNames({ data: { queryId: id } }).then((names) => setStaff(names));
   }, [id]);
 
   useEffect(() => {

@@ -191,31 +191,61 @@ function Account() {
     return () => clearInterval(id);
   }, [loadOpenCount]);
 
-  const onPhoto = async (file: File) => {
+  const onPick = (e: ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f) return;
+    setPhotoSheetOpen(false);
+    setCropSrc(URL.createObjectURL(f));
+  };
+
+  const onCropSave = async (blob: Blob) => {
     if (!userId || uploading) return;
     setUploading(true);
+    const path = `${userId}/avatar-${Date.now()}.jpg`;
     try {
-      const prepared = await prepareUpload(file);
-      if (!prepared.ok) {
-        toast.error(t(prepared.reason === "tooLarge" ? "registration.errFileTooLarge" : "registration.errFileType"));
-        return;
-      }
-      const path = `${userId}/${Date.now()}.${prepared.ext}`;
-      const { error } = await supabase.storage.from("avatars").upload(path, prepared.blob, {
-        contentType: prepared.mime,
+      const { error } = await supabase.storage.from("avatars").upload(path, blob, {
+        contentType: "image/jpeg",
+        upsert: false,
       });
       if (error) throw error;
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      await supabase.rpc("update_my_profile", {
+      const { error: rpcErr } = await supabase.rpc("update_my_profile", {
         p_full_name: profile?.name ?? "",
-        ...(data.publicUrl ? { p_photo_url: data.publicUrl } : {}),
+        p_photo_url: data.publicUrl,
+        p_language: lang,
       });
+      if (rpcErr) {
+        await supabase.storage.from("avatars").remove([path]);
+        throw rpcErr;
+      }
+      const prev = avatarStoragePath(profile?.photoUrl, userId);
+      if (prev) await supabase.storage.from("avatars").remove([prev]);
       setProfile((p) => (p ? { ...p, photoUrl: data.publicUrl } : p));
+      setCropSrc(null);
       toast.success(t("account.photoUpdated"));
+    } catch {
+      toast.error(t("account.errPhotoPath", { path }));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removePhoto = async () => {
+    if (!userId || removing) return;
+    setRemoving(true);
+    try {
+      const result = await clearPhoto();
+      if (result.ok === false) throw new Error("clear failed");
+      const prev = avatarStoragePath(profile?.photoUrl, userId);
+      if (prev) await supabase.storage.from("avatars").remove([prev]);
+      setProfile((p) => (p ? { ...p, photoUrl: null } : p));
+      setPhotoSheetOpen(false);
+      toast.success(t("account.photoRemoved"));
     } catch {
       toast.error(t("account.errPhoto"));
     } finally {
-      setUploading(false);
+      setRemoving(false);
     }
   };
 

@@ -30,6 +30,7 @@ import { clearMyPhoto } from "@/lib/profile.functions";
 import { AddressSheet } from "@/components/AddressSheet";
 import { LanguageSheet } from "@/components/LanguageSheet";
 import { Logo } from "@/components/Logo";
+import { useOffline } from "@/hooks/use-offline";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -123,6 +124,7 @@ function Account() {
   const { queryClient } = Route.useRouteContext();
   const myReg = useServerFn(getMyRegistration);
   const clearPhoto = useServerFn(clearMyPhoto);
+  const offline = useOffline();
   const deva = lang === "en" ? "" : "font-deva";
 
   const [profile, setProfile] = useState<{ name: string; mobile: string; photoUrl: string | null } | null>(null);

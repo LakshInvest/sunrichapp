@@ -103,7 +103,7 @@ function MyOrders() {
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-5 pb-3 pt-6 backdrop-blur-md">
         <h1 className="text-2xl font-bold text-primary">{t("track.title")}</h1>
         <div className="mt-3 flex items-center gap-1 rounded-full border border-border bg-card p-1">
-          <button type="button" onClick={() => navigate({ to: "/order" })} className={switchCls(false)}>
+          <button type="button" onClick={() => navigate({ to: "/order", search: { category: undefined } })} className={switchCls(false)}>
             {t("track.tabShop")}
           </button>
           <button type="button" aria-current="page" className={switchCls(true)}>

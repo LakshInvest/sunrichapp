@@ -166,8 +166,8 @@ function Checkout() {
           landmark: addr.landmark || null,
           city: addr.city || null,
           pincode: addr.pincode || null,
-          latitude: loc_.lat,
-          longitude: loc_.lng,
+          latitude: loc_?.lat ?? null,
+          longitude: loc_?.lng ?? null,
           delivery_date: deliveryDate,
           delivery_slot: t(`checkout.slot.${slot}`),
         },
@@ -227,7 +227,7 @@ function Checkout() {
             </button>
           </div>
           <p className="mt-2 text-sm leading-relaxed text-foreground">{addressLines.join(", ") || "—"}</p>
-          {loc_.lat != null && loc_.lng != null ? (
+          {loc_?.lat != null && loc_?.lng != null ? (
             <div className="mt-3">
               <Suspense fallback={<div className="h-36 w-full animate-pulse rounded-xl bg-muted" />}>
                 <MapPreview lat={loc_.lat} lng={loc_.lng} />
@@ -262,7 +262,7 @@ function Checkout() {
                   <input value={addr.pincode} onChange={(e) => setAddr({ ...addr, pincode: e.target.value })} className={inputCls} inputMode="numeric" maxLength={6} />
                 </label>
               </div>
-              <LocationPicker value={loc_} onChange={setLoc_} />
+              <LocationPicker value={loc_ ?? DEFAULT_LOCATION} onChange={setLoc_} />
             </div>
           )}
         </section>

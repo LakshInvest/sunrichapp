@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_authenticated/checkout")({
       { property: "og:title", content: en.checkout.metaTitle },
       { property: "og:description", content: en.checkout.metaDescription },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", summary_large_image },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Checkout,

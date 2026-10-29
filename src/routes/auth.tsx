@@ -206,6 +206,7 @@ function Login() {
 
   /** Home when registration is done, registration placeholder when it isn't. */
   const routeAfterLogin = async () => {
+    sessionStorage.removeItem(AUTH_FLOW_KEY);
     const reg = await myCustomer();
     if (!reg.customerId || reg.status === "draft" || reg.status === "rejected") {
       await navigate({ to: "/registration" });

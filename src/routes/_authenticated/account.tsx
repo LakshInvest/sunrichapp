@@ -432,8 +432,7 @@ function Account() {
 
       <LanguageSheet open={langOpen} onOpenChange={setLangOpen} lang={lang} onChoose={choose} />
 
-      <Drawer open={photoSheetOpen} onOpenChange={setPhotoSheetOpen}>
-        <DrawerContent className="mx-auto max-w-md">
+      <SheetDrawer open={photoSheetOpen} onOpenChange={setPhotoSheetOpen}>
           <DrawerHeader>
             <DrawerTitle className="text-center">{t("account.photoSheetTitle")}</DrawerTitle>
           </DrawerHeader>
@@ -478,8 +477,7 @@ function Account() {
               </button>
             )}
           </div>
-        </DrawerContent>
-      </Drawer>
+      </SheetDrawer>
 
       {cropSrc && (
         <PhotoCrop
@@ -490,8 +488,7 @@ function Account() {
         />
       )}
 
-      <Drawer open={aboutOpen} onOpenChange={setAboutOpen}>
-        <DrawerContent className="mx-auto max-w-md">
+      <SheetDrawer open={aboutOpen} onOpenChange={setAboutOpen}>
           <DrawerHeader>
             <DrawerTitle className="text-center">{t("account.about")}</DrawerTitle>
           </DrawerHeader>

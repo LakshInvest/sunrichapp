@@ -301,7 +301,7 @@ export async function placeMyOrder(
   },
   notes: string | null,
 ): Promise<PlacedOrder[]> {
-  const { data, error } = await supabase.rpc("place_my_order", { p_lines: lines, p_delivery: delivery, p_notes: notes });
+  const { data, error } = await supabase.rpc("place_my_order", notes ? { p_lines: lines, p_delivery: delivery, p_notes: notes } : { p_lines: lines, p_delivery: delivery });
   if (error) throw new Error(error.message);
   return (data ?? []) as PlacedOrder[];
 }
@@ -312,16 +312,16 @@ export async function cancelMyOrder(orderId: string, reason: string): Promise<vo
 }
 
 export async function distributorRespond(orderId: string, accept: boolean, reason?: string): Promise<void> {
-  const { error } = await supabase.rpc("distributor_respond", { p_order_id: orderId, p_accept: accept, p_reason: reason ? reason : undefined });
+  const args: { p_order_id: string; p_accept: boolean; p_reason?: string } = { p_order_id: orderId, p_accept: accept };
+  if (reason) args.p_reason = reason;
+  const { error } = await supabase.rpc("distributor_respond", args);
   if (error) throw new Error(error.message);
 }
 
 export async function distributorMarkDelivered(orderId: string, delivered: boolean, reason?: string): Promise<void> {
-  const { error } = await supabase.rpc("distributor_mark_delivered", {
-    p_order_id: orderId,
-    p_delivered: delivered,
-    p_reason: reason ? reason : undefined,
-  });
+  const args: { p_order_id: string; p_delivered: boolean; p_reason?: string } = { p_order_id: orderId, p_delivered: delivered };
+  if (reason) args.p_reason = reason;
+  const { error } = await supabase.rpc("distributor_mark_delivered", args);
   if (error) throw new Error(error.message);
 }
 
@@ -339,7 +339,7 @@ export type CreditStatus = {
 export async function fetchCreditStatus(): Promise<CreditStatus | null> {
   const cid = await getMyCustomerId();
   if (!cid) return null;
-  const { data, error } = await supabase.rpc("credit_status", { p_customer_id: cid, p_firm_id: null });
+  const { data, error } = await supabase.rpc("credit_status", { p_customer_id: cid });
   if (error) throw new Error(error.message);
   const row = (Array.isArray(data) ? data[0] : data) as CreditStatus | undefined;
   return row ?? null;

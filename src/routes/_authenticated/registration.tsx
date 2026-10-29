@@ -107,12 +107,14 @@ function Wizard() {
   const [step, setStep] = useState<Step>(() => initialStep(reg0));
   const [typeCode, setTypeCode] = useState<string | null>(reg0.typeCode);
 
-  // Anyone already registered belongs on Home, not in the wizard.
+  // Anyone already registered belongs on Home, not in the wizard
+  // (but let the success screen show after a fresh signup).
   useEffect(() => {
+    if (step === "done") return;
     if (reg.customerId && (reg.status === "active" || reg.status === "pending_approval")) {
       void navigate({ to: "/home", replace: true });
     }
-  }, [reg.customerId, reg.status, navigate]);
+  }, [step, reg.customerId, reg.status, navigate]);
 
   const refresh = async (): Promise<RegistrationDto> => {
     const fresh = await reload();
@@ -568,7 +570,6 @@ function DocsStep({
 
   const blocks = groupRequirements(requirements);
   const uploadedFor = (code: string) => uploaded.find((u) => u.docTypeCode === code);
-  const isImage = (code: string) => requirements.find((r) => r.code === code)?.acceptsImage ?? true;
 
   const upload = async (code: string, file: File) => {
     if (!reg.customerId || uploadingCode) return;
@@ -660,14 +661,14 @@ function DocsStep({
           {doc && <span className="text-xs font-semibold text-secondary">{t("registration.uploaded")}</span>}
         </div>
         <div className="flex items-center gap-3">
-          {doc && isImage(code) && thumbs[doc.filePath] && (
+          {doc && (doc.mimeType ?? "").startsWith("image/") && thumbs[doc.filePath] && (
             <img
               src={thumbs[doc.filePath]}
               alt=""
               className="h-16 w-16 rounded-lg border border-border object-cover"
             />
           )}
-          {doc && !isImage(code) && (
+          {doc && !(doc.mimeType ?? "").startsWith("image/") && (
             <span className="flex h-16 w-16 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground">
               <FileText className="h-7 w-7" aria-hidden />
             </span>

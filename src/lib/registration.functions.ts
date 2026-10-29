@@ -149,6 +149,7 @@ export type UploadedDocDto = {
   docTypeCode: string;
   filePath: string;
   fileName: string | null;
+  mimeType: string | null;
   docNumber: string | null;
   status: string;
 };
@@ -199,7 +200,7 @@ export const getDocumentRequirements = createServerFn({ method: "GET" })
 
     const { data: docs } = await context.supabase
       .from("customer_documents")
-      .select("file_path, file_name, doc_number, status, document_types(code)")
+      .select("file_path, file_name, mime_type, doc_number, status, document_types(code)")
       .eq("customer_id", cid);
 
     const uploaded: UploadedDocDto[] = (docs ?? [])
@@ -210,6 +211,7 @@ export const getDocumentRequirements = createServerFn({ method: "GET" })
           docTypeCode: dt.code,
           filePath: d.file_path,
           fileName: d.file_name ?? null,
+          mimeType: d.mime_type ?? null,
           docNumber: d.doc_number ?? null,
           status: d.status,
         } satisfies UploadedDocDto;

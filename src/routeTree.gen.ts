@@ -16,6 +16,7 @@ import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedCartRouteImport } from './routes/_authenticated/cart'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedOrderRouteImport } from './routes/_authenticated/order'
+import { Route as AuthenticatedRegistrationRouteImport } from './routes/_authenticated/registration'
 import { Route as AuthenticatedTrackRouteImport } from './routes/_authenticated/track'
 
 const IndexRoute = IndexRouteImport.update({
@@ -52,6 +53,12 @@ const AuthenticatedOrderRoute = AuthenticatedOrderRouteImport.update({
   path: '/order',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRegistrationRoute =
+  AuthenticatedRegistrationRouteImport.update({
+    id: '/registration',
+    path: '/registration',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedTrackRoute = AuthenticatedTrackRouteImport.update({
   id: '/track',
   path: '/track',
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof AuthenticatedCartRoute
   '/home': typeof AuthenticatedHomeRoute
   '/order': typeof AuthenticatedOrderRoute
+  '/registration': typeof AuthenticatedRegistrationRoute
   '/track': typeof AuthenticatedTrackRoute
 }
 export interface FileRoutesByTo {
@@ -74,6 +82,7 @@ export interface FileRoutesByTo {
   '/cart': typeof AuthenticatedCartRoute
   '/home': typeof AuthenticatedHomeRoute
   '/order': typeof AuthenticatedOrderRoute
+  '/registration': typeof AuthenticatedRegistrationRoute
   '/track': typeof AuthenticatedTrackRoute
 }
 export interface FileRoutesById {
@@ -85,14 +94,30 @@ export interface FileRoutesById {
   '/_authenticated/cart': typeof AuthenticatedCartRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/order': typeof AuthenticatedOrderRoute
+  '/_authenticated/registration': typeof AuthenticatedRegistrationRoute
   '/_authenticated/track': typeof AuthenticatedTrackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/account' | '/cart' | '/home' | '/order' | '/track'
+    | '/'
+    | '/auth'
+    | '/account'
+    | '/cart'
+    | '/home'
+    | '/order'
+    | '/registration'
+    | '/track'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/account' | '/cart' | '/home' | '/order' | '/track'
+  to:
+    | '/'
+    | '/auth'
+    | '/account'
+    | '/cart'
+    | '/home'
+    | '/order'
+    | '/registration'
+    | '/track'
   id:
     | '__root__'
     | '/'
@@ -102,6 +127,7 @@ export interface FileRouteTypes {
     | '/_authenticated/cart'
     | '/_authenticated/home'
     | '/_authenticated/order'
+    | '/_authenticated/registration'
     | '/_authenticated/track'
   fileRoutesById: FileRoutesById
 }
@@ -162,6 +188,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrderRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/registration': {
+      id: '/_authenticated/registration'
+      path: '/registration'
+      fullPath: '/registration'
+      preLoaderRoute: typeof AuthenticatedRegistrationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/track': {
       id: '/_authenticated/track'
       path: '/track'
@@ -177,6 +210,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCartRoute: typeof AuthenticatedCartRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedOrderRoute: typeof AuthenticatedOrderRoute
+  AuthenticatedRegistrationRoute: typeof AuthenticatedRegistrationRoute
   AuthenticatedTrackRoute: typeof AuthenticatedTrackRoute
 }
 
@@ -185,6 +219,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCartRoute: AuthenticatedCartRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedOrderRoute: AuthenticatedOrderRoute,
+  AuthenticatedRegistrationRoute: AuthenticatedRegistrationRoute,
   AuthenticatedTrackRoute: AuthenticatedTrackRoute,
 }
 

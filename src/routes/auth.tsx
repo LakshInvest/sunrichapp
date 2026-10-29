@@ -7,7 +7,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
 import en from "@/locales/en.json";
 import { useLang } from "@/hooks/use-lang";
-import { sendOtp, verifyOtp, type OtpResult } from "@/lib/otp.functions";
+import {
+  sendOtp,
+  verifyOtp,
+  pinLogin,
+  getMyDevice,
+  getMyCustomerId,
+  type OtpResult,
+  type PinLoginResult,
+} from "@/lib/otp.functions";
+import {
+  getDeviceId,
+  getDeviceLabel,
+  getLastMobile,
+  setLastMobile,
+  clearLastMobile,
+  maskMobile,
+} from "@/lib/device";
 
 export const LOGGED_OUT_FLAG = "sunrich.loggedOut";
 
@@ -25,7 +41,10 @@ export const Route = createFileRoute("/auth")({
   }),
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
-    if (data.user) throw redirect({ to: "/home" });
+    if (data.user) {
+      const { customerId } = await getMyCustomerId();
+      throw redirect({ to: customerId ? "/home" : "/registration" });
+    }
   },
   component: Login,
 });
@@ -40,23 +59,119 @@ function WhatsAppIcon() {
   );
 }
 
+type Step = "welcome" | "mobile" | "code" | "setpin";
+
+/** Four large PIN boxes with auto-advance, paste support and auto-submit. */
+function PinBoxes({
+  value,
+  onChange,
+  onComplete,
+  disabled,
+  shake,
+  autoFocusFirst,
+  label,
+}: {
+  value: string[];
+  onChange: (v: string[]) => void;
+  onComplete: (pin: string) => void;
+  disabled?: boolean;
+  shake?: boolean;
+  autoFocusFirst?: boolean;
+  label: string;
+}) {
+  const refs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const fill = (start: number, raw: string) => {
+    const next = [...value];
+    const chars = raw.replace(/\D/g, "").slice(0, 4 - start).split("");
+    chars.forEach((c, i) => (next[start + i] = c));
+    if (!chars.length) next[start] = "";
+    onChange(next);
+    refs.current[Math.min(start + chars.length, 3)]?.focus();
+    if (next.every(Boolean)) onComplete(next.join(""));
+  };
+
+  const onKey = (i: number, e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !value[i] && i > 0) {
+      const next = [...value];
+      next[i - 1] = "";
+      onChange(next);
+      refs.current[i - 1]?.focus();
+    }
+  };
+
+  const onPaste = (i: number, e: ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    fill(i, e.clipboardData.getData("text"));
+  };
+
+  return (
+    <div
+      className={`flex justify-center gap-3 ${shake ? "animate-shake" : ""}`}
+      role="group"
+      aria-label={label}
+    >
+      {value.map((d, i) => (
+        <input
+          key={i}
+          ref={(el) => {
+            refs.current[i] = el;
+          }}
+          type="text"
+          inputMode="numeric"
+          autoComplete={i === 0 ? "one-time-code" : "off"}
+          maxLength={i === 0 ? 4 : 1}
+          value={d}
+          disabled={disabled}
+          autoFocus={autoFocusFirst && i === 0}
+          aria-label={`${label} ${i + 1}`}
+          onChange={(e) => fill(i, e.target.value)}
+          onKeyDown={(e) => onKey(i, e)}
+          onPaste={(e) => onPaste(i, e)}
+          onFocus={(e) => e.target.select()}
+          className="h-16 w-14 rounded-2xl border border-input bg-card text-center text-3xl font-bold text-primary outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30 disabled:opacity-60"
+        />
+      ))}
+    </div>
+  );
+}
+
 function Login() {
   const { t } = useTranslation();
   const { lang } = useLang();
   const navigate = useNavigate();
   const send = useServerFn(sendOtp);
   const verify = useServerFn(verifyOtp);
+  const pinCheck = useServerFn(pinLogin);
+  const deviceStatus = useServerFn(getMyDevice);
+  const myCustomer = useServerFn(getMyCustomerId);
 
-  const [step, setStep] = useState<"mobile" | "code">("mobile");
+  const [step, setStep] = useState<Step>("mobile");
+  const [deviceId, setDeviceId] = useState("");
+  const [lastMobile, setLastMobileState] = useState<string | null>(null);
   const [mobile, setMobile] = useState("");
   const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
+  const [pin, setPin] = useState<string[]>(Array(4).fill(""));
+  const [confirm, setConfirm] = useState<string[]>(Array(4).fill(""));
+  const [pinPhase, setPinPhase] = useState<"enter" | "confirm">("enter");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [shaking, setShaking] = useState(false);
+  const [forcePin, setForcePin] = useState(false);
   const boxes = useRef<(HTMLInputElement | null)[]>([]);
 
   const valid = /^[6-9]\d{9}$/.test(mobile);
+
+  useEffect(() => {
+    setDeviceId(getDeviceId());
+    const saved = getLastMobile();
+    if (saved) {
+      setLastMobileState(saved);
+      setStep("welcome");
+    }
+  }, []);
 
   useEffect(() => {
     if (sessionStorage.getItem(LOGGED_OUT_FLAG)) {
@@ -71,10 +186,21 @@ function Login() {
     return () => clearTimeout(id);
   }, [countdown]);
 
+  const shake = () => {
+    setShaking(true);
+    setTimeout(() => setShaking(false), 500);
+  };
+
   const errText = (r: Extract<OtpResult, { ok: false }>) =>
     r.code === "provider" && r.message
       ? r.message
       : t(`auth.errors.${r.code}`, { seconds: r.seconds, left: r.left, defaultValue: t("auth.errors.generic") });
+
+  /** Home when registration is done, registration placeholder when it isn't. */
+  const routeAfterLogin = async () => {
+    const { customerId } = await myCustomer();
+    await navigate({ to: customerId ? "/home" : "/registration" });
+  };
 
   const requestOtp = async () => {
     setError(null);
@@ -98,6 +224,27 @@ function Login() {
     }
   };
 
+  const afterOtpSession = async () => {
+    await supabase.rpc("record_login", {
+      p_user_agent: navigator.userAgent.slice(0, 500),
+      p_login_method: "otp_whatsapp",
+    });
+    setLastMobile(mobile);
+    try {
+      const { trusted } = await deviceStatus({ data: { deviceId } });
+      if (!trusted || forcePin) {
+        setPin(Array(4).fill(""));
+        setConfirm(Array(4).fill(""));
+        setPinPhase("enter");
+        setStep("setpin");
+        return;
+      }
+    } catch {
+      /* fall through to routing */
+    }
+    await routeAfterLogin();
+  };
+
   const submitCode = async (code: string) => {
     if (busy) return;
     setError(null);
@@ -115,8 +262,7 @@ function Login() {
         setError(t("auth.errors.generic"));
         return;
       }
-      await supabase.rpc("record_login", { p_user_agent: navigator.userAgent.slice(0, 500) });
-      await navigate({ to: "/home" });
+      await afterOtpSession();
     } catch {
       setError(t("auth.errors.generic"));
     } finally {
@@ -155,6 +301,89 @@ function Login() {
     if (valid && !busy) void requestOtp();
   };
 
+  const submitPinLogin = async (pinValue: string) => {
+    const m = lastMobile;
+    if (!m || !deviceId || busy) return;
+    setError(null);
+    setBusy(true);
+    try {
+      const r: PinLoginResult = await pinCheck({ data: { mobile: m, deviceId, pin: pinValue } });
+      if (!r.ok) {
+        if (r.status === "wrong_pin") {
+          setError(t("auth.pin.wrongTries", { n: r.triesLeft ?? 0 }));
+          shake();
+        } else if (r.status === "not_registered") {
+          clearLastMobile();
+          setLastMobileState(null);
+          setMobile("");
+          setForcePin(false);
+          setStep("mobile");
+        } else {
+          setNotice(t("auth.pin.useOtp"));
+          setMobile(m);
+          setForcePin(r.status === "pin_not_set" || r.status === "locked_use_otp");
+          setStep("mobile");
+        }
+        return;
+      }
+      const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: r.tokenHash, type: "magiclink" });
+      if (vErr) {
+        setError(t("auth.errors.generic"));
+        return;
+      }
+      await supabase.rpc("record_login", {
+        p_user_agent: navigator.userAgent.slice(0, 500),
+        p_login_method: "pin",
+      });
+      setLastMobile(m);
+      await routeAfterLogin();
+    } catch {
+      setError(t("auth.errors.generic"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onPinEntered = (entered: string) => {
+    setPin(entered.split(""));
+    setPinPhase("confirm");
+  };
+
+  const submitSetPin = async (confirmed: string) => {
+    const entered = pin.join("");
+    if (!confirmed) return;
+    if (entered !== confirmed) {
+      setError(t("auth.pin.mismatch"));
+      shake();
+      setConfirm(Array(4).fill(""));
+      return;
+    }
+    if (!deviceId || busy) return;
+    setError(null);
+    setBusy(true);
+    try {
+      const { error: pErr } = await supabase.rpc("set_my_pin", {
+        p_pin: confirmed,
+        p_device_id: deviceId,
+        p_device_label: getDeviceLabel(),
+      });
+      if (pErr) {
+        setError(pErr.message);
+        shake();
+        setPin(Array(4).fill(""));
+        setConfirm(Array(4).fill(""));
+        setPinPhase("enter");
+        return;
+      }
+      setForcePin(false);
+      await routeAfterLogin();
+    } catch {
+      setError(t("auth.errors.generic"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const pretty = `+91 ${mobile.slice(0, 5)} ${mobile.slice(5)}`;
   const font = lang === "en" ? "" : "font-deva";
 
@@ -165,7 +394,65 @@ function Login() {
           <Logo />
         </div>
 
-        {step === "mobile" ? (
+        {step === "welcome" && lastMobile && (
+          <div className="flex flex-col gap-6">
+            <div>
+              <h1 className="text-center text-2xl font-bold text-primary">{t("auth.pin.welcomeTitle")}</h1>
+              <p className="mt-2 text-center text-sm text-muted-foreground">{maskMobile(lastMobile)}</p>
+            </div>
+            {notice && (
+              <p role="status" className="rounded-xl bg-secondary/10 px-4 py-3 text-center text-sm font-medium text-primary">
+                {notice}
+              </p>
+            )}
+            <PinBoxes
+              value={pin}
+              onChange={setPin}
+              onComplete={(p) => void submitPinLogin(p)}
+              disabled={busy}
+              shake={shaking}
+              label={t("auth.pin.group")}
+            />
+            {busy && (
+              <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> {t("auth.verifying")}
+              </p>
+            )}
+            {error && <p role="alert" className="text-center text-sm font-medium text-destructive">{error}</p>}
+            <div className="flex flex-col items-center gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setNotice(null);
+                  setError(null);
+                  setMobile(lastMobile);
+                  setForcePin(true);
+                  setStep("mobile");
+                }}
+                className="min-h-11 text-sm font-medium text-secondary underline underline-offset-4"
+              >
+                {t("auth.pin.forgotPin")}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  clearLastMobile();
+                  setLastMobileState(null);
+                  setMobile("");
+                  setForcePin(false);
+                  setNotice(null);
+                  setError(null);
+                  setStep("mobile");
+                }}
+                className="min-h-11 text-sm font-medium text-muted-foreground underline underline-offset-4"
+              >
+                {t("auth.pin.differentNumber")}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === "mobile" && (
           <form onSubmit={onMobileSubmit} className="flex flex-col gap-5" noValidate>
             <div>
               <h1 className="text-center text-2xl font-bold text-primary">{t("auth.title")}</h1>
@@ -206,7 +493,9 @@ function Login() {
               {busy ? t("auth.sending") : t("auth.getOtp")}
             </button>
           </form>
-        ) : (
+        )}
+
+        {step === "code" && (
           <div className="flex flex-col gap-5">
             <div>
               <h1 className="text-center text-2xl font-bold text-primary">{t("auth.codeTitle")}</h1>
@@ -261,6 +550,58 @@ function Login() {
             >
               {t("auth.changeNumber")}
             </button>
+          </div>
+        )}
+
+        {step === "setpin" && (
+          <div className="flex flex-col gap-6">
+            <div>
+              <h1 className="text-center text-2xl font-bold text-primary">
+                {pinPhase === "enter" ? t("auth.pin.setPinTitle") : t("auth.pin.confirmTitle")}
+              </h1>
+              <p className="mt-2 text-center text-sm text-muted-foreground">
+                {pinPhase === "enter" ? t("auth.pin.setPinSubtitle") : t("auth.pin.confirmSubtitle")}
+              </p>
+            </div>
+            {pinPhase === "enter" ? (
+              <PinBoxes
+                value={pin}
+                onChange={setPin}
+                onComplete={onPinEntered}
+                disabled={busy}
+                shake={shaking}
+                label={t("auth.pin.group")}
+              />
+            ) : (
+              <PinBoxes
+                value={confirm}
+                onChange={setConfirm}
+                onComplete={(c) => void submitSetPin(c)}
+                disabled={busy}
+                shake={shaking}
+                autoFocusFirst
+                label={t("auth.pin.group")}
+              />
+            )}
+            {busy && (
+              <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> {t("auth.pin.setting")}
+              </p>
+            )}
+            {error && <p role="alert" className="text-center text-sm font-medium text-destructive">{error}</p>}
+            {pinPhase === "confirm" && !busy && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPinPhase("enter");
+                  setConfirm(Array(4).fill(""));
+                  setError(null);
+                }}
+                className="min-h-11 text-sm font-medium text-muted-foreground underline underline-offset-4"
+              >
+                {t("auth.pin.reenter")}
+              </button>
+            )}
           </div>
         )}
       </div>

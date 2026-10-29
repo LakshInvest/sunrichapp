@@ -156,6 +156,25 @@
   animation: bubble-rise 5s ease-in-out infinite;
 }
 
+@keyframes pin-shake {
+  10%, 90% {
+    transform: translateX(-2px);
+  }
+  20%, 80% {
+    transform: translateX(4px);
+  }
+  30%, 50%, 70% {
+    transform: translateX(-6px);
+  }
+  40%, 60% {
+    transform: translateX(6px);
+  }
+}
+
+@utility animate-shake {
+  animation: pin-shake 0.5s ease-in-out;
+}
+
 @layer base {
   * {
     border-color: var(--color-border);

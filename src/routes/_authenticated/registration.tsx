@@ -533,12 +533,14 @@ function DetailsStep({
       <button
         type="button"
         onClick={() => void save()}
-        disabled={busy}
+        disabled={busy || offline}
+        title={offline ? t("offline.hint") : undefined}
         className="flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md transition active:scale-[0.98] disabled:opacity-60"
       >
         {busy && <Loader2 className="h-5 w-5 animate-spin" />}
         {busy ? t("registration.saving") : t("registration.saveDetails")}
       </button>
+      {offline && <p className="text-center text-xs text-muted-foreground">{t("offline.hint")}</p>}
     </div>
   );
 }

@@ -75,7 +75,8 @@
     "home": "Home",
     "order": "Order",
     "track": "Track",
-    "account": "Account"
+    "account": "Account",
+    "inbox": "Inbox"
   },
   "home": {
     "greeting": "Pure water, at your door",
@@ -102,7 +103,8 @@
     "metaTitle": "Sunrich — Home",
     "metaDescription": "Order Sunrich packaged drinking water — jars, bottles and more, delivered to your door.",
     "needsAction": "Sunrich needs something from you",
-    "open": "Open"
+    "open": "Open",
+    "updatesBell": "Order updates"
   },
   "catalog": {
     "priceOnRequest": "Price on request",
@@ -164,19 +166,31 @@
     "orderingAfterApproval": "Ordering opens after approval",
     "priceUpdated": "Price updated",
     "bulkNote": "For bulk orders our team will confirm the rate.",
-    "removedFromCatalogue": "Some items are no longer available and were removed from your cart."
+    "removedFromCatalogue": "Some items are no longer available and were removed from your cart.",
+    "proceed": "Proceed"
   },
   "order": {
     "title": "Order",
     "comingSoon": "Ordering is coming soon.",
     "metaTitle": "Sunrich — Order",
-    "metaDescription": "Place your Sunrich water order."
+    "metaDescription": "Place your Sunrich water order.",
+    "tabSwitch": "Shop or My orders"
   },
   "track": {
-    "title": "Track",
+    "title": "My orders",
     "comingSoon": "Order tracking is coming soon.",
-    "metaTitle": "Sunrich — Track",
-    "metaDescription": "Track your Sunrich water order."
+    "metaTitle": "Sunrich — My orders",
+    "metaDescription": "Track your Sunrich water orders.",
+    "tabShop": "Shop",
+    "tabMyOrders": "My orders",
+    "filters": "Filter orders",
+    "filterActive": "Active",
+    "filterDelivered": "Delivered",
+    "filterCancelled": "Cancelled",
+    "moreItems": "+{{count}} more",
+    "emptyTitle": "No orders here yet",
+    "emptyBody": "Orders you place will appear here.",
+    "notFound": "This order is not on your account."
   },
   "account": {
     "title": "Account",
@@ -310,9 +324,17 @@
   "status": {
     "active": "Active",
     "pending_approval": "Under review",
-    "rejected": "Changes requested",
+    "rejected": "Rejected",
     "draft": "Incomplete",
-    "blocked": "On hold"
+    "blocked": "On hold",
+    "placed": "Received",
+    "credit_hold": "Under review",
+    "approved": "Confirmed",
+    "processing": "Packed",
+    "dispatched": "Out for delivery",
+    "delivered": "Delivered",
+    "closed": "Closed",
+    "cancelled": "Cancelled"
   },
   "banner": {
     "underReview": "Your account is under review. You can order once Sunrich approves it."
@@ -360,5 +382,129 @@
       "sendQuestion": "Send question",
       "sent": "Question sent — the Sunrich team will reply soon."
     }
+  },
+  "checkout": {
+    "title": "Checkout",
+    "metaTitle": "Sunrich — Checkout",
+    "metaDescription": "Confirm your Sunrich water delivery.",
+    "addressTitle": "Delivery address",
+    "noPin": "No map pin saved — add it below.",
+    "addressNote": "This address is used for this order only.",
+    "line1": "Address line 1",
+    "line2": "Address line 2 (optional)",
+    "landmark": "Landmark (optional)",
+    "city": "City",
+    "pincode": "Pincode",
+    "whenTitle": "When should we deliver?",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "pickDate": "Pick a date",
+    "slotLabel": "Delivery slot",
+    "slot": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening"
+    },
+    "newJarsTitle": "New jars needed?",
+    "newJarsHint": "Return your empty jars and take only what you need — deposit applies to new jars only.",
+    "jarDepositEach": "+{{amount}} refundable each",
+    "fewerNewJars": "Fewer new jars",
+    "moreNewJars": "More new jars",
+    "billTitle": "Your bill",
+    "quoting": "Getting your prices…",
+    "gstIncluded": "GST included in the prices.",
+    "paymentTitle": "Payment",
+    "cashOnDelivery": "Cash on delivery",
+    "onCredit": "On credit — {{amount}} available",
+    "creditReview": "Your order will be reviewed by Sunrich.",
+    "notesLabel": "Notes (optional)",
+    "notesPlaceholder": "Anything we should know?",
+    "placeOrder": "Place order",
+    "placing": "Placing your order…",
+    "errPlace": "Could not place the order.",
+    "deliversOn": "delivery {{date}}",
+    "priceOnRequestNote": "{{count}} item(s) without a price are not included — ask the Sunrich team.",
+    "termsNote": "By placing the order you accept Sunrich's terms."
+  },
+  "success": {
+    "title": "Order placed",
+    "metaTitle": "Sunrich — Order placed",
+    "metaDescription": "Your Sunrich order is confirmed.",
+    "subtitle": "Thank you! Your water is on its way soon.",
+    "expected": "Expected delivery: {{date}} · {{slot}}",
+    "statusConfirmed": "Confirmed",
+    "statusReceived": "Received — waiting for confirmation",
+    "statusUnderReview": "Under review",
+    "deliveredBy": "Delivered by {{who}}",
+    "bySunrich": "Sunrich",
+    "byDistributor": "your distributor",
+    "trackOrder": "Track order",
+    "continueShopping": "Continue shopping"
+  },
+  "trackDetail": {
+    "metaTitle": "Sunrich — Order detail",
+    "metaDescription": "Order details and delivery tracking.",
+    "timelineTitle": "Order progress",
+    "step": {
+      "placed": "Placed",
+      "approved": "Confirmed",
+      "processing": "Packed",
+      "dispatched": "Out for delivery",
+      "delivered": "Delivered"
+    },
+    "paidOnCredit": "Payment: on credit",
+    "paidOnDelivery": "Payment: cash on delivery",
+    "cancelOrder": "Cancel order",
+    "cancelTitle": "Cancel this order?",
+    "reasonLabel": "Reason",
+    "reasonPlaceholder": "Tell us why you are cancelling",
+    "cancelConfirm": "Cancel order",
+    "cancelling": "Cancelling…",
+    "cancelled": "Order cancelled",
+    "reorder": "Reorder",
+    "reordering": "Adding to cart…",
+    "needHelp": "Need help?"
+  },
+  "payments": {
+    "title": "Payments & ledger",
+    "metaTitle": "Sunrich — Payments",
+    "metaDescription": "Credit, outstanding and unpaid bills.",
+    "creditTitle": "Your credit",
+    "used": "Used",
+    "available": "Available",
+    "overdue": "Overdue ₹{{amount}} — oldest bill is {{days}} days late",
+    "unpaidTitle": "Unpaid credit bills",
+    "noUnpaid": "Nothing unpaid right now.",
+    "overdueChip": "Overdue",
+    "payOnDelivery": "You pay on delivery",
+    "payOnDeliveryBody": "No credit account — pay cash when your order arrives.",
+    "deliveredTitle": "Delivered orders",
+    "comingSoon": "Invoices and statements coming soon."
+  },
+  "inbox": {
+    "title": "Inbox",
+    "metaTitle": "Sunrich — Inbox",
+    "metaDescription": "Orders routed to you for delivery.",
+    "tabNew": "New",
+    "tabToDeliver": "To deliver",
+    "tabDone": "Done",
+    "call": "Call",
+    "copyNumber": "Copy number",
+    "copied": "Number copied",
+    "copyFailed": "Could not copy",
+    "mapFallback": "on the map",
+    "accept": "Accept",
+    "cantDeliver": "Can't deliver",
+    "delivered": "Delivered",
+    "notDelivered": "Not delivered",
+    "reasonLabel": "Reason",
+    "reasonPlaceholder": "Tell the customer why",
+    "reasonConfirm": "Send",
+    "sending": "Sending…",
+    "done": "Updated",
+    "accepted": "Order accepted",
+    "rejected": "Sunrich will deliver this order",
+    "markedDelivered": "Marked delivered",
+    "markedNotDelivered": "Marked not delivered"
   }
 }

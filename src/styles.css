@@ -141,6 +141,21 @@
   }
 }
 
+@keyframes bubble-rise {
+  0% {
+    transform: translateY(0);
+    opacity: 0.25;
+  }
+  100% {
+    transform: translateY(-28px) scale(1.2);
+    opacity: 0.05;
+  }
+}
+
+@utility animate-bubble {
+  animation: bubble-rise 5s ease-in-out infinite;
+}
+
 @layer base {
   * {
     border-color: var(--color-border);

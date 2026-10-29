@@ -14,6 +14,59 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          company_id: string | null
+          created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_type: string | null
+          id: number
+          ip_address: string | null
+          new_data: Json | null
+          old_data: Json | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: never
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: never
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brands: {
         Row: {
           code: string
@@ -193,6 +246,57 @@ export type Database = {
           },
         ]
       }
+      otp_requests: {
+        Row: {
+          attempts: number
+          channel: Database["public"]["Enums"]["otp_channel"]
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          destination: string
+          expires_at: string
+          id: string
+          ip_address: string | null
+          max_attempts: number
+          purpose: Database["public"]["Enums"]["otp_purpose"]
+          session_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attempts?: number
+          channel: Database["public"]["Enums"]["otp_channel"]
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          destination: string
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          max_attempts?: number
+          purpose: Database["public"]["Enums"]["otp_purpose"]
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attempts?: number
+          channel?: Database["public"]["Enums"]["otp_channel"]
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          destination?: string
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          max_attempts?: number
+          purpose?: Database["public"]["Enums"]["otp_purpose"]
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       units: {
         Row: {
           address_line1: string | null
@@ -277,15 +381,154 @@ export type Database = {
           },
         ]
       }
+      user_profiles: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          email: string | null
+          firm_id: string | null
+          full_name: string
+          id: string
+          is_active: boolean
+          is_super_admin: boolean
+          last_login_at: string | null
+          mobile: string | null
+          photo_url: string | null
+          preferred_language: string
+          unit_id: string | null
+          updated_at: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          firm_id?: string | null
+          full_name: string
+          id: string
+          is_active?: boolean
+          is_super_admin?: boolean
+          last_login_at?: string | null
+          mobile?: string | null
+          photo_url?: string | null
+          preferred_language?: string
+          unit_id?: string | null
+          updated_at?: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          firm_id?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          is_super_admin?: boolean
+          last_login_at?: string | null
+          mobile?: string | null
+          photo_url?: string | null
+          preferred_language?: string
+          unit_id?: string | null
+          updated_at?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_profiles_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_profiles_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_sessions: {
+        Row: {
+          ip_address: string | null
+          last_seen_at: string
+          otp_verified_at: string | null
+          revoke_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          session_id: string
+          started_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          ip_address?: string | null
+          last_seen_at?: string
+          otp_verified_at?: string | null
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          session_id: string
+          started_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          ip_address?: string | null
+          last_seen_at?: string
+          otp_verified_at?: string | null
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          session_id?: string
+          started_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      current_session_id: { Args: never; Returns: string }
+      force_logout: {
+        Args: { p_reason?: string; p_user_id: string }
+        Returns: number
+      }
+      is_super_admin: { Args: never; Returns: boolean }
+      my_company_id: { Args: never; Returns: string }
+      my_session_is_valid: { Args: never; Returns: boolean }
+      my_staff_session_verified: { Args: never; Returns: boolean }
+      record_login: { Args: { p_user_agent?: string }; Returns: undefined }
+      record_logout: { Args: never; Returns: undefined }
+      set_user_active: {
+        Args: { p_active: boolean; p_user_id: string }
+        Returns: undefined
+      }
+      update_my_profile: {
+        Args: { p_full_name: string; p_language?: string; p_photo_url?: string }
+        Returns: undefined
+      }
     }
     Enums: {
+      otp_channel: "whatsapp" | "email"
+      otp_purpose: "app_login" | "staff_2fa"
       unit_type: "plant" | "depot" | "copacker" | "jar_unit" | "office"
+      user_type: "staff" | "customer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -413,7 +656,10 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      otp_channel: ["whatsapp", "email"],
+      otp_purpose: ["app_login", "staff_2fa"],
       unit_type: ["plant", "depot", "copacker", "jar_unit", "office"],
+      user_type: ["staff", "customer"],
     },
   },
 } as const

@@ -13,7 +13,6 @@ import {
   MapPin,
   Milk,
   Package,
-  Search,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -28,7 +27,7 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { SearchBox } from "@/components/catalog/SearchBox";
 import { NoResultsState, ChipsSkeleton, GridSkeleton, BannerSkeleton, HeroSkeleton, ErrorState } from "@/components/catalog/states";
-import { JAR_HERO_IMAGE, fallbackImageFor } from "@/components/catalog/image-fallbacks";
+import { JAR_HERO_IMAGE } from "@/components/catalog/image-fallbacks";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
@@ -43,6 +42,7 @@ import {
   loc,
   matchesSearch,
   readCatalogueCache,
+  saveCartPrice,
   type CatalogData,
 } from "@/lib/catalogue";
 

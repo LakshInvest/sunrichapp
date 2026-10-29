@@ -233,14 +233,17 @@ export function markOrdersSeen(): void {
 /** True when any of my orders got a new status entry since My orders was last opened. */
 export async function hasOrderUpdates(): Promise<boolean> {
   try {
+    const mine = await getMyCustomerId();
     const { data, error } = await supabase
       .from("orders")
-      .select("order_status_history(changed_at)")
+      .select("customer_id, order_status_history(changed_at)")
       .limit(200);
     if (error) return false;
+    // The bell reflects the customer's own orders; distributor-routed rows are filtered out.
+    const rows = ((data ?? []) as any[]).filter((o) => mine == null || String(o["customer_id"] ?? "") === mine);
     const seen = readOrdersSeenAt();
-    if (!seen) return ((data ?? []) as any[]).length > 0;
-    return ((data ?? []) as any[]).some((o) =>
+    if (!seen) return rows.length > 0;
+    return rows.some((o) =>
       ((o["order_status_history"] ?? []) as any[]).some((h) => String(h["changed_at"] ?? "") > seen),
     );
   } catch {

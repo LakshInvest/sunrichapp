@@ -290,7 +290,7 @@ function Account() {
           <div className="flex items-center gap-4">
             <button
               type="button"
-              onClick={() => photoInput.current?.click()}
+              onClick={() => setPhotoSheetOpen(true)}
               aria-label={t("account.changePhoto")}
               className="relative shrink-0 rounded-full transition active:scale-95"
             >
@@ -299,7 +299,11 @@ function Account() {
                 name={profile?.name}
                 className="h-20 w-20 border-2 border-white/40 text-xl"
               />
-              {uploading && <span className="absolute inset-0 animate-pulse rounded-full bg-primary/40" />}
+              {uploading && (
+                <span className="absolute inset-0 flex items-center justify-center rounded-full bg-primary/60">
+                  <Loader2 className="h-6 w-6 animate-spin text-white" aria-hidden />
+                </span>
+              )}
             </button>
             <div className="min-w-0 flex-1">
               <p className="truncate text-xl font-bold text-primary-foreground">{profile?.name || "…"}</p>

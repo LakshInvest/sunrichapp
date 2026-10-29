@@ -3,13 +3,14 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { ArrowLeft, Camera, FileText, Paperclip, Send, X } from "lucide-react";
+import { ArrowLeft, Camera, FileText, Paperclip, Send, TriangleAlert, X } from "lucide-react";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { QueryChip } from "@/components/QueryChip";
 import { useLang } from "@/hooks/use-lang";
 import { prepareUpload } from "@/lib/image-compress";
 import { getMyRegistration } from "@/lib/registration.functions";
+import { getStaffNames } from "@/lib/query-staff.functions";
 
 export const Route = createFileRoute("/_authenticated/queries/$id")({
   head: () => ({
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/_authenticated/queries/$id")({
 type Msg = {
   id: string;
   senderType: string;
+  senderId: string | null;
   body: string | null;
   attachmentPath: string | null;
   attachmentName: string | null;
@@ -57,10 +59,24 @@ function StaffAvatar() {
   );
 }
 
-function Message({ m, url, lang }: { m: Msg; url: string | null; lang: string }) {
+function Message({
+  m,
+  url,
+  lang,
+  staffName,
+  onOpenImage,
+}: {
+  m: Msg;
+  url: string | null;
+  lang: string;
+  staffName?: string | undefined;
+  onOpenImage: (url: string) => void;
+}) {
   const { t } = useTranslation();
   const staff = m.senderType === "staff";
+  const [failed, setFailed] = useState(false);
   const image = isImage(m.attachmentName) || isImage(m.attachmentPath);
+  const broken = !url || failed;
   return (
     <div className={`flex items-start gap-2 ${staff ? "" : "flex-row-reverse"}`}>
       {staff && <StaffAvatar />}
@@ -71,13 +87,28 @@ function Message({ m, url, lang }: { m: Msg; url: string | null; lang: string })
             : "rounded-tr-sm bg-primary text-primary-foreground"
         }`}
       >
-        {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
-        {m.attachmentPath && url && image && (
-          <a href={url} target="_blank" rel="noreferrer" className={m.body ? "mt-2 block" : "block"}>
-            <img src={url} alt={m.attachmentName ?? ""} className="max-h-56 w-48 rounded-xl object-cover" />
-          </a>
+        {staff && (
+          <p className="mb-0.5 text-[11px] font-bold text-secondary">
+            {t("queries.staffLabel", { name: staffName || "Sunrich" })}
+          </p>
         )}
-        {m.attachmentPath && (!image || !url) && (
+        {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
+        {m.attachmentPath && url && image && !failed && (
+          <button
+            type="button"
+            onClick={() => onOpenImage(url)}
+            aria-label={m.attachmentName ?? t("queries.attach")}
+            className={m.body ? "mt-2 block" : "block"}
+          >
+            <img
+              src={url}
+              alt={m.attachmentName ?? ""}
+              onError={() => setFailed(true)}
+              className="max-h-56 w-48 rounded-xl object-cover"
+            />
+          </button>
+        )}
+        {m.attachmentPath && (!image || broken) && (
           <a
             href={url ?? "#"}
             target="_blank"
@@ -86,8 +117,9 @@ function Message({ m, url, lang }: { m: Msg; url: string | null; lang: string })
               staff ? "bg-secondary/10 text-secondary" : "bg-primary-foreground/15 text-primary-foreground"
             }`}
           >
-            <FileText className="h-4 w-4 shrink-0" aria-hidden />
+            {broken ? <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden /> : <FileText className="h-4 w-4 shrink-0" aria-hidden />}
             <span className="truncate">{m.attachmentName ?? t("queries.attach")}</span>
+            {broken && <span className="sr-only">{t("queries.attachFailed")}</span>}
           </a>
         )}
         <p className={`mt-1 text-[11px] ${staff ? "text-muted-foreground" : "text-primary-foreground/70"}`}>
@@ -104,10 +136,13 @@ function Thread() {
   const { lang } = useLang();
   const navigate = useNavigate();
   const myReg = useServerFn(getMyRegistration);
+  const staffNames = useServerFn(getStaffNames);
   const [query, setQuery] = useState<{ subject: string; status: string } | null>(null);
   const [missing, setMissing] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
+  const [staff, setStaff] = useState<Record<string, string>>({});
+  const [lightbox, setLightbox] = useState<string | null>(null);
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -129,12 +164,13 @@ function Thread() {
     setQuery({ subject: q.subject, status: q.status });
     const { data: msgs } = await supabase
       .from("customer_query_messages")
-      .select("id, sender_type, body, attachment_path, attachment_name, created_at")
+      .select("id, sender_type, sender_id, body, attachment_path, attachment_name, created_at")
       .eq("query_id", id)
       .order("created_at", { ascending: true });
     const list: Msg[] = (msgs ?? []).map((m) => ({
       id: m.id,
       senderType: m.sender_type,
+      senderId: m.sender_id,
       body: m.body,
       attachmentPath: m.attachment_path,
       attachmentName: m.attachment_name,
@@ -147,11 +183,12 @@ function Thread() {
         .map(async (m) => {
           const { data } = await supabase.storage
             .from("customer-docs")
-            .createSignedUrl(m.attachmentPath as string, 600);
+            .createSignedUrl(m.attachmentPath as string, 3600);
           return [m.id, data?.signedUrl ?? null] as const;
         }),
     );
     setUrls(Object.fromEntries(entries.filter(([, u]) => u !== null) as [string, string][]));
+    void staffNames({ data: { queryId: id } }).then((names) => setStaff(names));
   }, [id]);
 
   useEffect(() => {
@@ -249,7 +286,14 @@ function Thread() {
         {missing && <p className="mt-10 text-center text-sm text-muted-foreground">{t("queries.notFound")}</p>}
         <div className="flex flex-col gap-3">
           {messages.map((m) => (
-            <Message key={m.id} m={m} url={urls[m.id] ?? null} lang={lang} />
+            <Message
+              key={m.id}
+              m={m}
+              url={urls[m.id] ?? null}
+              lang={lang}
+              staffName={m.senderId ? staff[m.senderId] : undefined}
+              onOpenImage={setLightbox}
+            />
           ))}
         </div>
         <div ref={endRef} />
@@ -316,6 +360,26 @@ function Thread() {
         <input ref={cameraInput} type="file" accept="image/*" capture="environment" className="hidden" onChange={pick} />
         <input ref={fileInput} type="file" accept="image/*,application/pdf" className="hidden" onChange={pick} />
       </div>
+
+      {lightbox && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={t("queries.closeImage")}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <img src={lightbox} alt="" className="max-h-full max-w-full object-contain" />
+          <button
+            type="button"
+            aria-label={t("queries.closeImage")}
+            onClick={() => setLightbox(null)}
+            className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition active:scale-90"
+          >
+            <X className="h-5 w-5" aria-hidden />
+          </button>
+        </div>
+      )}
     </main>
   );
 }

@@ -1,23 +1,29 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
+  Camera,
   ChevronRight,
+  Image as ImageIcon,
   Info,
   Languages,
+  Loader2,
   LogOut,
   MapPin,
   MessagesSquare,
   Package,
+  Trash2,
   Wallet,
   type LucideIcon,
 } from "lucide-react";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
+import { PhotoCrop } from "@/components/PhotoCrop";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
+import { clearMyPhoto } from "@/lib/profile.functions";
 import { AddressSheet } from "@/components/AddressSheet";
 import { LanguageSheet } from "@/components/LanguageSheet";
 import { Logo } from "@/components/Logo";
@@ -47,8 +53,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useLang } from "@/hooks/use-lang";
-import { prepareUpload } from "@/lib/image-compress";
 import { getMyRegistration, type DbLocalized, type RegistrationDto } from "@/lib/registration.functions";
+
+function pl(v: DbLocalized | null | undefined, lang: string): string {
+  if (!v) return "";
+  if (lang === "hi") return v.hi || v.en;
+  if (lang === "mr") return v.mr || v.en;
+  return v.en;
+}
+
+/** Storage path of a previously uploaded avatar, only when it is the user's own file. */
+function avatarStoragePath(url: string | null | undefined, userId: string): string | null {
+  if (!url || !userId) return null;
+  const m = url.match(/\/storage\/v1\/object\/(?:public|sign)\/avatars\/([^?]+)/);
+  const p = m?.[1] ? decodeURIComponent(m[1]) : null;
+  return p && p.startsWith(`${userId}/`) ? p : null;
+}
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({
@@ -65,13 +85,6 @@ export const Route = createFileRoute("/_authenticated/account")({
 });
 
 const APP_VERSION = "1.0.0";
-
-function pl(v: DbLocalized | null | undefined, lang: string): string {
-  if (!v) return "";
-  if (lang === "hi") return v.hi || v.en;
-  if (lang === "mr") return v.mr || v.en;
-  return v.en;
-}
 
 function MenuItem({
   icon: Icon,
@@ -110,6 +123,7 @@ function Account() {
   const navigate = useNavigate();
   const { queryClient } = Route.useRouteContext();
   const myReg = useServerFn(getMyRegistration);
+  const clearPhoto = useServerFn(clearMyPhoto);
   const deva = lang === "en" ? "" : "font-deva";
 
   const [profile, setProfile] = useState<{ name: string; mobile: string; photoUrl: string | null } | null>(null);
@@ -124,7 +138,11 @@ function Account() {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const photoInput = useRef<HTMLInputElement>(null);
+  const [removing, setRemoving] = useState(false);
+  const [photoSheetOpen, setPhotoSheetOpen] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const cameraInput = useRef<HTMLInputElement>(null);
+  const galleryInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -173,31 +191,61 @@ function Account() {
     return () => clearInterval(id);
   }, [loadOpenCount]);
 
-  const onPhoto = async (file: File) => {
+  const onPick = (e: ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f) return;
+    setPhotoSheetOpen(false);
+    setCropSrc(URL.createObjectURL(f));
+  };
+
+  const onCropSave = async (blob: Blob) => {
     if (!userId || uploading) return;
     setUploading(true);
+    const path = `${userId}/avatar-${Date.now()}.jpg`;
     try {
-      const prepared = await prepareUpload(file);
-      if (!prepared.ok) {
-        toast.error(t(prepared.reason === "tooLarge" ? "registration.errFileTooLarge" : "registration.errFileType"));
-        return;
-      }
-      const path = `${userId}/${Date.now()}.${prepared.ext}`;
-      const { error } = await supabase.storage.from("avatars").upload(path, prepared.blob, {
-        contentType: prepared.mime,
+      const { error } = await supabase.storage.from("avatars").upload(path, blob, {
+        contentType: "image/jpeg",
+        upsert: false,
       });
       if (error) throw error;
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      await supabase.rpc("update_my_profile", {
+      const { error: rpcErr } = await supabase.rpc("update_my_profile", {
         p_full_name: profile?.name ?? "",
-        ...(data.publicUrl ? { p_photo_url: data.publicUrl } : {}),
+        p_photo_url: data.publicUrl,
+        p_language: lang,
       });
+      if (rpcErr) {
+        await supabase.storage.from("avatars").remove([path]);
+        throw rpcErr;
+      }
+      const prev = avatarStoragePath(profile?.photoUrl, userId);
+      if (prev) await supabase.storage.from("avatars").remove([prev]);
       setProfile((p) => (p ? { ...p, photoUrl: data.publicUrl } : p));
+      setCropSrc(null);
       toast.success(t("account.photoUpdated"));
+    } catch {
+      toast.error(t("account.errPhotoPath", { path }));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removePhoto = async () => {
+    if (!userId || removing) return;
+    setRemoving(true);
+    try {
+      const result = await clearPhoto();
+      if (result.ok === false) throw new Error("clear failed");
+      const prev = avatarStoragePath(profile?.photoUrl, userId);
+      if (prev) await supabase.storage.from("avatars").remove([prev]);
+      setProfile((p) => (p ? { ...p, photoUrl: null } : p));
+      setPhotoSheetOpen(false);
+      toast.success(t("account.photoRemoved"));
     } catch {
       toast.error(t("account.errPhoto"));
     } finally {
-      setUploading(false);
+      setRemoving(false);
     }
   };
 
@@ -242,7 +290,7 @@ function Account() {
           <div className="flex items-center gap-4">
             <button
               type="button"
-              onClick={() => photoInput.current?.click()}
+              onClick={() => setPhotoSheetOpen(true)}
               aria-label={t("account.changePhoto")}
               className="relative shrink-0 rounded-full transition active:scale-95"
             >
@@ -251,7 +299,11 @@ function Account() {
                 name={profile?.name}
                 className="h-20 w-20 border-2 border-white/40 text-xl"
               />
-              {uploading && <span className="absolute inset-0 animate-pulse rounded-full bg-primary/40" />}
+              {uploading && (
+                <span className="absolute inset-0 flex items-center justify-center rounded-full bg-primary/60">
+                  <Loader2 className="h-6 w-6 animate-spin text-white" aria-hidden />
+                </span>
+              )}
             </button>
             <div className="min-w-0 flex-1">
               <p className="truncate text-xl font-bold text-primary-foreground">{profile?.name || "…"}</p>
@@ -345,6 +397,64 @@ function Account() {
 
       <LanguageSheet open={langOpen} onOpenChange={setLangOpen} lang={lang} onChoose={choose} />
 
+      <Drawer open={photoSheetOpen} onOpenChange={setPhotoSheetOpen}>
+        <DrawerContent className="mx-auto max-w-md">
+          <DrawerHeader>
+            <DrawerTitle className="text-center">{t("account.photoSheetTitle")}</DrawerTitle>
+          </DrawerHeader>
+          <div className="flex flex-col px-2 pb-10">
+            <button
+              type="button"
+              onClick={() => {
+                setPhotoSheetOpen(false);
+                cameraInput.current?.click();
+              }}
+              className="flex min-h-12 items-center gap-3 rounded-xl px-4 text-left text-[15px] font-medium text-foreground transition active:bg-secondary/5"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary/10">
+                <Camera className="h-5 w-5 text-secondary" aria-hidden />
+              </span>
+              {t("account.takePhoto")}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPhotoSheetOpen(false);
+                galleryInput.current?.click();
+              }}
+              className="flex min-h-12 items-center gap-3 rounded-xl px-4 text-left text-[15px] font-medium text-foreground transition active:bg-secondary/5"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary/10">
+                <ImageIcon className="h-5 w-5 text-secondary" aria-hidden />
+              </span>
+              {t("account.chooseGallery")}
+            </button>
+            {profile?.photoUrl && (
+              <button
+                type="button"
+                onClick={() => void removePhoto()}
+                disabled={removing}
+                className="flex min-h-12 items-center gap-3 rounded-xl px-4 text-left text-[15px] font-medium text-destructive transition active:bg-destructive/5 disabled:opacity-50"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-destructive/10">
+                  <Trash2 className="h-5 w-5 text-destructive" aria-hidden />
+                </span>
+                {removing ? t("account.saving") : t("account.removePhoto")}
+              </button>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {cropSrc && (
+        <PhotoCrop
+          src={cropSrc}
+          busy={uploading}
+          onCancel={() => setCropSrc(null)}
+          onSave={(b) => void onCropSave(b)}
+        />
+      )}
+
       <Drawer open={aboutOpen} onOpenChange={setAboutOpen}>
         <DrawerContent className="mx-auto max-w-md">
           <DrawerHeader>
@@ -401,17 +511,8 @@ function Account() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <input
-        ref={photoInput}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          e.target.value = "";
-          if (f) void onPhoto(f);
-        }}
-      />
+      <input ref={cameraInput} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPick} />
+      <input ref={galleryInput} type="file" accept="image/*" className="hidden" onChange={onPick} />
     </main>
   );
 }

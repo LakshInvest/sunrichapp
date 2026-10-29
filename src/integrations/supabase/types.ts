@@ -75,6 +75,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           default_firm_id: string | null
+          description: string | null
           id: string
           is_active: boolean
           logo_url: string | null
@@ -91,6 +92,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           default_firm_id?: string | null
+          description?: string | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
@@ -107,6 +109,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           default_firm_id?: string | null
+          description?: string | null
           id?: string
           is_active?: boolean
           logo_url?: string | null
@@ -548,6 +551,66 @@ export type Database = {
           },
         ]
       }
+      document_series: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          doc_type: Database["public"]["Enums"]["doc_series_type"]
+          financial_year: string
+          firm_id: string
+          id: string
+          is_active: boolean
+          next_number: number
+          padding: number
+          prefix: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          doc_type: Database["public"]["Enums"]["doc_series_type"]
+          financial_year: string
+          firm_id: string
+          id?: string
+          is_active?: boolean
+          next_number?: number
+          padding?: number
+          prefix: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          doc_type?: Database["public"]["Enums"]["doc_series_type"]
+          financial_year?: string
+          firm_id?: string
+          id?: string
+          is_active?: boolean
+          next_number?: number
+          padding?: number
+          prefix?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_series_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_series_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_types: {
         Row: {
           accepts_image: boolean
@@ -607,69 +670,162 @@ export type Database = {
           },
         ]
       }
+      firm_bank_accounts: {
+        Row: {
+          account_name: string
+          account_number: string
+          bank_name: string
+          branch: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          firm_id: string
+          id: string
+          ifsc: string
+          is_active: boolean
+          is_default: boolean
+          updated_at: string
+          upi_id: string | null
+        }
+        Insert: {
+          account_name: string
+          account_number: string
+          bank_name: string
+          branch?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          firm_id: string
+          id?: string
+          ifsc: string
+          is_active?: boolean
+          is_default?: boolean
+          updated_at?: string
+          upi_id?: string | null
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          bank_name?: string
+          branch?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          firm_id?: string
+          id?: string
+          ifsc?: string
+          is_active?: boolean
+          is_default?: boolean
+          updated_at?: string
+          upi_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "firm_bank_accounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "firm_bank_accounts_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       firms: {
         Row: {
           address_line1: string | null
           address_line2: string | null
+          cin_number: string | null
           city: string | null
           code: string
           company_id: string
           created_at: string
           created_by: string | null
           email: string | null
+          fssai_number: string | null
           gstin: string | null
           id: string
+          invoice_terms: string | null
           is_active: boolean
+          latitude: number | null
           legal_name: string
+          logo_url: string | null
+          longitude: number | null
           pan: string | null
           phone: string | null
           pincode: string | null
           short_name: string | null
+          signatory_name: string | null
+          signature_url: string | null
           state: string | null
           state_code: string | null
           updated_at: string
+          website: string | null
         }
         Insert: {
           address_line1?: string | null
           address_line2?: string | null
+          cin_number?: string | null
           city?: string | null
           code: string
           company_id: string
           created_at?: string
           created_by?: string | null
           email?: string | null
+          fssai_number?: string | null
           gstin?: string | null
           id?: string
+          invoice_terms?: string | null
           is_active?: boolean
+          latitude?: number | null
           legal_name: string
+          logo_url?: string | null
+          longitude?: number | null
           pan?: string | null
           phone?: string | null
           pincode?: string | null
           short_name?: string | null
+          signatory_name?: string | null
+          signature_url?: string | null
           state?: string | null
           state_code?: string | null
           updated_at?: string
+          website?: string | null
         }
         Update: {
           address_line1?: string | null
           address_line2?: string | null
+          cin_number?: string | null
           city?: string | null
           code?: string
           company_id?: string
           created_at?: string
           created_by?: string | null
           email?: string | null
+          fssai_number?: string | null
           gstin?: string | null
           id?: string
+          invoice_terms?: string | null
           is_active?: boolean
+          latitude?: number | null
           legal_name?: string
+          logo_url?: string | null
+          longitude?: number | null
           pan?: string | null
           phone?: string | null
           pincode?: string | null
           short_name?: string | null
+          signatory_name?: string | null
+          signature_url?: string | null
           state?: string | null
           state_code?: string | null
           updated_at?: string
+          website?: string | null
         }
         Relationships: [
           {
@@ -739,8 +895,10 @@ export type Database = {
           city: string | null
           code: string
           company_id: string
+          contact_person: string | null
           created_at: string
           created_by: string | null
+          daily_capacity: number | null
           firm_id: string
           id: string
           is_active: boolean
@@ -761,8 +919,10 @@ export type Database = {
           city?: string | null
           code: string
           company_id: string
+          contact_person?: string | null
           created_at?: string
           created_by?: string | null
+          daily_capacity?: number | null
           firm_id: string
           id?: string
           is_active?: boolean
@@ -783,8 +943,10 @@ export type Database = {
           city?: string | null
           code?: string
           company_id?: string
+          contact_person?: string | null
           created_at?: string
           created_by?: string | null
+          daily_capacity?: number | null
           firm_id?: string
           id?: string
           is_active?: boolean
@@ -1062,7 +1224,12 @@ export type Database = {
       }
       approve_customer: { Args: { p_customer_id: string }; Returns: undefined }
       check_pin: {
-        Args: { p_device_id: string; p_mobile: string; p_pin: string }
+        Args: {
+          p_device_id: string
+          p_mobile: string
+          p_pin: string
+          p_user_type?: string
+        }
         Returns: {
           out_result: string
           out_user_id: string
@@ -1074,12 +1241,21 @@ export type Database = {
         Args: { p_reason?: string; p_user_id: string }
         Returns: number
       }
+      is_staff: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       my_company_id: { Args: never; Returns: string }
       my_customer_can_edit: { Args: never; Returns: boolean }
       my_customer_id: { Args: never; Returns: string }
       my_session_is_valid: { Args: never; Returns: boolean }
       my_staff_session_verified: { Args: never; Returns: boolean }
+      next_document_number: {
+        Args: {
+          p_date?: string
+          p_doc_type: Database["public"]["Enums"]["doc_series_type"]
+          p_firm_id: string
+        }
+        Returns: string
+      }
       record_login: {
         Args: { p_login_method?: string; p_user_agent?: string }
         Returns: undefined
@@ -1140,6 +1316,14 @@ export type Database = {
         | "rejected"
         | "blocked"
       doc_requirement: "required" | "optional" | "one_of"
+      doc_series_type:
+        | "tax_invoice"
+        | "delivery_challan"
+        | "credit_note"
+        | "debit_note"
+        | "receipt"
+        | "gate_pass"
+        | "order"
       otp_channel: "whatsapp" | "email"
       otp_purpose: "app_login" | "staff_2fa"
       query_status: "open" | "answered" | "closed"
@@ -1280,6 +1464,15 @@ export const Constants = {
         "blocked",
       ],
       doc_requirement: ["required", "optional", "one_of"],
+      doc_series_type: [
+        "tax_invoice",
+        "delivery_challan",
+        "credit_note",
+        "debit_note",
+        "receipt",
+        "gate_pass",
+        "order",
+      ],
       otp_channel: ["whatsapp", "email"],
       otp_purpose: ["app_login", "staff_2fa"],
       query_status: ["open", "answered", "closed"],

@@ -56,7 +56,9 @@
       "mismatch": "PINs don't match. Try again.",
       "setting": "Saving…",
       "reenter": "Re-enter PIN",
-      "digit": "PIN digit {{n}}"
+      "digit": "PIN digit {{n}}",
+      "enterRow": "Enter PIN",
+      "confirmRow": "Confirm PIN"
     }
   },
   "nav": {
@@ -147,6 +149,15 @@
     "saving": "Saving…",
     "photoUpdated": "Photo updated",
     "errPhoto": "Could not update photo. Please try again.",
+    "photoSheetTitle": "Profile photo",
+    "takePhoto": "Take photo",
+    "chooseGallery": "Choose from gallery",
+    "removePhoto": "Remove photo",
+    "photoRemoved": "Photo removed",
+    "cropTitle": "Adjust photo",
+    "zoom": "Zoom",
+    "rotate": "Rotate",
+    "errPhotoPath": "Could not upload photo ({{path}}). Please try again.",
     "nameUpdated": "Name updated",
     "myOrders": "My orders",
     "payments": "Payments & ledger",
@@ -263,6 +274,9 @@
     "sending": "Sending…",
     "closedNote": "This query is closed",
     "attachLocked": "You can attach files while your query is open.",
-    "errSend": "Could not send. Please try again."
+    "errSend": "Could not send. Please try again.",
+    "staffLabel": "{{name}} · Sunrich",
+    "closeImage": "Close image",
+    "attachFailed": "Attachment could not load"
   }
 }

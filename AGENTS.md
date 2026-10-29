@@ -26,3 +26,7 @@
 
 - `/auth`'s beforeLoad redirect to Home/Registration is skipped while a login is in progress (`sessionStorage` key `sunrich.authflow`, set before the magic-link exchange, cleared in `routeAfterLogin`). Why: otherwise the signed-in redirect fires the moment the session exists and skips the mandatory Set PIN screen on new devices.
 - Offline mode: every mutating screen (auth, registration, account, queries, cart, product) disables its actions and shows `offline.hint` while `useOffline()` is false; catalogue screens fall back to the cached read-only copy. Why: this app is used on patchy mobile data.
+
+- Segment-nested route files (track.tsx + track.$id.tsx) must have a layout: /track renders <Outlet/> from track.tsx with the list in track.index.tsx; queries already follows this pattern. Why: a parent route without <Outlet/> silently renders the parent page for child paths.
+- Shared order/status label helpers live in src/lib/order-format.ts; route files must not import helpers from other route files. Why: cross-imports between route modules obscure the route tree.
+- The customer's own-order filter relies on customer_id in ORDER_SELECT; keep it in sync with fetchMyOrders(). Why: RLS returns own + distributor-routed rows, so the client filters routed ones out.

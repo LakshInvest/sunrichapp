@@ -7,6 +7,7 @@ import {
   Camera,
   ChevronRight,
   ExternalLink,
+  FileText,
   Image as ImageIcon,
   Info,
   Languages,
@@ -565,6 +566,60 @@ function Account() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="mx-auto max-w-sm rounded-2xl">
+          {deleteDone ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>{t("account.deleteSentTitle")}</DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-muted-foreground">{t("account.deleteSentBody")}</p>
+              <Button onClick={() => void signOut()} className="min-h-12 rounded-xl">
+                {t("account.logout")}
+              </Button>
+            </>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle>{t("account.deleteAccount")}</DialogTitle>
+              </DialogHeader>
+              <p className="text-sm leading-relaxed text-muted-foreground">{t("account.deleteBody")}</p>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium text-foreground">{t("account.deleteReason")}</span>
+                <select
+                  value={deleteReason}
+                  onChange={(e) => setDeleteReason(e.target.value)}
+                  className="min-h-12 rounded-xl border border-input bg-card px-3 text-base text-foreground outline-none focus:border-secondary"
+                >
+                  <option value="">{t("account.deleteReasonNone")}</option>
+                  <option value={t("account.deleteReason1")}>{t("account.deleteReason1")}</option>
+                  <option value={t("account.deleteReason2")}>{t("account.deleteReason2")}</option>
+                  <option value={t("account.deleteReason3")}>{t("account.deleteReason3")}</option>
+                </select>
+              </label>
+              <label className="flex items-start gap-2.5">
+                <input
+                  type="checkbox"
+                  checked={deleteConfirm}
+                  onChange={(e) => setDeleteConfirm(e.target.checked)}
+                  className="mt-1 h-5 w-5 shrink-0 rounded border-input accent-[#0B2545]"
+                />
+                <span className="text-sm text-foreground">{t("account.deleteConfirm")}</span>
+              </label>
+              <Button
+                variant="destructive"
+                onClick={() => void requestDelete()}
+                disabled={!deleteConfirm || deleting || offline}
+                className="min-h-12 rounded-xl"
+              >
+                {deleting ? t("account.saving") : t("account.deleteRequest")}
+              </Button>
+              {offline && <p className="text-center text-xs text-muted-foreground">{t("offline.hint")}</p>}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <input ref={cameraInput} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPick} />
       <input ref={galleryInput} type="file" accept="image/*" className="hidden" onChange={onPick} />

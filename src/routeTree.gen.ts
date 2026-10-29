@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedCartRouteImport } from './routes/_authenticated/cart'
+import { Route as AuthenticatedHoldRouteImport } from './routes/_authenticated/hold'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedOrderRouteImport } from './routes/_authenticated/order'
 import { Route as AuthenticatedRegistrationRouteImport } from './routes/_authenticated/registration'
@@ -43,6 +44,11 @@ const AuthenticatedCartRoute = AuthenticatedCartRouteImport.update({
   path: '/cart',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedHoldRoute = AuthenticatedHoldRouteImport.update({
+  id: '/hold',
+  path: '/hold',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   id: '/home',
   path: '/home',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/account': typeof AuthenticatedAccountRoute
   '/cart': typeof AuthenticatedCartRoute
+  '/hold': typeof AuthenticatedHoldRoute
   '/home': typeof AuthenticatedHomeRoute
   '/order': typeof AuthenticatedOrderRoute
   '/registration': typeof AuthenticatedRegistrationRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/account': typeof AuthenticatedAccountRoute
   '/cart': typeof AuthenticatedCartRoute
+  '/hold': typeof AuthenticatedHoldRoute
   '/home': typeof AuthenticatedHomeRoute
   '/order': typeof AuthenticatedOrderRoute
   '/registration': typeof AuthenticatedRegistrationRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/cart': typeof AuthenticatedCartRoute
+  '/_authenticated/hold': typeof AuthenticatedHoldRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/order': typeof AuthenticatedOrderRoute
   '/_authenticated/registration': typeof AuthenticatedRegistrationRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/account'
     | '/cart'
+    | '/hold'
     | '/home'
     | '/order'
     | '/registration'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/account'
     | '/cart'
+    | '/hold'
     | '/home'
     | '/order'
     | '/registration'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/account'
     | '/_authenticated/cart'
+    | '/_authenticated/hold'
     | '/_authenticated/home'
     | '/_authenticated/order'
     | '/_authenticated/registration'
@@ -174,6 +186,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCartRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/hold': {
+      id: '/_authenticated/hold'
+      path: '/hold'
+      fullPath: '/hold'
+      preLoaderRoute: typeof AuthenticatedHoldRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/home': {
       id: '/_authenticated/home'
       path: '/home'
@@ -208,6 +227,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedCartRoute: typeof AuthenticatedCartRoute
+  AuthenticatedHoldRoute: typeof AuthenticatedHoldRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedOrderRoute: typeof AuthenticatedOrderRoute
   AuthenticatedRegistrationRoute: typeof AuthenticatedRegistrationRoute
@@ -217,6 +237,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedCartRoute: AuthenticatedCartRoute,
+  AuthenticatedHoldRoute: AuthenticatedHoldRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedOrderRoute: AuthenticatedOrderRoute,
   AuthenticatedRegistrationRoute: AuthenticatedRegistrationRoute,

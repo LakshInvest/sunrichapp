@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LogOut } from "lucide-react";
 import en from "@/locales/en.json";
@@ -60,6 +59,3 @@ function Hold() {
     </main>
   );
 }
-
-// Keep the router import effect-free on module evaluation.
-useEffect;

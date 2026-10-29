@@ -1,16 +1,20 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
+  Camera,
   ChevronRight,
+  Image as ImageIcon,
   Info,
   Languages,
+  Loader2,
   LogOut,
   MapPin,
   MessagesSquare,
   Package,
+  Trash2,
   Wallet,
   type LucideIcon,
 } from "lucide-react";
@@ -49,8 +53,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useLang } from "@/hooks/use-lang";
-import { prepareUpload } from "@/lib/image-compress";
 import { getMyRegistration, type DbLocalized, type RegistrationDto } from "@/lib/registration.functions";
+
+function pl(v: DbLocalized | null | undefined, lang: string): string {
+  if (!v) return "";
+  if (lang === "hi") return v.hi || v.en;
+  if (lang === "mr") return v.mr || v.en;
+  return v.en;
+}
+
+/** Storage path of a previously uploaded avatar, only when it is the user's own file. */
+function avatarStoragePath(url: string | null | undefined, userId: string): string | null {
+  if (!url || !userId) return null;
+  const m = url.match(/\/storage\/v1\/object\/(?:public|sign)\/avatars\/([^?]+)/);
+  const p = m?.[1] ? decodeURIComponent(m[1]) : null;
+  return p && p.startsWith(`${userId}/`) ? p : null;
+}
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({

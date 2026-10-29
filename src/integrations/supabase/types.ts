@@ -922,6 +922,37 @@ export type Database = {
         }
         Returns: string
       }
+      admin_add_customer_document: {
+        Args: {
+          p_customer_id: string
+          p_doc_number?: string
+          p_document_type_code: string
+          p_file_name?: string
+          p_file_path: string
+          p_file_size?: number
+          p_mime_type?: string
+        }
+        Returns: string
+      }
+      admin_create_customer: {
+        Args: {
+          p_address_line1: string
+          p_address_line2?: string
+          p_business_name?: string
+          p_city?: string
+          p_contact_name: string
+          p_customer_type_code: string
+          p_email?: string
+          p_gstin?: string
+          p_landmark?: string
+          p_latitude?: number
+          p_longitude?: number
+          p_mobile: string
+          p_pincode?: string
+          p_state?: string
+        }
+        Returns: string
+      }
       approve_customer: { Args: { p_customer_id: string }; Returns: undefined }
       check_pin: {
         Args: { p_device_id: string; p_mobile: string; p_pin: string }

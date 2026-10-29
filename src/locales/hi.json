@@ -88,7 +88,9 @@
     "decreaseQty": "मात्रा घटाएँ",
     "itemsInCart": "कार्ट में उत्पाद",
     "metaTitle": "सनरिच — होम",
-    "metaDescription": "सनरिच पैकेज्ड पेयजल ऑर्डर करें — जार, बोतलें और बहुत कुछ, आपके द्वार तक।"
+    "metaDescription": "सनरिच पैकेज्ड पेयजल ऑर्डर करें — जार, बोतलें और बहुत कुछ, आपके द्वार तक।",
+    "needsAction": "Sunrich को आपसे कुछ चाहिए",
+    "open": "खोलें"
   },
   "cart": {
     "title": "कार्ट",
@@ -135,7 +137,31 @@
     "mobile": "मोबाइल",
     "customerCode": "ग्राहक कोड",
     "customerType": "ग्राहक प्रकार",
-    "address": "पता"
+    "address": "पता",
+    "edit": "बदलें",
+    "changePhoto": "फ़ोटो बदलें",
+    "editNameTitle": "अपना नाम बदलें",
+    "nameLabel": "आपका नाम",
+    "save": "सेव करें",
+    "cancel": "रद्द करें",
+    "saving": "सेव हो रहा है…",
+    "photoUpdated": "फ़ोटो अपडेट हो गई",
+    "errPhoto": "फ़ोटो अपडेट नहीं हुई। कृपया फिर कोशिश करें।",
+    "nameUpdated": "नाम अपडेट हो गया",
+    "myOrders": "मेरे ऑर्डर",
+    "payments": "भुगतान और लेन-देन",
+    "deliveryAddress": "डिलीवरी पता",
+    "deliveryAddressTitle": "डिलीवरी पता",
+    "helpQueries": "मदद और सवाल",
+    "openQueries": "{{count}} खुले",
+    "about": "Sunrich के बारे में",
+    "aboutVersion": "वर्शन {{version}}",
+    "aboutBody": "घरों, दुकानों और व्यापार के लिए शुद्ध पैकेज्ड पीने का पानी।",
+    "comingSoon": "जल्द आ रहा है",
+    "moreAddresses": "और डिलीवरी पते जल्द आ रहे हैं",
+    "logoutTitle": "लॉग आउट करें?",
+    "logoutBody": "आपको अपने नंबर से दोबारा लॉग इन करना होगा।",
+    "logoutConfirm": "लॉग आउट"
   },
   "register": {
     "title": "अपना पंजीकरण पूरा करें",
@@ -216,5 +242,27 @@
   "hold": {
     "title": "आपका खाता रोक दिया गया है",
     "body": "आपका खाता रोक दिया गया है। कृपया Sunrich से संपर्क करें।"
+  },
+  "queries": {
+    "title": "मदद और सवाल",
+    "metaTitle": "Sunrich — मदद और सवाल",
+    "metaDescription": "Sunrich टीम से अपने खाते या डिलीवरी के बारे में पूछें।",
+    "emptyTitle": "अभी कोई सवाल नहीं",
+    "emptyBody": "Sunrich टीम से आपकी बातचीत यहाँ दिखेगी।",
+    "chipOpen": "कार्रवाई ज़रूरी",
+    "chipAnswered": "जवाब आया",
+    "chipClosed": "बंद",
+    "notFound": "यह सवाल उपलब्ध नहीं है।",
+    "replyPlaceholder": "जवाब लिखें…",
+    "attach": "अटैच",
+    "camera": "फ़ोटो लें",
+    "chooseFile": "फ़ाइल चुनें",
+    "attached": "जुड़ी: {{name}}",
+    "remove": "हटाएँ",
+    "send": "भेजें",
+    "sending": "भेज रहे हैं…",
+    "closedNote": "यह सवाल बंद हो गया है",
+    "attachLocked": "सवाल खुला होने पर ही फ़ाइल जोड़ सकते हैं।",
+    "errSend": "भेजा नहीं जा सका। कृपया फिर कोशिश करें।"
   }
 }

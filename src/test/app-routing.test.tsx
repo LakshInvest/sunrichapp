@@ -36,4 +36,9 @@ describe("App routing", () => {
     expect(lastRouteId("/track")).toBe("/_authenticated/track");
     expect(lastRouteId("/account")).toBe("/_authenticated/account");
   });
+
+  it("matches the queries list and thread pages", () => {
+    expect(lastRouteId("/queries")).toBe("/_authenticated/queries/");
+    expect(lastRouteId("/queries/abc-def")).toBe("/_authenticated/queries/$id");
+  });
 });

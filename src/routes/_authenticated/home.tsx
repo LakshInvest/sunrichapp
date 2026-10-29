@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useState, type UIEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type UIEvent } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ArrowRight,
@@ -22,10 +22,12 @@ import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { SmartImage } from "@/components/SmartImage";
+import { AddressSheet } from "@/components/AddressSheet";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
-import { getMyRegistration } from "@/lib/registration.functions";
+import { getMyRegistration, type RegistrationDto } from "@/lib/registration.functions";
 import { homeContent, pick, type Product } from "@/data/homeContent";
 
 export const Route = createFileRoute("/_authenticated/home")({
@@ -127,14 +129,19 @@ function Home() {
   const [showAll, setShowAll] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
-  const [initial, setInitial] = useState("S");
   const [pending, setPending] = useState(false);
+  const [reg, setReg] = useState<RegistrationDto | null>(null);
+  const [profile, setProfile] = useState({ name: "", photoUrl: null as string | null });
+  const [addressOpen, setAddressOpen] = useState(false);
+  const [openQuery, setOpenQuery] = useState<{ id: string; subject: string } | null>(null);
   const myReg = useServerFn(getMyRegistration);
 
   useEffect(() => {
     let active = true;
-    void myReg().then((reg) => {
-      if (active) setPending(reg.status === "pending_approval");
+    void myReg().then((r) => {
+      if (!active) return;
+      setReg(r);
+      setPending(r.status === "pending_approval");
     });
     return () => {
       active = false;
@@ -143,13 +150,35 @@ function Home() {
 
   useEffect(() => {
     let active = true;
-    void supabase.auth.getUser().then(({ data }) => {
-      if (active) setInitial((data.user?.email?.[0] ?? "S").toUpperCase());
+    void supabase.auth.getUser().then(async ({ data }) => {
+      if (!active || !data.user) return;
+      const { data: p } = await supabase
+        .from("user_profiles")
+        .select("full_name, photo_url")
+        .eq("id", data.user.id)
+        .maybeSingle();
+      if (active && p) setProfile({ name: p.full_name ?? "", photoUrl: p.photo_url ?? null });
     });
     return () => {
       active = false;
     };
   }, []);
+
+  const loadOpenQuery = useCallback(async () => {
+    const { data } = await supabase
+      .from("customer_queries")
+      .select("id, subject")
+      .eq("status", "open")
+      .order("created_at", { ascending: false })
+      .limit(1);
+    setOpenQuery(data?.[0] ? { id: data[0].id, subject: data[0].subject } : null);
+  }, []);
+
+  useEffect(() => {
+    void loadOpenQuery();
+    const id = setInterval(() => void loadOpenQuery(), 60_000);
+    return () => clearInterval(id);
+  }, [loadOpenQuery]);
 
   const { hero, banners, categories, products, sections } = homeContent;
   const deva = lang === "en" ? "" : "font-deva";
@@ -179,6 +208,9 @@ function Home() {
       }, 0),
     [quantities, products],
   );
+
+  const areaLabel = reg?.city || reg?.addressLine1 || t("home.locationArea");
+  const typeLabel = reg?.typeName ? pick(reg.typeName, lang) : "";
 
   const hasQuery = search.trim() !== "";
   const defaultPopularView = category === "all" && !hasQuery && !showAll;

@@ -21,6 +21,7 @@ import { Route as AuthenticatedQueriesRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedRegistrationRouteImport } from './routes/_authenticated/registration'
 import { Route as AuthenticatedTrackRouteImport } from './routes/_authenticated/track'
 import { Route as AuthenticatedQueriesIndexRouteImport } from './routes/_authenticated/queries.index'
+import { Route as AuthenticatedQueriesIdRouteImport } from './routes/_authenticated/queries.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -83,6 +84,11 @@ const AuthenticatedQueriesIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedQueriesRoute,
   } as any)
+const AuthenticatedQueriesIdRoute = AuthenticatedQueriesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedQueriesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/queries': typeof AuthenticatedQueriesRouteWithChildren
   '/registration': typeof AuthenticatedRegistrationRoute
   '/track': typeof AuthenticatedTrackRoute
+  '/queries/$id': typeof AuthenticatedQueriesIdRoute
   '/queries/': typeof AuthenticatedQueriesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/order': typeof AuthenticatedOrderRoute
   '/registration': typeof AuthenticatedRegistrationRoute
   '/track': typeof AuthenticatedTrackRoute
+  '/queries/$id': typeof AuthenticatedQueriesIdRoute
   '/queries': typeof AuthenticatedQueriesIndexRoute
 }
 export interface FileRoutesById {
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/_authenticated/queries': typeof AuthenticatedQueriesRouteWithChildren
   '/_authenticated/registration': typeof AuthenticatedRegistrationRoute
   '/_authenticated/track': typeof AuthenticatedTrackRoute
+  '/_authenticated/queries/$id': typeof AuthenticatedQueriesIdRoute
   '/_authenticated/queries/': typeof AuthenticatedQueriesIndexRoute
 }
 export interface FileRouteTypes {
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/queries'
     | '/registration'
     | '/track'
+    | '/queries/$id'
     | '/queries/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/order'
     | '/registration'
     | '/track'
+    | '/queries/$id'
     | '/queries'
   id:
     | '__root__'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/_authenticated/queries'
     | '/_authenticated/registration'
     | '/_authenticated/track'
+    | '/_authenticated/queries/$id'
     | '/_authenticated/queries/'
   fileRoutesById: FileRoutesById
 }
@@ -258,14 +270,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedQueriesIndexRouteImport
       parentRoute: typeof AuthenticatedQueriesRoute
     }
+    '/_authenticated/queries/$id': {
+      id: '/_authenticated/queries/$id'
+      path: '/$id'
+      fullPath: '/queries/$id'
+      preLoaderRoute: typeof AuthenticatedQueriesIdRouteImport
+      parentRoute: typeof AuthenticatedQueriesRoute
+    }
   }
 }
 
 interface AuthenticatedQueriesRouteChildren {
+  AuthenticatedQueriesIdRoute: typeof AuthenticatedQueriesIdRoute
   AuthenticatedQueriesIndexRoute: typeof AuthenticatedQueriesIndexRoute
 }
 
 const AuthenticatedQueriesRouteChildren: AuthenticatedQueriesRouteChildren = {
+  AuthenticatedQueriesIdRoute: AuthenticatedQueriesIdRoute,
   AuthenticatedQueriesIndexRoute: AuthenticatedQueriesIndexRoute,
 }
 

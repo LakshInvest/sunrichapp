@@ -16,8 +16,8 @@ export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 backdrop-blur">
-      <div className="mx-auto flex max-w-md">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 backdrop-blur-md">
+      <div className="mx-auto flex max-w-md shadow-[0_-8px_24px_-16px_rgba(11,37,69,0.35)]">
         {TABS.map(({ to, key, icon: Icon }) => {
           const active = pathname === to;
           return (
@@ -25,11 +25,20 @@ export function BottomNav() {
               key={to}
               to={to}
               aria-current={active ? "page" : undefined}
-              className={`flex min-h-16 flex-1 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors ${
+              className={`relative flex min-h-16 flex-1 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors ${
                 active ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              <Icon className="h-6 w-6" strokeWidth={active ? 2.4 : 2} />
+              {active && (
+                <span
+                  aria-hidden
+                  className="absolute top-0 h-1 w-8 rounded-full bg-secondary"
+                />
+              )}
+              <Icon
+                className={`transition-transform ${active ? "h-7 w-7" : "h-6 w-6"}`}
+                strokeWidth={active ? 2.4 : 1.8}
+              />
               {t(key)}
             </Link>
           );

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import {
   Camera,
   ChevronRight,
+  ExternalLink,
   Image as ImageIcon,
   Info,
   Languages,
@@ -14,6 +15,7 @@ import {
   MapPin,
   MessagesSquare,
   Package,
+  ShieldCheck,
   Trash2,
   Wallet,
   type LucideIcon,
@@ -44,12 +46,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+import { SheetDrawer } from "@/components/SheetDrawer";
+import { DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useLang } from "@/hooks/use-lang";

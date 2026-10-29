@@ -36,6 +36,8 @@ const order = (over: Partial<OrderDto>): OrderDto => ({
   itemsTotal: 100,
   depositTotal: 0,
   grandTotal: 100,
+  paidAmount: 0,
+  paymentStatus: null,
   paymentMode: "cod",
   createdAt: "2026-10-29T10:00:00Z",
   dueDate: null,

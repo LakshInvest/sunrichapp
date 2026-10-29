@@ -315,6 +315,7 @@ function Account() {
             <button
               type="button"
               onClick={() => setPhotoSheetOpen(true)}
+              disabled={offline}
               aria-label={t("account.changePhoto")}
               className="relative shrink-0 rounded-full transition active:scale-95"
             >
@@ -544,7 +545,7 @@ function Account() {
             <Button variant="outline" onClick={() => setEditOpen(false)} className="min-h-11 flex-1 rounded-xl">
               {t("account.cancel")}
             </Button>
-            <Button onClick={() => void saveName()} disabled={saving || !editName.trim()} className="min-h-11 flex-1 rounded-xl">
+            <Button onClick={() => void saveName()} disabled={saving || offline || !editName.trim()} className="min-h-11 flex-1 rounded-xl">
               {saving ? t("account.saving") : t("account.save")}
             </Button>
           </div>

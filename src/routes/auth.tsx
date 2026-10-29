@@ -147,7 +147,7 @@ function Login() {
   const verify = useServerFn(verifyOtp);
   const pinCheck = useServerFn(pinLogin);
   const deviceStatus = useServerFn(getMyDevice);
-  const myCustomer = useServerFn(getMyCustomerId);
+  const myCustomer = useServerFn(getMyRegistration);
 
   const [step, setStep] = useState<Step>("mobile");
   const [deviceId, setDeviceId] = useState("");

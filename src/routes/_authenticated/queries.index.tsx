@@ -46,7 +46,6 @@ function QueriesList() {
   const { lang } = useLang();
   const navigate = useNavigate();
   const [rows, setRows] = useState<Summary[] | null>(null);
-  const pull = usePullToRefresh(load);
 
   const load = useCallback(async () => {
     const { data: qs, error } = await supabase
@@ -81,6 +80,8 @@ function QueriesList() {
     );
   }, []);
 
+  const pull = usePullToRefresh(load);
+
   useEffect(() => {
     void load();
     const id = setInterval(() => void load(), 60_000);
@@ -88,7 +89,27 @@ function QueriesList() {
   }, [load]);
 
   return (
-    <main className={`mx-auto min-h-screen max-w-md bg-background px-5 pb-28 pt-8 ${lang === "en" ? "" : "font-deva"}`}>
+    <main
+      className={`mx-auto min-h-screen max-w-md bg-background px-5 pb-28 pt-8 ${lang === "en" ? "" : "font-deva"}`}
+      onTouchStart={pull.handlers.onTouchStart}
+      onTouchMove={pull.handlers.onTouchMove}
+      onTouchEnd={pull.handlers.onTouchEnd}
+      onTouchCancel={pull.handlers.onTouchCancel}
+    >
+      <OfflineBanner />
+      {pull.indicator && (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-x-0 top-2 z-40 flex justify-center"
+          style={{ transform: `translateY(${Math.max(0, pull.offset - 16)}px)` }}
+        >
+          <span
+            className={`flex h-8 w-8 items-center justify-center rounded-full bg-card shadow-md ${pull.spinning ? "animate-spin" : ""}`}
+          >
+            <ChevronRight className="h-4 w-4 rotate-90 text-secondary" />
+          </span>
+        </div>
+      )}
       <h1 className="text-3xl font-bold text-primary">{t("queries.title")}</h1>
 
       {rows === null && <p className="mt-10 text-center text-sm text-muted-foreground">{t("registration.loading")}</p>}

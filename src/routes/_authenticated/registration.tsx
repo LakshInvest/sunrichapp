@@ -34,6 +34,7 @@ import {
 } from "@/lib/registration.functions";
 import { isValidGstin, isValidPincode } from "@/lib/registration-validation";
 import { prepareUpload } from "@/lib/image-compress";
+import { useOffline } from "@/hooks/use-offline";
 
 export const Route = createFileRoute("/_authenticated/registration")({
   ssr: false,
@@ -264,6 +265,7 @@ type DetailsState = {
   addressLine2: string;
   landmark: string;
   city: string;
+  state: string;
   pincode: string;
   gstin: string;
   email: string;
@@ -320,6 +322,7 @@ function DetailsStep({
     addressLine2: reg.addressLine2 ?? "",
     landmark: reg.landmark ?? "",
     city: reg.city ?? "",
+    state: reg.state ?? "",
     pincode: reg.pincode ?? "",
     gstin: reg.gstin ?? "",
     email: reg.email ?? "",

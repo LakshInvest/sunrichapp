@@ -286,7 +286,14 @@ function Thread() {
         {missing && <p className="mt-10 text-center text-sm text-muted-foreground">{t("queries.notFound")}</p>}
         <div className="flex flex-col gap-3">
           {messages.map((m) => (
-            <Message key={m.id} m={m} url={urls[m.id] ?? null} lang={lang} />
+            <Message
+              key={m.id}
+              m={m}
+              url={urls[m.id] ?? null}
+              lang={lang}
+              staffName={m.senderId ? staff[m.senderId] : undefined}
+              onOpenImage={setLightbox}
+            />
           ))}
         </div>
         <div ref={endRef} />
@@ -353,6 +360,26 @@ function Thread() {
         <input ref={cameraInput} type="file" accept="image/*" capture="environment" className="hidden" onChange={pick} />
         <input ref={fileInput} type="file" accept="image/*,application/pdf" className="hidden" onChange={pick} />
       </div>
+
+      {lightbox && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={t("queries.closeImage")}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <img src={lightbox} alt="" className="max-h-full max-w-full object-contain" />
+          <button
+            type="button"
+            aria-label={t("queries.closeImage")}
+            onClick={() => setLightbox(null)}
+            className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition active:scale-90"
+          >
+            <X className="h-5 w-5" aria-hidden />
+          </button>
+        </div>
+      )}
     </main>
   );
 }

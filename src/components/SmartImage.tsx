@@ -15,8 +15,8 @@ export function SmartImage({
 }: {
   src?: string | null | undefined;
   alt: string;
-  className?: string;
-  iconClassName?: string;
+  className?: string | undefined;
+  iconClassName?: string | undefined;
   fallbackSrc?: string | null | undefined;
 }) {
   const [failed, setFailed] = useState(false);

@@ -206,12 +206,18 @@ function Thread() {
         if (upErr) throw upErr;
         name = file.name;
       }
-      const { error: rpcErr } = await supabase.rpc("reply_query", {
-        p_query_id: id,
-        p_message: message || undefined,
-        p_attachment_path: path ?? undefined,
-        p_attachment_name: name ?? undefined,
-      });
+      const rpcArgs: {
+        p_query_id: string;
+        p_message?: string;
+        p_attachment_path?: string;
+        p_attachment_name?: string;
+      } = { p_query_id: id };
+      if (message) rpcArgs.p_message = message;
+      if (path) {
+        rpcArgs.p_attachment_path = path;
+        rpcArgs.p_attachment_name = name ?? "";
+      }
+      const { error: rpcErr } = await supabase.rpc("reply_query", rpcArgs);
       if (rpcErr) throw rpcErr;
       setText("");
       setFile(null);

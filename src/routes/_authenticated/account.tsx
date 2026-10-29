@@ -190,8 +190,7 @@ function Account() {
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
       await supabase.rpc("update_my_profile", {
         p_full_name: profile?.name ?? "",
-        p_photo_url: data.publicUrl,
-        p_language: undefined,
+        ...(data.publicUrl ? { p_photo_url: data.publicUrl } : {}),
       });
       setProfile((p) => (p ? { ...p, photoUrl: data.publicUrl } : p));
       toast.success(t("account.photoUpdated"));
@@ -207,11 +206,7 @@ function Account() {
     if (!name || saving) return;
     setSaving(true);
     try {
-      await supabase.rpc("update_my_profile", {
-        p_full_name: name,
-        p_photo_url: undefined,
-        p_language: undefined,
-      });
+      await supabase.rpc("update_my_profile", { p_full_name: name });
       setProfile((p) => (p ? { ...p, name } : p));
       setEditOpen(false);
       toast.success(t("account.nameUpdated"));

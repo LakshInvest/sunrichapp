@@ -29,12 +29,23 @@ function Account() {
   const { lang, choose } = useLang();
   const navigate = useNavigate();
   const { queryClient } = Route.useRouteContext();
-  const [email, setEmail] = useState<string | null>(null);
+  const [profile, setProfile] = useState<{ name: string; mobile: string } | null>(null);
 
   useEffect(() => {
     let active = true;
-    void supabase.auth.getUser().then(({ data }) => {
-      if (active) setEmail(data.user?.email ?? null);
+    void supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { data: p } = await supabase
+        .from("user_profiles")
+        .select("full_name, mobile")
+        .eq("id", data.user.id)
+        .maybeSingle();
+      if (!active) return;
+      const m = (p?.mobile ?? "").replace(/\D/g, "").slice(-10);
+      setProfile({
+        name: p?.full_name ?? "",
+        mobile: m ? `+91 ${m.slice(0, 5)} ${m.slice(5)}` : "",
+      });
     });
     return () => {
       active = false;
@@ -44,6 +55,11 @@ function Account() {
   const signOut = async () => {
     await queryClient.cancelQueries();
     queryClient.clear();
+    try {
+      await supabase.rpc("record_logout");
+    } catch {
+      /* still sign out locally */
+    }
     await supabase.auth.signOut();
     await navigate({ to: "/auth", replace: true });
   };
@@ -56,8 +72,10 @@ function Account() {
 
       <section className="mt-6 rounded-xl border border-border bg-card p-5 shadow-sm">
         <p className="text-sm text-muted-foreground">{t("account.signedInAs")}</p>
-        <p className="mt-1 break-all text-base font-medium text-foreground">
-          {email ?? "…"}
+        <p className="mt-1 text-lg font-semibold text-foreground">{profile?.name || "…"}</p>
+        <p className="mt-1 text-base text-muted-foreground">
+          <span className="sr-only">{t("account.mobile")}: </span>
+          {profile?.mobile || "…"}
         </p>
       </section>
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ArrowDownWideNarrow, CupSoda, GlassWater, LayoutGrid, Milk, Package, type LucideIcon } from "lucide-react";
 import en from "@/locales/en.json";

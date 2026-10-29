@@ -570,7 +570,6 @@ function DocsStep({
 
   const blocks = groupRequirements(requirements);
   const uploadedFor = (code: string) => uploaded.find((u) => u.docTypeCode === code);
-  const isImage = (code: string) => requirements.find((r) => r.code === code)?.acceptsImage ?? true;
 
   const upload = async (code: string, file: File) => {
     if (!reg.customerId || uploadingCode) return;

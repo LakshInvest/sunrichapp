@@ -395,6 +395,20 @@ function Account() {
         {t("account.logout")}
       </button>
 
+      {/* Delete account — required for Play Store policy */}
+      <button
+        type="button"
+        onClick={() => {
+          setDeleteConfirm(false);
+          setDeleteDone(false);
+          setDeleteOpen(true);
+        }}
+        className="mx-auto mt-2 flex min-h-11 items-center gap-1.5 text-sm font-medium text-destructive underline underline-offset-4 transition active:scale-[0.98]"
+      >
+        <Trash2 className="h-4 w-4" aria-hidden />
+        {t("account.deleteAccount")}
+      </button>
+
       <BottomNav />
 
       <AddressSheet

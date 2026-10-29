@@ -232,10 +232,15 @@ function Login() {
   };
 
   const afterOtpSession = async () => {
-    await supabase.rpc("record_login", {
+    // The session row must exist before Set PIN: set_my_pin validates it.
+    const { error: rlErr } = await supabase.rpc("record_login", {
       p_user_agent: navigator.userAgent.slice(0, 500),
       p_login_method: "otp_whatsapp",
     });
+    if (rlErr) {
+      setError(rlErr.message);
+      return;
+    }
     setLastMobile(mobile);
     try {
       const { trusted } = await deviceStatus({ data: { deviceId } });
@@ -247,7 +252,12 @@ function Login() {
         return;
       }
     } catch {
-      /* fall through to routing */
+      // Device check failed — play safe and ask for the PIN now.
+      setPin(Array(4).fill(""));
+      setConfirm(Array(4).fill(""));
+      setPinPhase("enter");
+      setStep("setpin");
+      return;
     }
     await routeAfterLogin();
   };
@@ -338,10 +348,14 @@ function Login() {
         setError(t("auth.errors.generic"));
         return;
       }
-      await supabase.rpc("record_login", {
+      const { error: rlErr } = await supabase.rpc("record_login", {
         p_user_agent: navigator.userAgent.slice(0, 500),
         p_login_method: "pin",
       });
+      if (rlErr) {
+        setError(rlErr.message);
+        return;
+      }
       setLastMobile(m);
       await routeAfterLogin();
     } catch {
@@ -376,6 +390,23 @@ function Login() {
       });
       if (pErr) {
         setError(pErr.message);
+        shake();
+        setPin(Array(4).fill(""));
+        setConfirm(Array(4).fill(""));
+        setPinPhase("enter");
+        return;
+      }
+      // Read back the trusted device row: only continue when it exists.
+      const { data: me } = await supabase.auth.getUser();
+      const { data: dev } = await supabase
+        .from("user_devices")
+        .select("id")
+        .eq("user_id", me.user?.id ?? "")
+        .eq("device_id", deviceId)
+        .is("revoked_at", null)
+        .maybeSingle();
+      if (!dev) {
+        setError(t("auth.pin.notSaved"));
         shake();
         setPin(Array(4).fill(""));
         setConfirm(Array(4).fill(""));

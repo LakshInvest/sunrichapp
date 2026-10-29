@@ -117,8 +117,8 @@ export function PhotoCrop({
           aspect={1}
           cropShape="round"
           showGrid={false}
-          zoomMin={1}
-          zoomMax={3}
+          minZoom={1}
+          maxZoom={3}
           restrictPosition={false}
           overlayOpacity={0.85}
           onCropChange={setCrop}

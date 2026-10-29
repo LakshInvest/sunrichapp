@@ -69,7 +69,7 @@ function Message({
   m: Msg;
   url: string | null;
   lang: string;
-  staffName?: string;
+  staffName?: string | undefined;
   onOpenImage: (url: string) => void;
 }) {
   const { t } = useTranslation();

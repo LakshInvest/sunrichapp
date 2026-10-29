@@ -662,14 +662,14 @@ function DocsStep({
           {doc && <span className="text-xs font-semibold text-secondary">{t("registration.uploaded")}</span>}
         </div>
         <div className="flex items-center gap-3">
-          {doc && isImage(code) && thumbs[doc.filePath] && (
+          {doc && (doc.mimeType ?? "").startsWith("image/") && thumbs[doc.filePath] && (
             <img
               src={thumbs[doc.filePath]}
               alt=""
               className="h-16 w-16 rounded-lg border border-border object-cover"
             />
           )}
-          {doc && !isImage(code) && (
+          {doc && !(doc.mimeType ?? "").startsWith("image/") && (
             <span className="flex h-16 w-16 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground">
               <FileText className="h-7 w-7" aria-hidden />
             </span>

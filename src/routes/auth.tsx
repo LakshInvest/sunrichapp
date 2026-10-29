@@ -128,7 +128,7 @@ function Login() {
           <button
             type="submit"
             disabled={busy}
-            className="min-h-14 rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md transition active:scale-[0.98] disabled:opacity-60"
+            className="h-[52px] w-full rounded-xl bg-primary text-center text-lg font-semibold text-primary-foreground shadow-md transition active:scale-[0.98] disabled:opacity-60"
           >
             {busy ? t("auth.loggingIn") : t("auth.loginButton")}
           </button>

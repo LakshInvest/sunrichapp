@@ -1,18 +1,25 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { ErrorComponentProps } from "@tanstack/react-router";
-import { ChevronRight } from "lucide-react";
+import {
+  ChevronDown,
+  MapPin,
+  Minus,
+  Plus,
+  Search,
+  ShoppingCart,
+} from "lucide-react";
 import en from "@/locales/en.json";
-import { getBrands, type Brand } from "@/lib/brands";
-import { Logo } from "@/components/Logo";
+import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { useLang } from "@/hooks/use-lang";
-
-const brandsQueryOptions = queryOptions({
-  queryKey: ["brands"],
-  queryFn: () => getBrands(),
-});
+import {
+  localizedPackSize,
+  localizedName,
+  sampleProducts,
+  type Product,
+  type ProductCategory,
+} from "@/data/sampleProducts";
 
 export const Route = createFileRoute("/_authenticated/home")({
   head: () => ({
@@ -25,94 +32,278 @@ export const Route = createFileRoute("/_authenticated/home")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(brandsQueryOptions),
-  errorComponent: HomeError,
   component: Home,
 });
 
-function brandName(brand: Brand, lang: string): string {
-  if (lang === "hi") return brand.nameHi || brand.name;
-  if (lang === "mr") return brand.nameMr || brand.name;
-  return brand.name;
-}
+type CategoryFilter = "all" | ProductCategory;
 
-function safeColor(hex: string): string {
-  return /^#[0-9a-fA-F]{6}$/.test(hex) ? hex : "#2EA3C7";
-}
+const CATEGORIES: { value: CategoryFilter; key: string }[] = [
+  { value: "all", key: "home.categoryAll" },
+  { value: "jars", key: "home.categoryJars" },
+  { value: "bottles", key: "home.categoryBottles" },
+  { value: "bulk", key: "home.categoryBulk" },
+  { value: "beverages", key: "home.categoryBeverages" },
+];
 
-function BrandCard({ brand }: { brand: Brand }) {
+function ProductCard({
+  product,
+  qty,
+  lang,
+  onAdd,
+  onInc,
+  onDec,
+}: {
+  product: Product;
+  qty: number;
+  lang: string;
+  onAdd: () => void;
+  onInc: () => void;
+  onDec: () => void;
+}) {
   const { t } = useTranslation();
-  const { lang } = useLang();
-  const name = brandName(brand, lang);
   return (
-    <button
-      type="button"
-      className="w-full overflow-hidden rounded-xl border border-border bg-card text-left shadow-sm transition active:scale-[0.99]"
-      aria-label={t("home.title") + ": " + name}
-    >
-      <div
-        className="h-2 w-full"
-        style={{ backgroundColor: safeColor(brand.colorHex) }}
-      />
-      <div className="flex min-h-20 items-center justify-between px-5 py-4">
-        <span
-          className={`text-2xl font-semibold text-primary ${lang === "en" ? "" : "font-deva"}`}
-        >
-          {name}
-        </span>
-        <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
+    <div className="flex animate-in flex-col rounded-2xl border border-border bg-card p-2.5 shadow-sm fade-in slide-in-from-bottom-2 duration-300">
+      <div className="overflow-hidden rounded-xl bg-secondary/10">
+        <img
+          src={product.image}
+          alt={localizedName(product, lang)}
+          loading="lazy"
+          width={1024}
+          height={1024}
+          className="aspect-square w-full object-cover"
+        />
       </div>
-    </button>
+      <p className="mt-2 line-clamp-2 min-h-10 text-sm font-semibold leading-snug text-foreground">
+        {localizedName(product, lang)}
+      </p>
+      <p className="mt-0.5 text-xs text-muted-foreground">
+        {localizedPackSize(product, lang)}
+      </p>
+      <div className="mt-2.5 flex items-center justify-between">
+        <span className="text-base font-bold text-primary">₹{product.price}</span>
+        {qty === 0 ? (
+          <button
+            type="button"
+            onClick={onAdd}
+            className="min-h-9 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition active:scale-95"
+          >
+            {t("home.addToCart")}
+          </button>
+        ) : (
+          <div className="flex items-center rounded-full bg-primary text-primary-foreground">
+            <button
+              type="button"
+              onClick={onDec}
+              aria-label={t("home.decreaseQty")}
+              className="flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90"
+            >
+              <Minus className="h-4 w-4" />
+            </button>
+            <span className="min-w-4 text-center text-sm font-bold">{qty}</span>
+            <button
+              type="button"
+              onClick={onInc}
+              aria-label={t("home.increaseQty")}
+              className="flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
 function Home() {
   const { t } = useTranslation();
   const { lang } = useLang();
-  const { data: brands } = useSuspenseQuery(brandsQueryOptions);
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState<CategoryFilter>("all");
+  const [initial, setInitial] = useState("S");
 
-  return (
-    <main
-      className={`mx-auto min-h-screen max-w-md bg-background px-5 pb-28 pt-8 ${lang === "en" ? "" : "font-deva"}`}
-    >
-      <div className="flex items-center justify-between">
-        <Logo size="md" />
-      </div>
-      <div className="mt-8 h-1 w-12 rounded-full bg-accent" />
-      <h1 className="mt-4 text-3xl font-bold text-primary">{t("home.title")}</h1>
-      <div className="mt-6 flex flex-col gap-4">
-        {brands.map((brand) => (
-          <BrandCard key={brand.id} brand={brand} />
-        ))}
-      </div>
-      <BottomNav />
-    </main>
+  useEffect(() => {
+    let active = true;
+    void supabase.auth.getUser().then(({ data }) => {
+      if (active) setInitial((data.user?.email?.[0] ?? "S").toUpperCase());
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const cartCount = useMemo(
+    () => Object.values(quantities).reduce((sum, n) => sum + n, 0),
+    [quantities],
   );
-}
 
-function HomeError({ error, reset }: ErrorComponentProps) {
-  const { t } = useTranslation();
-  const router = useRouter();
-  const { lang } = useLang();
+  const products = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return sampleProducts.filter((product) => {
+      if (category !== "all" && product.category !== category) return false;
+      if (!query) return true;
+      const haystack = [product.name.en, localizedName(product, lang), localizedPackSize(product, lang)]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [category, search, lang]);
+
+  const setQty = (id: string, qty: number) =>
+    setQuantities((prev) => {
+      const next = { ...prev };
+      if (qty <= 0) delete next[id];
+      else next[id] = qty;
+      return next;
+    });
+
+  const deva = lang === "en" ? "" : "font-deva";
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center ${lang === "en" ? "" : "font-deva"}`}
-    >
-      <p className="text-lg font-semibold text-primary">{t("home.loadError")}</p>
-      <p className="text-sm text-muted-foreground">
-        {error instanceof Error ? error.message : String(error)}
-      </p>
-      <button
-        type="button"
-        onClick={async () => {
-          await router.invalidate({ sync: true });
-          reset();
+    <main className={`mx-auto min-h-screen max-w-md bg-background ${deva}`}>
+      {/* Hero */}
+      <div
+        className="relative px-5 pb-24 pt-6"
+        style={{
+          background:
+            "linear-gradient(175deg, #0B2545 0%, #103A66 55%, #2EA3C7 140%)",
         }}
-        className="min-h-12 rounded-xl bg-primary px-6 font-semibold text-primary-foreground shadow-md active:scale-[0.98]"
       >
-        {t("home.retry")}
-      </button>
-      <BottomNav />
+        <div className="flex items-start justify-between">
+          <button
+            type="button"
+            aria-label={`${t("home.locationLabel")}: ${t("home.locationArea")}`}
+            className="flex min-h-11 items-start gap-1.5 text-left"
+          >
+            <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-white/80" />
+            <span>
+              <span className="flex items-center gap-1 text-sm font-semibold text-white">
+                {t("home.locationLabel")}
+                <ChevronDown className="h-4 w-4" />
+              </span>
+              <span className={`block text-xs text-white/70 ${deva}`}>
+                {t("home.locationArea")}
+              </span>
+            </span>
+          </button>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              aria-label={`${t("home.itemsInCart")}: ${cartCount}`}
+              className="relative flex h-11 w-11 items-center justify-center rounded-full text-white transition active:scale-95"
+            >
+              <ShoppingCart className="h-6 w-6" />
+              {cartCount > 0 && (
+                <span className="absolute right-0.5 top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[11px] font-bold text-accent-foreground">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              aria-label={t("home.profile")}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/15 text-sm font-semibold text-white transition active:scale-95"
+            >
+              {initial}
+            </button>
+          </div>
+        </div>
+
+        <h1 className="mt-9 text-3xl font-bold leading-tight text-white">
+          {t("home.greeting")}
+        </h1>
+        <p className="mt-2.5 flex items-center gap-2 text-sm text-white/85">
+          <span className="h-2 w-2 shrink-0 rounded-full bg-accent" aria-hidden />
+          {t("home.deliveryToday")}
+        </p>
+
+        {/* Soft water wave along the hero's bottom edge */}
+        <svg
+          className="absolute inset-x-0 bottom-0 h-12 w-full text-white/10"
+          viewBox="0 0 390 48"
+          preserveAspectRatio="none"
+          aria-hidden
+        >
+          <path
+            d="M0 26 C 70 46 140 8 225 16 C 300 23 345 38 390 20 L390 48 L0 48 Z"
+            fill="currentColor"
+          />
+        </svg>
+        <svg
+          className="absolute inset-x-0 bottom-0 h-6 w-full"
+          viewBox="0 0 390 24"
+          preserveAspectRatio="none"
+          aria-hidden
+        >
+          <path
+            d="M0 12 C 80 24 180 2 280 10 C 330 14 360 20 390 12 L390 24 L0 24 Z"
+            className="fill-background"
+          />
+        </svg>
+      </div>
+
+      {/* Content sheet sliding over the hero */}
+      <div className="relative z-10 -mt-4 rounded-t-3xl bg-background pb-28">
+        <div className="relative z-10 -mt-7 px-5">
+          <div className="flex min-h-12 items-center gap-3 rounded-2xl border border-border bg-card px-4 shadow-lg shadow-primary/5">
+            <Search className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t("home.searchPlaceholder")}
+              aria-label={t("home.searchPlaceholder")}
+              className={`h-12 w-full bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground ${deva}`}
+            />
+          </div>
+        </div>
+
+        {/* Category chips */}
+        <div className="no-scrollbar mt-5 flex gap-2 overflow-x-auto px-5">
+          {CATEGORIES.map(({ value, key }) => {
+            const selected = category === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setCategory(value)}
+                aria-pressed={selected}
+                className={`min-h-11 shrink-0 rounded-full border px-4 text-sm font-medium transition active:scale-95 ${
+                  selected
+                    ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                    : "border-border bg-card text-foreground"
+                }`}
+              >
+                {t(key)}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Products */}
+        <div className="mt-5 grid grid-cols-2 gap-3 px-5">
+          {products.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              qty={quantities[product.id] ?? 0}
+              lang={lang}
+              onAdd={() => setQty(product.id, 1)}
+              onInc={() => setQty(product.id, (quantities[product.id] ?? 0) + 1)}
+              onDec={() => setQty(product.id, (quantities[product.id] ?? 0) - 1)}
+            />
+          ))}
+        </div>
+        {products.length === 0 && (
+          <p className={`mt-10 text-center text-sm text-muted-foreground ${deva}`}>
+            {t("home.searchNoResults")}
+          </p>
+        )}
+
+        <BottomNav />
+      </div>
     </main>
   );
 }

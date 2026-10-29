@@ -199,16 +199,22 @@ export const getDocumentRequirements = createServerFn({ method: "GET" })
 
     const { data: docs } = await context.supabase
       .from("customer_documents")
-      .select("doc_code, file_path, file_name, doc_number, status")
+      .select("file_path, file_name, doc_number, status, document_types(code)")
       .eq("customer_id", cid);
 
-    const uploaded: UploadedDocDto[] = (docs ?? []).map((d) => ({
-      docTypeCode: d.doc_code,
-      filePath: d.file_path,
-      fileName: d.file_name ?? null,
-      docNumber: d.doc_number ?? null,
-      status: d.status,
-    }));
+    const uploaded: UploadedDocDto[] = (docs ?? [])
+      .map((d) => {
+        const dt = Array.isArray(d.document_types) ? d.document_types[0] : d.document_types;
+        if (!dt) return null;
+        return {
+          docTypeCode: dt.code,
+          filePath: d.file_path,
+          fileName: d.file_name ?? null,
+          docNumber: d.doc_number ?? null,
+          status: d.status,
+        } satisfies UploadedDocDto;
+      })
+      .filter((d): d is UploadedDocDto => d !== null);
 
     return { customerId: cid, requirements, uploaded };
   });

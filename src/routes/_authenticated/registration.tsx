@@ -588,14 +588,15 @@ function DocsStep({
         setError(t("registration.errUpload"));
         return;
       }
-      const { error: rpcErr } = await supabase.rpc("add_customer_document", {
+      const docArgs = {
         p_document_type_code: code,
         p_file_path: path,
         p_file_name: file.name,
         p_mime_type: prepared.mime,
         p_file_size: prepared.blob.size,
-        p_doc_number: docNumbers[code] || undefined,
-      });
+        ...(docNumbers[code] ? { p_doc_number: docNumbers[code] } : {}),
+      };
+      const { error: rpcErr } = await supabase.rpc("add_customer_document", docArgs);
       if (rpcErr) {
         setError(rpcErr.message);
         return;

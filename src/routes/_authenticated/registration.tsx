@@ -47,7 +47,7 @@ export const Route = createFileRoute("/_authenticated/registration")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: () => getMyRegistration(),
+  loader: async () => await getMyRegistration(),
   component: Wizard,
 });
 

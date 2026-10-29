@@ -310,8 +310,8 @@ function ProductDetail() {
         )}
       </div>
 
-      {/* Sticky add-to-cart */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-5 py-3 backdrop-blur-md">
+      {/* Sticky add-to-cart, sitting above the bottom navigation */}
+      <div className="fixed inset-x-0 bottom-16 z-40 border-t border-border bg-card/95 px-5 py-3 backdrop-blur-md">
         <div className="mx-auto flex max-w-md items-center gap-3">
           <div className="min-w-0">
             <p className="text-xs text-muted-foreground">{t("product.total")}</p>

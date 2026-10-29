@@ -316,15 +316,3 @@ export const getMyDevice = createServerFn({ method: "POST" })
       .maybeSingle();
     return { trusted: !!dev };
   });
-
-/** customer_id of the signed-in user's profile (null until registration completes). */
-export const getMyCustomerId = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data } = await context.supabase
-      .from("user_profiles")
-      .select("customer_id")
-      .eq("id", context.userId)
-      .maybeSingle();
-    return { customerId: data?.customer_id ?? null };
-  });

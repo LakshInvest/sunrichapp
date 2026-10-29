@@ -12,10 +12,10 @@ import {
   verifyOtp,
   pinLogin,
   getMyDevice,
-  getMyCustomerId,
   type OtpResult,
   type PinLoginResult,
 } from "@/lib/otp.functions";
+import { getMyRegistration } from "@/lib/registration.functions";
 import {
   getDeviceId,
   getDeviceLabel,
@@ -42,8 +42,11 @@ export const Route = createFileRoute("/auth")({
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (data.user) {
-      const { customerId } = await getMyCustomerId();
-      throw redirect({ to: customerId ? "/home" : "/registration" });
+      const reg = await getMyRegistration();
+      if (!reg.customerId || reg.status === "draft" || reg.status === "rejected") {
+        throw redirect({ to: "/registration" });
+      }
+      throw redirect({ to: reg.status === "blocked" ? "/hold" : "/home" });
     }
   },
   component: Login,
@@ -198,8 +201,12 @@ function Login() {
 
   /** Home when registration is done, registration placeholder when it isn't. */
   const routeAfterLogin = async () => {
-    const { customerId } = await myCustomer();
-    await navigate({ to: customerId ? "/home" : "/registration" });
+    const reg = await myCustomer();
+    if (!reg.customerId || reg.status === "draft" || reg.status === "rejected") {
+      await navigate({ to: "/registration" });
+      return;
+    }
+    await navigate({ to: reg.status === "blocked" ? "/hold" : "/home" });
   };
 
   const requestOtp = async () => {

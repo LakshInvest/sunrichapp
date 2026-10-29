@@ -9,6 +9,7 @@ const TABS: Tab[] = [
   { to: "/home", key: "nav.home", icon: Home },
   { to: "/order", key: "nav.order", icon: ShoppingCart },
   { to: "/track", key: "nav.track", icon: MapPin },
+  { to: "/inbox", key: "nav.inbox", icon: Inbox },
   { to: "/account", key: "nav.account", icon: UserRound },
 ];
 
@@ -17,9 +18,7 @@ export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { isDistributor, newCount } = useDistributorNav();
 
-  const tabs: Tab[] = isDistributor
-    ? [...TABS.slice(0, 3), { to: "/inbox", key: "nav.inbox", icon: Inbox }, TABS[3]]
-    : TABS;
+  const tabs: Tab[] = isDistributor ? TABS : TABS.filter((tab) => tab.to !== "/inbox");
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 backdrop-blur-md">

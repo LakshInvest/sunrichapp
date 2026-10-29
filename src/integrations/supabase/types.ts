@@ -14,6 +14,162 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_banners: {
+        Row: {
+          company_id: string
+          created_at: string
+          customer_type_ids: string[] | null
+          end_at: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          link_type: string
+          link_value: string | null
+          sort_order: number
+          start_at: string | null
+          subtitle: string | null
+          subtitle_hi: string | null
+          subtitle_mr: string | null
+          tag: string | null
+          tag_hi: string | null
+          tag_mr: string | null
+          title: string
+          title_hi: string | null
+          title_mr: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          customer_type_ids?: string[] | null
+          end_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          link_type?: string
+          link_value?: string | null
+          sort_order?: number
+          start_at?: string | null
+          subtitle?: string | null
+          subtitle_hi?: string | null
+          subtitle_mr?: string | null
+          tag?: string | null
+          tag_hi?: string | null
+          tag_mr?: string | null
+          title: string
+          title_hi?: string | null
+          title_mr?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          customer_type_ids?: string[] | null
+          end_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          link_type?: string
+          link_value?: string | null
+          sort_order?: number
+          start_at?: string | null
+          subtitle?: string | null
+          subtitle_hi?: string | null
+          subtitle_mr?: string | null
+          tag?: string | null
+          tag_hi?: string | null
+          tag_mr?: string | null
+          title?: string
+          title_hi?: string | null
+          title_mr?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_banners_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      app_hero: {
+        Row: {
+          background_image_url: string | null
+          company_id: string
+          delivery_line: string | null
+          delivery_line_hi: string | null
+          delivery_line_mr: string | null
+          greeting: string | null
+          greeting_hi: string | null
+          greeting_mr: string | null
+          product_image_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          background_image_url?: string | null
+          company_id: string
+          delivery_line?: string | null
+          delivery_line_hi?: string | null
+          delivery_line_mr?: string | null
+          greeting?: string | null
+          greeting_hi?: string | null
+          greeting_mr?: string | null
+          product_image_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          background_image_url?: string | null
+          company_id?: string
+          delivery_line?: string | null
+          delivery_line_hi?: string | null
+          delivery_line_mr?: string | null
+          greeting?: string | null
+          greeting_hi?: string | null
+          greeting_mr?: string | null
+          product_image_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_hero_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      app_home_sections: {
+        Row: {
+          company_id: string
+          is_active: boolean
+          key: string
+          sort_order: number
+        }
+        Insert: {
+          company_id: string
+          is_active?: boolean
+          key: string
+          sort_order?: number
+        }
+        Update: {
+          company_id?: string
+          is_active?: boolean
+          key?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_home_sections_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -241,6 +397,39 @@ export type Database = {
           },
         ]
       }
+      customer_favourites: {
+        Row: {
+          created_at: string
+          customer_id: string
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_favourites_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_favourites_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_queries: {
         Row: {
           closed_at: string | null
@@ -384,6 +573,7 @@ export type Database = {
           company_id: string
           created_at: string
           created_by: string | null
+          default_price_plan_id: string | null
           description: string | null
           description_hi: string | null
           description_mr: string | null
@@ -403,6 +593,7 @@ export type Database = {
           company_id: string
           created_at?: string
           created_by?: string | null
+          default_price_plan_id?: string | null
           description?: string | null
           description_hi?: string | null
           description_mr?: string | null
@@ -422,6 +613,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           created_by?: string | null
+          default_price_plan_id?: string | null
           description?: string | null
           description_hi?: string | null
           description_mr?: string | null
@@ -442,6 +634,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_types_default_price_plan_id_fkey"
+            columns: ["default_price_plan_id"]
+            isOneToOne: false
+            referencedRelation: "price_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -469,6 +668,7 @@ export type Database = {
           longitude: number | null
           mobile: string
           pincode: string | null
+          price_plan_id: string | null
           registered_via: string
           rejection_reason: string | null
           state: string | null
@@ -498,6 +698,7 @@ export type Database = {
           longitude?: number | null
           mobile: string
           pincode?: string | null
+          price_plan_id?: string | null
           registered_via?: string
           rejection_reason?: string | null
           state?: string | null
@@ -527,6 +728,7 @@ export type Database = {
           longitude?: number | null
           mobile?: string
           pincode?: string | null
+          price_plan_id?: string | null
           registered_via?: string
           rejection_reason?: string | null
           state?: string | null
@@ -547,6 +749,13 @@ export type Database = {
             columns: ["customer_type_id"]
             isOneToOne: false
             referencedRelation: "customer_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customers_price_plan_id_fkey"
+            columns: ["price_plan_id"]
+            isOneToOne: false
+            referencedRelation: "price_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -887,6 +1096,347 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      price_plan_items: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          price: number
+          price_plan_id: string
+          product_id: string
+          valid_from: string
+          valid_to: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          price: number
+          price_plan_id: string
+          product_id: string
+          valid_from?: string
+          valid_to?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          price?: number
+          price_plan_id?: string
+          product_id?: string
+          valid_from?: string
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_plan_items_price_plan_id_fkey"
+            columns: ["price_plan_id"]
+            isOneToOne: false
+            referencedRelation: "price_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "price_plan_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      price_plans: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          name_hi: string | null
+          name_mr: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          name_hi?: string | null
+          name_mr?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_hi?: string | null
+          name_mr?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_categories: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          icon_key: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          name_hi: string | null
+          name_mr: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          icon_key?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          name_hi?: string | null
+          name_mr?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          icon_key?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          name_hi?: string | null
+          name_mr?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_images: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          sort_order: number
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          sort_order?: number
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          sort_order?: number
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          brand_id: string
+          bulk_threshold_qty: number | null
+          category_id: string | null
+          code: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          deposit_amount: number
+          description: string | null
+          description_hi: string | null
+          description_mr: string | null
+          factory_only: boolean
+          firm_id: string
+          gst_rate: number
+          hsn_code: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          is_popular: boolean
+          is_returnable: boolean
+          max_order_qty: number | null
+          min_order_qty: number
+          mrp: number | null
+          name: string
+          name_hi: string | null
+          name_mr: string | null
+          pack_label: string | null
+          pack_label_hi: string | null
+          pack_label_mr: string | null
+          sell_unit: Database["public"]["Enums"]["sell_unit"]
+          shelf_life_days: number | null
+          show_in_app: boolean
+          sort_order: number
+          track_batch: boolean
+          track_expiry: boolean
+          units_per_sell_unit: number
+          updated_at: string
+          volume_ml: number | null
+          weight_kg: number | null
+        }
+        Insert: {
+          brand_id: string
+          bulk_threshold_qty?: number | null
+          category_id?: string | null
+          code: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          deposit_amount?: number
+          description?: string | null
+          description_hi?: string | null
+          description_mr?: string | null
+          factory_only?: boolean
+          firm_id: string
+          gst_rate?: number
+          hsn_code?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_popular?: boolean
+          is_returnable?: boolean
+          max_order_qty?: number | null
+          min_order_qty?: number
+          mrp?: number | null
+          name: string
+          name_hi?: string | null
+          name_mr?: string | null
+          pack_label?: string | null
+          pack_label_hi?: string | null
+          pack_label_mr?: string | null
+          sell_unit?: Database["public"]["Enums"]["sell_unit"]
+          shelf_life_days?: number | null
+          show_in_app?: boolean
+          sort_order?: number
+          track_batch?: boolean
+          track_expiry?: boolean
+          units_per_sell_unit?: number
+          updated_at?: string
+          volume_ml?: number | null
+          weight_kg?: number | null
+        }
+        Update: {
+          brand_id?: string
+          bulk_threshold_qty?: number | null
+          category_id?: string | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          deposit_amount?: number
+          description?: string | null
+          description_hi?: string | null
+          description_mr?: string | null
+          factory_only?: boolean
+          firm_id?: string
+          gst_rate?: number
+          hsn_code?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          is_popular?: boolean
+          is_returnable?: boolean
+          max_order_qty?: number | null
+          min_order_qty?: number
+          mrp?: number | null
+          name?: string
+          name_hi?: string | null
+          name_mr?: string | null
+          pack_label?: string | null
+          pack_label_hi?: string | null
+          pack_label_mr?: string | null
+          sell_unit?: Database["public"]["Enums"]["sell_unit"]
+          shelf_life_days?: number | null
+          show_in_app?: boolean
+          sort_order?: number
+          track_batch?: boolean
+          track_expiry?: boolean
+          units_per_sell_unit?: number
+          updated_at?: string
+          volume_ml?: number | null
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "product_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       units: {
         Row: {
@@ -1237,12 +1787,58 @@ export type Database = {
       }
       close_query: { Args: { p_query_id: string }; Returns: undefined }
       current_session_id: { Args: never; Returns: string }
+      customer_raise_query: {
+        Args: {
+          p_attachment_name?: string
+          p_attachment_path?: string
+          p_context?: string
+          p_message: string
+          p_subject: string
+        }
+        Returns: string
+      }
       force_logout: {
         Args: { p_reason?: string; p_user_id: string }
         Returns: number
       }
       is_staff: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      my_catalogue: {
+        Args: never
+        Returns: {
+          brand_name: string
+          bulk_threshold_qty: number
+          can_order: boolean
+          category_code: string
+          category_id: string
+          code: string
+          deposit_amount: number
+          description: string
+          description_hi: string
+          description_mr: string
+          gst_rate: number
+          id: string
+          image_url: string
+          images: string[]
+          is_favourite: boolean
+          is_popular: boolean
+          is_returnable: boolean
+          max_order_qty: number
+          min_order_qty: number
+          mrp: number
+          name: string
+          name_hi: string
+          name_mr: string
+          pack_label: string
+          pack_label_hi: string
+          pack_label_mr: string
+          price: number
+          sell_unit: string
+          sort_order: number
+          units_per_sell_unit: number
+          volume_ml: number
+        }[]
+      }
       my_company_id: { Args: never; Returns: string }
       my_customer_can_edit: { Args: never; Returns: boolean }
       my_customer_id: { Args: never; Returns: string }
@@ -1255,6 +1851,25 @@ export type Database = {
           p_firm_id: string
         }
         Returns: string
+      }
+      plan_price: {
+        Args: { p_on?: string; p_plan_id: string; p_product_id: string }
+        Returns: number
+      }
+      price_plan_for_customer: {
+        Args: { p_customer_id: string }
+        Returns: string
+      }
+      price_preview: {
+        Args: { p_customer_id: string; p_on?: string }
+        Returns: {
+          code: string
+          mrp: number
+          name: string
+          plan_name: string
+          price: number
+          product_id: string
+        }[]
       }
       record_login: {
         Args: { p_login_method?: string; p_user_agent?: string }
@@ -1303,6 +1918,7 @@ export type Database = {
         Returns: string
       }
       submit_registration: { Args: never; Returns: undefined }
+      toggle_favourite: { Args: { p_product_id: string }; Returns: boolean }
       update_my_profile: {
         Args: { p_full_name: string; p_language?: string; p_photo_url?: string }
         Returns: undefined
@@ -1327,6 +1943,7 @@ export type Database = {
       otp_channel: "whatsapp" | "email"
       otp_purpose: "app_login" | "staff_2fa"
       query_status: "open" | "answered" | "closed"
+      sell_unit: "piece" | "pack" | "case" | "crate" | "jar" | "can"
       unit_type: "plant" | "depot" | "copacker" | "jar_unit" | "office"
       user_type: "staff" | "customer"
     }
@@ -1476,6 +2093,7 @@ export const Constants = {
       otp_channel: ["whatsapp", "email"],
       otp_purpose: ["app_login", "staff_2fa"],
       query_status: ["open", "answered", "closed"],
+      sell_unit: ["piece", "pack", "case", "crate", "jar", "can"],
       unit_type: ["plant", "depot", "copacker", "jar_unit", "office"],
       user_type: ["staff", "customer"],
     },

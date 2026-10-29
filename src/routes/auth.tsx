@@ -5,8 +5,10 @@ import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
+import { OfflineBanner } from "@/components/OfflineBanner";
 import en from "@/locales/en.json";
 import { useLang } from "@/hooks/use-lang";
+import { useOffline } from "@/hooks/use-offline";
 import {
   sendOtp,
   verifyOtp,
@@ -153,6 +155,7 @@ function Login() {
   const pinCheck = useServerFn(pinLogin);
   const deviceStatus = useServerFn(getMyDevice);
   const myCustomer = useServerFn(getMyRegistration);
+  const offline = useOffline();
 
   const [step, setStep] = useState<Step>("mobile");
   const [deviceId, setDeviceId] = useState("");
@@ -218,6 +221,10 @@ function Login() {
   const requestOtp = async () => {
     setError(null);
     setNotice(null);
+    if (offline) {
+      setError(t("offline.hint"));
+      return;
+    }
     setBusy(true);
     try {
       const r = await send({ data: { mobile } });
@@ -435,6 +442,7 @@ function Login() {
 
   return (
     <main className={`mx-auto flex min-h-screen max-w-md flex-col bg-background px-6 py-10 ${font}`}>
+      <OfflineBanner />
       <div className="flex flex-1 flex-col justify-center gap-10 animate-in fade-in">
         <div className="flex justify-center">
           <Logo />
@@ -532,7 +540,8 @@ function Login() {
             {error && <p role="alert" className="text-sm font-medium text-destructive">{error}</p>}
             <button
               type="submit"
-              disabled={!valid || busy}
+              disabled={!valid || busy || offline}
+              title={offline ? t("offline.hint") : undefined}
               className="flex h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md transition active:scale-[0.98] disabled:opacity-50"
             >
               {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <WhatsAppIcon />}
@@ -579,7 +588,7 @@ function Login() {
             {error && <p role="alert" className="text-center text-sm font-medium text-destructive">{error}</p>}
             <button
               type="button"
-              disabled={countdown > 0 || busy}
+              disabled={countdown > 0 || busy || offline}
               onClick={() => void requestOtp()}
               className="min-h-11 text-base font-semibold text-secondary disabled:text-muted-foreground"
             >

@@ -411,7 +411,7 @@ function Login() {
               onComplete={(p) => void submitPinLogin(p)}
               disabled={busy}
               shake={shaking}
-              label={t("auth.pin.digit", { n: "" })}
+              label={t("auth.pin.group")}
             />
             {busy && (
               <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
@@ -570,7 +570,7 @@ function Login() {
                 onComplete={onPinEntered}
                 disabled={busy}
                 shake={shaking}
-                label={t("auth.pin.digit", { n: "" })}
+                label={t("auth.pin.group")}
               />
             ) : (
               <PinBoxes
@@ -580,7 +580,7 @@ function Login() {
                 disabled={busy}
                 shake={shaking}
                 autoFocusFirst
-                label={t("auth.pin.digit", { n: "" })}
+                label={t("auth.pin.group")}
               />
             )}
             {busy && (
@@ -599,7 +599,7 @@ function Login() {
                 }}
                 className="min-h-11 text-sm font-medium text-muted-foreground underline underline-offset-4"
               >
-                {t("auth.changeNumber")}
+                {t("auth.pin.reenter")}
               </button>
             )}
           </div>

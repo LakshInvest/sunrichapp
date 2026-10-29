@@ -574,6 +574,7 @@ function DocsStep({
 }) {
   const { t } = useTranslation();
   const { lang } = useLang();
+  const offline = useOffline();
   const fetchDocs = useServerFn(getDocumentRequirements);
   const [requirements, setRequirements] = useState<RequirementDto[]>([]);
   const [uploaded, setUploaded] = useState<UploadedDocDto[]>([]);

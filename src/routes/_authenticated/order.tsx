@@ -137,7 +137,19 @@ function Order() {
       <OfflineBanner />
 
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-5 pb-3 pt-7 backdrop-blur-md">
-        <h1 className="text-2xl font-bold text-primary">{t("order.title")}</h1>
+        <div className="flex items-center gap-1 rounded-full border border-border bg-card p-1" role="group" aria-label={t("order.tabSwitch")}>
+          <button type="button" aria-current="page" className="min-h-10 flex-1 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm">
+            {t("track.tabShop")}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/track" })}
+            className="min-h-10 flex-1 rounded-full px-4 text-sm font-semibold text-muted-foreground transition"
+          >
+            {t("track.tabMyOrders")}
+          </button>
+        </div>
+        <h1 className="mt-3 text-2xl font-bold text-primary">{t("order.title")}</h1>
         <div className="mt-3">
           <SearchBox
             value={search}

@@ -156,6 +156,35 @@
   animation: bubble-rise 5s ease-in-out infinite;
 }
 
+/* Order success: soft ring + check draw-in */
+@keyframes check-ring {
+  0% {
+    stroke-dashoffset: 264;
+  }
+  60%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes check-mark {
+  0%,
+  55% {
+    stroke-dashoffset: 60;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@utility animate-check-ring {
+  animation: check-ring 0.9s ease-out forwards;
+}
+
+@utility animate-check-mark {
+  animation: check-mark 0.6s ease-out 0.45s forwards;
+}
+
 @keyframes pin-shake {
   10%, 90% {
     transform: translateX(-2px);

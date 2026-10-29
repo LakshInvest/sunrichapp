@@ -74,7 +74,8 @@
     "home": "होम",
     "order": "ऑर्डर",
     "track": "ट्रैक",
-    "account": "अकाउंट"
+    "account": "अकाउंट",
+    "inbox": "इनबॉक्स"
   },
   "home": {
     "greeting": "शुद्ध पानी, आपके द्वार पर",
@@ -101,7 +102,8 @@
     "metaTitle": "सनरिच — होम",
     "metaDescription": "सनरिच पैकेज्ड पेयजल ऑर्डर करें — जार, बोतलें और बहुत कुछ, आपके द्वार तक।",
     "needsAction": "Sunrich को आपसे कुछ चाहिए",
-    "open": "खोलें"
+    "open": "खोलें",
+    "updatesBell": "ऑर्डर अपडेट"
   },
   "catalog": {
     "priceOnRequest": "कीमत पूछें",
@@ -163,19 +165,31 @@
     "depositLine": "+ {{amount}} जार डिपॉज़िट",
     "priceUpdated": "कीमत अपडेट हुई",
     "bulkNote": "थोक ऑर्डर पर हमारी टीम दर पुष्टि करेगी।",
-    "removedFromCatalogue": "कुछ आइटम अब उपलब्ध नहीं हैं और कार्ट से हटा दिए गए।"
+    "removedFromCatalogue": "कुछ आइटम अब उपलब्ध नहीं हैं और कार्ट से हटा दिए गए।",
+    "proceed": "आगे बढ़ें"
   },
   "order": {
     "title": "ऑर्डर",
     "comingSoon": "ऑर्डर करने की सुविधा जल्द आ रही है।",
     "metaTitle": "सनरिच — ऑर्डर",
-    "metaDescription": "सनरिच पानी का ऑर्डर दर्ज करें।"
+    "metaDescription": "सनरिच पानी का ऑर्डर दर्ज करें।",
+    "tabSwitch": "दुकान या मेरे ऑर्डर"
   },
   "track": {
-    "title": "ट्रैक",
+    "title": "मेरे ऑर्डर",
     "comingSoon": "ऑर्डर ट्रैक करने की सुविधा जल्द आ रही है।",
-    "metaTitle": "सनरिच — ट्रैक",
-    "metaDescription": "अपने सनरिच पानी के ऑर्डर को ट्रैक करें।"
+    "metaTitle": "सनरिच — मेरे ऑर्डर",
+    "metaDescription": "अपने सनरिच ऑर्डर ट्रैक करें।",
+    "tabShop": "दुकान",
+    "tabMyOrders": "मेरे ऑर्डर",
+    "filters": "ऑर्डर छाँटें",
+    "filterActive": "चालू",
+    "filterDelivered": "पहुँच गए",
+    "filterCancelled": "रद्द",
+    "moreItems": "+{{count}} और",
+    "emptyTitle": "अभी कोई ऑर्डर नहीं",
+    "emptyBody": "आपके ऑर्डर यहाँ दिखेंगे।",
+    "notFound": "यह ऑर्डर आपके खाते में नहीं है।"
   },
   "account": {
     "title": "अकाउंट",
@@ -309,9 +323,17 @@
   "status": {
     "active": "सक्रिय",
     "pending_approval": "समीक्षा में",
-    "rejected": "बदल माँगे गए",
+    "rejected": "अस्वीकृत",
     "draft": "अधूरा",
-    "blocked": "रोका गया"
+    "blocked": "रोका गया",
+    "placed": "मिल गया",
+    "credit_hold": "समीक्षा में",
+    "approved": "पक्का हुआ",
+    "processing": "पैक हुआ",
+    "dispatched": "रास्ते में",
+    "delivered": "पहुँच गया",
+    "closed": "बंद",
+    "cancelled": "रद्द"
   },
   "banner": {
     "underReview": "आपका खाता समीक्षा में है। Sunrich की स्वीकृति के बाद आप ऑर्डर कर सकेंगे।"
@@ -359,5 +381,129 @@
       "sendQuestion": "सवाल भेजें",
       "sent": "सवाल भेजा गया — Sunrich टीम जल्द जवाब देगी।"
     }
+  },
+  "checkout": {
+    "title": "चेकआउट",
+    "metaTitle": "सनरिच — चेकआउट",
+    "metaDescription": "अपनी सनरिच पानी डिलीवरी पक्की करें।",
+    "addressTitle": "डिलीवरी का पता",
+    "noPin": "कोई मैप पिन सेव नहीं है — नीचे जोड़ें।",
+    "addressNote": "यह पता सिर्फ इस ऑर्डर के लिए उपयोग होगा।",
+    "line1": "पता लाइन 1",
+    "line2": "पता लाइन 2 (वैकल्पिक)",
+    "landmark": "लैंडमार्क (वैकल्पिक)",
+    "city": "शहर",
+    "pincode": "पिनकोड",
+    "whenTitle": "डिलीवरी कब चाहिए?",
+    "today": "आज",
+    "tomorrow": "कल",
+    "pickDate": "तारीख चुनें",
+    "slotLabel": "डिलीवरी समय",
+    "slot": {
+      "morning": "सुबह",
+      "afternoon": "दोपहर",
+      "evening": "शाम"
+    },
+    "newJarsTitle": "नए जार चाहिए?",
+    "newJarsHint": "खाली जार लौटाएँ और उतने ही लें — जमा राशि सिर्फ नए जारों पर लगती है।",
+    "jarDepositEach": "+{{amount}} प्रति जार (वापस मिलने वाली)",
+    "fewerNewJars": "कम नए जार",
+    "moreNewJars": "ज़्यादा नए जार",
+    "billTitle": "आपका बिल",
+    "quoting": "कीमत ले रहे हैं…",
+    "gstIncluded": "कीमतों में GST शामिल है।",
+    "paymentTitle": "भुगतान",
+    "cashOnDelivery": "डिलीवरी पर नकद",
+    "onCredit": "उधार — {{amount}} उपलब्ध",
+    "creditReview": "आपका ऑर्डर सनरिच देखेगा।",
+    "notesLabel": "नोट (वैकल्पिक)",
+    "notesPlaceholder": "कुछ बताना है?",
+    "placeOrder": "ऑर्डर करें",
+    "placing": "ऑर्डर हो रहा है…",
+    "errPlace": "ऑर्डर नहीं हो सका।",
+    "deliversOn": "डिलीवरी {{date}}",
+    "priceOnRequestNote": "बिना कीमत वाले {{count}} आइटम शामिल नहीं हैं — सनरिच टीम से पूछें।",
+    "termsNote": "ऑर्डर करके आप सनरिच की शर्तें मानते हैं।"
+  },
+  "success": {
+    "title": "ऑर्डर हो गया",
+    "metaTitle": "सनरिच — ऑर्डर हो गया",
+    "metaDescription": "आपका सनरिच ऑर्डर पक्का हुआ।",
+    "subtitle": "धन्यवाद! आपका पानी जल्दी पहुँचेगा।",
+    "expected": "संभावित डिलीवरी: {{date}} · {{slot}}",
+    "statusConfirmed": "पक्का हुआ",
+    "statusReceived": "मिल गया — पुष्टि का इंतज़ार",
+    "statusUnderReview": "समीक्षा में",
+    "deliveredBy": "{{who}} डिलीवर करेंगे",
+    "bySunrich": "सनरिच",
+    "byDistributor": "आपके डिस्ट्रीब्यूटर",
+    "trackOrder": "ऑर्डर ट्रैक करें",
+    "continueShopping": "और खरीदें"
+  },
+  "trackDetail": {
+    "metaTitle": "सनरिच — ऑर्डर विवरण",
+    "metaDescription": "ऑर्डर विवरण और डिलीवरी ट्रैकिंग।",
+    "timelineTitle": "ऑर्डर की स्थिति",
+    "step": {
+      "placed": "ऑर्डर हुआ",
+      "approved": "पक्का हुआ",
+      "processing": "पैक हुआ",
+      "dispatched": "रास्ते में",
+      "delivered": "पहुँच गया"
+    },
+    "paidOnCredit": "भुगतान: उधार",
+    "paidOnDelivery": "भुगतान: डिलीवरी पर नकद",
+    "cancelOrder": "ऑर्डर रद्द करें",
+    "cancelTitle": "यह ऑर्डर रद्द करें?",
+    "reasonLabel": "कारण",
+    "reasonPlaceholder": "रद्द करने का कारण बताएँ",
+    "cancelConfirm": "रद्द करें",
+    "cancelling": "रद्द हो रहा है…",
+    "cancelled": "ऑर्डर रद्द हुआ",
+    "reorder": "दोबारा ऑर्डर करें",
+    "reordering": "कार्ट में जोड़ रहे हैं…",
+    "needHelp": "मदद चाहिए?"
+  },
+  "payments": {
+    "title": "भुगतान व खाता",
+    "metaTitle": "सनरिच — भुगतान",
+    "metaDescription": "उधार, बकाया और बाकी बिल।",
+    "creditTitle": "आपकी उधार सीमा",
+    "used": "इस्तेमाल",
+    "available": "उपलब्ध",
+    "overdue": "₹{{amount}} ओवरड्यू — सबसे पुराना बिल {{days}} दिन लेट",
+    "unpaidTitle": "बाकी उधार बिल",
+    "noUnpaid": "अभी कुछ बाकी नहीं।",
+    "overdueChip": "ओवरड्यू",
+    "payOnDelivery": "आप डिलीवरी पर भुगतान करते हैं",
+    "payOnDeliveryBody": "उधार खाता नहीं है — ऑर्डर आने पर नकद दें।",
+    "deliveredTitle": "पहुँचे हुए ऑर्डर",
+    "comingSoon": "इनवॉइस और स्टेटमेंट जल्द आ रहे हैं।"
+  },
+  "inbox": {
+    "title": "इनबॉक्स",
+    "metaTitle": "सनरिच — इनबॉक्स",
+    "metaDescription": "आपको डिलीवरी के लिए भेजे गए ऑर्डर।",
+    "tabNew": "नए",
+    "tabToDeliver": "डिलीवरी बाकी",
+    "tabDone": "पूरे",
+    "call": "कॉल",
+    "copyNumber": "नंबर कॉपी करें",
+    "copied": "नंबर कॉपी हुआ",
+    "copyFailed": "कॉपी नहीं हुआ",
+    "mapFallback": "नक्शे पर",
+    "accept": "स्वीकार करें",
+    "cantDeliver": "डिलीवरी नहीं कर सकते",
+    "delivered": "पहुँच गया",
+    "notDelivered": "नहीं पहुँचा",
+    "reasonLabel": "कारण",
+    "reasonPlaceholder": "ग्राहक को कारण बताएँ",
+    "reasonConfirm": "भेजें",
+    "sending": "भेज रहे हैं…",
+    "done": "अपडेट हुआ",
+    "accepted": "ऑर्डर स्वीकार हुआ",
+    "rejected": "यह ऑर्डर सनरिच देगा",
+    "markedDelivered": "पहुँच गया चिह्नित",
+    "markedNotDelivered": "नहीं पहुँचा चिह्नित"
   }
 }

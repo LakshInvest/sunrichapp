@@ -14,9 +14,13 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedCartRouteImport } from './routes/_authenticated/cart'
+import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/checkout'
 import { Route as AuthenticatedHoldRouteImport } from './routes/_authenticated/hold'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedOrderRouteImport } from './routes/_authenticated/order'
+import { Route as AuthenticatedOrderSuccessRouteImport } from './routes/_authenticated/order-success'
+import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
 import { Route as AuthenticatedQueriesRouteImport } from './routes/_authenticated/queries'
 import { Route as AuthenticatedRegistrationRouteImport } from './routes/_authenticated/registration'
 import { Route as AuthenticatedTrackRouteImport } from './routes/_authenticated/track'
@@ -24,6 +28,8 @@ import { Route as AuthenticatedProductIdRouteImport } from './routes/_authentica
 import { Route as AuthenticatedQueriesIndexRouteImport } from './routes/_authenticated/queries.index'
 import { Route as AuthenticatedQueriesIdRouteImport } from './routes/_authenticated/queries.$id'
 import { Route as AuthenticatedQueriesAskRouteImport } from './routes/_authenticated/queries.ask'
+import { Route as AuthenticatedTrackIndexRouteImport } from './routes/_authenticated/track.index'
+import { Route as AuthenticatedTrackIdRouteImport } from './routes/_authenticated/track.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -49,6 +55,11 @@ const AuthenticatedCartRoute = AuthenticatedCartRouteImport.update({
   path: '/cart',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCheckoutRoute = AuthenticatedCheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedHoldRoute = AuthenticatedHoldRouteImport.update({
   id: '/hold',
   path: '/hold',
@@ -59,9 +70,25 @@ const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedInboxRoute = AuthenticatedInboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOrderRoute = AuthenticatedOrderRouteImport.update({
   id: '/order',
   path: '/order',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrderSuccessRoute =
+  AuthenticatedOrderSuccessRouteImport.update({
+    id: '/order-success',
+    path: '/order-success',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedQueriesRoute = AuthenticatedQueriesRouteImport.update({
@@ -101,37 +128,58 @@ const AuthenticatedQueriesAskRoute = AuthenticatedQueriesAskRouteImport.update({
   path: '/ask',
   getParentRoute: () => AuthenticatedQueriesRoute,
 } as any)
+const AuthenticatedTrackIndexRoute = AuthenticatedTrackIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedTrackRoute,
+} as any)
+const AuthenticatedTrackIdRoute = AuthenticatedTrackIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedTrackRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/account': typeof AuthenticatedAccountRoute
   '/cart': typeof AuthenticatedCartRoute
+  '/checkout': typeof AuthenticatedCheckoutRoute
   '/hold': typeof AuthenticatedHoldRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/inbox': typeof AuthenticatedInboxRoute
   '/order': typeof AuthenticatedOrderRoute
+  '/order-success': typeof AuthenticatedOrderSuccessRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
   '/queries': typeof AuthenticatedQueriesRouteWithChildren
   '/registration': typeof AuthenticatedRegistrationRoute
-  '/track': typeof AuthenticatedTrackRoute
+  '/track': typeof AuthenticatedTrackRouteWithChildren
   '/product/$id': typeof AuthenticatedProductIdRoute
   '/queries/$id': typeof AuthenticatedQueriesIdRoute
   '/queries/ask': typeof AuthenticatedQueriesAskRoute
+  '/track/$id': typeof AuthenticatedTrackIdRoute
   '/queries/': typeof AuthenticatedQueriesIndexRoute
+  '/track/': typeof AuthenticatedTrackIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/account': typeof AuthenticatedAccountRoute
   '/cart': typeof AuthenticatedCartRoute
+  '/checkout': typeof AuthenticatedCheckoutRoute
   '/hold': typeof AuthenticatedHoldRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/inbox': typeof AuthenticatedInboxRoute
   '/order': typeof AuthenticatedOrderRoute
+  '/order-success': typeof AuthenticatedOrderSuccessRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
   '/registration': typeof AuthenticatedRegistrationRoute
-  '/track': typeof AuthenticatedTrackRoute
   '/product/$id': typeof AuthenticatedProductIdRoute
   '/queries/$id': typeof AuthenticatedQueriesIdRoute
   '/queries/ask': typeof AuthenticatedQueriesAskRoute
+  '/track/$id': typeof AuthenticatedTrackIdRoute
   '/queries': typeof AuthenticatedQueriesIndexRoute
+  '/track': typeof AuthenticatedTrackIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -140,16 +188,22 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/cart': typeof AuthenticatedCartRoute
+  '/_authenticated/checkout': typeof AuthenticatedCheckoutRoute
   '/_authenticated/hold': typeof AuthenticatedHoldRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/inbox': typeof AuthenticatedInboxRoute
   '/_authenticated/order': typeof AuthenticatedOrderRoute
+  '/_authenticated/order-success': typeof AuthenticatedOrderSuccessRoute
+  '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/queries': typeof AuthenticatedQueriesRouteWithChildren
   '/_authenticated/registration': typeof AuthenticatedRegistrationRoute
-  '/_authenticated/track': typeof AuthenticatedTrackRoute
+  '/_authenticated/track': typeof AuthenticatedTrackRouteWithChildren
   '/_authenticated/product/$id': typeof AuthenticatedProductIdRoute
   '/_authenticated/queries/$id': typeof AuthenticatedQueriesIdRoute
   '/_authenticated/queries/ask': typeof AuthenticatedQueriesAskRoute
+  '/_authenticated/track/$id': typeof AuthenticatedTrackIdRoute
   '/_authenticated/queries/': typeof AuthenticatedQueriesIndexRoute
+  '/_authenticated/track/': typeof AuthenticatedTrackIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -158,31 +212,42 @@ export interface FileRouteTypes {
     | '/auth'
     | '/account'
     | '/cart'
+    | '/checkout'
     | '/hold'
     | '/home'
+    | '/inbox'
     | '/order'
+    | '/order-success'
+    | '/payments'
     | '/queries'
     | '/registration'
     | '/track'
     | '/product/$id'
     | '/queries/$id'
     | '/queries/ask'
+    | '/track/$id'
     | '/queries/'
+    | '/track/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/account'
     | '/cart'
+    | '/checkout'
     | '/hold'
     | '/home'
+    | '/inbox'
     | '/order'
+    | '/order-success'
+    | '/payments'
     | '/registration'
-    | '/track'
     | '/product/$id'
     | '/queries/$id'
     | '/queries/ask'
+    | '/track/$id'
     | '/queries'
+    | '/track'
   id:
     | '__root__'
     | '/'
@@ -190,16 +255,22 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/account'
     | '/_authenticated/cart'
+    | '/_authenticated/checkout'
     | '/_authenticated/hold'
     | '/_authenticated/home'
+    | '/_authenticated/inbox'
     | '/_authenticated/order'
+    | '/_authenticated/order-success'
+    | '/_authenticated/payments'
     | '/_authenticated/queries'
     | '/_authenticated/registration'
     | '/_authenticated/track'
     | '/_authenticated/product/$id'
     | '/_authenticated/queries/$id'
     | '/_authenticated/queries/ask'
+    | '/_authenticated/track/$id'
     | '/_authenticated/queries/'
+    | '/_authenticated/track/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -245,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCartRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/checkout': {
+      id: '/_authenticated/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof AuthenticatedCheckoutRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/hold': {
       id: '/_authenticated/hold'
       path: '/hold'
@@ -259,11 +337,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/inbox': {
+      id: '/_authenticated/inbox'
+      path: '/inbox'
+      fullPath: '/inbox'
+      preLoaderRoute: typeof AuthenticatedInboxRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/order': {
       id: '/_authenticated/order'
       path: '/order'
       fullPath: '/order'
       preLoaderRoute: typeof AuthenticatedOrderRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/order-success': {
+      id: '/_authenticated/order-success'
+      path: '/order-success'
+      fullPath: '/order-success'
+      preLoaderRoute: typeof AuthenticatedOrderSuccessRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/payments': {
+      id: '/_authenticated/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/queries': {
@@ -315,6 +414,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedQueriesAskRouteImport
       parentRoute: typeof AuthenticatedQueriesRoute
     }
+    '/_authenticated/track/': {
+      id: '/_authenticated/track/'
+      path: '/'
+      fullPath: '/track/'
+      preLoaderRoute: typeof AuthenticatedTrackIndexRouteImport
+      parentRoute: typeof AuthenticatedTrackRoute
+    }
+    '/_authenticated/track/$id': {
+      id: '/_authenticated/track/$id'
+      path: '/$id'
+      fullPath: '/track/$id'
+      preLoaderRoute: typeof AuthenticatedTrackIdRouteImport
+      parentRoute: typeof AuthenticatedTrackRoute
+    }
   }
 }
 
@@ -333,27 +446,48 @@ const AuthenticatedQueriesRouteChildren: AuthenticatedQueriesRouteChildren = {
 const AuthenticatedQueriesRouteWithChildren =
   AuthenticatedQueriesRoute._addFileChildren(AuthenticatedQueriesRouteChildren)
 
+interface AuthenticatedTrackRouteChildren {
+  AuthenticatedTrackIdRoute: typeof AuthenticatedTrackIdRoute
+  AuthenticatedTrackIndexRoute: typeof AuthenticatedTrackIndexRoute
+}
+
+const AuthenticatedTrackRouteChildren: AuthenticatedTrackRouteChildren = {
+  AuthenticatedTrackIdRoute: AuthenticatedTrackIdRoute,
+  AuthenticatedTrackIndexRoute: AuthenticatedTrackIndexRoute,
+}
+
+const AuthenticatedTrackRouteWithChildren =
+  AuthenticatedTrackRoute._addFileChildren(AuthenticatedTrackRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedCartRoute: typeof AuthenticatedCartRoute
+  AuthenticatedCheckoutRoute: typeof AuthenticatedCheckoutRoute
   AuthenticatedHoldRoute: typeof AuthenticatedHoldRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
   AuthenticatedOrderRoute: typeof AuthenticatedOrderRoute
+  AuthenticatedOrderSuccessRoute: typeof AuthenticatedOrderSuccessRoute
+  AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedQueriesRoute: typeof AuthenticatedQueriesRouteWithChildren
   AuthenticatedRegistrationRoute: typeof AuthenticatedRegistrationRoute
-  AuthenticatedTrackRoute: typeof AuthenticatedTrackRoute
+  AuthenticatedTrackRoute: typeof AuthenticatedTrackRouteWithChildren
   AuthenticatedProductIdRoute: typeof AuthenticatedProductIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedCartRoute: AuthenticatedCartRoute,
+  AuthenticatedCheckoutRoute: AuthenticatedCheckoutRoute,
   AuthenticatedHoldRoute: AuthenticatedHoldRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedInboxRoute: AuthenticatedInboxRoute,
   AuthenticatedOrderRoute: AuthenticatedOrderRoute,
+  AuthenticatedOrderSuccessRoute: AuthenticatedOrderSuccessRoute,
+  AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedQueriesRoute: AuthenticatedQueriesRouteWithChildren,
   AuthenticatedRegistrationRoute: AuthenticatedRegistrationRoute,
-  AuthenticatedTrackRoute: AuthenticatedTrackRoute,
+  AuthenticatedTrackRoute: AuthenticatedTrackRouteWithChildren,
   AuthenticatedProductIdRoute: AuthenticatedProductIdRoute,
 }
 

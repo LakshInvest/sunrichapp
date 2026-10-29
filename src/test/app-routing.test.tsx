@@ -33,8 +33,12 @@ describe("App routing", () => {
   it("matches the four bottom-nav pages", () => {
     expect(lastRouteId("/home")).toBe("/_authenticated/home");
     expect(lastRouteId("/order")).toBe("/_authenticated/order");
-    expect(lastRouteId("/track")).toBe("/_authenticated/track");
+    expect(lastRouteId("/track")).toBe("/_authenticated/track/");
     expect(lastRouteId("/account")).toBe("/_authenticated/account");
+  });
+
+  it("matches the order detail inside the track layout", () => {
+    expect(lastRouteId("/track/abc-def")).toBe("/_authenticated/track/$id");
   });
 
   it("matches the queries list and thread pages", () => {

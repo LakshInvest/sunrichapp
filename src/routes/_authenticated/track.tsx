@@ -1,11 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useTranslation } from "react-i18next";
-import { MapPin } from "lucide-react";
+import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { OfflineBanner } from "@/components/OfflineBanner";
 import en from "@/locales/en.json";
-import { BottomNav } from "@/components/BottomNav";
 import { useLang } from "@/hooks/use-lang";
 
+/**
+ * Layout route for /track. The My orders list lives in track.index.tsx and
+ * the order detail (tracking timeline) in track.$id.tsx.
+ */
 export const Route = createFileRoute("/_authenticated/track")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: en.track.metaTitle },
@@ -16,22 +19,15 @@ export const Route = createFileRoute("/_authenticated/track")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Track,
+  component: TrackLayout,
 });
 
-function Track() {
-  const { t } = useTranslation();
+function TrackLayout() {
   const { lang } = useLang();
   return (
-    <main
-      className={`mx-auto min-h-screen max-w-md bg-background px-5 pb-28 pt-8 ${lang === "en" ? "" : "font-deva"}`}
-    >
-      <h1 className="text-3xl font-bold text-primary">{t("track.title")}</h1>
-      <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-border bg-card py-20 text-center shadow-sm">
-        <MapPin className="h-12 w-12 text-muted-foreground" strokeWidth={1.5} />
-        <p className="px-6 text-muted-foreground">{t("track.comingSoon")}</p>
-      </div>
-      <BottomNav />
-    </main>
+    <div className={`min-h-screen bg-background ${lang === "en" ? "" : "font-deva"}`}>
+      <OfflineBanner />
+      <Outlet />
+    </div>
   );
 }

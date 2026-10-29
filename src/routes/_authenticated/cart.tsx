@@ -289,14 +289,14 @@ function Cart() {
             ) : (
               <button
                 type="button"
+                onClick={() => navigate({ to: "/checkout" })}
                 disabled={offline}
                 title={offline ? t("offline.hint") : undefined}
                 className="mt-5 flex min-h-14 w-full items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {t("cart.placeOrder")}
+                {t("cart.proceed")}
               </button>
             )}
-            <p className="mt-3 text-center text-sm font-medium text-secondary">{t("cart.comingSoon")}</p>
           </>
         )}
       </div>

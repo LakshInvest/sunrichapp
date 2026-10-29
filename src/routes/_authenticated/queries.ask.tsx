@@ -13,6 +13,10 @@ import { prepareUpload } from "@/lib/image-compress";
 import { getMyRegistration } from "@/lib/registration.functions";
 
 export const Route = createFileRoute("/_authenticated/queries/ask")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    topic: typeof search["topic"] === "string" ? search["topic"] : undefined,
+    order: typeof search["order"] === "string" ? search["order"] : undefined,
+  }),
   head: () => ({
     meta: [
       { title: en.queries.metaTitle },
@@ -33,14 +37,15 @@ const TOPICS = [
 ] as const;
 
 function AskQuery() {
+  const { topic = "general", order } = Route.useSearch();
   const { t } = useTranslation();
   const { lang } = useLang();
   const navigate = useNavigate();
   const offline = useOffline();
   const myReg = useServerFn(getMyRegistration);
 
-  const [context, setContext] = useState<string>("general");
-  const [subject, setSubject] = useState("");
+  const [context, setContext] = useState<string>(topic === "order" ? "order" : "general");
+  const [subject, setSubject] = useState<string>(order ? `Order ${order}` : "");
   const [message, setMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [customerId, setCustomerId] = useState<string | null>(null);

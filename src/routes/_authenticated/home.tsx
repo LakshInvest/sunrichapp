@@ -210,7 +210,9 @@ function Home() {
   );
 
   const areaLabel = reg?.city || reg?.addressLine1 || t("home.locationArea");
-  const typeLabel = reg?.typeName ? pick(reg.typeName, lang) : "";
+  const typeLabel = reg?.typeName
+    ? pick({ en: reg.typeName.en, hi: reg.typeName.hi ?? "", mr: reg.typeName.mr ?? "" }, lang)
+    : "";
 
   const hasQuery = search.trim() !== "";
   const defaultPopularView = category === "all" && !hasQuery && !showAll;

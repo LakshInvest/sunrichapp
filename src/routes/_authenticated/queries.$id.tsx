@@ -208,9 +208,9 @@ function Thread() {
       }
       const { error: rpcErr } = await supabase.rpc("reply_query", {
         p_query_id: id,
-        p_message: message || null,
-        p_attachment_path: path,
-        p_attachment_name: name,
+        p_message: message || undefined,
+        p_attachment_path: path ?? undefined,
+        p_attachment_name: name ?? undefined,
       });
       if (rpcErr) throw rpcErr;
       setText("");

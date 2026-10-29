@@ -191,7 +191,7 @@ function Account() {
       await supabase.rpc("update_my_profile", {
         p_full_name: profile?.name ?? "",
         p_photo_url: data.publicUrl,
-        p_language: null,
+        p_language: undefined,
       });
       setProfile((p) => (p ? { ...p, photoUrl: data.publicUrl } : p));
       toast.success(t("account.photoUpdated"));
@@ -209,8 +209,8 @@ function Account() {
     try {
       await supabase.rpc("update_my_profile", {
         p_full_name: name,
-        p_photo_url: null,
-        p_language: null,
+        p_photo_url: undefined,
+        p_language: undefined,
       });
       setProfile((p) => (p ? { ...p, name } : p));
       setEditOpen(false);

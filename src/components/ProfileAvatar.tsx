@@ -13,8 +13,8 @@ export function ProfileAvatar({
   name,
   className,
 }: {
-  src?: string | null;
-  name?: string | null;
+  src?: string | null | undefined;
+  name?: string | null | undefined;
   className?: string;
 }) {
   const [failed, setFailed] = useState(false);

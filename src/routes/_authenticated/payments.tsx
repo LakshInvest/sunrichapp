@@ -53,9 +53,10 @@ function Payments() {
 
   const unpaidCreditOrders = useMemo(
     () =>
-      (orders ?? []).filter(
-        (o) => o.paymentMode === "credit" && o.grandTotal > 0 && statusGroup(o.status) !== "cancelled",
-      ),
+      (orders ?? [])
+        .filter((o) => o.paymentMode === "credit" && o.grandTotal > 0 && statusGroup(o.status) !== "cancelled")
+        .filter((o) => Math.max(0, o.grandTotal - o.paidAmount) > 0)
+        .map((o) => ({ ...o, outstanding: Math.max(0, o.grandTotal - o.paidAmount) })),
     [orders],
   );
 
@@ -131,8 +132,8 @@ function Payments() {
               ) : (
                 <ul className="mt-3 space-y-3">
                   {unpaidCreditOrders.map((o) => {
-                    const due = o.deliveryDate ?? o.createdAt;
-                    const overdue = statusGroup(o.status) === "delivered";
+                    const due = o.dueDate ?? o.deliveryDate ?? o.createdAt;
+                    const overdue = o.dueDate ? new Date(`${o.dueDate}T23:59:59`).getTime() < Date.now() : false;
                     return (
                       <li key={o.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
                         <div className="flex items-center justify-between gap-3">
@@ -145,7 +146,7 @@ function Payments() {
                         </div>
                         <div className="mt-1 flex items-center justify-between gap-3 text-sm">
                           <span className="text-muted-foreground">{dateLabel(due, lang)}</span>
-                          <span className="font-bold text-primary">{formatINR(o.grandTotal)}</span>
+                          <span className="font-bold text-primary">{formatINR(o.outstanding)}</span>
                         </div>
                       </li>
                     );

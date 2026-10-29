@@ -364,7 +364,7 @@ function Home() {
                     onOpen={() => void navigate({ to: "/product/$id", params: { id: p.id } })}
                     onAdd={() => {
                       setQty(p.id, p.minOrderQty || 1);
-                      if (p.price != null) import("@/lib/catalogue").then((m) => m.saveCartPrice(p.id, p.price));
+                      if (p.price != null) saveCartPrice(p.id, p.price);
                     }}
                     onInc={() => {
                       const max = p.maxOrderQty ?? Infinity;
@@ -425,7 +425,7 @@ function Home() {
                   onOpen={() => void navigate({ to: "/product/$id", params: { id: p.id } })}
                   onAdd={() => {
                     setQty(p.id, p.minOrderQty || 1);
-                    if (p.price != null) import("@/lib/catalogue").then((m) => m.saveCartPrice(p.id, p.price));
+                    if (p.price != null) saveCartPrice(p.id, p.price);
                   }}
                   onInc={() => {
                     const max = p.maxOrderQty ?? Infinity;

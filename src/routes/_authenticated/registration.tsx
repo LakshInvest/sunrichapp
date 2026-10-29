@@ -276,14 +276,14 @@ function Field({
   children,
 }: {
   label: string;
-  error?: string;
+  error?: string | null;
   children: React.ReactNode;
 }) {
   return (
     <label className="flex flex-col gap-1.5">
       <span className="text-sm font-medium text-foreground">{label}</span>
       {children}
-      {error && <span className="text-xs font-medium text-destructive">{error}</span>}
+      {error ? <span className="text-xs font-medium text-destructive">{error}</span> : null}
     </label>
   );
 }
@@ -368,18 +368,18 @@ function DetailsStep({
       const { error: rpcErr } = await supabase.rpc("start_registration", {
         p_customer_type_code: typeCode,
         p_contact_name: fields.contactName.trim(),
-        p_business_name: isBusiness ? fields.businessName.trim() : null,
+        p_business_name: isBusiness ? fields.businessName.trim() : undefined,
         p_address_line1: fields.addressLine1.trim(),
-        p_address_line2: fields.addressLine2.trim() || null,
-        p_landmark: fields.landmark.trim() || null,
+        p_address_line2: fields.addressLine2.trim() || undefined,
+        p_landmark: fields.landmark.trim() || undefined,
         p_city: fields.city.trim(),
-        p_state: null,
+        p_state: undefined,
         p_pincode: fields.pincode.trim(),
-        p_latitude: requiresGps ? location.lat : null,
-        p_longitude: requiresGps ? location.lng : null,
-        p_location_accuracy_m: requiresGps && location.accuracy != null ? location.accuracy : null,
-        p_gstin: fields.gstin.trim() || null,
-        p_email: fields.email.trim() || null,
+        p_latitude: requiresGps ? location.lat : undefined,
+        p_longitude: requiresGps ? location.lng : undefined,
+        p_location_accuracy_m: requiresGps && location.accuracy != null ? location.accuracy : undefined,
+        p_gstin: fields.gstin.trim() || undefined,
+        p_email: fields.email.trim() || undefined,
       });
       if (rpcErr) {
         setError(rpcErr.message);
@@ -409,11 +409,11 @@ function DetailsStep({
       </div>
 
       {isBusiness && (
-        <Field label={t("registration.businessName")} error={fieldErrors.businessName}>
+        <Field label={t("registration.businessName")} error={fieldErrors["businessName"]}>
           <input className={inputClass} value={fields.businessName} onChange={set("businessName")} />
         </Field>
       )}
-      <Field label={t("registration.contactName")} error={fieldErrors.contactName}>
+      <Field label={t("registration.contactName")} error={fieldErrors["contactName"]}>
         <input className={inputClass} value={fields.contactName} onChange={set("contactName")} />
       </Field>
       {isBusiness && (
@@ -423,7 +423,7 @@ function DetailsStep({
           </div>
         </Field>
       )}
-      <Field label={t("registration.address1")} error={fieldErrors.addressLine1}>
+      <Field label={t("registration.address1")} error={fieldErrors["addressLine1"]}>
         <input className={inputClass} value={fields.addressLine1} onChange={set("addressLine1")} />
       </Field>
       <Field label={t("registration.address2")}>
@@ -433,10 +433,10 @@ function DetailsStep({
         <input className={inputClass} value={fields.landmark} onChange={set("landmark")} />
       </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label={t("registration.city")} error={fieldErrors.city}>
+        <Field label={t("registration.city")} error={fieldErrors["city"]}>
           <input className={inputClass} value={fields.city} onChange={set("city")} />
         </Field>
-        <Field label={t("registration.pincode")} error={fieldErrors.pincode}>
+        <Field label={t("registration.pincode")} error={fieldErrors["pincode"]}>
           <input
             className={inputClass}
             inputMode="numeric"
@@ -450,7 +450,7 @@ function DetailsStep({
         </Field>
       </div>
       {isBusiness && (
-        <Field label={t("registration.gstin")} error={fieldErrors.gstin}>
+        <Field label={t("registration.gstin")} error={fieldErrors["gstin"]}>
           <input
             className={`${inputClass} uppercase`}
             value={fields.gstin}
@@ -460,7 +460,7 @@ function DetailsStep({
         </Field>
       )}
       {isBusiness && (
-        <Field label={t("registration.email")} error={fieldErrors.email}>
+        <Field label={t("registration.email")} error={fieldErrors["email"]}>
           <input className={inputClass} type="email" value={fields.email} onChange={set("email")} />
         </Field>
       )}
@@ -471,8 +471,8 @@ function DetailsStep({
           {requiresGps && <span className="text-destructive"> *</span>}
         </span>
         <LocationPicker value={location} onChange={setLocation} />
-        {fieldErrors.location && (
-          <span className="text-xs font-medium text-destructive">{fieldErrors.location}</span>
+        {fieldErrors["location"] && (
+          <span className="text-xs font-medium text-destructive">{fieldErrors["location"]}</span>
         )}
       </div>
 

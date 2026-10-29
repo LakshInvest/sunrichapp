@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LogOut } from "lucide-react";
@@ -7,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { useLang } from "@/hooks/use-lang";
 import { LANGUAGES, type Lang } from "@/lib/i18n";
+import { getMyRegistration, type DbLocalized, type RegistrationDto } from "@/lib/registration.functions";
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({
@@ -24,12 +26,31 @@ export const Route = createFileRoute("/_authenticated/account")({
 
 const LANGUAGE_LABELS: Record<Lang, string> = { en: "English", hi: "हिंदी", mr: "मराठी" };
 
+function pl(v: DbLocalized | null | undefined, lang: string): string {
+  if (!v) return "";
+  if (lang === "hi") return v.hi || v.en;
+  if (lang === "mr") return v.mr || v.en;
+  return v.en;
+}
+
 function Account() {
   const { t } = useTranslation();
   const { lang, choose } = useLang();
   const navigate = useNavigate();
   const { queryClient } = Route.useRouteContext();
   const [profile, setProfile] = useState<{ name: string; mobile: string } | null>(null);
+  const [customer, setCustomer] = useState<RegistrationDto | null>(null);
+  const myReg = useServerFn(getMyRegistration);
+
+  useEffect(() => {
+    let active = true;
+    void myReg().then((reg) => {
+      if (active && reg.customerId) setCustomer(reg);
+    });
+    return () => {
+      active = false;
+    };
+  }, [myReg]);
 
   useEffect(() => {
     let active = true;
@@ -78,6 +99,30 @@ function Account() {
           {profile?.mobile || "…"}
         </p>
       </section>
+
+      {customer && (
+        <section className="mt-4 rounded-xl border border-border bg-card p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-medium text-foreground">{t("account.customerCode")}</p>
+            <span className="rounded-full bg-secondary/15 px-3 py-1 text-xs font-bold uppercase tracking-wide text-secondary">
+              {t(`status.${customer.status ?? "draft"}`)}
+            </span>
+          </div>
+          <p className="mt-1 text-lg font-semibold text-foreground">{customer.customerCode ?? "—"}</p>
+          <div className="mt-3 grid gap-2 text-sm">
+            <p className="text-muted-foreground">
+              <span className="font-medium text-foreground">{t("account.customerType")}: </span>
+              {pl(customer.typeName, lang)}
+            </p>
+            <p className="text-muted-foreground">
+              <span className="font-medium text-foreground">{t("account.address")}: </span>
+              {[customer.addressLine1, customer.addressLine2, customer.landmark, customer.city, customer.pincode]
+                .filter(Boolean)
+                .join(", ") || "—"}
+            </p>
+          </div>
+        </section>
+      )}
 
       <section className="mt-4 rounded-xl border border-border bg-card p-5 shadow-sm">
         <p className="text-sm font-medium text-foreground">{t("account.language")}</p>

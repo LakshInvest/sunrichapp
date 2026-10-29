@@ -289,7 +289,9 @@ function Cart() {
             ) : (
               <button
                 type="button"
-                className="mt-5 flex min-h-14 w-full items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98]"
+                disabled={offline}
+                title={offline ? t("offline.hint") : undefined}
+                className="mt-5 flex min-h-14 w-full items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {t("cart.placeOrder")}
               </button>

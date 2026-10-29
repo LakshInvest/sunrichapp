@@ -120,7 +120,8 @@ export function PhotoCrop({
           minZoom={1}
           maxZoom={3}
           restrictPosition={false}
-          overlayOpacity={0.85}
+          style={{ containerStyle: { backgroundColor: "#000" } }}
+          classes={{}}
           onCropChange={setCrop}
           onZoomChange={setZoom}
           onCropComplete={(_, area) => {

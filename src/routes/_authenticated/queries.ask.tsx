@@ -17,10 +17,6 @@ export const Route = createFileRoute("/_authenticated/queries/ask")({
     topic: typeof search["topic"] === "string" ? search["topic"] : undefined,
     order: typeof search["order"] === "string" ? search["order"] : undefined,
   }),
-  validateSearch: (search: Record<string, unknown>) => ({
-    topic: typeof search["topic"] === "string" ? search["topic"] : undefined,
-    order: typeof search["order"] === "string" ? search["order"] : undefined,
-  }),
   head: () => ({
     meta: [
       { title: en.queries.metaTitle },

@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -13,7 +14,6 @@ import { fallbackImageFor } from "@/components/catalog/image-fallbacks";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
-import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { getMyRegistration } from "@/lib/registration.functions";
 import {
   clampQty,
@@ -55,7 +55,6 @@ function Cart() {
   const [data, setData] = useState<CatalogData | null>(() => readCatalogueCache());
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(!readCatalogueCache());
-  const [notices, setNotices] = useState<string[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -91,32 +90,13 @@ function Cart() {
     };
   }, [load]);
 
-  // Fresh prices every time the cart opens; flag changed rates and remove
-  // products that no longer exist in the catalogue.
-  const removedNames: string[] = [];
-  const items = useMemo(() => {
-    const products = data?.products ?? [];
-    const saved = loadCartPrices();
-    const out: { id: string; changed: boolean }[] = [];
-    for (const [id, qty] of Object.entries(quantities)) {
-      const p = products.find((x) => x.id === id);
-      if (!p) {
-        removedNames.push(loc((products.length ? undefined : null) ?? null, "en") ?? "");
-        continue;
-      }
-      out.push({ id, changed: saved[id] !== undefined && p.price !== null && saved[id] !== p.price });
-      if (p.price != null && saved[id] !== p.price) saveCartPrice(id, p.price);
-      if (qty < (p.minOrderQty || 1) || (p.maxOrderQty != null && qty > p.maxOrderQty)) {
-        setQty(id, clampQty(p, qty));
-      }
-    }
-    return out;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, quantities]);
+  const products = data?.products ?? [];
 
+  // Remove products that left the catalogue, with a notice.
   useEffect(() => {
-    const gone = Object.keys(quantities).filter((id) => !(data?.products ?? []).some((p) => p.id === id));
-    if (data && gone.length > 0) {
+    if (!data) return;
+    const gone = Object.keys(quantities).filter((id) => !products.some((p) => p.id === id));
+    if (gone.length > 0) {
       for (const id of gone) {
         forgetCartPrice(id);
         setQty(id, 0);
@@ -126,22 +106,43 @@ function Cart() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
-  const products = data?.products ?? [];
-  const rows = items
-    .map(({ id, changed }) => ({ product: products.find((p) => p.id === id)!, changed }))
-    .filter((r) => r.product);
+  // Keep every quantity within the product's min/max rules.
+  useEffect(() => {
+    if (!data) return;
+    for (const [id, qty] of Object.entries(quantities)) {
+      const p = products.find((x) => x.id === id);
+      if (p) {
+        const clamped = clampQty(p, qty);
+        if (clamped !== qty) setQty(id, clamped);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, quantities]);
 
-  const itemTotal = rows.reduce((sum, r) => sum + (r.product.price ?? 0) * (quantities[r.product.id] ?? 0), 0);
+  const rows = useMemo(() => {
+    const saved = loadCartPrices();
+    return Object.entries(quantities)
+      .map(([id, qty]) => {
+        const product = products.find((p) => p.id === id);
+        if (!product) return null;
+        const changed = saved[id] !== undefined && product.price !== null && saved[id] !== product.price;
+        if (product.price != null && saved[id] !== product.price) saveCartPrice(id, product.price);
+        return { product, qty, changed };
+      })
+      .filter((r): r is { product: (typeof products)[number]; qty: number; changed: boolean } => r !== null)
+      .sort((a, b) => a.product.sortOrder - b.product.sortOrder);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, quantities]);
+
+  const itemTotal = rows.reduce((sum, r) => sum + (r.product.price ?? 0) * r.qty, 0);
   const jarDeposit = rows.reduce(
     (sum, r) =>
-      r.product.isReturnable && r.product.depositAmount != null
-        ? sum + r.product.depositAmount * (quantities[r.product.id] ?? 0)
-        : sum,
+      r.product.isReturnable && r.product.depositAmount != null ? sum + r.product.depositAmount * r.qty : sum,
     0,
   );
   const grandTotal = itemTotal + jarDeposit;
   const hasBulk = rows.some(
-    (r) => r.product.bulkThresholdQty != null && (quantities[r.product.id] ?? 0) >= (r.product.bulkThresholdQty ?? Infinity),
+    (r) => r.product.bulkThresholdQty != null && r.qty >= (r.product.bulkThresholdQty ?? Infinity),
   );
 
   return (
@@ -185,76 +186,69 @@ function Cart() {
         ) : (
           <>
             <ul className="mt-5 space-y-3">
-              {rows.map(({ product, changed }) => {
-                const qty = quantities[product.id] ?? 0;
-                return (
-                  <li
-                    key={product.id}
-                    className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm"
-                  >
-                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-secondary/10">
-                      <SmartImage
-                        src={product.imageUrl ?? product.images[0] ?? null}
-                        alt={loc(product.name, lang)}
-                        fallbackSrc={fallbackImageFor(product)}
-                        className="h-16 w-16 object-cover"
-                        iconClassName="h-6 w-6 text-secondary/70"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-bold text-foreground">{loc(product.name, lang)}</p>
-                      <p className="text-xs text-muted-foreground">{loc(product.packLabel, lang)}</p>
-                      {changed && (
-                        <p className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-accent-foreground">
-                          <CircleAlert className="h-3 w-3" aria-hidden />
-                          {t("cart.priceUpdated")}
-                        </p>
-                      )}
-                      <p className="mt-0.5 text-sm font-bold text-primary">
-                        {product.price === null
-                          ? t("catalog.priceOnRequest")
-                          : formatINR(product.price * qty)}
+              {rows.map(({ product, qty, changed }) => (
+                <li
+                  key={product.id}
+                  className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm"
+                >
+                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-secondary/10">
+                    <SmartImage
+                      src={product.imageUrl ?? product.images[0] ?? null}
+                      alt={loc(product.name, lang)}
+                      fallbackSrc={fallbackImageFor(product)}
+                      className="h-16 w-16 object-cover"
+                      iconClassName="h-6 w-6 text-secondary/70"
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold text-foreground">{loc(product.name, lang)}</p>
+                    <p className="text-xs text-muted-foreground">{loc(product.packLabel, lang)}</p>
+                    {changed && (
+                      <p className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-accent-foreground">
+                        <CircleAlert className="h-3 w-3" aria-hidden />
+                        {t("cart.priceUpdated")}
                       </p>
-                      {product.isReturnable && product.depositAmount != null && product.depositAmount > 0 && (
-                        <p className="text-[11px] text-muted-foreground">
-                          {t("cart.depositLine", { amount: formatINR(product.depositAmount * qty) })}
-                        </p>
-                      )}
-                      {product.bulkThresholdQty != null && qty >= product.bulkThresholdQty && (
-                        <p className="mt-0.5 rounded-lg bg-accent/15 px-2 py-1 text-[11px] font-medium text-accent-foreground">
-                          {t("cart.bulkNote")}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center rounded-full bg-primary text-primary-foreground">
-                      <button
-                        type="button"
-                        onClick={() => setQty(product.id, qty - 1)}
-                        disabled={offline}
-                        aria-label={t("home.decreaseQty")}
-                        className="flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90 disabled:opacity-40"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </button>
-                      <span className="min-w-4 text-center text-sm font-bold">{qty}</span>
-                      <button
-                        type="button"
-                        onClick={() => setQty(product.id, qty + 1)}
-                        disabled={offline || (product.maxOrderQty != null && qty >= product.maxOrderQty)}
-                        aria-label={t("home.increaseQty")}
-                        className="flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90 disabled:opacity-40"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </li>
-                );
-              })}
+                    )}
+                    <p className="mt-0.5 text-sm font-bold text-primary">
+                      {product.price === null ? t("catalog.priceOnRequest") : formatINR(product.price * qty)}
+                    </p>
+                    {product.isReturnable && product.depositAmount != null && product.depositAmount > 0 && (
+                      <p className="text-[11px] text-muted-foreground">
+                        {t("cart.depositLine", { amount: formatINR(product.depositAmount * qty) })}
+                      </p>
+                    )}
+                    {product.bulkThresholdQty != null && qty >= product.bulkThresholdQty && (
+                      <p className="mt-1 rounded-lg bg-accent/15 px-2 py-1 text-[11px] font-medium text-accent-foreground">
+                        {t("cart.bulkNote")}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center rounded-full bg-primary text-primary-foreground">
+                    <button
+                      type="button"
+                      onClick={() => setQty(product.id, qty - 1)}
+                      disabled={offline}
+                      aria-label={t("home.decreaseQty")}
+                      className="flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90 disabled:opacity-40"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <span className="min-w-4 text-center text-sm font-bold">{qty}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQty(product.id, qty + 1)}
+                      disabled={offline || (product.maxOrderQty != null && qty >= product.maxOrderQty)}
+                      aria-label={t("home.increaseQty")}
+                      className="flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90 disabled:opacity-40"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                </li>
+              ))}
             </ul>
 
-            {offline && (
-              <p className="mt-3 text-center text-xs text-muted-foreground">{t("offline.cartHint")}</p>
-            )}
+            {offline && <p className="mt-3 text-center text-xs text-muted-foreground">{t("offline.cartHint")}</p>}
 
             <section className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-sm">
               <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -300,7 +294,7 @@ function Cart() {
                 {t("cart.placeOrder")}
               </button>
             )}
-            <p className="mt-3 text-center text-sm text-secondary">{t("cart.comingSoon")}</p>
+            <p className="mt-3 text-center text-sm font-medium text-secondary">{t("cart.comingSoon")}</p>
           </>
         )}
       </div>

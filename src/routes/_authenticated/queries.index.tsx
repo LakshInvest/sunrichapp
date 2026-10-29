@@ -1,12 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronRight, MessageCircleQuestion } from "lucide-react";
+import { ChevronRight, MessageCircleQuestion, Plus } from "lucide-react";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { QueryChip } from "@/components/QueryChip";
+import { OfflineBanner } from "@/components/OfflineBanner";
 import { useLang } from "@/hooks/use-lang";
+import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 
 export const Route = createFileRoute("/_authenticated/queries/")({
   head: () => ({
@@ -42,7 +44,9 @@ function timeLabel(iso: string, lang: string): string {
 function QueriesList() {
   const { t } = useTranslation();
   const { lang } = useLang();
+  const navigate = useNavigate();
   const [rows, setRows] = useState<Summary[] | null>(null);
+  const pull = usePullToRefresh(load);
 
   const load = useCallback(async () => {
     const { data: qs, error } = await supabase

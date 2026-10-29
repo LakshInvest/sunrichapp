@@ -8,6 +8,15 @@
   "changeLanguage": "भाषा बदलें",
   "metaTitle": "सनरिच — पैकेज्ड पेयजल ऑर्डर करें",
   "metaDescription": "दुकान, वितरण और घर के लिए सनरिच पानी ऑर्डर करें।",
+  "offline": {
+    "title": "आप ऑफ़लाइन हैं",
+    "hint": "कोई कनेक्शन नहीं। ऑनलाइन आने पर फिर से कोशिश करें।",
+    "cartHint": "आप ऑफ़लाइन हैं — ऑनलाइन आने पर मात्रा बदलें।"
+  },
+  "errors": {
+    "title": "कुछ गलत हो गया",
+    "retry": "फिर से कोशिश करें"
+  },
   "auth": {
     "title": "WhatsApp से लॉग इन करें",
     "subtitle": "हम आपके WhatsApp पर एक बार का कोड भेजेंगे",
@@ -94,6 +103,40 @@
     "needsAction": "Sunrich को आपसे कुछ चाहिए",
     "open": "खोलें"
   },
+  "catalog": {
+    "priceOnRequest": "कीमत पूछें",
+    "save": "{{amount}} बचाएँ",
+    "depositLine": "+ {{amount}} जार डिपॉज़िट (वापसी योग्य)",
+    "yourFavourites": "आपके पसंदीदा",
+    "addFavourite": "पसंदीदा में जोड़ें",
+    "removeFavourite": "पसंदीदा से हटाएँ",
+    "favError": "पसंदीदा अपडेट नहीं हुए। कृपया फिर कोशिश करें।",
+    "recentSearches": "हाल की खोजें",
+    "clearSearch": "खोज साफ़ करें",
+    "resultsCount_one": "{{count}} उत्पाद",
+    "resultsCount_other": "{{count}} उत्पाद",
+    "noResultsTitle": "कोई परिणाम नहीं",
+    "noResultsBody": "यह उत्पाद नहीं मिला। Sunrich टीम से पूछें, हम मदद करेंगे।",
+    "sortLabel": "क्रम",
+    "sortPopular": "लोकप्रिय",
+    "sortPriceAsc": "कीमत कम–ज़्यादा",
+    "sortPriceDesc": "कीमत ज़्यादा–कम",
+    "emptyTitle": "अभी कोई उत्पाद नहीं",
+    "emptyBody": "Sunrich कैटलॉग तैयार हो रहा है। कृपया थोड़ी देर बाद देखें।",
+    "askUs": "सनरिच टीम से पूछें"
+  },
+  "product": {
+    "quantity": "मात्रा",
+    "qtyLimits": "न्यूनतम {{min}}, अधिकतम {{max}} प्रति ऑर्डर",
+    "total": "कुल",
+    "addToCart": "कार्ट में जोड़ें",
+    "similar": "ये भी देखें",
+    "sellUnitInfo": "{{units}} का {{unit}}",
+    "notFound": "उत्पाद उपलब्ध नहीं",
+    "notFoundBody": "यह उत्पाद अब आपके कैटलॉग में नहीं है।",
+    "metaTitle": "सनरिच — उत्पाद",
+    "metaDescription": "आपके Sunrich कैटलॉग से उत्पाद विवरण और कीमत।"
+  },
   "cart": {
     "title": "कार्ट",
     "metaTitle": "सनरिच — कार्ट",
@@ -111,11 +154,16 @@
     "free": "मुफ़्त",
     "grandTotal": "कुल राशि",
     "placeOrder": "ऑर्डर करें",
-    "comingSoon": "ऑर्डर करने की सुविधा जल्द आ रही है।",
+    "comingSoon": "ऑर्डरिंग अगले रिलीज़ में आ रही है — आपका कार्ट सेव है।",
     "emptyTitle": "आपका कार्ट खाली है",
     "emptySubtitle": "शुरू करने के लिए जार और बोतलें जोड़ें।",
     "browse": "उत्पाद देखें",
-    "orderingAfterApproval": "स्वीकृति के बाद ऑर्डरिंग शुरू होगी"
+    "orderingAfterApproval": "स्वीकृति के बाद ऑर्डरिंग शुरू होगी",
+    "jarDeposit": "जार डिपॉज़िट (वापसी योग्य)",
+    "depositLine": "+ {{amount}} जार डिपॉज़िट",
+    "priceUpdated": "कीमत अपडेट हुई",
+    "bulkNote": "थोक ऑर्डर पर हमारी टीम दर पुष्टि करेगी।",
+    "removedFromCatalogue": "कुछ आइटम अब उपलब्ध नहीं हैं और कार्ट से हटा दिए गए।"
   },
   "order": {
     "title": "ऑर्डर",
@@ -172,7 +220,23 @@
     "moreAddresses": "और डिलीवरी पते जल्द आ रहे हैं",
     "logoutTitle": "लॉग आउट करें?",
     "logoutBody": "आपको अपने नंबर से दोबारा लॉग इन करना होगा।",
-    "logoutConfirm": "लॉग आउट"
+    "logoutConfirm": "लॉग आउट",
+    "privacyPolicy": "गोपनीयता नीति",
+    "termsOfUse": "उपयोग की शर्तें",
+    "madeBy": "Growth Story द्वारा निर्मित",
+    "deleteAccount": "मेरा खाता हटाएँ",
+    "deleteBody": "Sunrich आपका खाता और निजी जानकारी 7 दिनों के भीतर हटा देगा। GST कानून के अनुसार इनवॉइस और भुगतान रिकॉर्ड रखे जाते हैं।",
+    "deleteReason": "कारण (वैकल्पिक)",
+    "deleteReasonNone": "कारण चुनें",
+    "deleteReason1": "सेवा की अब ज़रूरत नहीं",
+    "deleteReason2": "कीमत या सेवा की समस्या",
+    "deleteReason3": "अन्य",
+    "deleteConfirm": "मैं समझता/समझती हूँ कि मेरा खाता और निजी जानकारी 7 दिनों में हटा दी जाएगी।",
+    "deleteRequest": "हटाने का अनुरोध करें",
+    "deleteSubject": "मेरा खाता हटाएँ",
+    "deleteMessage": "कृपया मेरा खाता हटा दें। कारण: {{reason}}",
+    "deleteSentTitle": "अनुरोध भेजा गया",
+    "deleteSentBody": "अनुरोध भेजा गया। Sunrich 7 दिनों के भीतर आपसे संपर्क करेगा।"
   },
   "register": {
     "title": "अपना पंजीकरण पूरा करें",
@@ -238,7 +302,9 @@
     "rejectedTitle": "पंजीकरण में बदलाव की ज़रूरत है",
     "rejectedBody": "कारण: {{reason}}",
     "editAndResubmit": "बदलें और दोबारा भेजें",
-    "yourName": "आपका नाम"
+    "yourName": "आपका नाम",
+    "state": "राज्य",
+    "statePlaceholder": "पिनकोड से भरा जाएगा"
   },
   "status": {
     "active": "सक्रिय",
@@ -277,6 +343,21 @@
     "errSend": "भेजा नहीं जा सका। कृपया फिर कोशिश करें।",
     "staffLabel": "{{name}} · सनरिच",
     "closeImage": "इमेज बंद करें",
-    "attachFailed": "अटैचमेंट लोड नहीं हुआ"
+    "attachFailed": "अटैचमेंट लोड नहीं हुआ",
+    "ask": {
+      "title": "सवाल पूछें",
+      "fab": "सवाल पूछें",
+      "topicLabel": "किस बारे में है?",
+      "topicGeneral": "सामान्य",
+      "topicOrder": "ऑर्डर",
+      "topicPayment": "भुगतान",
+      "subjectLabel": "विषय",
+      "subjectPlaceholder": "संक्षिप्त सार",
+      "messageLabel": "आपका सवाल",
+      "messagePlaceholder": "बताएँ कि आपको किस मदद चाहिए…",
+      "attachHint": "फ़ोटो या PDF (वैकल्पिक)। फ़ाइलें खुले सवाल पर ही जुड़ सकती हैं।",
+      "sendQuestion": "सवाल भेजें",
+      "sent": "सवाल भेजा गया — Sunrich टीम जल्द जवाब देगी।"
+    }
   }
 }

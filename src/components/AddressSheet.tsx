@@ -1,9 +1,8 @@
 import { Suspense, lazy } from "react";
 import { useTranslation } from "react-i18next";
 import { MapPin } from "lucide-react";
+import { SheetDrawer } from "@/components/SheetDrawer";
 import {
-  Drawer,
-  DrawerContent,
   DrawerDescription,
   DrawerHeader,
   DrawerTitle,
@@ -39,9 +38,8 @@ export function AddressSheet({
     : [];
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="mx-auto max-w-md">
-        <DrawerHeader>
+    <SheetDrawer open={open} onOpenChange={onOpenChange}>
+      <DrawerHeader>
           <DrawerTitle>{t("account.deliveryAddressTitle")}</DrawerTitle>
           <DrawerDescription className="sr-only">{t("account.deliveryAddress")}</DrawerDescription>
         </DrawerHeader>
@@ -66,7 +64,6 @@ export function AddressSheet({
           </div>
           <p className="mt-3 text-center text-xs text-muted-foreground">{t("account.moreAddresses")}</p>
         </div>
-      </DrawerContent>
-    </Drawer>
+    </SheetDrawer>
   );
 }

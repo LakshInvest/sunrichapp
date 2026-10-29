@@ -1,16 +1,31 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Droplets, Minus, Plus } from "lucide-react";
+import { toast } from "sonner";
+import { CircleAlert, Droplets, Minus, Plus } from "lucide-react";
 import en from "@/locales/en.json";
 import { BottomNav } from "@/components/BottomNav";
 import { SmartImage } from "@/components/SmartImage";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
+import { OfflineBanner } from "@/components/OfflineBanner";
+import { ErrorState, GridSkeleton } from "@/components/catalog/states";
+import { fallbackImageFor } from "@/components/catalog/image-fallbacks";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
+import { useOffline } from "@/hooks/use-offline";
 import { getMyRegistration } from "@/lib/registration.functions";
-import { homeContent, pick } from "@/data/homeContent";
+import {
+  clampQty,
+  fetchCatalogue,
+  formatINR,
+  forgetCartPrice,
+  loadCartPrices,
+  loc,
+  readCatalogueCache,
+  saveCartPrice,
+  type CatalogData,
+} from "@/lib/catalogue";
 
 export const Route = createFileRoute("/_authenticated/cart")({
   head: () => ({
@@ -31,11 +46,15 @@ function Cart() {
   const { lang } = useLang();
   const navigate = useNavigate();
   const { quantities, setQty, clear } = useCart();
+  const offline = useOffline();
   const [confirmClear, setConfirmClear] = useState(false);
-  const [ordered, setOrdered] = useState(false);
   const [pending, setPending] = useState(false);
   const myReg = useServerFn(getMyRegistration);
   const deva = lang === "en" ? "" : "font-deva";
+
+  const [data, setData] = useState<CatalogData | null>(() => readCatalogueCache());
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(!readCatalogueCache());
 
   useEffect(() => {
     let active = true;
@@ -47,29 +66,92 @@ function Cart() {
     };
   }, [myReg]);
 
-  const items = useMemo(
-    () =>
-      Object.entries(quantities)
-        .map(([id, qty]) => ({ product: homeContent.products.find((p) => p.id === id), qty }))
-        .filter((entry): entry is { product: (typeof homeContent.products)[number]; qty: number } =>
-          Boolean(entry.product),
-        )
-        .sort((a, b) => a.product.sortOrder - b.product.sortOrder),
-    [quantities],
+  const load = useCallback(async () => {
+    try {
+      const fresh = await fetchCatalogue();
+      setData(fresh);
+      setLoadError(null);
+    } catch (e) {
+      setLoadError((e as Error).message);
+      throw e;
+    }
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    load()
+      .catch(() => undefined)
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [load]);
+
+  const products = data?.products ?? [];
+
+  // Remove products that left the catalogue, with a notice.
+  useEffect(() => {
+    if (!data) return;
+    const gone = Object.keys(quantities).filter((id) => !products.some((p) => p.id === id));
+    if (gone.length > 0) {
+      for (const id of gone) {
+        forgetCartPrice(id);
+        setQty(id, 0);
+      }
+      toast(t("cart.removedFromCatalogue"));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  // Keep every quantity within the product's min/max rules.
+  useEffect(() => {
+    if (!data) return;
+    for (const [id, qty] of Object.entries(quantities)) {
+      const p = products.find((x) => x.id === id);
+      if (p) {
+        const clamped = clampQty(p, qty);
+        if (clamped !== qty) setQty(id, clamped);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, quantities]);
+
+  const rows = useMemo(() => {
+    const saved = loadCartPrices();
+    return Object.entries(quantities)
+      .map(([id, qty]) => {
+        const product = products.find((p) => p.id === id);
+        if (!product) return null;
+        const changed = saved[id] !== undefined && product.price !== null && saved[id] !== product.price;
+        if (product.price != null && saved[id] !== product.price) saveCartPrice(id, product.price);
+        return { product, qty, changed };
+      })
+      .filter((r): r is { product: (typeof products)[number]; qty: number; changed: boolean } => r !== null)
+      .sort((a, b) => a.product.sortOrder - b.product.sortOrder);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products, quantities]);
+
+  const itemTotal = rows.reduce((sum, r) => sum + (r.product.price ?? 0) * r.qty, 0);
+  const jarDeposit = rows.reduce(
+    (sum, r) =>
+      r.product.isReturnable && r.product.depositAmount != null ? sum + r.product.depositAmount * r.qty : sum,
+    0,
   );
-
-  const itemTotal = items.reduce((sum, item) => sum + item.product.price * item.qty, 0);
-
-  const placeOrder = () => {
-    setOrdered(true);
-  };
+  const grandTotal = itemTotal + jarDeposit;
+  const hasBulk = rows.some(
+    (r) => r.product.bulkThresholdQty != null && r.qty >= (r.product.bulkThresholdQty ?? Infinity),
+  );
 
   return (
     <main className={`mx-auto min-h-screen max-w-md bg-background ${deva}`}>
+      <OfflineBanner />
       <div className="px-5 pb-44 pt-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-primary">{t("cart.title")}</h1>
-          {items.length > 0 && (
+          {rows.length > 0 && (
             <button
               type="button"
               onClick={() => setConfirmClear(true)}
@@ -80,7 +162,13 @@ function Cart() {
           )}
         </div>
 
-        {items.length === 0 ? (
+        {loading ? (
+          <div className="mt-6">
+            <GridSkeleton count={2} />
+          </div>
+        ) : !data ? (
+          <ErrorState message={loadError} onRetry={() => void load().catch(() => undefined)} />
+        ) : rows.length === 0 ? (
           <div className="mt-16 flex flex-col items-center text-center">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary/15">
               <Droplets className="h-10 w-10 text-secondary" aria-hidden />
@@ -98,34 +186,50 @@ function Cart() {
         ) : (
           <>
             <ul className="mt-5 space-y-3">
-              {items.map(({ product, qty }) => (
+              {rows.map(({ product, qty, changed }) => (
                 <li
                   key={product.id}
-                  className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm"
+                  className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm"
                 >
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-secondary/10">
                     <SmartImage
-                      src={product.imageUrl}
-                      alt={pick(product.name, lang)}
+                      src={product.imageUrl ?? product.images[0] ?? null}
+                      alt={loc(product.name, lang)}
+                      fallbackSrc={fallbackImageFor(product)}
                       className="h-16 w-16 object-cover"
                       iconClassName="h-6 w-6 text-secondary/70"
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-bold text-foreground">
-                      {pick(product.name, lang)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{pick(product.packLabel, lang)}</p>
+                    <p className="truncate text-sm font-bold text-foreground">{loc(product.name, lang)}</p>
+                    <p className="text-xs text-muted-foreground">{loc(product.packLabel, lang)}</p>
+                    {changed && (
+                      <p className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-accent-foreground">
+                        <CircleAlert className="h-3 w-3" aria-hidden />
+                        {t("cart.priceUpdated")}
+                      </p>
+                    )}
                     <p className="mt-0.5 text-sm font-bold text-primary">
-                      ₹{product.price * qty}
+                      {product.price === null ? t("catalog.priceOnRequest") : formatINR(product.price * qty)}
                     </p>
+                    {product.isReturnable && product.depositAmount != null && product.depositAmount > 0 && (
+                      <p className="text-[11px] text-muted-foreground">
+                        {t("cart.depositLine", { amount: formatINR(product.depositAmount * qty) })}
+                      </p>
+                    )}
+                    {product.bulkThresholdQty != null && qty >= product.bulkThresholdQty && (
+                      <p className="mt-1 rounded-lg bg-accent/15 px-2 py-1 text-[11px] font-medium text-accent-foreground">
+                        {t("cart.bulkNote")}
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center rounded-full bg-primary text-primary-foreground">
                     <button
                       type="button"
                       onClick={() => setQty(product.id, qty - 1)}
+                      disabled={offline}
                       aria-label={t("home.decreaseQty")}
-                      className="flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90"
+                      className="flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90 disabled:opacity-40"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
@@ -133,8 +237,9 @@ function Cart() {
                     <button
                       type="button"
                       onClick={() => setQty(product.id, qty + 1)}
+                      disabled={offline || (product.maxOrderQty != null && qty >= product.maxOrderQty)}
                       aria-label={t("home.increaseQty")}
-                      className="flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90"
+                      className="flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90 disabled:opacity-40"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
@@ -143,11 +248,19 @@ function Cart() {
               ))}
             </ul>
 
+            {offline && <p className="mt-3 text-center text-xs text-muted-foreground">{t("offline.cartHint")}</p>}
+
             <section className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-sm">
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>{t("cart.itemTotal")}</span>
-                <span className="font-medium text-foreground">₹{itemTotal}</span>
+                <span className="font-medium text-foreground">{formatINR(itemTotal)}</span>
               </div>
+              {jarDeposit > 0 && (
+                <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
+                  <span>{t("cart.jarDeposit")}</span>
+                  <span className="font-medium text-foreground">{formatINR(jarDeposit)}</span>
+                </div>
+              )}
               <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
                 <span>{t("cart.delivery")}</span>
                 <span className="font-semibold text-secondary">{t("cart.free")}</span>
@@ -155,9 +268,14 @@ function Cart() {
               <div className="mt-3 border-t border-border pt-3">
                 <div className="flex items-center justify-between text-base font-bold text-foreground">
                   <span>{t("cart.grandTotal")}</span>
-                  <span className="text-primary">₹{itemTotal}</span>
+                  <span className="text-primary">{formatINR(grandTotal)}</span>
                 </div>
               </div>
+              {hasBulk && (
+                <p className="mt-3 rounded-xl bg-accent/15 px-3 py-2 text-xs font-medium text-accent-foreground">
+                  {t("cart.bulkNote")}
+                </p>
+              )}
             </section>
 
             {pending ? (
@@ -171,17 +289,14 @@ function Cart() {
             ) : (
               <button
                 type="button"
-                onClick={placeOrder}
-                className="mt-5 flex min-h-14 w-full items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98]"
+                disabled={offline}
+                title={offline ? t("offline.hint") : undefined}
+                className="mt-5 flex min-h-14 w-full items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {t("cart.placeOrder")}
               </button>
             )}
-            {ordered && (
-              <p className="mt-3 animate-in fade-in text-center text-sm font-medium text-secondary duration-300">
-                {t("cart.comingSoon")}
-              </p>
-            )}
+            <p className="mt-3 text-center text-sm font-medium text-secondary">{t("cart.comingSoon")}</p>
           </>
         )}
       </div>

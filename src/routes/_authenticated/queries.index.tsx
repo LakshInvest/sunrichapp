@@ -1,12 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronRight, MessageCircleQuestion } from "lucide-react";
+import { ChevronRight, MessageCircleQuestion, Plus } from "lucide-react";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { QueryChip } from "@/components/QueryChip";
+import { OfflineBanner } from "@/components/OfflineBanner";
 import { useLang } from "@/hooks/use-lang";
+import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 
 export const Route = createFileRoute("/_authenticated/queries/")({
   head: () => ({
@@ -42,6 +44,7 @@ function timeLabel(iso: string, lang: string): string {
 function QueriesList() {
   const { t } = useTranslation();
   const { lang } = useLang();
+  const navigate = useNavigate();
   const [rows, setRows] = useState<Summary[] | null>(null);
 
   const load = useCallback(async () => {
@@ -77,6 +80,8 @@ function QueriesList() {
     );
   }, []);
 
+  const pull = usePullToRefresh(load);
+
   useEffect(() => {
     void load();
     const id = setInterval(() => void load(), 60_000);
@@ -84,7 +89,27 @@ function QueriesList() {
   }, [load]);
 
   return (
-    <main className={`mx-auto min-h-screen max-w-md bg-background px-5 pb-28 pt-8 ${lang === "en" ? "" : "font-deva"}`}>
+    <main
+      className={`mx-auto min-h-screen max-w-md bg-background px-5 pb-28 pt-8 ${lang === "en" ? "" : "font-deva"}`}
+      onTouchStart={pull.handlers.onTouchStart}
+      onTouchMove={pull.handlers.onTouchMove}
+      onTouchEnd={pull.handlers.onTouchEnd}
+      onTouchCancel={pull.handlers.onTouchCancel}
+    >
+      <OfflineBanner />
+      {pull.indicator && (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-x-0 top-2 z-40 flex justify-center"
+          style={{ transform: `translateY(${Math.max(0, pull.offset - 16)}px)` }}
+        >
+          <span
+            className={`flex h-8 w-8 items-center justify-center rounded-full bg-card shadow-md ${pull.spinning ? "animate-spin" : ""}`}
+          >
+            <ChevronRight className="h-4 w-4 rotate-90 text-secondary" />
+          </span>
+        </div>
+      )}
       <h1 className="text-3xl font-bold text-primary">{t("queries.title")}</h1>
 
       {rows === null && <p className="mt-10 text-center text-sm text-muted-foreground">{t("registration.loading")}</p>}
@@ -121,6 +146,15 @@ function QueriesList() {
           </Link>
         ))}
       </div>
+
+      <button
+        type="button"
+        onClick={() => navigate({ to: "/queries/ask" })}
+        className="fixed bottom-20 right-5 z-40 flex min-h-14 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground shadow-xl shadow-primary/30 transition active:scale-95"
+      >
+        <Plus className="h-5 w-5" aria-hidden />
+        {t("queries.ask.fab")}
+      </button>
 
       <BottomNav />
     </main>

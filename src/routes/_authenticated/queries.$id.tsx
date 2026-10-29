@@ -6,8 +6,10 @@ import { toast } from "sonner";
 import { ArrowLeft, Camera, FileText, Paperclip, Send, TriangleAlert, X } from "lucide-react";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
+import { OfflineBanner } from "@/components/OfflineBanner";
 import { QueryChip } from "@/components/QueryChip";
 import { useLang } from "@/hooks/use-lang";
+import { useOffline } from "@/hooks/use-offline";
 import { prepareUpload } from "@/lib/image-compress";
 import { getMyRegistration } from "@/lib/registration.functions";
 import { getStaffNames } from "@/lib/query-staff.functions";
@@ -137,6 +139,7 @@ function Thread() {
   const navigate = useNavigate();
   const myReg = useServerFn(getMyRegistration);
   const staffNames = useServerFn(getStaffNames);
+  const offline = useOffline();
   const [query, setQuery] = useState<{ subject: string; status: string } | null>(null);
   const [missing, setMissing] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -281,6 +284,7 @@ function Thread() {
         </p>
         {query && <QueryChip status={query.status} className="mr-2" />}
       </header>
+      <OfflineBanner />
 
       <div className="flex-1 px-4 py-4">
         {missing && <p className="mt-10 text-center text-sm text-muted-foreground">{t("queries.notFound")}</p>}
@@ -321,8 +325,8 @@ function Thread() {
               <button
                 type="button"
                 onClick={() => cameraInput.current?.click()}
-                disabled={!canAttach || sending}
-                title={canAttach ? t("queries.camera") : t("queries.attachLocked")}
+                disabled={!canAttach || sending || offline}
+                title={!canAttach ? t("queries.attachLocked") : offline ? t("offline.hint") : t("queries.camera")}
                 aria-label={t("queries.camera")}
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-border bg-background text-foreground transition active:scale-95 disabled:opacity-40"
               >
@@ -331,8 +335,8 @@ function Thread() {
               <button
                 type="button"
                 onClick={() => fileInput.current?.click()}
-                disabled={!canAttach || sending}
-                title={canAttach ? t("queries.chooseFile") : t("queries.attachLocked")}
+                disabled={!canAttach || sending || offline}
+                title={!canAttach ? t("queries.attachLocked") : offline ? t("offline.hint") : t("queries.chooseFile")}
                 aria-label={t("queries.chooseFile")}
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-border bg-background text-foreground transition active:scale-95 disabled:opacity-40"
               >
@@ -348,13 +352,14 @@ function Thread() {
               <button
                 type="button"
                 onClick={() => void send()}
-                disabled={sending || (!text.trim() && !file)}
+                disabled={sending || offline || (!text.trim() && !file)}
                 aria-label={t("queries.send")}
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm transition active:scale-95 disabled:opacity-40"
               >
                 <Send className="h-5 w-5" aria-hidden />
               </button>
             </div>
+            {offline && <p className="mt-2 text-center text-xs text-muted-foreground">{t("offline.hint")}</p>}
           </>
         )}
         <input ref={cameraInput} type="file" accept="image/*" capture="environment" className="hidden" onChange={pick} />

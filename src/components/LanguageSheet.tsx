@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { SheetDrawer } from "@/components/SheetDrawer";
+import { DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { LANGUAGES, type Lang } from "@/lib/i18n";
 
 const LANGUAGE_LABELS: Record<Lang, string> = { en: "English", hi: "हिंदी", mr: "मराठी" };
@@ -18,9 +19,8 @@ export function LanguageSheet({
 }) {
   const { t } = useTranslation();
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="mx-auto max-w-md">
-        <DrawerHeader>
+    <SheetDrawer open={open} onOpenChange={onOpenChange}>
+      <DrawerHeader>
           <DrawerTitle>{t("account.language")}</DrawerTitle>
         </DrawerHeader>
         <div className="flex gap-2 px-4 pb-10">
@@ -44,7 +44,6 @@ export function LanguageSheet({
             </button>
           ))}
         </div>
-      </DrawerContent>
-    </Drawer>
+    </SheetDrawer>
   );
 }

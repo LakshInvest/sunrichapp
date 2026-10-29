@@ -34,6 +34,7 @@ import {
 } from "@/lib/registration.functions";
 import { isValidGstin, isValidPincode } from "@/lib/registration-validation";
 import { prepareUpload } from "@/lib/image-compress";
+import { useOffline } from "@/hooks/use-offline";
 
 export const Route = createFileRoute("/_authenticated/registration")({
   ssr: false,
@@ -264,6 +265,7 @@ type DetailsState = {
   addressLine2: string;
   landmark: string;
   city: string;
+  state: string;
   pincode: string;
   gstin: string;
   email: string;
@@ -320,6 +322,7 @@ function DetailsStep({
     addressLine2: reg.addressLine2 ?? "",
     landmark: reg.landmark ?? "",
     city: reg.city ?? "",
+    state: reg.state ?? "",
     pincode: reg.pincode ?? "",
     gstin: reg.gstin ?? "",
     email: reg.email ?? "",
@@ -349,6 +352,37 @@ function DetailsStep({
   const locationTouched =
     location.accuracy != null || location.lat !== DEFAULT_LOCATION.lat || location.lng !== DEFAULT_LOCATION.lng;
 
+  const offline = useOffline();
+  const [pinLookup, setPinLookup] = useState(false);
+
+  /** Fills City (District) and State from the 6-digit pincode; still editable. */
+  const lookupPincode = async (pin: string) => {
+    if (!/^\d{6}$/.test(pin)) return;
+    setPinLookup(true);
+    try {
+      const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+      const json: unknown = await res.json();
+      const entry = Array.isArray(json) ? (json[0] as Record<string, unknown> | undefined) : undefined;
+      const offices = entry?.["PostOffice"] as Record<string, unknown>[] | undefined;
+      const office = offices?.[0];
+      const district = typeof office?.["District"] === "string" ? office["District"] : "";
+      const state = typeof office?.["State"] === "string" ? office["State"] : "";
+      if (district || state) {
+        setFields((f) => ({
+          ...f,
+          ...(district ? { city: district } : {}),
+          ...(state ? { state } : f.state ? {} : { state: "Maharashtra" }),
+        }));
+      } else {
+        setFields((f) => ({ ...f, state: f.state || "Maharashtra" }));
+      }
+    } catch {
+      setFields((f) => ({ ...f, state: f.state || "Maharashtra" }));
+    } finally {
+      setPinLookup(false);
+    }
+  };
+
   const save = async () => {
     if (busy) return;
     const errs: Record<string, string> = {};
@@ -356,6 +390,7 @@ function DetailsStep({
     if (!fields.contactName.trim()) errs["contactName"] = t("registration.errRequired");
     if (!fields.addressLine1.trim()) errs["addressLine1"] = t("registration.errRequired");
     if (!fields.city.trim()) errs["city"] = t("registration.errRequired");
+    if (!fields.state.trim()) errs["state"] = t("registration.errRequired");
     if (!isValidPincode(fields.pincode)) errs["pincode"] = t("registration.errInvalidPincode");
     if (fields.gstin.trim() && !isValidGstin(fields.gstin)) errs["gstin"] = t("registration.errInvalidGstin");
     if (fields.email.trim() && !/^\S+@\S+\.\S+$/.test(fields.email.trim()))
@@ -372,6 +407,7 @@ function DetailsStep({
         p_contact_name: fields.contactName.trim(),
         p_address_line1: fields.addressLine1.trim(),
         p_city: fields.city.trim(),
+        p_state: fields.state.trim(),
         p_pincode: fields.pincode.trim(),
         ...(isBusiness ? { p_business_name: fields.businessName.trim() } : {}),
         ...(fields.addressLine2.trim() ? { p_address_line2: fields.addressLine2.trim() } : {}),
@@ -449,12 +485,22 @@ function DetailsStep({
             maxLength={6}
             value={fields.pincode}
             onChange={(e) => {
-              setFields((f) => ({ ...f, pincode: e.target.value.replace(/\D/g, "").slice(0, 6) }));
+              const pin = e.target.value.replace(/\D/g, "").slice(0, 6);
+              setFields((f) => ({ ...f, pincode: pin }));
               setFieldErrors((fe) => ({ ...fe, pincode: "" }));
+              void lookupPincode(pin);
             }}
           />
         </Field>
       </div>
+      <Field label={t("registration.state")} error={fieldErrors["state"]}>
+        <input
+          className={inputClass}
+          value={fields.state}
+          onChange={set("state")}
+          placeholder={pinLookup ? t("registration.locating") : t("registration.statePlaceholder")}
+        />
+      </Field>
       {isBusiness && (
         <Field label={t("registration.gstin")} error={fieldErrors["gstin"]}>
           <input
@@ -487,12 +533,14 @@ function DetailsStep({
       <button
         type="button"
         onClick={() => void save()}
-        disabled={busy}
+        disabled={busy || offline}
+        title={offline ? t("offline.hint") : undefined}
         className="flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md transition active:scale-[0.98] disabled:opacity-60"
       >
         {busy && <Loader2 className="h-5 w-5 animate-spin" />}
         {busy ? t("registration.saving") : t("registration.saveDetails")}
       </button>
+      {offline && <p className="text-center text-xs text-muted-foreground">{t("offline.hint")}</p>}
     </div>
   );
 }
@@ -526,6 +574,7 @@ function DocsStep({
 }) {
   const { t } = useTranslation();
   const { lang } = useLang();
+  const offline = useOffline();
   const fetchDocs = useServerFn(getDocumentRequirements);
   const [requirements, setRequirements] = useState<RequirementDto[]>([]);
   const [uploaded, setUploaded] = useState<UploadedDocDto[]>([]);
@@ -682,7 +731,7 @@ function DocsStep({
                 accept="image/*"
                 capture="environment"
                 className="hidden"
-                disabled={!!uploadingCode}
+                disabled={!!uploadingCode || offline}
                 onChange={onFilePicked(code)}
               />
             </label>
@@ -692,7 +741,7 @@ function DocsStep({
                 type="file"
                 accept={`${req?.acceptsImage ? "image/*," : ""}${req?.acceptsPdf ? "application/pdf" : ""}` || undefined}
                 className="hidden"
-                disabled={!!uploadingCode}
+                disabled={!!uploadingCode || offline}
                 onChange={onFilePicked(code)}
               />
             </label>
@@ -759,7 +808,8 @@ function DocsStep({
       <button
         type="button"
         onClick={() => void submit()}
-        disabled={!readyToSubmit || submitting}
+        disabled={!readyToSubmit || submitting || offline}
+        title={offline ? t("offline.hint") : undefined}
         className="flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md transition active:scale-[0.98] disabled:opacity-50"
       >
         {submitting && <Loader2 className="h-5 w-5 animate-spin" />}

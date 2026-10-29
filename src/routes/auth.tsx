@@ -5,8 +5,10 @@ import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
+import { OfflineBanner } from "@/components/OfflineBanner";
 import en from "@/locales/en.json";
 import { useLang } from "@/hooks/use-lang";
+import { useOffline } from "@/hooks/use-offline";
 import {
   sendOtp,
   verifyOtp,
@@ -40,6 +42,9 @@ export const Route = createFileRoute("/auth")({
     ],
   }),
   beforeLoad: async () => {
+    // While an OTP/PIN login is mid-flight (Set PIN screen pending) the session
+    // already exists — don't bounce the user out of the flow they're in.
+    if (sessionStorage.getItem(AUTH_FLOW_KEY)) return;
     const { data } = await supabase.auth.getUser();
     if (data.user) {
       const reg = await getMyRegistration();
@@ -53,6 +58,8 @@ export const Route = createFileRoute("/auth")({
 });
 
 const RESEND_SECONDS = 30;
+/** Present while an OTP/PIN login is in progress; keeps the /auth beforeLoad redirect out of the flow. */
+const AUTH_FLOW_KEY = "sunrich.authflow";
 
 function WhatsAppIcon() {
   return (
@@ -148,6 +155,7 @@ function Login() {
   const pinCheck = useServerFn(pinLogin);
   const deviceStatus = useServerFn(getMyDevice);
   const myCustomer = useServerFn(getMyRegistration);
+  const offline = useOffline();
 
   const [step, setStep] = useState<Step>("mobile");
   const [deviceId, setDeviceId] = useState("");
@@ -201,6 +209,7 @@ function Login() {
 
   /** Home when registration is done, registration placeholder when it isn't. */
   const routeAfterLogin = async () => {
+    sessionStorage.removeItem(AUTH_FLOW_KEY);
     const reg = await myCustomer();
     if (!reg.customerId || reg.status === "draft" || reg.status === "rejected") {
       await navigate({ to: "/registration" });
@@ -212,6 +221,10 @@ function Login() {
   const requestOtp = async () => {
     setError(null);
     setNotice(null);
+    if (offline) {
+      setError(t("offline.hint"));
+      return;
+    }
     setBusy(true);
     try {
       const r = await send({ data: { mobile } });
@@ -232,10 +245,15 @@ function Login() {
   };
 
   const afterOtpSession = async () => {
-    await supabase.rpc("record_login", {
+    // The session row must exist before Set PIN: set_my_pin validates it.
+    const { error: rlErr } = await supabase.rpc("record_login", {
       p_user_agent: navigator.userAgent.slice(0, 500),
       p_login_method: "otp_whatsapp",
     });
+    if (rlErr) {
+      setError(rlErr.message);
+      return;
+    }
     setLastMobile(mobile);
     try {
       const { trusted } = await deviceStatus({ data: { deviceId } });
@@ -247,7 +265,12 @@ function Login() {
         return;
       }
     } catch {
-      /* fall through to routing */
+      // Device check failed — play safe and ask for the PIN now.
+      setPin(Array(4).fill(""));
+      setConfirm(Array(4).fill(""));
+      setPinPhase("enter");
+      setStep("setpin");
+      return;
     }
     await routeAfterLogin();
   };
@@ -264,6 +287,7 @@ function Login() {
         boxes.current[0]?.focus();
         return;
       }
+      sessionStorage.setItem(AUTH_FLOW_KEY, "1");
       const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: r.tokenHash, type: "magiclink" });
       if (vErr) {
         setError(t("auth.errors.generic"));
@@ -311,6 +335,10 @@ function Login() {
   const submitPinLogin = async (pinValue: string) => {
     const m = lastMobile;
     if (!m || !deviceId || busy) return;
+    if (offline) {
+      setError(t("offline.hint"));
+      return;
+    }
     setError(null);
     setBusy(true);
     try {
@@ -333,15 +361,20 @@ function Login() {
         }
         return;
       }
+      sessionStorage.setItem(AUTH_FLOW_KEY, "1");
       const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: r.tokenHash, type: "magiclink" });
       if (vErr) {
         setError(t("auth.errors.generic"));
         return;
       }
-      await supabase.rpc("record_login", {
+      const { error: rlErr } = await supabase.rpc("record_login", {
         p_user_agent: navigator.userAgent.slice(0, 500),
         p_login_method: "pin",
       });
+      if (rlErr) {
+        setError(rlErr.message);
+        return;
+      }
       setLastMobile(m);
       await routeAfterLogin();
     } catch {
@@ -382,6 +415,23 @@ function Login() {
         setPinPhase("enter");
         return;
       }
+      // Read back the trusted device row: only continue when it exists.
+      const { data: me } = await supabase.auth.getUser();
+      const { data: dev } = await supabase
+        .from("user_devices")
+        .select("id")
+        .eq("user_id", me.user?.id ?? "")
+        .eq("device_id", deviceId)
+        .is("revoked_at", null)
+        .maybeSingle();
+      if (!dev) {
+        setError(t("auth.pin.notSaved"));
+        shake();
+        setPin(Array(4).fill(""));
+        setConfirm(Array(4).fill(""));
+        setPinPhase("enter");
+        return;
+      }
       setForcePin(false);
       await routeAfterLogin();
     } catch {
@@ -396,6 +446,7 @@ function Login() {
 
   return (
     <main className={`mx-auto flex min-h-screen max-w-md flex-col bg-background px-6 py-10 ${font}`}>
+      <OfflineBanner />
       <div className="flex flex-1 flex-col justify-center gap-10 animate-in fade-in">
         <div className="flex justify-center">
           <Logo />
@@ -493,7 +544,8 @@ function Login() {
             {error && <p role="alert" className="text-sm font-medium text-destructive">{error}</p>}
             <button
               type="submit"
-              disabled={!valid || busy}
+              disabled={!valid || busy || offline}
+              title={offline ? t("offline.hint") : undefined}
               className="flex h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md transition active:scale-[0.98] disabled:opacity-50"
             >
               {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <WhatsAppIcon />}
@@ -540,7 +592,7 @@ function Login() {
             {error && <p role="alert" className="text-center text-sm font-medium text-destructive">{error}</p>}
             <button
               type="button"
-              disabled={countdown > 0 || busy}
+              disabled={countdown > 0 || busy || offline}
               onClick={() => void requestOtp()}
               className="min-h-11 text-base font-semibold text-secondary disabled:text-muted-foreground"
             >

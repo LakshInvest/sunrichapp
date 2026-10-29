@@ -20,8 +20,10 @@ import { Route as AuthenticatedOrderRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedQueriesRouteImport } from './routes/_authenticated/queries'
 import { Route as AuthenticatedRegistrationRouteImport } from './routes/_authenticated/registration'
 import { Route as AuthenticatedTrackRouteImport } from './routes/_authenticated/track'
+import { Route as AuthenticatedProductIdRouteImport } from './routes/_authenticated/product.$id'
 import { Route as AuthenticatedQueriesIndexRouteImport } from './routes/_authenticated/queries.index'
 import { Route as AuthenticatedQueriesIdRouteImport } from './routes/_authenticated/queries.$id'
+import { Route as AuthenticatedQueriesAskRouteImport } from './routes/_authenticated/queries.ask'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -78,6 +80,11 @@ const AuthenticatedTrackRoute = AuthenticatedTrackRouteImport.update({
   path: '/track',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedProductIdRoute = AuthenticatedProductIdRouteImport.update({
+  id: '/product/$id',
+  path: '/product/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedQueriesIndexRoute =
   AuthenticatedQueriesIndexRouteImport.update({
     id: '/',
@@ -87,6 +94,11 @@ const AuthenticatedQueriesIndexRoute =
 const AuthenticatedQueriesIdRoute = AuthenticatedQueriesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
+  getParentRoute: () => AuthenticatedQueriesRoute,
+} as any)
+const AuthenticatedQueriesAskRoute = AuthenticatedQueriesAskRouteImport.update({
+  id: '/ask',
+  path: '/ask',
   getParentRoute: () => AuthenticatedQueriesRoute,
 } as any)
 
@@ -101,7 +113,9 @@ export interface FileRoutesByFullPath {
   '/queries': typeof AuthenticatedQueriesRouteWithChildren
   '/registration': typeof AuthenticatedRegistrationRoute
   '/track': typeof AuthenticatedTrackRoute
+  '/product/$id': typeof AuthenticatedProductIdRoute
   '/queries/$id': typeof AuthenticatedQueriesIdRoute
+  '/queries/ask': typeof AuthenticatedQueriesAskRoute
   '/queries/': typeof AuthenticatedQueriesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -114,7 +128,9 @@ export interface FileRoutesByTo {
   '/order': typeof AuthenticatedOrderRoute
   '/registration': typeof AuthenticatedRegistrationRoute
   '/track': typeof AuthenticatedTrackRoute
+  '/product/$id': typeof AuthenticatedProductIdRoute
   '/queries/$id': typeof AuthenticatedQueriesIdRoute
+  '/queries/ask': typeof AuthenticatedQueriesAskRoute
   '/queries': typeof AuthenticatedQueriesIndexRoute
 }
 export interface FileRoutesById {
@@ -130,7 +146,9 @@ export interface FileRoutesById {
   '/_authenticated/queries': typeof AuthenticatedQueriesRouteWithChildren
   '/_authenticated/registration': typeof AuthenticatedRegistrationRoute
   '/_authenticated/track': typeof AuthenticatedTrackRoute
+  '/_authenticated/product/$id': typeof AuthenticatedProductIdRoute
   '/_authenticated/queries/$id': typeof AuthenticatedQueriesIdRoute
+  '/_authenticated/queries/ask': typeof AuthenticatedQueriesAskRoute
   '/_authenticated/queries/': typeof AuthenticatedQueriesIndexRoute
 }
 export interface FileRouteTypes {
@@ -146,7 +164,9 @@ export interface FileRouteTypes {
     | '/queries'
     | '/registration'
     | '/track'
+    | '/product/$id'
     | '/queries/$id'
+    | '/queries/ask'
     | '/queries/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -159,7 +179,9 @@ export interface FileRouteTypes {
     | '/order'
     | '/registration'
     | '/track'
+    | '/product/$id'
     | '/queries/$id'
+    | '/queries/ask'
     | '/queries'
   id:
     | '__root__'
@@ -174,7 +196,9 @@ export interface FileRouteTypes {
     | '/_authenticated/queries'
     | '/_authenticated/registration'
     | '/_authenticated/track'
+    | '/_authenticated/product/$id'
     | '/_authenticated/queries/$id'
+    | '/_authenticated/queries/ask'
     | '/_authenticated/queries/'
   fileRoutesById: FileRoutesById
 }
@@ -263,6 +287,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTrackRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/product/$id': {
+      id: '/_authenticated/product/$id'
+      path: '/product/$id'
+      fullPath: '/product/$id'
+      preLoaderRoute: typeof AuthenticatedProductIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/queries/': {
       id: '/_authenticated/queries/'
       path: '/'
@@ -277,16 +308,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedQueriesIdRouteImport
       parentRoute: typeof AuthenticatedQueriesRoute
     }
+    '/_authenticated/queries/ask': {
+      id: '/_authenticated/queries/ask'
+      path: '/ask'
+      fullPath: '/queries/ask'
+      preLoaderRoute: typeof AuthenticatedQueriesAskRouteImport
+      parentRoute: typeof AuthenticatedQueriesRoute
+    }
   }
 }
 
 interface AuthenticatedQueriesRouteChildren {
   AuthenticatedQueriesIdRoute: typeof AuthenticatedQueriesIdRoute
+  AuthenticatedQueriesAskRoute: typeof AuthenticatedQueriesAskRoute
   AuthenticatedQueriesIndexRoute: typeof AuthenticatedQueriesIndexRoute
 }
 
 const AuthenticatedQueriesRouteChildren: AuthenticatedQueriesRouteChildren = {
   AuthenticatedQueriesIdRoute: AuthenticatedQueriesIdRoute,
+  AuthenticatedQueriesAskRoute: AuthenticatedQueriesAskRoute,
   AuthenticatedQueriesIndexRoute: AuthenticatedQueriesIndexRoute,
 }
 
@@ -302,6 +342,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedQueriesRoute: typeof AuthenticatedQueriesRouteWithChildren
   AuthenticatedRegistrationRoute: typeof AuthenticatedRegistrationRoute
   AuthenticatedTrackRoute: typeof AuthenticatedTrackRoute
+  AuthenticatedProductIdRoute: typeof AuthenticatedProductIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -313,6 +354,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedQueriesRoute: AuthenticatedQueriesRouteWithChildren,
   AuthenticatedRegistrationRoute: AuthenticatedRegistrationRoute,
   AuthenticatedTrackRoute: AuthenticatedTrackRoute,
+  AuthenticatedProductIdRoute: AuthenticatedProductIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

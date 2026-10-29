@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import {
   Camera,
   ChevronRight,
+  ExternalLink,
+  FileText,
   Image as ImageIcon,
   Info,
   Languages,
@@ -14,6 +16,7 @@ import {
   MapPin,
   MessagesSquare,
   Package,
+  ShieldCheck,
   Trash2,
   Wallet,
   type LucideIcon,
@@ -27,6 +30,7 @@ import { clearMyPhoto } from "@/lib/profile.functions";
 import { AddressSheet } from "@/components/AddressSheet";
 import { LanguageSheet } from "@/components/LanguageSheet";
 import { Logo } from "@/components/Logo";
+import { useOffline } from "@/hooks/use-offline";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,12 +48,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+import { SheetDrawer } from "@/components/SheetDrawer";
+import { DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useLang } from "@/hooks/use-lang";
@@ -124,6 +124,7 @@ function Account() {
   const { queryClient } = Route.useRouteContext();
   const myReg = useServerFn(getMyRegistration);
   const clearPhoto = useServerFn(clearMyPhoto);
+  const offline = useOffline();
   const deva = lang === "en" ? "" : "font-deva";
 
   const [profile, setProfile] = useState<{ name: string; mobile: string; photoUrl: string | null } | null>(null);
@@ -141,6 +142,11 @@ function Account() {
   const [removing, setRemoving] = useState(false);
   const [photoSheetOpen, setPhotoSheetOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteReason, setDeleteReason] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteDone, setDeleteDone] = useState(false);
   const cameraInput = useRef<HTMLInputElement>(null);
   const galleryInput = useRef<HTMLInputElement>(null);
 
@@ -277,6 +283,24 @@ function Account() {
     await navigate({ to: "/auth", replace: true });
   };
 
+  const requestDelete = async () => {
+    if (!deleteConfirm || deleting) return;
+    setDeleting(true);
+    try {
+      const { error } = await supabase.rpc("customer_raise_query", {
+        p_subject: t("account.deleteSubject"),
+        p_message: t("account.deleteMessage", { reason: deleteReason || "—" }),
+        p_context: "account_deletion",
+      });
+      if (error) throw error;
+      setDeleteDone(true);
+    } catch {
+      toast.error(t("queries.errSend"));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const typeLabel = pl(customer?.typeName, lang);
   const notActive = customer?.status && customer.status !== "active";
 
@@ -291,6 +315,7 @@ function Account() {
             <button
               type="button"
               onClick={() => setPhotoSheetOpen(true)}
+              disabled={offline}
               aria-label={t("account.changePhoto")}
               className="relative shrink-0 rounded-full transition active:scale-95"
             >
@@ -374,6 +399,20 @@ function Account() {
         {t("account.logout")}
       </button>
 
+      {/* Delete account — required for Play Store policy */}
+      <button
+        type="button"
+        onClick={() => {
+          setDeleteConfirm(false);
+          setDeleteDone(false);
+          setDeleteOpen(true);
+        }}
+        className="mx-auto mt-2 flex min-h-11 items-center gap-1.5 text-sm font-medium text-destructive underline underline-offset-4 transition active:scale-[0.98]"
+      >
+        <Trash2 className="h-4 w-4" aria-hidden />
+        {t("account.deleteAccount")}
+      </button>
+
       <BottomNav />
 
       <AddressSheet
@@ -397,8 +436,7 @@ function Account() {
 
       <LanguageSheet open={langOpen} onOpenChange={setLangOpen} lang={lang} onChoose={choose} />
 
-      <Drawer open={photoSheetOpen} onOpenChange={setPhotoSheetOpen}>
-        <DrawerContent className="mx-auto max-w-md">
+      <SheetDrawer open={photoSheetOpen} onOpenChange={setPhotoSheetOpen}>
           <DrawerHeader>
             <DrawerTitle className="text-center">{t("account.photoSheetTitle")}</DrawerTitle>
           </DrawerHeader>
@@ -433,7 +471,7 @@ function Account() {
               <button
                 type="button"
                 onClick={() => void removePhoto()}
-                disabled={removing}
+                disabled={removing || offline}
                 className="flex min-h-12 items-center gap-3 rounded-xl px-4 text-left text-[15px] font-medium text-destructive transition active:bg-destructive/5 disabled:opacity-50"
               >
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-destructive/10">
@@ -443,8 +481,7 @@ function Account() {
               </button>
             )}
           </div>
-        </DrawerContent>
-      </Drawer>
+      </SheetDrawer>
 
       {cropSrc && (
         <PhotoCrop
@@ -455,20 +492,42 @@ function Account() {
         />
       )}
 
-      <Drawer open={aboutOpen} onOpenChange={setAboutOpen}>
-        <DrawerContent className="mx-auto max-w-md">
+      <SheetDrawer open={aboutOpen} onOpenChange={setAboutOpen}>
           <DrawerHeader>
             <DrawerTitle className="text-center">{t("account.about")}</DrawerTitle>
           </DrawerHeader>
           <div className="flex flex-col items-center gap-3 px-4 pb-10 text-center">
             <Logo size="md" />
             <p className="max-w-64 text-sm text-muted-foreground">{t("account.aboutBody")}</p>
+            <div className="flex flex-col items-center gap-1.5">
+              <a
+                href="https://sunrichaqua.com/privacy"
+                target="_blank"
+                rel="noreferrer"
+                className="flex min-h-10 items-center gap-1.5 text-sm font-semibold text-secondary underline underline-offset-4"
+              >
+                <ShieldCheck className="h-4 w-4" aria-hidden />
+                {t("account.privacyPolicy")}
+                <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+              </a>
+              <a
+                href="https://sunrichaqua.com/terms"
+                target="_blank"
+                rel="noreferrer"
+                className="flex min-h-10 items-center gap-1.5 text-sm font-semibold text-secondary underline underline-offset-4"
+              >
+                <FileText className="h-4 w-4" aria-hidden />
+                {t("account.termsOfUse")}
+                <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+              </a>
+            </div>
             <p className="text-xs font-medium text-muted-foreground">
               {t("account.aboutVersion", { version: APP_VERSION })}
             </p>
+            <p className="text-xs text-muted-foreground">{t("account.madeBy")}</p>
           </div>
-        </DrawerContent>
-      </Drawer>
+      </SheetDrawer>
+
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="mx-auto max-w-sm rounded-2xl">
@@ -486,7 +545,7 @@ function Account() {
             <Button variant="outline" onClick={() => setEditOpen(false)} className="min-h-11 flex-1 rounded-xl">
               {t("account.cancel")}
             </Button>
-            <Button onClick={() => void saveName()} disabled={saving || !editName.trim()} className="min-h-11 flex-1 rounded-xl">
+            <Button onClick={() => void saveName()} disabled={saving || offline || !editName.trim()} className="min-h-11 flex-1 rounded-xl">
               {saving ? t("account.saving") : t("account.save")}
             </Button>
           </div>
@@ -510,6 +569,60 @@ function Account() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="mx-auto max-w-sm rounded-2xl">
+          {deleteDone ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>{t("account.deleteSentTitle")}</DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-muted-foreground">{t("account.deleteSentBody")}</p>
+              <Button onClick={() => void signOut()} className="min-h-12 rounded-xl">
+                {t("account.logout")}
+              </Button>
+            </>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle>{t("account.deleteAccount")}</DialogTitle>
+              </DialogHeader>
+              <p className="text-sm leading-relaxed text-muted-foreground">{t("account.deleteBody")}</p>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium text-foreground">{t("account.deleteReason")}</span>
+                <select
+                  value={deleteReason}
+                  onChange={(e) => setDeleteReason(e.target.value)}
+                  className="min-h-12 rounded-xl border border-input bg-card px-3 text-base text-foreground outline-none focus:border-secondary"
+                >
+                  <option value="">{t("account.deleteReasonNone")}</option>
+                  <option value={t("account.deleteReason1")}>{t("account.deleteReason1")}</option>
+                  <option value={t("account.deleteReason2")}>{t("account.deleteReason2")}</option>
+                  <option value={t("account.deleteReason3")}>{t("account.deleteReason3")}</option>
+                </select>
+              </label>
+              <label className="flex items-start gap-2.5">
+                <input
+                  type="checkbox"
+                  checked={deleteConfirm}
+                  onChange={(e) => setDeleteConfirm(e.target.checked)}
+                  className="mt-1 h-5 w-5 shrink-0 rounded border-input accent-[#0B2545]"
+                />
+                <span className="text-sm text-foreground">{t("account.deleteConfirm")}</span>
+              </label>
+              <Button
+                variant="destructive"
+                onClick={() => void requestDelete()}
+                disabled={!deleteConfirm || deleting || offline}
+                className="min-h-12 rounded-xl"
+              >
+                {deleting ? t("account.saving") : t("account.deleteRequest")}
+              </Button>
+              {offline && <p className="text-center text-xs text-muted-foreground">{t("offline.hint")}</p>}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <input ref={cameraInput} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPick} />
       <input ref={galleryInput} type="file" accept="image/*" className="hidden" onChange={onPick} />

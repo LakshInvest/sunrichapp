@@ -397,6 +397,64 @@ function Account() {
 
       <LanguageSheet open={langOpen} onOpenChange={setLangOpen} lang={lang} onChoose={choose} />
 
+      <Drawer open={photoSheetOpen} onOpenChange={setPhotoSheetOpen}>
+        <DrawerContent className="mx-auto max-w-md">
+          <DrawerHeader>
+            <DrawerTitle className="text-center">{t("account.photoSheetTitle")}</DrawerTitle>
+          </DrawerHeader>
+          <div className="flex flex-col px-2 pb-10">
+            <button
+              type="button"
+              onClick={() => {
+                setPhotoSheetOpen(false);
+                cameraInput.current?.click();
+              }}
+              className="flex min-h-12 items-center gap-3 rounded-xl px-4 text-left text-[15px] font-medium text-foreground transition active:bg-secondary/5"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary/10">
+                <Camera className="h-5 w-5 text-secondary" aria-hidden />
+              </span>
+              {t("account.takePhoto")}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPhotoSheetOpen(false);
+                galleryInput.current?.click();
+              }}
+              className="flex min-h-12 items-center gap-3 rounded-xl px-4 text-left text-[15px] font-medium text-foreground transition active:bg-secondary/5"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary/10">
+                <ImageIcon className="h-5 w-5 text-secondary" aria-hidden />
+              </span>
+              {t("account.chooseGallery")}
+            </button>
+            {profile?.photoUrl && (
+              <button
+                type="button"
+                onClick={() => void removePhoto()}
+                disabled={removing}
+                className="flex min-h-12 items-center gap-3 rounded-xl px-4 text-left text-[15px] font-medium text-destructive transition active:bg-destructive/5 disabled:opacity-50"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-destructive/10">
+                  <Trash2 className="h-5 w-5 text-destructive" aria-hidden />
+                </span>
+                {removing ? t("account.saving") : t("account.removePhoto")}
+              </button>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {cropSrc && (
+        <PhotoCrop
+          src={cropSrc}
+          busy={uploading}
+          onCancel={() => setCropSrc(null)}
+          onSave={(b) => void onCropSave(b)}
+        />
+      )}
+
       <Drawer open={aboutOpen} onOpenChange={setAboutOpen}>
         <DrawerContent className="mx-auto max-w-md">
           <DrawerHeader>
@@ -453,17 +511,8 @@ function Account() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <input
-        ref={photoInput}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          e.target.value = "";
-          if (f) void onPhoto(f);
-        }}
-      />
+      <input ref={cameraInput} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPick} />
+      <input ref={galleryInput} type="file" accept="image/*" className="hidden" onChange={onPick} />
     </main>
   );
 }

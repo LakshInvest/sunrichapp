@@ -56,7 +56,7 @@ function Order() {
   const { t } = useTranslation();
   const { lang } = useLang();
   const { category } = Route.useSearch();
-  const navigate = useNavigateFromOrder();
+  const navigate = useNavigate();
   const { quantities, setQty } = useCart();
   const offline = useOffline();
   const fav = useFavourites();
@@ -282,7 +282,3 @@ function Order() {
   );
 }
 
-import { useNavigate } from "@tanstack/react-router";
-function useNavigateFromOrder() {
-  return useNavigate();
-}

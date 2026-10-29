@@ -136,10 +136,13 @@ function Thread() {
   const { lang } = useLang();
   const navigate = useNavigate();
   const myReg = useServerFn(getMyRegistration);
+  const staffNames = useServerFn(getStaffNames);
   const [query, setQuery] = useState<{ subject: string; status: string } | null>(null);
   const [missing, setMissing] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
+  const [staff, setStaff] = useState<Record<string, string>>({});
+  const [lightbox, setLightbox] = useState<string | null>(null);
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);

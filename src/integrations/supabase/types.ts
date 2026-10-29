@@ -292,6 +292,77 @@ export type Database = {
           },
         ]
       }
+      cash_handovers: {
+        Row: {
+          amount: number
+          company_id: string
+          confirmed_at: string | null
+          created_at: string
+          created_by: string | null
+          from_user_id: string
+          handover_date: string
+          id: string
+          note: string | null
+          to_user_id: string
+          trip_id: string | null
+        }
+        Insert: {
+          amount: number
+          company_id: string
+          confirmed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          from_user_id: string
+          handover_date?: string
+          id?: string
+          note?: string | null
+          to_user_id: string
+          trip_id?: string | null
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          confirmed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          from_user_id?: string
+          handover_date?: string
+          id?: string
+          note?: string | null
+          to_user_id?: string
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_handovers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_handovers_from_user_id_fkey"
+            columns: ["from_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_handovers_to_user_id_fkey"
+            columns: ["to_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_handovers_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           code: string
@@ -330,6 +401,205 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      container_movements: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          id: number
+          note: string | null
+          product_id: string
+          qty_in: number
+          qty_out: number
+          ref_id: string | null
+          ref_type: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          id?: never
+          note?: string | null
+          product_id: string
+          qty_in?: number
+          qty_out?: number
+          ref_id?: string | null
+          ref_type?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          id?: never
+          note?: string | null
+          product_id?: string
+          qty_in?: number
+          qty_out?: number
+          ref_id?: string | null
+          ref_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "container_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "container_movements_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "container_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_debit_notes: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          firm_id: string
+          gst_rate: number
+          id: string
+          invoice_id: string | null
+          note_date: string
+          note_no: string
+          note_type: string
+          reason: string
+          status: string
+          tax_amount: number
+          taxable_value: number
+          total: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          firm_id: string
+          gst_rate?: number
+          id?: string
+          invoice_id?: string | null
+          note_date?: string
+          note_no: string
+          note_type: string
+          reason: string
+          status?: string
+          tax_amount?: number
+          taxable_value: number
+          total: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          firm_id?: string
+          gst_rate?: number
+          id?: string
+          invoice_id?: string | null
+          note_date?: string
+          note_no?: string
+          note_type?: string
+          reason?: string
+          status?: string
+          tax_amount?: number
+          taxable_value?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_debit_notes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_zone_defaults: {
+        Row: {
+          company_id: string
+          credit_days: number
+          credit_limit: number
+          customer_type_id: string
+          id: string
+          zone_id: string
+        }
+        Insert: {
+          company_id: string
+          credit_days?: number
+          credit_limit?: number
+          customer_type_id: string
+          id?: string
+          zone_id: string
+        }
+        Update: {
+          company_id?: string
+          credit_days?: number
+          credit_limit?: number
+          customer_type_id?: string
+          id?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_zone_defaults_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_zone_defaults_customer_type_id_fkey"
+            columns: ["customer_type_id"]
+            isOneToOne: false
+            referencedRelation: "customer_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_zone_defaults_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "geo_zones"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       customer_documents: {
         Row: {
@@ -426,6 +696,103 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_firm_credit: {
+        Row: {
+          credit_days: number
+          credit_limit: number
+          customer_id: string
+          firm_id: string
+        }
+        Insert: {
+          credit_days?: number
+          credit_limit?: number
+          customer_id: string
+          firm_id: string
+        }
+        Update: {
+          credit_days?: number
+          credit_limit?: number
+          customer_id?: string
+          firm_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_firm_credit_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_firm_credit_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_opening_balances: {
+        Row: {
+          amount: number
+          amount_paid: number
+          as_of: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          firm_id: string
+          id: string
+          note: string | null
+        }
+        Insert: {
+          amount: number
+          amount_paid?: number
+          as_of: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          firm_id: string
+          id?: string
+          note?: string | null
+        }
+        Update: {
+          amount?: number
+          amount_paid?: number
+          as_of?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          firm_id?: string
+          id?: string
+          note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_opening_balances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_opening_balances_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_opening_balances_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
             referencedColumns: ["id"]
           },
         ]
@@ -569,10 +936,13 @@ export type Database = {
       }
       customer_types: {
         Row: {
+          auto_approve_orders: boolean
           code: string
           company_id: string
           created_at: string
           created_by: string | null
+          default_credit_days: number
+          default_credit_limit: number
           default_price_plan_id: string | null
           description: string | null
           description_hi: string | null
@@ -585,14 +955,18 @@ export type Database = {
           name_mr: string | null
           requires_approval: boolean
           requires_gps: boolean
+          route_via_distributor: boolean
           sort_order: number
           updated_at: string
         }
         Insert: {
+          auto_approve_orders?: boolean
           code: string
           company_id: string
           created_at?: string
           created_by?: string | null
+          default_credit_days?: number
+          default_credit_limit?: number
           default_price_plan_id?: string | null
           description?: string | null
           description_hi?: string | null
@@ -605,14 +979,18 @@ export type Database = {
           name_mr?: string | null
           requires_approval?: boolean
           requires_gps?: boolean
+          route_via_distributor?: boolean
           sort_order?: number
           updated_at?: string
         }
         Update: {
+          auto_approve_orders?: boolean
           code?: string
           company_id?: string
           created_at?: string
           created_by?: string | null
+          default_credit_days?: number
+          default_credit_limit?: number
           default_price_plan_id?: string | null
           description?: string | null
           description_hi?: string | null
@@ -625,6 +1003,7 @@ export type Database = {
           name_mr?: string | null
           requires_approval?: boolean
           requires_gps?: boolean
+          route_via_distributor?: boolean
           sort_order?: number
           updated_at?: string
         }
@@ -651,12 +1030,17 @@ export type Database = {
           address_line2: string | null
           approved_at: string | null
           approved_by: string | null
+          area_id: string | null
           business_name: string | null
           city: string | null
           company_id: string
           contact_name: string
           created_at: string
           created_by: string | null
+          credit_block_reason: string | null
+          credit_blocked: boolean
+          credit_days: number | null
+          credit_limit: number | null
           customer_code: string
           customer_type_id: string
           email: string | null
@@ -667,10 +1051,12 @@ export type Database = {
           location_accuracy_m: number | null
           longitude: number | null
           mobile: string
+          overdue_grace_days: number
           pincode: string | null
           price_plan_id: string | null
           registered_via: string
           rejection_reason: string | null
+          route_id: string | null
           state: string | null
           status: Database["public"]["Enums"]["customer_status"]
           submitted_at: string | null
@@ -681,12 +1067,17 @@ export type Database = {
           address_line2?: string | null
           approved_at?: string | null
           approved_by?: string | null
+          area_id?: string | null
           business_name?: string | null
           city?: string | null
           company_id: string
           contact_name: string
           created_at?: string
           created_by?: string | null
+          credit_block_reason?: string | null
+          credit_blocked?: boolean
+          credit_days?: number | null
+          credit_limit?: number | null
           customer_code?: string
           customer_type_id: string
           email?: string | null
@@ -697,10 +1088,12 @@ export type Database = {
           location_accuracy_m?: number | null
           longitude?: number | null
           mobile: string
+          overdue_grace_days?: number
           pincode?: string | null
           price_plan_id?: string | null
           registered_via?: string
           rejection_reason?: string | null
+          route_id?: string | null
           state?: string | null
           status?: Database["public"]["Enums"]["customer_status"]
           submitted_at?: string | null
@@ -711,12 +1104,17 @@ export type Database = {
           address_line2?: string | null
           approved_at?: string | null
           approved_by?: string | null
+          area_id?: string | null
           business_name?: string | null
           city?: string | null
           company_id?: string
           contact_name?: string
           created_at?: string
           created_by?: string | null
+          credit_block_reason?: string | null
+          credit_blocked?: boolean
+          credit_days?: number | null
+          credit_limit?: number | null
           customer_code?: string
           customer_type_id?: string
           email?: string | null
@@ -727,16 +1125,25 @@ export type Database = {
           location_accuracy_m?: number | null
           longitude?: number | null
           mobile?: string
+          overdue_grace_days?: number
           pincode?: string | null
           price_plan_id?: string | null
           registered_via?: string
           rejection_reason?: string | null
+          route_id?: string | null
           state?: string | null
           status?: Database["public"]["Enums"]["customer_status"]
           submitted_at?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "customers_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "geo_areas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "customers_company_id_fkey"
             columns: ["company_id"]
@@ -756,6 +1163,186 @@ export type Database = {
             columns: ["price_plan_id"]
             isOneToOne: false
             referencedRelation: "price_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customers_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "geo_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_lines: {
+        Row: {
+          damaged_qty: number
+          delivered_qty: number
+          empties_returned: number
+          order_line_id: string
+          refused_qty: number
+          short_qty: number
+          stop_id: string
+        }
+        Insert: {
+          damaged_qty?: number
+          delivered_qty?: number
+          empties_returned?: number
+          order_line_id: string
+          refused_qty?: number
+          short_qty?: number
+          stop_id: string
+        }
+        Update: {
+          damaged_qty?: number
+          delivered_qty?: number
+          empties_returned?: number
+          order_line_id?: string
+          refused_qty?: number
+          short_qty?: number
+          stop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_lines_order_line_id_fkey"
+            columns: ["order_line_id"]
+            isOneToOne: false
+            referencedRelation: "order_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_lines_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "trip_stops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_settings: {
+        Row: {
+          allow_cash: boolean
+          allow_cheque: boolean
+          allow_extra_load: boolean
+          allow_partial_delivery: boolean
+          allow_pickup_only: boolean
+          allow_spot_sale: boolean
+          allow_upi: boolean
+          arrived_button_enabled: boolean
+          collect_old_dues: boolean
+          company_id: string
+          default_language: string
+          expense_bill_photo_required: boolean
+          expense_limit_per_trip: number
+          expense_types: string[]
+          expenses_enabled: boolean
+          failed_reasons: string[]
+          location_at_each_stop: boolean
+          location_interval_minutes: number
+          location_tracking_enabled: boolean
+          proof_otp_enabled: boolean
+          proof_otp_required: boolean
+          proof_photo_enabled: boolean
+          proof_photo_required: boolean
+          proof_signature_enabled: boolean
+          proof_signature_required: boolean
+          require_end_odometer: boolean
+          require_end_odometer_photo: boolean
+          require_start_odometer: boolean
+          require_start_odometer_photo: boolean
+          require_start_selfie: boolean
+          show_jar_balance: boolean
+          show_outstanding: boolean
+          sos_enabled: boolean
+          updated_at: string
+          updated_by: string | null
+          vehicle_check_enabled: boolean
+          vehicle_check_items: string[]
+        }
+        Insert: {
+          allow_cash?: boolean
+          allow_cheque?: boolean
+          allow_extra_load?: boolean
+          allow_partial_delivery?: boolean
+          allow_pickup_only?: boolean
+          allow_spot_sale?: boolean
+          allow_upi?: boolean
+          arrived_button_enabled?: boolean
+          collect_old_dues?: boolean
+          company_id: string
+          default_language?: string
+          expense_bill_photo_required?: boolean
+          expense_limit_per_trip?: number
+          expense_types?: string[]
+          expenses_enabled?: boolean
+          failed_reasons?: string[]
+          location_at_each_stop?: boolean
+          location_interval_minutes?: number
+          location_tracking_enabled?: boolean
+          proof_otp_enabled?: boolean
+          proof_otp_required?: boolean
+          proof_photo_enabled?: boolean
+          proof_photo_required?: boolean
+          proof_signature_enabled?: boolean
+          proof_signature_required?: boolean
+          require_end_odometer?: boolean
+          require_end_odometer_photo?: boolean
+          require_start_odometer?: boolean
+          require_start_odometer_photo?: boolean
+          require_start_selfie?: boolean
+          show_jar_balance?: boolean
+          show_outstanding?: boolean
+          sos_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_check_enabled?: boolean
+          vehicle_check_items?: string[]
+        }
+        Update: {
+          allow_cash?: boolean
+          allow_cheque?: boolean
+          allow_extra_load?: boolean
+          allow_partial_delivery?: boolean
+          allow_pickup_only?: boolean
+          allow_spot_sale?: boolean
+          allow_upi?: boolean
+          arrived_button_enabled?: boolean
+          collect_old_dues?: boolean
+          company_id?: string
+          default_language?: string
+          expense_bill_photo_required?: boolean
+          expense_limit_per_trip?: number
+          expense_types?: string[]
+          expenses_enabled?: boolean
+          failed_reasons?: string[]
+          location_at_each_stop?: boolean
+          location_interval_minutes?: number
+          location_tracking_enabled?: boolean
+          proof_otp_enabled?: boolean
+          proof_otp_required?: boolean
+          proof_photo_enabled?: boolean
+          proof_photo_required?: boolean
+          proof_signature_enabled?: boolean
+          proof_signature_required?: boolean
+          require_end_odometer?: boolean
+          require_end_odometer_photo?: boolean
+          require_start_odometer?: boolean
+          require_start_odometer_photo?: boolean
+          require_start_selfie?: boolean
+          show_jar_balance?: boolean
+          show_outstanding?: boolean
+          sos_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+          vehicle_check_enabled?: boolean
+          vehicle_check_items?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -875,6 +1462,51 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_profiles: {
+        Row: {
+          alt_phone: string | null
+          default_vehicle_id: string | null
+          licence_expiry: string | null
+          licence_no: string | null
+          licence_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alt_phone?: string | null
+          default_vehicle_id?: string | null
+          licence_expiry?: string | null
+          licence_no?: string | null
+          licence_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alt_phone?: string | null
+          default_vehicle_id?: string | null
+          licence_expiry?: string | null
+          licence_no?: string | null
+          licence_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_profiles_default_vehicle_id_fkey"
+            columns: ["default_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1046,6 +1678,935 @@ export type Database = {
           },
         ]
       }
+      gate_passes: {
+        Row: {
+          id: string
+          issued_at: string
+          issued_by: string | null
+          pass_no: string
+          qr_token: string
+          trip_id: string
+        }
+        Insert: {
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          pass_no: string
+          qr_token?: string
+          trip_id: string
+        }
+        Update: {
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          pass_no?: string
+          qr_token?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gate_passes_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: true
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geo_areas: {
+        Row: {
+          backup_distributor_id: string | null
+          code: string
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          name_hi: string | null
+          name_mr: string | null
+          pincodes: string[]
+          primary_distributor_id: string | null
+          salesman_user_id: string | null
+          updated_at: string
+          zone_id: string
+        }
+        Insert: {
+          backup_distributor_id?: string | null
+          code: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_hi?: string | null
+          name_mr?: string | null
+          pincodes?: string[]
+          primary_distributor_id?: string | null
+          salesman_user_id?: string | null
+          updated_at?: string
+          zone_id: string
+        }
+        Update: {
+          backup_distributor_id?: string | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_hi?: string | null
+          name_mr?: string | null
+          pincodes?: string[]
+          primary_distributor_id?: string | null
+          salesman_user_id?: string | null
+          updated_at?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geo_areas_backup_distributor_id_fkey"
+            columns: ["backup_distributor_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_areas_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_areas_primary_distributor_id_fkey"
+            columns: ["primary_distributor_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_areas_salesman_user_id_fkey"
+            columns: ["salesman_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_areas_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "geo_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geo_cities: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          name_hi: string | null
+          name_mr: string | null
+          state_id: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_hi?: string | null
+          name_mr?: string | null
+          state_id: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_hi?: string | null
+          name_mr?: string | null
+          state_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geo_cities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_cities_state_id_fkey"
+            columns: ["state_id"]
+            isOneToOne: false
+            referencedRelation: "geo_states"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geo_route_areas: {
+        Row: {
+          area_id: string
+          route_id: string
+          sort_order: number
+        }
+        Insert: {
+          area_id: string
+          route_id: string
+          sort_order?: number
+        }
+        Update: {
+          area_id?: string
+          route_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geo_route_areas_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "geo_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_route_areas_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "geo_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geo_routes: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geo_routes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_routes_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geo_states: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          gst_state_code: string | null
+          id: string
+          is_active: boolean
+          name: string
+          name_hi: string | null
+          name_mr: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          gst_state_code?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          name_hi?: string | null
+          name_mr?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          gst_state_code?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_hi?: string | null
+          name_mr?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geo_states_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geo_zones: {
+        Row: {
+          city_id: string
+          code: string
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          manager_user_id: string | null
+          name: string
+          name_hi: string | null
+          name_mr: string | null
+          updated_at: string
+        }
+        Insert: {
+          city_id: string
+          code: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          manager_user_id?: string | null
+          name: string
+          name_hi?: string | null
+          name_mr?: string | null
+          updated_at?: string
+        }
+        Update: {
+          city_id?: string
+          code?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          manager_user_id?: string | null
+          name?: string
+          name_hi?: string | null
+          name_mr?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geo_zones_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "geo_cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_zones_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_zones_manager_user_id_fkey"
+            columns: ["manager_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_lines: {
+        Row: {
+          cgst: number
+          description: string
+          gst_rate: number
+          hsn_code: string | null
+          id: string
+          igst: number
+          invoice_id: string
+          line_total: number
+          order_line_id: string | null
+          product_id: string
+          qty: number
+          sgst: number
+          sort_order: number
+          taxable_value: number
+          unit_price: number
+        }
+        Insert: {
+          cgst?: number
+          description: string
+          gst_rate: number
+          hsn_code?: string | null
+          id?: string
+          igst?: number
+          invoice_id: string
+          line_total: number
+          order_line_id?: string | null
+          product_id: string
+          qty: number
+          sgst?: number
+          sort_order?: number
+          taxable_value: number
+          unit_price: number
+        }
+        Update: {
+          cgst?: number
+          description?: string
+          gst_rate?: number
+          hsn_code?: string | null
+          id?: string
+          igst?: number
+          invoice_id?: string
+          line_total?: number
+          order_line_id?: string | null
+          product_id?: string
+          qty?: number
+          sgst?: number
+          sort_order?: number
+          taxable_value?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_order_line_id_fkey"
+            columns: ["order_line_id"]
+            isOneToOne: false
+            referencedRelation: "order_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          ack_date: string | null
+          ack_no: string | null
+          amount_paid: number
+          billing_address: string | null
+          business_name: string | null
+          cgst: number
+          company_id: string
+          created_at: string
+          created_by: string | null
+          customer_gstin: string | null
+          customer_id: string
+          customer_name: string | null
+          deposit_total: number
+          due_date: string | null
+          eway_bill_no: string | null
+          firm_id: string
+          grand_total: number
+          id: string
+          igst: number
+          invoice_date: string
+          invoice_no: string
+          irn: string | null
+          is_interstate: boolean
+          order_id: string
+          payment_status: string
+          place_of_supply: string | null
+          round_off: number
+          sgst: number
+          status: string
+          taxable_value: number
+          trip_id: string | null
+        }
+        Insert: {
+          ack_date?: string | null
+          ack_no?: string | null
+          amount_paid?: number
+          billing_address?: string | null
+          business_name?: string | null
+          cgst?: number
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_gstin?: string | null
+          customer_id: string
+          customer_name?: string | null
+          deposit_total?: number
+          due_date?: string | null
+          eway_bill_no?: string | null
+          firm_id: string
+          grand_total?: number
+          id?: string
+          igst?: number
+          invoice_date?: string
+          invoice_no: string
+          irn?: string | null
+          is_interstate?: boolean
+          order_id: string
+          payment_status?: string
+          place_of_supply?: string | null
+          round_off?: number
+          sgst?: number
+          status?: string
+          taxable_value?: number
+          trip_id?: string | null
+        }
+        Update: {
+          ack_date?: string | null
+          ack_no?: string | null
+          amount_paid?: number
+          billing_address?: string | null
+          business_name?: string | null
+          cgst?: number
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_gstin?: string | null
+          customer_id?: string
+          customer_name?: string | null
+          deposit_total?: number
+          due_date?: string | null
+          eway_bill_no?: string | null
+          firm_id?: string
+          grand_total?: number
+          id?: string
+          igst?: number
+          invoice_date?: string
+          invoice_no?: string
+          irn?: string | null
+          is_interstate?: boolean
+          order_id?: string
+          payment_status?: string
+          place_of_supply?: string | null
+          round_off?: number
+          sgst?: number
+          status?: string
+          taxable_value?: number
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_lines: {
+        Row: {
+          deposit_per_unit: number
+          deposit_total: number
+          gst_rate: number
+          hsn_code: string | null
+          id: string
+          line_total: number
+          mrp: number | null
+          new_containers: number
+          order_id: string
+          pack_label: string | null
+          product_code: string
+          product_id: string
+          product_name: string
+          qty: number
+          sort_order: number
+          tax_amount: number
+          taxable_value: number
+          unit_price: number
+        }
+        Insert: {
+          deposit_per_unit?: number
+          deposit_total?: number
+          gst_rate?: number
+          hsn_code?: string | null
+          id?: string
+          line_total: number
+          mrp?: number | null
+          new_containers?: number
+          order_id: string
+          pack_label?: string | null
+          product_code: string
+          product_id: string
+          product_name: string
+          qty: number
+          sort_order?: number
+          tax_amount: number
+          taxable_value: number
+          unit_price: number
+        }
+        Update: {
+          deposit_per_unit?: number
+          deposit_total?: number
+          gst_rate?: number
+          hsn_code?: string | null
+          id?: string
+          line_total?: number
+          mrp?: number | null
+          new_containers?: number
+          order_id?: string
+          pack_label?: string | null
+          product_code?: string
+          product_id?: string
+          product_name?: string
+          qty?: number
+          sort_order?: number
+          tax_amount?: number
+          taxable_value?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_lines_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_status_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          from_status: Database["public"]["Enums"]["order_status"] | null
+          id: number
+          note: string | null
+          order_id: string
+          to_status: Database["public"]["Enums"]["order_status"]
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          from_status?: Database["public"]["Enums"]["order_status"] | null
+          id?: never
+          note?: string | null
+          order_id: string
+          to_status: Database["public"]["Enums"]["order_status"]
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          from_status?: Database["public"]["Enums"]["order_status"] | null
+          id?: never
+          note?: string | null
+          order_id?: string
+          to_status?: Database["public"]["Enums"]["order_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          amount_paid: number
+          approved_at: string | null
+          approved_by: string | null
+          area_id: string | null
+          business_name: string | null
+          cancel_reason: string | null
+          cancelled_by: string | null
+          company_id: string
+          created_at: string
+          credit_limit_snapshot: number | null
+          customer_id: string
+          customer_mobile: string | null
+          customer_name: string | null
+          customer_type_code: string | null
+          delivery_address_line1: string | null
+          delivery_address_line2: string | null
+          delivery_charge: number
+          delivery_city: string | null
+          delivery_date: string | null
+          delivery_landmark: string | null
+          delivery_latitude: number | null
+          delivery_longitude: number | null
+          delivery_otp: string | null
+          delivery_pincode: string | null
+          delivery_slot: string | null
+          deposit_total: number
+          distributor_assigned_at: string | null
+          distributor_note: string | null
+          distributor_responded_at: string | null
+          distributor_status: string | null
+          due_date: string | null
+          firm_id: string
+          fulfiller_customer_id: string | null
+          grand_total: number
+          hold_reason: string | null
+          id: string
+          items_total: number
+          notes: string | null
+          order_group_id: string
+          order_no: string
+          order_type: string
+          outstanding_snapshot: number | null
+          payment_mode: string
+          payment_status: string
+          placed_by: string | null
+          price_plan_id: string | null
+          round_off: number
+          route_id: string | null
+          source: string
+          status: Database["public"]["Enums"]["order_status"]
+          tax_total: number
+          taxable_value: number
+          updated_at: string
+          zone_id: string | null
+        }
+        Insert: {
+          amount_paid?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          area_id?: string | null
+          business_name?: string | null
+          cancel_reason?: string | null
+          cancelled_by?: string | null
+          company_id: string
+          created_at?: string
+          credit_limit_snapshot?: number | null
+          customer_id: string
+          customer_mobile?: string | null
+          customer_name?: string | null
+          customer_type_code?: string | null
+          delivery_address_line1?: string | null
+          delivery_address_line2?: string | null
+          delivery_charge?: number
+          delivery_city?: string | null
+          delivery_date?: string | null
+          delivery_landmark?: string | null
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
+          delivery_otp?: string | null
+          delivery_pincode?: string | null
+          delivery_slot?: string | null
+          deposit_total?: number
+          distributor_assigned_at?: string | null
+          distributor_note?: string | null
+          distributor_responded_at?: string | null
+          distributor_status?: string | null
+          due_date?: string | null
+          firm_id: string
+          fulfiller_customer_id?: string | null
+          grand_total?: number
+          hold_reason?: string | null
+          id?: string
+          items_total?: number
+          notes?: string | null
+          order_group_id: string
+          order_no: string
+          order_type?: string
+          outstanding_snapshot?: number | null
+          payment_mode?: string
+          payment_status?: string
+          placed_by?: string | null
+          price_plan_id?: string | null
+          round_off?: number
+          route_id?: string | null
+          source?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          tax_total?: number
+          taxable_value?: number
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Update: {
+          amount_paid?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          area_id?: string | null
+          business_name?: string | null
+          cancel_reason?: string | null
+          cancelled_by?: string | null
+          company_id?: string
+          created_at?: string
+          credit_limit_snapshot?: number | null
+          customer_id?: string
+          customer_mobile?: string | null
+          customer_name?: string | null
+          customer_type_code?: string | null
+          delivery_address_line1?: string | null
+          delivery_address_line2?: string | null
+          delivery_charge?: number
+          delivery_city?: string | null
+          delivery_date?: string | null
+          delivery_landmark?: string | null
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
+          delivery_otp?: string | null
+          delivery_pincode?: string | null
+          delivery_slot?: string | null
+          deposit_total?: number
+          distributor_assigned_at?: string | null
+          distributor_note?: string | null
+          distributor_responded_at?: string | null
+          distributor_status?: string | null
+          due_date?: string | null
+          firm_id?: string
+          fulfiller_customer_id?: string | null
+          grand_total?: number
+          hold_reason?: string | null
+          id?: string
+          items_total?: number
+          notes?: string | null
+          order_group_id?: string
+          order_no?: string
+          order_type?: string
+          outstanding_snapshot?: number | null
+          payment_mode?: string
+          payment_status?: string
+          placed_by?: string | null
+          price_plan_id?: string | null
+          round_off?: number
+          route_id?: string | null
+          source?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          tax_total?: number
+          taxable_value?: number
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "geo_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_fulfiller_customer_id_fkey"
+            columns: ["fulfiller_customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_price_plan_id_fkey"
+            columns: ["price_plan_id"]
+            isOneToOne: false
+            referencedRelation: "price_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "geo_routes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "geo_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       otp_requests: {
         Row: {
           attempts: number
@@ -1099,6 +2660,7 @@ export type Database = {
       }
       price_plan_items: {
         Row: {
+          city_id: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -1107,8 +2669,10 @@ export type Database = {
           product_id: string
           valid_from: string
           valid_to: string | null
+          zone_id: string | null
         }
         Insert: {
+          city_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -1117,8 +2681,10 @@ export type Database = {
           product_id: string
           valid_from?: string
           valid_to?: string | null
+          zone_id?: string | null
         }
         Update: {
+          city_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -1127,8 +2693,16 @@ export type Database = {
           product_id?: string
           valid_from?: string
           valid_to?: string | null
+          zone_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "price_plan_items_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "geo_cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "price_plan_items_price_plan_id_fkey"
             columns: ["price_plan_id"]
@@ -1141,6 +2715,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "price_plan_items_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "geo_zones"
             referencedColumns: ["id"]
           },
         ]
@@ -1285,6 +2866,7 @@ export type Database = {
       }
       products: {
         Row: {
+          always_direct: boolean
           brand_id: string
           bulk_threshold_qty: number | null
           category_id: string | null
@@ -1326,6 +2908,7 @@ export type Database = {
           weight_kg: number | null
         }
         Insert: {
+          always_direct?: boolean
           brand_id: string
           bulk_threshold_qty?: number | null
           category_id?: string | null
@@ -1367,6 +2950,7 @@ export type Database = {
           weight_kg?: number | null
         }
         Update: {
+          always_direct?: boolean
           brand_id?: string
           bulk_threshold_qty?: number | null
           category_id?: string | null
@@ -1434,6 +3018,971 @@ export type Database = {
             columns: ["firm_id"]
             isOneToOne: false
             referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      receipt_allocations: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          invoice_id: string | null
+          opening_id: string | null
+          receipt_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          opening_id?: string | null
+          receipt_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          opening_id?: string | null
+          receipt_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipt_allocations_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_allocations_opening_id_fkey"
+            columns: ["opening_id"]
+            isOneToOne: false
+            referencedRelation: "customer_opening_balances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_allocations_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
+            referencedRelation: "receipts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      receipts: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          cancel_reason: string | null
+          cheque_bank: string | null
+          cheque_date: string | null
+          cheque_no: string | null
+          cheque_photo_url: string | null
+          cheque_status: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          firm_id: string
+          id: string
+          mode: string
+          notes: string | null
+          receipt_date: string
+          receipt_no: string
+          reference: string | null
+          source: string
+          status: string
+          trip_collection_id: string | null
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          cancel_reason?: string | null
+          cheque_bank?: string | null
+          cheque_date?: string | null
+          cheque_no?: string | null
+          cheque_photo_url?: string | null
+          cheque_status?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          firm_id: string
+          id?: string
+          mode: string
+          notes?: string | null
+          receipt_date?: string
+          receipt_no: string
+          reference?: string | null
+          source?: string
+          status?: string
+          trip_collection_id?: string | null
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          cancel_reason?: string | null
+          cheque_bank?: string | null
+          cheque_date?: string | null
+          cheque_no?: string | null
+          cheque_photo_url?: string | null
+          cheque_status?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          firm_id?: string
+          id?: string
+          mode?: string
+          notes?: string | null
+          receipt_date?: string
+          receipt_no?: string
+          reference?: string | null
+          source?: string
+          status?: string
+          trip_collection_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipts_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "firm_bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_trip_collection_id_fkey"
+            columns: ["trip_collection_id"]
+            isOneToOne: false
+            referencedRelation: "trip_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_permissions: {
+        Row: {
+          action: string
+          module: string
+          role_id: string
+        }
+        Insert: {
+          action: string
+          module: string
+          role_id: string
+        }
+        Update: {
+          action?: string
+          module?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          approval_limit: number | null
+          code: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          is_system: boolean
+          name: string
+          name_hi: string | null
+          name_mr: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_limit?: number | null
+          code: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name: string
+          name_hi?: string | null
+          name_mr?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_limit?: number | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name?: string
+          name_hi?: string | null
+          name_mr?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_movements: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: number
+          movement_type: string
+          note: string | null
+          product_id: string
+          qty: number
+          ref_id: string | null
+          ref_type: string | null
+          unit_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: never
+          movement_type: string
+          note?: string | null
+          product_id: string
+          qty: number
+          ref_id?: string | null
+          ref_type?: string | null
+          unit_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: never
+          movement_type?: string
+          note?: string | null
+          product_id?: string
+          qty?: number
+          ref_id?: string | null
+          ref_type?: string | null
+          unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      temp_credit_limits: {
+        Row: {
+          approved_by: string | null
+          created_at: string
+          customer_id: string
+          extra_amount: number
+          firm_id: string | null
+          id: string
+          reason: string
+          valid_till: string
+        }
+        Insert: {
+          approved_by?: string | null
+          created_at?: string
+          customer_id: string
+          extra_amount: number
+          firm_id?: string | null
+          id?: string
+          reason: string
+          valid_till: string
+        }
+        Update: {
+          approved_by?: string | null
+          created_at?: string
+          customer_id?: string
+          extra_amount?: number
+          firm_id?: string | null
+          id?: string
+          reason?: string
+          valid_till?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "temp_credit_limits_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "temp_credit_limits_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_alerts: {
+        Row: {
+          alert_type: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          note: string | null
+          raised_at: string
+          raised_by: string | null
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          trip_id: string
+        }
+        Insert: {
+          alert_type: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          note?: string | null
+          raised_at?: string
+          raised_by?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          trip_id: string
+        }
+        Update: {
+          alert_type?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          note?: string | null
+          raised_at?: string
+          raised_by?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_alerts_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_collections: {
+        Row: {
+          against_old_dues: boolean
+          amount: number
+          collected_at: string
+          collected_by: string | null
+          confirmed: boolean
+          customer_id: string
+          id: string
+          mode: string
+          order_id: string | null
+          photo_url: string | null
+          reference: string | null
+          stop_id: string | null
+          trip_id: string
+        }
+        Insert: {
+          against_old_dues?: boolean
+          amount: number
+          collected_at?: string
+          collected_by?: string | null
+          confirmed?: boolean
+          customer_id: string
+          id?: string
+          mode: string
+          order_id?: string | null
+          photo_url?: string | null
+          reference?: string | null
+          stop_id?: string | null
+          trip_id: string
+        }
+        Update: {
+          against_old_dues?: boolean
+          amount?: number
+          collected_at?: string
+          collected_by?: string | null
+          confirmed?: boolean
+          customer_id?: string
+          id?: string
+          mode?: string
+          order_id?: string | null
+          photo_url?: string | null
+          reference?: string | null
+          stop_id?: string | null
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_collections_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_collections_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_collections_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_collections_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_expenses: {
+        Row: {
+          amount: number
+          approved: boolean | null
+          bill_photo_url: string | null
+          created_at: string
+          created_by: string | null
+          expense_type: string
+          id: string
+          note: string | null
+          paid_from_cash: boolean
+          trip_id: string
+        }
+        Insert: {
+          amount: number
+          approved?: boolean | null
+          bill_photo_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          expense_type: string
+          id?: string
+          note?: string | null
+          paid_from_cash?: boolean
+          trip_id: string
+        }
+        Update: {
+          amount?: number
+          approved?: boolean | null
+          bill_photo_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          expense_type?: string
+          id?: string
+          note?: string | null
+          paid_from_cash?: boolean
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_expenses_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_extra_load: {
+        Row: {
+          product_id: string
+          qty: number
+          trip_id: string
+        }
+        Insert: {
+          product_id: string
+          qty: number
+          trip_id: string
+        }
+        Update: {
+          product_id?: string
+          qty?: number
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_extra_load_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_extra_load_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_loading: {
+        Row: {
+          crates_count: number | null
+          loaded_at: string | null
+          loaded_qty: number | null
+          loader_user_id: string | null
+          photo_url: string | null
+          planned_qty: number
+          product_id: string
+          trip_id: string
+        }
+        Insert: {
+          crates_count?: number | null
+          loaded_at?: string | null
+          loaded_qty?: number | null
+          loader_user_id?: string | null
+          photo_url?: string | null
+          planned_qty?: number
+          product_id: string
+          trip_id: string
+        }
+        Update: {
+          crates_count?: number | null
+          loaded_at?: string | null
+          loaded_qty?: number | null
+          loader_user_id?: string | null
+          photo_url?: string | null
+          planned_qty?: number
+          product_id?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_loading_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_loading_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_locations: {
+        Row: {
+          accuracy_m: number | null
+          battery_pct: number | null
+          id: number
+          kind: string
+          latitude: number
+          longitude: number
+          recorded_at: string
+          speed_kmh: number | null
+          trip_id: string
+          user_id: string
+        }
+        Insert: {
+          accuracy_m?: number | null
+          battery_pct?: number | null
+          id?: never
+          kind?: string
+          latitude: number
+          longitude: number
+          recorded_at?: string
+          speed_kmh?: number | null
+          trip_id: string
+          user_id: string
+        }
+        Update: {
+          accuracy_m?: number | null
+          battery_pct?: number | null
+          id?: never
+          kind?: string
+          latitude?: number
+          longitude?: number
+          recorded_at?: string
+          speed_kmh?: number | null
+          trip_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_locations_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_pickups: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          photo_url: string | null
+          product_id: string
+          qty: number
+          trip_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          photo_url?: string | null
+          product_id: string
+          qty: number
+          trip_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          photo_url?: string | null
+          product_id?: string
+          qty?: number
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_pickups_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_pickups_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_pickups_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_stops: {
+        Row: {
+          arrived_at: string | null
+          delivered_at: string | null
+          fail_reason: string | null
+          id: string
+          is_spot_sale: boolean
+          latitude: number | null
+          longitude: number | null
+          order_id: string
+          otp_verified: boolean
+          photo_url: string | null
+          seq: number
+          signature_url: string | null
+          status: string
+          trip_id: string
+        }
+        Insert: {
+          arrived_at?: string | null
+          delivered_at?: string | null
+          fail_reason?: string | null
+          id?: string
+          is_spot_sale?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          order_id: string
+          otp_verified?: boolean
+          photo_url?: string | null
+          seq?: number
+          signature_url?: string | null
+          status?: string
+          trip_id: string
+        }
+        Update: {
+          arrived_at?: string | null
+          delivered_at?: string | null
+          fail_reason?: string | null
+          id?: string
+          is_spot_sale?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          order_id?: string
+          otp_verified?: boolean
+          photo_url?: string | null
+          seq?: number
+          signature_url?: string | null
+          status?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_stops_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_stops_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_vehicle_checks: {
+        Row: {
+          all_ok: boolean
+          checked_at: string
+          checked_by: string | null
+          id: string
+          items: Json
+          photo_url: string | null
+          trip_id: string
+        }
+        Insert: {
+          all_ok: boolean
+          checked_at?: string
+          checked_by?: string | null
+          id?: string
+          items: Json
+          photo_url?: string | null
+          trip_id: string
+        }
+        Update: {
+          all_ok?: boolean
+          checked_at?: string
+          checked_by?: string | null
+          id?: string
+          items?: Json
+          photo_url?: string | null
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_vehicle_checks_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trips: {
+        Row: {
+          cancel_reason: string | null
+          cash_expected: number
+          cash_received: number | null
+          company_id: string
+          created_at: string
+          driver_user_id: string
+          end_odometer: number | null
+          end_odometer_photo_url: string | null
+          ended_at: string | null
+          fuel_amount: number | null
+          fuel_litres: number | null
+          gate_in_at: string | null
+          gate_in_by: string | null
+          gate_out_at: string | null
+          gate_out_by: string | null
+          helper_user_ids: string[]
+          id: string
+          loaded_at: string | null
+          loaded_by: string | null
+          planned_by: string | null
+          route_id: string | null
+          settle_note: string | null
+          settled_at: string | null
+          settled_by: string | null
+          start_odometer: number | null
+          start_odometer_photo_url: string | null
+          start_selfie_url: string | null
+          status: Database["public"]["Enums"]["trip_status"]
+          trip_date: string
+          trip_no: string
+          unit_id: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          cancel_reason?: string | null
+          cash_expected?: number
+          cash_received?: number | null
+          company_id: string
+          created_at?: string
+          driver_user_id: string
+          end_odometer?: number | null
+          end_odometer_photo_url?: string | null
+          ended_at?: string | null
+          fuel_amount?: number | null
+          fuel_litres?: number | null
+          gate_in_at?: string | null
+          gate_in_by?: string | null
+          gate_out_at?: string | null
+          gate_out_by?: string | null
+          helper_user_ids?: string[]
+          id?: string
+          loaded_at?: string | null
+          loaded_by?: string | null
+          planned_by?: string | null
+          route_id?: string | null
+          settle_note?: string | null
+          settled_at?: string | null
+          settled_by?: string | null
+          start_odometer?: number | null
+          start_odometer_photo_url?: string | null
+          start_selfie_url?: string | null
+          status?: Database["public"]["Enums"]["trip_status"]
+          trip_date?: string
+          trip_no: string
+          unit_id: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          cancel_reason?: string | null
+          cash_expected?: number
+          cash_received?: number | null
+          company_id?: string
+          created_at?: string
+          driver_user_id?: string
+          end_odometer?: number | null
+          end_odometer_photo_url?: string | null
+          ended_at?: string | null
+          fuel_amount?: number | null
+          fuel_litres?: number | null
+          gate_in_at?: string | null
+          gate_in_by?: string | null
+          gate_out_at?: string | null
+          gate_out_by?: string | null
+          helper_user_ids?: string[]
+          id?: string
+          loaded_at?: string | null
+          loaded_by?: string | null
+          planned_by?: string | null
+          route_id?: string | null
+          settle_note?: string | null
+          settled_at?: string | null
+          settled_by?: string | null
+          start_odometer?: number | null
+          start_odometer_photo_url?: string | null
+          start_selfie_url?: string | null
+          status?: Database["public"]["Enums"]["trip_status"]
+          trip_date?: string
+          trip_no?: string
+          unit_id?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trips_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_driver_user_id_fkey"
+            columns: ["driver_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "geo_routes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
@@ -1674,6 +4223,68 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          role_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          role_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          role_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_scopes: {
+        Row: {
+          scope_id: string
+          scope_type: string
+          user_id: string
+        }
+        Insert: {
+          scope_id: string
+          scope_type: string
+          user_id: string
+        }
+        Update: {
+          scope_id?: string
+          scope_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_scopes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_sessions: {
         Row: {
           ip_address: string | null
@@ -1716,11 +4327,230 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicles: {
+        Row: {
+          capacity_kg: number | null
+          capacity_units: number
+          company_id: string
+          created_at: string
+          created_by: string | null
+          fitness_expiry: string | null
+          id: string
+          insurance_expiry: string | null
+          insurance_url: string | null
+          is_active: boolean
+          ownership: string
+          permit_expiry: string | null
+          puc_expiry: string | null
+          puc_url: string | null
+          rc_expiry: string | null
+          rc_url: string | null
+          reg_no: string
+          transporter_name: string | null
+          transporter_phone: string | null
+          unit_id: string | null
+          updated_at: string
+          vehicle_type: string | null
+        }
+        Insert: {
+          capacity_kg?: number | null
+          capacity_units?: number
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          fitness_expiry?: string | null
+          id?: string
+          insurance_expiry?: string | null
+          insurance_url?: string | null
+          is_active?: boolean
+          ownership?: string
+          permit_expiry?: string | null
+          puc_expiry?: string | null
+          puc_url?: string | null
+          rc_expiry?: string | null
+          rc_url?: string | null
+          reg_no: string
+          transporter_name?: string | null
+          transporter_phone?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          vehicle_type?: string | null
+        }
+        Update: {
+          capacity_kg?: number | null
+          capacity_units?: number
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          fitness_expiry?: string | null
+          id?: string
+          insurance_expiry?: string | null
+          insurance_url?: string | null
+          is_active?: boolean
+          ownership?: string
+          permit_expiry?: string | null
+          puc_expiry?: string | null
+          puc_url?: string | null
+          rc_expiry?: string | null
+          rc_url?: string | null
+          reg_no?: string
+          transporter_name?: string | null
+          transporter_phone?: string | null
+          unit_id?: string | null
+          updated_at?: string
+          vehicle_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      container_balances: {
+        Row: {
+          balance: number | null
+          company_id: string | null
+          customer_id: string | null
+          product_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "container_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "container_movements_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "container_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_on_hand: {
+        Row: {
+          company_id: string | null
+          product_id: string | null
+          qty: number | null
+          unit_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      _allocate: {
+        Args: { p_allocations: Json; p_receipt_id: string }
+        Returns: number
+      }
+      _create_orders: {
+        Args: {
+          p_customer_id: string
+          p_delivery: Json
+          p_lines: Json
+          p_notes: string
+          p_office: boolean
+          p_source: string
+        }
+        Returns: Json
+      }
+      _create_receipt: {
+        Args: {
+          p_amount: number
+          p_bank_account_id: string
+          p_cheque_bank: string
+          p_cheque_date: string
+          p_cheque_no: string
+          p_cheque_photo_url: string
+          p_customer_id: string
+          p_date: string
+          p_firm_id: string
+          p_mode: string
+          p_notes: string
+          p_reference: string
+          p_source: string
+          p_trip_collection_id: string
+        }
+        Returns: string
+      }
+      _doc_no: {
+        Args: {
+          p_fallback: string
+          p_firm_id: string
+          p_type: Database["public"]["Enums"]["doc_series_type"]
+        }
+        Returns: string
+      }
+      _generate_invoice: {
+        Args: { p_order_id: string; p_trip_id: string }
+        Returns: string
+      }
+      _is_my_trip: { Args: { p_trip_id: string }; Returns: boolean }
+      _next_order_no: { Args: { p_firm_id: string }; Returns: string }
+      _price_lines: {
+        Args: { p_customer_id: string; p_lines: Json; p_office: boolean }
+        Returns: Json
+      }
+      _refresh_invoice_paid: {
+        Args: { p_invoice_id: string }
+        Returns: undefined
+      }
+      _refresh_opening_paid: {
+        Args: { p_opening_id: string }
+        Returns: undefined
+      }
+      _set_order_status: {
+        Args: {
+          p_note: string
+          p_order_id: string
+          p_to: Database["public"]["Enums"]["order_status"]
+        }
+        Returns: undefined
+      }
       add_customer_document: {
         Args: {
           p_doc_number?: string
@@ -1729,6 +4559,17 @@ export type Database = {
           p_file_path: string
           p_file_size?: number
           p_mime_type?: string
+        }
+        Returns: string
+      }
+      add_trip_expense: {
+        Args: {
+          p_amount: number
+          p_bill_photo_url: string
+          p_note?: string
+          p_paid_from_cash?: boolean
+          p_trip_id: string
+          p_type: string
         }
         Returns: string
       }
@@ -1772,7 +4613,55 @@ export type Database = {
         }
         Returns: string
       }
+      ageing_report: {
+        Args: { p_as_of?: string; p_firm_id?: string }
+        Returns: {
+          advance: number
+          customer_code: string
+          customer_id: string
+          customer_name: string
+          customer_type: string
+          d0_30: number
+          d31_60: number
+          d61_90: number
+          d90_plus: number
+          not_due: number
+          total_due: number
+          zone_name: string
+        }[]
+      }
+      allocate_receipt: {
+        Args: { p_allocations?: Json; p_receipt_id: string }
+        Returns: number
+      }
       approve_customer: { Args: { p_customer_id: string }; Returns: undefined }
+      approve_order: {
+        Args: { p_note?: string; p_order_id: string }
+        Returns: undefined
+      }
+      auto_block_overdue_customers: { Args: never; Returns: number }
+      bulk_approve_orders: { Args: { p_order_ids: string[] }; Returns: Json }
+      bulk_update_plan_prices: {
+        Args: {
+          p_category_id?: string
+          p_from: string
+          p_percent: number
+          p_plan_id: string
+        }
+        Returns: number
+      }
+      cancel_order: {
+        Args: { p_order_id: string; p_reason: string }
+        Returns: undefined
+      }
+      cancel_receipt: {
+        Args: { p_reason: string; p_receipt_id: string }
+        Returns: undefined
+      }
+      cancel_trip: {
+        Args: { p_reason: string; p_trip_id: string }
+        Returns: undefined
+      }
       check_pin: {
         Args: {
           p_device_id: string
@@ -1786,7 +4675,49 @@ export type Database = {
         }[]
       }
       close_query: { Args: { p_query_id: string }; Returns: undefined }
+      confirm_cash_handover: { Args: { p_id: string }; Returns: undefined }
+      create_credit_debit_note: {
+        Args: {
+          p_gst_rate: number
+          p_invoice_id: string
+          p_reason: string
+          p_taxable: number
+          p_type: string
+        }
+        Returns: string
+      }
+      credit_status: {
+        Args: { p_customer_id: string; p_firm_id?: string }
+        Returns: {
+          out_available: number
+          out_block_reason: string
+          out_blocked: boolean
+          out_days: number
+          out_limit: number
+          out_oldest_overdue_days: number
+          out_outstanding: number
+          out_overdue: number
+        }[]
+      }
       current_session_id: { Args: never; Returns: string }
+      customer_location: {
+        Args: { p_customer_id: string }
+        Returns: Record<string, unknown>
+      }
+      customer_open_bills: {
+        Args: { p_customer_id: string; p_firm_id?: string }
+        Returns: {
+          balance: number
+          bill_date: string
+          days_overdue: number
+          due_date: string
+          kind: string
+          paid: number
+          ref_id: string
+          ref_no: string
+          total: number
+        }[]
+      }
       customer_raise_query: {
         Args: {
           p_attachment_name?: string
@@ -1797,12 +4728,89 @@ export type Database = {
         }
         Returns: string
       }
+      customer_statement: {
+        Args: {
+          p_customer_id: string
+          p_firm_id?: string
+          p_from: string
+          p_to: string
+        }
+        Returns: {
+          balance: number
+          credit: number
+          debit: number
+          description: string
+          entry_date: string
+          entry_type: string
+          ref_no: string
+        }[]
+      }
+      deliver_stop: {
+        Args: {
+          p_fail_reason?: string
+          p_lines: Json
+          p_proof: Json
+          p_stop_id: string
+        }
+        Returns: string
+      }
+      distributor_mark_delivered: {
+        Args: { p_delivered: boolean; p_order_id: string; p_reason?: string }
+        Returns: undefined
+      }
+      distributor_respond: {
+        Args: { p_accept: boolean; p_order_id: string; p_reason?: string }
+        Returns: undefined
+      }
+      end_trip: {
+        Args: {
+          p_odometer: number
+          p_odometer_photo_url: string
+          p_trip_id: string
+        }
+        Returns: undefined
+      }
+      finalize_loading: { Args: { p_trip_id: string }; Returns: Json }
       force_logout: {
         Args: { p_reason?: string; p_user_id: string }
         Returns: number
       }
+      gate_in: {
+        Args: {
+          p_fuel_amount?: number
+          p_fuel_litres?: number
+          p_odometer?: number
+          p_trip_id: string
+        }
+        Returns: undefined
+      }
+      gate_out: {
+        Args: { p_odometer?: number; p_qr_token: string }
+        Returns: string
+      }
+      has_perm: {
+        Args: { p_action: string; p_module: string }
+        Returns: boolean
+      }
       is_staff: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      log_location: {
+        Args: {
+          p_accuracy?: number
+          p_battery?: number
+          p_latitude: number
+          p_longitude: number
+          p_speed?: number
+          p_trip_id: string
+        }
+        Returns: undefined
+      }
+      map_customers_by_pincode: { Args: never; Returns: number }
+      mark_arrived: {
+        Args: { p_latitude?: number; p_longitude?: number; p_stop_id: string }
+        Returns: undefined
+      }
+      my_approval_limit: { Args: never; Returns: number }
       my_catalogue: {
         Args: never
         Returns: {
@@ -1842,6 +4850,61 @@ export type Database = {
       my_company_id: { Args: never; Returns: string }
       my_customer_can_edit: { Args: never; Returns: boolean }
       my_customer_id: { Args: never; Returns: string }
+      my_delivery_settings: {
+        Args: never
+        Returns: {
+          allow_cash: boolean
+          allow_cheque: boolean
+          allow_extra_load: boolean
+          allow_partial_delivery: boolean
+          allow_pickup_only: boolean
+          allow_spot_sale: boolean
+          allow_upi: boolean
+          arrived_button_enabled: boolean
+          collect_old_dues: boolean
+          company_id: string
+          default_language: string
+          expense_bill_photo_required: boolean
+          expense_limit_per_trip: number
+          expense_types: string[]
+          expenses_enabled: boolean
+          failed_reasons: string[]
+          location_at_each_stop: boolean
+          location_interval_minutes: number
+          location_tracking_enabled: boolean
+          proof_otp_enabled: boolean
+          proof_otp_required: boolean
+          proof_photo_enabled: boolean
+          proof_photo_required: boolean
+          proof_signature_enabled: boolean
+          proof_signature_required: boolean
+          require_end_odometer: boolean
+          require_end_odometer_photo: boolean
+          require_start_odometer: boolean
+          require_start_odometer_photo: boolean
+          require_start_selfie: boolean
+          show_jar_balance: boolean
+          show_outstanding: boolean
+          sos_enabled: boolean
+          updated_at: string
+          updated_by: string | null
+          vehicle_check_enabled: boolean
+          vehicle_check_items: string[]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "delivery_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      my_permissions: {
+        Args: never
+        Returns: {
+          action: string
+          module: string
+        }[]
+      }
       my_session_is_valid: { Args: never; Returns: boolean }
       my_staff_session_verified: { Args: never; Returns: boolean }
       next_document_number: {
@@ -1852,9 +4915,42 @@ export type Database = {
         }
         Returns: string
       }
+      place_my_order: {
+        Args: { p_delivery?: Json; p_lines: Json; p_notes?: string }
+        Returns: Json
+      }
+      place_order_for_customer: {
+        Args: {
+          p_customer_id: string
+          p_delivery?: Json
+          p_lines: Json
+          p_notes?: string
+          p_source?: string
+        }
+        Returns: Json
+      }
       plan_price: {
-        Args: { p_on?: string; p_plan_id: string; p_product_id: string }
+        Args: {
+          p_city_id?: string
+          p_on?: string
+          p_plan_id: string
+          p_product_id: string
+          p_zone_id?: string
+        }
         Returns: number
+      }
+      plan_trip: {
+        Args: {
+          p_allow_short?: boolean
+          p_driver_user_id: string
+          p_helper_ids?: string[]
+          p_order_ids: string[]
+          p_route_id?: string
+          p_trip_date: string
+          p_unit_id: string
+          p_vehicle_id: string
+        }
+        Returns: string
       }
       price_plan_for_customer: {
         Args: { p_customer_id: string }
@@ -1868,16 +4964,117 @@ export type Database = {
           name: string
           plan_name: string
           price: number
+          price_source: string
           product_id: string
         }[]
+      }
+      quote_my_order: { Args: { p_lines: Json }; Returns: Json }
+      raise_trip_alert: {
+        Args: {
+          p_latitude?: number
+          p_longitude?: number
+          p_note: string
+          p_trip_id: string
+          p_type: string
+        }
+        Returns: string
+      }
+      record_cash_handover: {
+        Args: {
+          p_amount: number
+          p_note?: string
+          p_to_user_id: string
+          p_trip_id?: string
+        }
+        Returns: string
+      }
+      record_collection: {
+        Args: {
+          p_amount: number
+          p_mode: string
+          p_photo_url?: string
+          p_reference?: string
+          p_stop_id: string
+        }
+        Returns: string
+      }
+      record_due_collection: {
+        Args: {
+          p_amount: number
+          p_customer_id: string
+          p_mode: string
+          p_photo_url?: string
+          p_reference?: string
+          p_stop_id?: string
+          p_trip_id: string
+        }
+        Returns: string
+      }
+      record_loading: {
+        Args: {
+          p_crates?: number
+          p_loaded_qty: number
+          p_photo_url?: string
+          p_product_id: string
+          p_trip_id: string
+        }
+        Returns: undefined
       }
       record_login: {
         Args: { p_login_method?: string; p_user_agent?: string }
         Returns: undefined
       }
       record_logout: { Args: never; Returns: undefined }
+      record_pickup: {
+        Args: {
+          p_customer_id: string
+          p_latitude?: number
+          p_longitude?: number
+          p_photo_url?: string
+          p_product_id: string
+          p_qty: number
+          p_trip_id: string
+        }
+        Returns: string
+      }
+      record_receipt: {
+        Args: {
+          p_allocations?: Json
+          p_amount: number
+          p_bank_account_id?: string
+          p_cheque_bank?: string
+          p_cheque_date?: string
+          p_cheque_no?: string
+          p_cheque_photo_url?: string
+          p_customer_id: string
+          p_date?: string
+          p_firm_id: string
+          p_mode: string
+          p_notes?: string
+          p_reference?: string
+        }
+        Returns: Json
+      }
+      record_stock: {
+        Args: {
+          p_note?: string
+          p_product_id: string
+          p_qty: number
+          p_type: string
+          p_unit_id: string
+        }
+        Returns: number
+      }
       reject_customer: {
         Args: { p_customer_id: string; p_reason: string }
+        Returns: undefined
+      }
+      reject_order: {
+        Args: { p_order_id: string; p_reason: string }
+        Returns: undefined
+      }
+      remove_order_from_trip: {
+        Args: { p_order_id: string; p_trip_id: string }
         Returns: undefined
       }
       reply_query: {
@@ -1889,14 +5086,76 @@ export type Database = {
         }
         Returns: undefined
       }
+      reroute_order: {
+        Args: { p_distributor_id?: string; p_note?: string; p_order_id: string }
+        Returns: undefined
+      }
+      reroute_stale_distributor_orders: {
+        Args: { p_minutes?: number }
+        Returns: number
+      }
+      resolve_trip_alert: {
+        Args: { p_alert_id: string; p_resolution: string }
+        Returns: undefined
+      }
+      review_trip_expense: {
+        Args: { p_approve: boolean; p_expense_id: string }
+        Returns: undefined
+      }
       revoke_user_devices: { Args: { p_user_id: string }; Returns: number }
+      scope_ok: { Args: { p_id: string; p_type: string }; Returns: boolean }
+      set_cheque_status: {
+        Args: { p_note?: string; p_receipt_id: string; p_status: string }
+        Returns: undefined
+      }
+      set_extra_load: {
+        Args: { p_product_id: string; p_qty: number; p_trip_id: string }
+        Returns: undefined
+      }
       set_my_pin: {
         Args: { p_device_id: string; p_device_label?: string; p_pin: string }
+        Returns: undefined
+      }
+      set_opening_balance: {
+        Args: {
+          p_amount: number
+          p_as_of: string
+          p_customer_id: string
+          p_firm_id: string
+          p_note?: string
+        }
+        Returns: undefined
+      }
+      set_opening_jars: {
+        Args: { p_customer_id: string; p_product_id: string; p_qty: number }
+        Returns: undefined
+      }
+      set_order_status: {
+        Args: {
+          p_note?: string
+          p_order_id: string
+          p_status: Database["public"]["Enums"]["order_status"]
+        }
         Returns: undefined
       }
       set_user_active: {
         Args: { p_active: boolean; p_user_id: string }
         Returns: undefined
+      }
+      settle_trip: {
+        Args: { p_cash_received: number; p_note?: string; p_trip_id: string }
+        Returns: Json
+      }
+      spot_sale: {
+        Args: {
+          p_customer_id: string
+          p_latitude?: number
+          p_lines: Json
+          p_longitude?: number
+          p_paid_now: boolean
+          p_trip_id: string
+        }
+        Returns: Json
       }
       start_registration: {
         Args: {
@@ -1917,7 +5176,30 @@ export type Database = {
         }
         Returns: string
       }
+      start_trip: {
+        Args: {
+          p_check_photo_url?: string
+          p_odometer: number
+          p_odometer_photo_url: string
+          p_selfie_url: string
+          p_trip_id: string
+          p_vehicle_check?: Json
+        }
+        Returns: undefined
+      }
+      stock_available: {
+        Args: { p_product_id: string; p_unit_id: string }
+        Returns: number
+      }
+      stop_customer_summary: {
+        Args: { p_customer_id: string; p_trip_id: string }
+        Returns: Json
+      }
       submit_registration: { Args: never; Returns: undefined }
+      tally_export: {
+        Args: { p_firm_id: string; p_from: string; p_to: string }
+        Returns: Json
+      }
       toggle_favourite: { Args: { p_product_id: string }; Returns: boolean }
       update_my_profile: {
         Args: { p_full_name: string; p_language?: string; p_photo_url?: string }
@@ -1940,10 +5222,29 @@ export type Database = {
         | "receipt"
         | "gate_pass"
         | "order"
+        | "trip"
+      order_status:
+        | "placed"
+        | "credit_hold"
+        | "approved"
+        | "processing"
+        | "dispatched"
+        | "delivered"
+        | "closed"
+        | "cancelled"
+        | "rejected"
       otp_channel: "whatsapp" | "email"
       otp_purpose: "app_login" | "staff_2fa"
       query_status: "open" | "answered" | "closed"
       sell_unit: "piece" | "pack" | "case" | "crate" | "jar" | "can"
+      trip_status:
+        | "planned"
+        | "loading"
+        | "loaded"
+        | "in_progress"
+        | "returned"
+        | "settled"
+        | "cancelled"
       unit_type: "plant" | "depot" | "copacker" | "jar_unit" | "office"
       user_type: "staff" | "customer"
     }
@@ -2089,11 +5390,32 @@ export const Constants = {
         "receipt",
         "gate_pass",
         "order",
+        "trip",
+      ],
+      order_status: [
+        "placed",
+        "credit_hold",
+        "approved",
+        "processing",
+        "dispatched",
+        "delivered",
+        "closed",
+        "cancelled",
+        "rejected",
       ],
       otp_channel: ["whatsapp", "email"],
       otp_purpose: ["app_login", "staff_2fa"],
       query_status: ["open", "answered", "closed"],
       sell_unit: ["piece", "pack", "case", "crate", "jar", "can"],
+      trip_status: [
+        "planned",
+        "loading",
+        "loaded",
+        "in_progress",
+        "returned",
+        "settled",
+        "cancelled",
+      ],
       unit_type: ["plant", "depot", "copacker", "jar_unit", "office"],
       user_type: ["staff", "customer"],
     },

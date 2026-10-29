@@ -367,9 +367,9 @@ function Account() {
 
       {/* Menu groups */}
       <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">
-        <MenuItem icon={Package} label={t("account.myOrders")} onClick={() => toast(t("account.comingSoon"))} />
+        <MenuItem icon={Package} label={t("account.myOrders")} onClick={() => navigate({ to: "/track" })} />
         <Separator />
-        <MenuItem icon={Wallet} label={t("account.payments")} onClick={() => toast(t("account.comingSoon"))} />
+        <MenuItem icon={Wallet} label={t("account.payments")} onClick={() => navigate({ to: "/payments" })} />
       </section>
 
       <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">

@@ -8,7 +8,7 @@ import { ErrorState, EmptyState } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
 import { formatINR } from "@/lib/catalogue";
 import { fetchCreditStatus, fetchMyOrders, statusGroup, type CreditStatus, type OrderDto } from "@/lib/orders";
-import { dateLabel, statusChipClass } from "./track";
+import { dateLabel, statusChipClass } from "@/lib/order-format";
 
 export const Route = createFileRoute("/_authenticated/payments")({
   head: () => ({

@@ -28,6 +28,7 @@ import { Route as AuthenticatedProductIdRouteImport } from './routes/_authentica
 import { Route as AuthenticatedQueriesIndexRouteImport } from './routes/_authenticated/queries.index'
 import { Route as AuthenticatedQueriesIdRouteImport } from './routes/_authenticated/queries.$id'
 import { Route as AuthenticatedQueriesAskRouteImport } from './routes/_authenticated/queries.ask'
+import { Route as AuthenticatedTrackIndexRouteImport } from './routes/_authenticated/track.index'
 import { Route as AuthenticatedTrackIdRouteImport } from './routes/_authenticated/track.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -127,6 +128,11 @@ const AuthenticatedQueriesAskRoute = AuthenticatedQueriesAskRouteImport.update({
   path: '/ask',
   getParentRoute: () => AuthenticatedQueriesRoute,
 } as any)
+const AuthenticatedTrackIndexRoute = AuthenticatedTrackIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedTrackRoute,
+} as any)
 const AuthenticatedTrackIdRoute = AuthenticatedTrackIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -153,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/queries/ask': typeof AuthenticatedQueriesAskRoute
   '/track/$id': typeof AuthenticatedTrackIdRoute
   '/queries/': typeof AuthenticatedQueriesIndexRoute
+  '/track/': typeof AuthenticatedTrackIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -167,12 +174,12 @@ export interface FileRoutesByTo {
   '/order-success': typeof AuthenticatedOrderSuccessRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/registration': typeof AuthenticatedRegistrationRoute
-  '/track': typeof AuthenticatedTrackRouteWithChildren
   '/product/$id': typeof AuthenticatedProductIdRoute
   '/queries/$id': typeof AuthenticatedQueriesIdRoute
   '/queries/ask': typeof AuthenticatedQueriesAskRoute
   '/track/$id': typeof AuthenticatedTrackIdRoute
   '/queries': typeof AuthenticatedQueriesIndexRoute
+  '/track': typeof AuthenticatedTrackIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -196,6 +203,7 @@ export interface FileRoutesById {
   '/_authenticated/queries/ask': typeof AuthenticatedQueriesAskRoute
   '/_authenticated/track/$id': typeof AuthenticatedTrackIdRoute
   '/_authenticated/queries/': typeof AuthenticatedQueriesIndexRoute
+  '/_authenticated/track/': typeof AuthenticatedTrackIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -219,6 +227,7 @@ export interface FileRouteTypes {
     | '/queries/ask'
     | '/track/$id'
     | '/queries/'
+    | '/track/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -233,12 +242,12 @@ export interface FileRouteTypes {
     | '/order-success'
     | '/payments'
     | '/registration'
-    | '/track'
     | '/product/$id'
     | '/queries/$id'
     | '/queries/ask'
     | '/track/$id'
     | '/queries'
+    | '/track'
   id:
     | '__root__'
     | '/'
@@ -261,6 +270,7 @@ export interface FileRouteTypes {
     | '/_authenticated/queries/ask'
     | '/_authenticated/track/$id'
     | '/_authenticated/queries/'
+    | '/_authenticated/track/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -404,6 +414,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedQueriesAskRouteImport
       parentRoute: typeof AuthenticatedQueriesRoute
     }
+    '/_authenticated/track/': {
+      id: '/_authenticated/track/'
+      path: '/'
+      fullPath: '/track/'
+      preLoaderRoute: typeof AuthenticatedTrackIndexRouteImport
+      parentRoute: typeof AuthenticatedTrackRoute
+    }
     '/_authenticated/track/$id': {
       id: '/_authenticated/track/$id'
       path: '/$id'
@@ -431,10 +448,12 @@ const AuthenticatedQueriesRouteWithChildren =
 
 interface AuthenticatedTrackRouteChildren {
   AuthenticatedTrackIdRoute: typeof AuthenticatedTrackIdRoute
+  AuthenticatedTrackIndexRoute: typeof AuthenticatedTrackIndexRoute
 }
 
 const AuthenticatedTrackRouteChildren: AuthenticatedTrackRouteChildren = {
   AuthenticatedTrackIdRoute: AuthenticatedTrackIdRoute,
+  AuthenticatedTrackIndexRoute: AuthenticatedTrackIndexRoute,
 }
 
 const AuthenticatedTrackRouteWithChildren =

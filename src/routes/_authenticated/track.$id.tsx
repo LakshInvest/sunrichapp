@@ -24,7 +24,7 @@ import {
   type OrderDto,
 } from "@/lib/orders";
 import { DEFAULT_LOCATION } from "@/components/locationShared";
-import { dateLabel, statusChipClass } from "./track";
+import { dateLabel, statusChipClass } from "@/lib/order-format";
 
 export const Route = createFileRoute("/_authenticated/track/$id")({
   head: () => ({

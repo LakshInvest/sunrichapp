@@ -276,7 +276,7 @@ function Field({
   children,
 }: {
   label: string;
-  error?: string | null;
+  error?: string | null | undefined;
   children: React.ReactNode;
 }) {
   return (
@@ -350,37 +350,41 @@ function DetailsStep({
   const save = async () => {
     if (busy) return;
     const errs: Record<string, string> = {};
-    if (isBusiness && !fields.businessName.trim()) errs.businessName = t("registration.errRequired");
-    if (!fields.contactName.trim()) errs.contactName = t("registration.errRequired");
-    if (!fields.addressLine1.trim()) errs.addressLine1 = t("registration.errRequired");
-    if (!fields.city.trim()) errs.city = t("registration.errRequired");
-    if (!isValidPincode(fields.pincode)) errs.pincode = t("registration.errInvalidPincode");
-    if (fields.gstin.trim() && !isValidGstin(fields.gstin)) errs.gstin = t("registration.errInvalidGstin");
+    if (isBusiness && !fields.businessName.trim()) errs["businessName"] = t("registration.errRequired");
+    if (!fields.contactName.trim()) errs["contactName"] = t("registration.errRequired");
+    if (!fields.addressLine1.trim()) errs["addressLine1"] = t("registration.errRequired");
+    if (!fields.city.trim()) errs["city"] = t("registration.errRequired");
+    if (!isValidPincode(fields.pincode)) errs["pincode"] = t("registration.errInvalidPincode");
+    if (fields.gstin.trim() && !isValidGstin(fields.gstin)) errs["gstin"] = t("registration.errInvalidGstin");
     if (fields.email.trim() && !/^\S+@\S+\.\S+$/.test(fields.email.trim()))
-      errs.email = t("registration.errInvalidEmail");
-    if (requiresGps && !locationTouched) errs.location = t("registration.errLocation");
+      errs["email"] = t("registration.errInvalidEmail");
+    if (requiresGps && !locationTouched) errs["location"] = t("registration.errLocation");
     setFieldErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
     setBusy(true);
     setError(null);
     try {
-      const { error: rpcErr } = await supabase.rpc("start_registration", {
+      const args = {
         p_customer_type_code: typeCode,
         p_contact_name: fields.contactName.trim(),
-        p_business_name: isBusiness ? fields.businessName.trim() : undefined,
         p_address_line1: fields.addressLine1.trim(),
-        p_address_line2: fields.addressLine2.trim() || undefined,
-        p_landmark: fields.landmark.trim() || undefined,
         p_city: fields.city.trim(),
-        p_state: undefined,
         p_pincode: fields.pincode.trim(),
-        p_latitude: requiresGps ? location.lat : undefined,
-        p_longitude: requiresGps ? location.lng : undefined,
-        p_location_accuracy_m: requiresGps && location.accuracy != null ? location.accuracy : undefined,
-        p_gstin: fields.gstin.trim() || undefined,
-        p_email: fields.email.trim() || undefined,
-      });
+        ...(isBusiness ? { p_business_name: fields.businessName.trim() } : {}),
+        ...(fields.addressLine2.trim() ? { p_address_line2: fields.addressLine2.trim() } : {}),
+        ...(fields.landmark.trim() ? { p_landmark: fields.landmark.trim() } : {}),
+        ...(fields.gstin.trim() ? { p_gstin: fields.gstin.trim() } : {}),
+        ...(fields.email.trim() ? { p_email: fields.email.trim() } : {}),
+        ...(requiresGps
+          ? {
+              p_latitude: location.lat,
+              p_longitude: location.lng,
+              ...(location.accuracy != null ? { p_location_accuracy_m: location.accuracy } : {}),
+            }
+          : {}),
+      };
+      const { error: rpcErr } = await supabase.rpc("start_registration", args);
       if (rpcErr) {
         setError(rpcErr.message);
         return;

@@ -86,13 +86,6 @@ export const Route = createFileRoute("/_authenticated/account")({
 
 const APP_VERSION = "1.0.0";
 
-function pl(v: DbLocalized | null | undefined, lang: string): string {
-  if (!v) return "";
-  if (lang === "hi") return v.hi || v.en;
-  if (lang === "mr") return v.mr || v.en;
-  return v.en;
-}
-
 function MenuItem({
   icon: Icon,
   label,
@@ -130,6 +123,7 @@ function Account() {
   const navigate = useNavigate();
   const { queryClient } = Route.useRouteContext();
   const myReg = useServerFn(getMyRegistration);
+  const clearPhoto = useServerFn(clearMyPhoto);
   const deva = lang === "en" ? "" : "font-deva";
 
   const [profile, setProfile] = useState<{ name: string; mobile: string; photoUrl: string | null } | null>(null);

@@ -200,7 +200,8 @@
     "errGeneric": "Could not save. Please try again.",
     "rejectedTitle": "Registration needs changes",
     "rejectedBody": "Reason: {{reason}}",
-    "editAndResubmit": "Edit and resubmit"
+    "editAndResubmit": "Edit and resubmit",
+    "yourName": "Your name"
   },
   "status": {
     "active": "Active",

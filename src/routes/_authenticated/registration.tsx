@@ -417,7 +417,7 @@ function DetailsStep({
           <input className={inputClass} value={fields.businessName} onChange={set("businessName")} />
         </Field>
       )}
-      <Field label={t("registration.contactName")} error={fieldErrors["contactName"]}>
+      <Field label={isBusiness ? t("registration.contactName") : t("registration.yourName")} error={fieldErrors["contactName"]}>
         <input className={inputClass} value={fields.contactName} onChange={set("contactName")} />
       </Field>
       {isBusiness && (

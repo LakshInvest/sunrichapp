@@ -200,7 +200,8 @@
     "errGeneric": "सेव नहीं हो सका। कृपया फिर से कोशिश करें।",
     "rejectedTitle": "पंजीकरण में बदलाव की ज़रूरत है",
     "rejectedBody": "कारण: {{reason}}",
-    "editAndResubmit": "बदलें और दोबारा भेजें"
+    "editAndResubmit": "बदलें और दोबारा भेजें",
+    "yourName": "आपका नाम"
   },
   "status": {
     "active": "सक्रिय",

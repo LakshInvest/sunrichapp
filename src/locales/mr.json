@@ -200,7 +200,8 @@
     "errGeneric": "सेव्ह झाले नाही. कृपया पुन्हा प्रयत्न करा.",
     "rejectedTitle": "नोंदणीत बदल आवश्यक आहेत",
     "rejectedBody": "कारण: {{reason}}",
-    "editAndResubmit": "बदला आणि पुन्हा पाठवा"
+    "editAndResubmit": "बदला आणि पुन्हा पाठवा",
+    "yourName": "तुमचे नाव"
   },
   "status": {
     "active": "सक्रिय",

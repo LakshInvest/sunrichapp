@@ -180,7 +180,8 @@ export type TimelineStep = { key: string; time: string | null };
 export function buildTimeline(status: string, history: OrderHistoryRow[]): { steps: TimelineStep[]; reached: number } {
   const timeFor = (key: string): string | null => {
     const rows = history.filter((h) => h.toStatus === key && h.changedAt);
-    return rows.length ? (rows[rows.length - 1]?.changedAt ?? null) : null;
+    const last = rows.at(-1);
+    return last ? last.changedAt : null;
   };
   const placedAt = history[0]?.changedAt || null;
   const steps: TimelineStep[] = [

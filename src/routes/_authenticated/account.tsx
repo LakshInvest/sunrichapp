@@ -1,13 +1,53 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { LogOut } from "lucide-react";
+import { toast } from "sonner";
+import {
+  ChevronRight,
+  Info,
+  Languages,
+  LogOut,
+  MapPin,
+  MessagesSquare,
+  Package,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
+import { ProfileAvatar } from "@/components/ProfileAvatar";
+import { AddressSheet } from "@/components/AddressSheet";
+import { LanguageSheet } from "@/components/LanguageSheet";
+import { Logo } from "@/components/Logo";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { useLang } from "@/hooks/use-lang";
-import { LANGUAGES, type Lang } from "@/lib/i18n";
+import { prepareUpload } from "@/lib/image-compress";
 import { getMyRegistration, type DbLocalized, type RegistrationDto } from "@/lib/registration.functions";
 
 export const Route = createFileRoute("/_authenticated/account")({
@@ -24,7 +64,7 @@ export const Route = createFileRoute("/_authenticated/account")({
   component: Account,
 });
 
-const LANGUAGE_LABELS: Record<Lang, string> = { en: "English", hi: "हिंदी", mr: "मराठी" };
+const APP_VERSION = "1.0.0";
 
 function pl(v: DbLocalized | null | undefined, lang: string): string {
   if (!v) return "";
@@ -33,14 +73,58 @@ function pl(v: DbLocalized | null | undefined, lang: string): string {
   return v.en;
 }
 
+function MenuItem({
+  icon: Icon,
+  label,
+  badge,
+  onClick,
+}: {
+  icon: LucideIcon;
+  label: string;
+  badge?: number;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex min-h-14 w-full items-center gap-3 px-4 text-left transition active:bg-secondary/5"
+    >
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary/10">
+        <Icon className="h-5 w-5 text-secondary" aria-hidden />
+      </span>
+      <span className="flex-1 truncate text-[15px] font-medium text-foreground">{label}</span>
+      {!!badge && badge > 0 && (
+        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-bold text-primary-foreground">
+          {badge}
+        </span>
+      )}
+      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+    </button>
+  );
+}
+
 function Account() {
   const { t } = useTranslation();
   const { lang, choose } = useLang();
   const navigate = useNavigate();
   const { queryClient } = Route.useRouteContext();
-  const [profile, setProfile] = useState<{ name: string; mobile: string } | null>(null);
-  const [customer, setCustomer] = useState<RegistrationDto | null>(null);
   const myReg = useServerFn(getMyRegistration);
+  const deva = lang === "en" ? "" : "font-deva";
+
+  const [profile, setProfile] = useState<{ name: string; mobile: string; photoUrl: string | null } | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [customer, setCustomer] = useState<RegistrationDto | null>(null);
+  const [openCount, setOpenCount] = useState(0);
+  const [addressOpen, setAddressOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const photoInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -55,10 +139,11 @@ function Account() {
   useEffect(() => {
     let active = true;
     void supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) return;
+      if (!active || !data.user) return;
+      setUserId(data.user.id);
       const { data: p } = await supabase
         .from("user_profiles")
-        .select("full_name, mobile")
+        .select("full_name, mobile, photo_url")
         .eq("id", data.user.id)
         .maybeSingle();
       if (!active) return;
@@ -66,12 +151,76 @@ function Account() {
       setProfile({
         name: p?.full_name ?? "",
         mobile: m ? `+91 ${m.slice(0, 5)} ${m.slice(5)}` : "",
+        photoUrl: p?.photo_url ?? null,
       });
     });
     return () => {
       active = false;
     };
   }, []);
+
+  const loadOpenCount = useCallback(async () => {
+    const { count } = await supabase
+      .from("customer_queries")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "open");
+    setOpenCount(count ?? 0);
+  }, []);
+
+  useEffect(() => {
+    void loadOpenCount();
+    const id = setInterval(() => void loadOpenCount(), 60_000);
+    return () => clearInterval(id);
+  }, [loadOpenCount]);
+
+  const onPhoto = async (file: File) => {
+    if (!userId || uploading) return;
+    setUploading(true);
+    try {
+      const prepared = await prepareUpload(file);
+      if (!prepared.ok) {
+        toast.error(t(prepared.reason === "tooLarge" ? "registration.errFileTooLarge" : "registration.errFileType"));
+        return;
+      }
+      const path = `${userId}/${Date.now()}.${prepared.ext}`;
+      const { error } = await supabase.storage.from("avatars").upload(path, prepared.blob, {
+        contentType: prepared.mime,
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      await supabase.rpc("update_my_profile", {
+        p_full_name: profile?.name ?? "",
+        p_photo_url: data.publicUrl,
+        p_language: null,
+      });
+      setProfile((p) => (p ? { ...p, photoUrl: data.publicUrl } : p));
+      toast.success(t("account.photoUpdated"));
+    } catch {
+      toast.error(t("account.errPhoto"));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const saveName = async () => {
+    const name = editName.trim();
+    if (!name || saving) return;
+    setSaving(true);
+    try {
+      await supabase.rpc("update_my_profile", {
+        p_full_name: name,
+        p_photo_url: null,
+        p_language: null,
+      });
+      setProfile((p) => (p ? { ...p, name } : p));
+      setEditOpen(false);
+      toast.success(t("account.nameUpdated"));
+    } catch {
+      toast.error(t("registration.errGeneric"));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const signOut = async () => {
     await queryClient.cancelQueries();
@@ -85,77 +234,189 @@ function Account() {
     await navigate({ to: "/auth", replace: true });
   };
 
+  const typeLabel = pl(customer?.typeName, lang);
+  const notActive = customer?.status && customer.status !== "active";
+
   return (
-    <main
-      className={`mx-auto min-h-screen max-w-md bg-background px-5 pb-28 pt-8 ${lang === "en" ? "" : "font-deva"}`}
-    >
+    <main className={`mx-auto min-h-screen max-w-md bg-background px-5 pb-28 pt-8 ${deva}`}>
       <h1 className="text-3xl font-bold text-primary">{t("account.title")}</h1>
 
-      <section className="mt-6 rounded-xl border border-border bg-card p-5 shadow-sm">
-        <p className="text-sm text-muted-foreground">{t("account.signedInAs")}</p>
-        <p className="mt-1 text-lg font-semibold text-foreground">{profile?.name || "…"}</p>
-        <p className="mt-1 text-base text-muted-foreground">
-          <span className="sr-only">{t("account.mobile")}: </span>
-          {profile?.mobile || "…"}
-        </p>
-      </section>
-
-      {customer && (
-        <section className="mt-4 rounded-xl border border-border bg-card p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-sm font-medium text-foreground">{t("account.customerCode")}</p>
-            <span className="rounded-full bg-secondary/15 px-3 py-1 text-xs font-bold uppercase tracking-wide text-secondary">
-              {t(`status.${customer.status ?? "draft"}`)}
-            </span>
-          </div>
-          <p className="mt-1 text-lg font-semibold text-foreground">{customer.customerCode ?? "—"}</p>
-          <div className="mt-3 grid gap-2 text-sm">
-            <p className="text-muted-foreground">
-              <span className="font-medium text-foreground">{t("account.customerType")}: </span>
-              {pl(customer.typeName, lang)}
-            </p>
-            <p className="text-muted-foreground">
-              <span className="font-medium text-foreground">{t("account.address")}: </span>
-              {[customer.addressLine1, customer.addressLine2, customer.landmark, customer.city, customer.pincode]
-                .filter(Boolean)
-                .join(", ") || "—"}
-            </p>
-          </div>
-        </section>
-      )}
-
-      <section className="mt-4 rounded-xl border border-border bg-card p-5 shadow-sm">
-        <p className="text-sm font-medium text-foreground">{t("account.language")}</p>
-        <div className="mt-3 flex gap-2">
-          {LANGUAGES.map((l) => (
+      {/* Profile header card */}
+      <section className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="bg-gradient-to-br from-primary via-primary to-secondary px-5 py-6">
+          <div className="flex items-center gap-4">
             <button
-              key={l}
               type="button"
-              lang={l}
-              onClick={() => choose(l)}
-              aria-pressed={lang === l}
-              className={`min-h-12 flex-1 rounded-xl border-2 text-base font-semibold transition active:scale-[0.98] ${
-                lang === l
-                  ? "border-secondary bg-secondary/10 text-primary"
-                  : "border-border bg-background text-foreground"
-              }`}
+              onClick={() => photoInput.current?.click()}
+              aria-label={t("account.changePhoto")}
+              className="relative shrink-0 rounded-full transition active:scale-95"
             >
-              {LANGUAGE_LABELS[l]}
+              <ProfileAvatar
+                src={profile?.photoUrl}
+                name={profile?.name}
+                className="h-20 w-20 border-2 border-white/40 text-xl"
+              />
+              {uploading && <span className="absolute inset-0 animate-pulse rounded-full bg-primary/40" />}
             </button>
-          ))}
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xl font-bold text-primary-foreground">{profile?.name || "…"}</p>
+              <p className="mt-0.5 text-sm text-primary-foreground/80">{profile?.mobile || "…"}</p>
+              {typeLabel && (
+                <span className="mt-1.5 inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
+                  {typeLabel}
+                </span>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setEditName(profile?.name ?? "");
+                setEditOpen(true);
+              }}
+              className="min-h-11 shrink-0 rounded-xl bg-primary-foreground/15 px-4 text-sm font-bold text-primary-foreground transition active:scale-95"
+            >
+              {t("account.edit")}
+            </button>
+          </div>
         </div>
+        {notActive && (
+          <div
+            className={`px-5 py-2.5 text-sm font-medium ${
+              customer?.status === "pending_approval"
+                ? "bg-accent text-accent-foreground"
+                : "bg-destructive/10 text-destructive"
+            }`}
+          >
+            {t(`status.${customer?.status ?? "draft"}`)}
+            {customer?.status === "rejected" && customer.rejectionReason ? ` — ${customer.rejectionReason}` : ""}
+          </div>
+        )}
       </section>
 
+      {/* Menu groups */}
+      <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">
+        <MenuItem icon={Package} label={t("account.myOrders")} onClick={() => toast(t("account.comingSoon"))} />
+        <Separator />
+        <MenuItem icon={Wallet} label={t("account.payments")} onClick={() => toast(t("account.comingSoon"))} />
+      </section>
+
+      <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">
+        <MenuItem icon={MapPin} label={t("account.deliveryAddress")} onClick={() => setAddressOpen(true)} />
+        <Separator />
+        <MenuItem
+          icon={MessagesSquare}
+          label={t("account.helpQueries")}
+          badge={openCount}
+          onClick={() => navigate({ to: "/queries" })}
+        />
+      </section>
+
+      <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">
+        <MenuItem icon={Languages} label={t("account.language")} onClick={() => setLangOpen(true)} />
+        <Separator />
+        <MenuItem icon={Info} label={t("account.about")} onClick={() => setAboutOpen(true)} />
+      </section>
+
+      {/* Quiet logout */}
       <button
         type="button"
-        onClick={() => void signOut()}
-        className="mt-4 flex min-h-14 w-full items-center justify-center gap-2 rounded-xl border border-border bg-card text-lg font-semibold text-destructive shadow-sm transition active:scale-[0.98]"
+        onClick={() => setLogoutOpen(true)}
+        className="mx-auto mt-6 flex min-h-11 items-center gap-2 text-base font-medium text-destructive transition active:scale-[0.98]"
       >
-        <LogOut className="h-5 w-5" />
+        <LogOut className="h-5 w-5" aria-hidden />
         {t("account.logout")}
       </button>
 
       <BottomNav />
+
+      <AddressSheet
+        open={addressOpen}
+        onOpenChange={setAddressOpen}
+        address={
+          customer
+            ? {
+                line1: customer.addressLine1 ?? "",
+                line2: customer.addressLine2,
+                landmark: customer.landmark,
+                city: customer.city,
+                pincode: customer.pincode,
+                lat: customer.latitude,
+                lng: customer.longitude,
+              }
+            : null
+        }
+        typeLabel={typeLabel}
+      />
+
+      <LanguageSheet open={langOpen} onOpenChange={setLangOpen} lang={lang} onChoose={choose} />
+
+      <Drawer open={aboutOpen} onOpenChange={setAboutOpen}>
+        <DrawerContent className="mx-auto max-w-md">
+          <DrawerHeader>
+            <DrawerTitle className="text-center">{t("account.about")}</DrawerTitle>
+          </DrawerHeader>
+          <div className="flex flex-col items-center gap-3 px-4 pb-10 text-center">
+            <Logo size="md" />
+            <p className="max-w-64 text-sm text-muted-foreground">{t("account.aboutBody")}</p>
+            <p className="text-xs font-medium text-muted-foreground">
+              {t("account.aboutVersion", { version: APP_VERSION })}
+            </p>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="mx-auto max-w-sm rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>{t("account.editNameTitle")}</DialogTitle>
+          </DialogHeader>
+          <Input
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            aria-label={t("account.nameLabel")}
+            maxLength={60}
+            className="min-h-12 rounded-xl"
+          />
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setEditOpen(false)} className="min-h-11 flex-1 rounded-xl">
+              {t("account.cancel")}
+            </Button>
+            <Button onClick={() => void saveName()} disabled={saving || !editName.trim()} className="min-h-11 flex-1 rounded-xl">
+              {saving ? t("account.saving") : t("account.save")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+        <AlertDialogContent className="mx-auto max-w-sm rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("account.logoutTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("account.logoutBody")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="min-h-11 rounded-xl">{t("account.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => void signOut()}
+              className="min-h-11 rounded-xl bg-destructive text-primary-foreground hover:bg-destructive/90"
+            >
+              {t("account.logoutConfirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <input
+        ref={photoInput}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          e.target.value = "";
+          if (f) void onPhoto(f);
+        }}
+      />
     </main>
   );
 }

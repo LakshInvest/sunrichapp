@@ -11,6 +11,7 @@
 
 ## Architecture rules
 
+- Login is WhatsApp OTP: `src/lib/otp.functions.ts` (public server fns, service-role inside handlers) verifies the code and returns a magic-link token_hash the browser exchanges for a session; the gate in `_authenticated/route.tsx` signs out when the `user_sessions` row is missing or revoked. Why: customers have no passwords and admins must be able to force logout.
 - Auth gate lives in `src/routes/_authenticated/route.tsx` (`ssr: false`, redirect to `/auth`); every post-login screen is a child of it. Why: the session lives in browser storage, so gating must run client-side on this external-Supabase project.
 - Server reads for signed-in data go through `createServerFn` in `src/lib/` with `.middleware([requireSupabaseAuth])`; the bearer token is attached by `attachSupabaseAuth` in `src/start.ts`. Why: server functions are callable without the route gate.
 - All screens apply the saved language on mount via the `useLang` hook (`src/hooks/use-lang.ts`). Why: only the language-picker route seeds the language otherwise.

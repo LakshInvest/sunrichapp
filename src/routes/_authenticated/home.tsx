@@ -4,6 +4,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import {
   ArrowRight,
+  Bell,
   ChevronDown,
   Clock,
   CupSoda,
@@ -33,6 +34,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
 import { useFavourites } from "@/hooks/use-favourites";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
+import { hasOrderUpdates } from "@/lib/orders";
 import { getMyRegistration, type RegistrationDto } from "@/lib/registration.functions";
 import {
   addRecentSearch,
@@ -87,6 +89,7 @@ function Home() {
   const [bannerIndex, setBannerIndex] = useState(0);
   const [reg, setReg] = useState<RegistrationDto | null>(null);
   const [profile, setProfile] = useState({ name: "", photoUrl: null as string | null });
+  const [orderUpdates, setOrderUpdates] = useState(false);
   const [addressOpen, setAddressOpen] = useState(false);
   const [openQuery, setOpenQuery] = useState<{ id: string; subject: string } | null>(null);
   const myReg = useServerFn(getMyRegistration);
@@ -158,6 +161,25 @@ function Home() {
     const id = setInterval(() => void loadOpenQuery(), 60_000);
     return () => clearInterval(id);
   }, [loadOpenQuery]);
+
+  // In-app update bell (Task 7): dot when an order changed since My orders was last opened.
+  useEffect(() => {
+    let active = true;
+    const check = async () => {
+      try {
+        const has = await hasOrderUpdates();
+        if (active) setOrderUpdates(has);
+      } catch {
+        /* offline — keep current state */
+      }
+    };
+    void check();
+    const id = setInterval(() => void check(), 60_000);
+    return () => {
+      active = false;
+      clearInterval(id);
+    };
+  }, []);
 
   const pull = usePullToRefresh(load);
 
@@ -537,18 +559,34 @@ function Home() {
                     </span>
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={() => navigate({ to: "/account" })}
-                    aria-label={t("home.profile")}
-                    className="rounded-full transition active:scale-95"
-                  >
-                    <ProfileAvatar
-                      src={profile.photoUrl}
-                      name={profile.name}
-                      className="h-10 w-10 border border-white/30 text-sm"
-                    />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => navigate({ to: "/track" })}
+                      aria-label={t("home.updatesBell")}
+                      className="relative flex h-10 w-10 items-center justify-center rounded-full transition active:scale-95"
+                    >
+                      <Bell className="h-5 w-5 text-white" />
+                      {orderUpdates && (
+                        <span
+                          aria-hidden
+                          className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-[#103A66] bg-accent"
+                        />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate({ to: "/account" })}
+                      aria-label={t("home.profile")}
+                      className="rounded-full transition active:scale-95"
+                    >
+                      <ProfileAvatar
+                        src={profile.photoUrl}
+                        name={profile.name}
+                        className="h-10 w-10 border border-white/30 text-sm"
+                      />
+                    </button>
+                  </div>
                 </div>
 
                 <h1 className={`relative z-10 mt-6 max-w-[65%] text-3xl font-bold leading-tight text-white ${deva}`}>

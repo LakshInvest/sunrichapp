@@ -1,9 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState, type UIEvent } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ArrowRight,
   ChevronDown,
+  Clock,
   CupSoda,
   GlassWater,
   LayoutGrid,
@@ -23,6 +25,7 @@ import { SmartImage } from "@/components/SmartImage";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
+import { getMyRegistration } from "@/lib/registration.functions";
 import { homeContent, pick, type Product } from "@/data/homeContent";
 
 export const Route = createFileRoute("/_authenticated/home")({
@@ -125,6 +128,18 @@ function Home() {
   const [confirmClear, setConfirmClear] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
   const [initial, setInitial] = useState("S");
+  const [pending, setPending] = useState(false);
+  const myReg = useServerFn(getMyRegistration);
+
+  useEffect(() => {
+    let active = true;
+    void myReg().then((reg) => {
+      if (active) setPending(reg.status === "pending_approval");
+    });
+    return () => {
+      active = false;
+    };
+  }, [myReg]);
 
   useEffect(() => {
     let active = true;
@@ -468,6 +483,15 @@ function Home() {
 
       {/* Content sheet sliding over the hero */}
       <div className="relative z-10 -mt-4 rounded-t-3xl bg-background pb-44">
+        {pending && (
+          <div
+            role="status"
+            className="mx-5 mb-4 flex items-start gap-2 rounded-xl bg-accent/15 px-4 py-3 text-sm font-medium text-foreground"
+          >
+            <Clock className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />
+            {t("banner.underReview")}
+          </div>
+        )}
         <div className="relative z-30 -mt-7 px-5">
           <div className="flex min-h-12 items-center gap-3 rounded-2xl border border-border bg-card px-4 shadow-lg shadow-primary/5">
             <Search className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
@@ -500,14 +524,20 @@ function Home() {
               <X className="h-4 w-4" />
             </button>
             <p className="text-sm font-semibold">{t("cart.itemsSummary", { count, total })}</p>
-            <button
-              type="button"
-              onClick={() => navigate({ to: "/cart" })}
-              className="flex min-h-11 items-center gap-1.5 rounded-xl bg-primary-foreground/15 px-4 text-sm font-bold text-primary-foreground transition active:scale-95"
-            >
-              {t("cart.viewCart")}
-              <ArrowRight className="h-4 w-4" />
-            </button>
+            {pending ? (
+              <span className="flex min-h-11 items-center rounded-xl bg-primary-foreground/15 px-4 text-sm font-bold text-primary-foreground">
+                {t("cart.orderingAfterApproval")}
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/cart" })}
+                className="flex min-h-11 items-center gap-1.5 rounded-xl bg-primary-foreground/15 px-4 text-sm font-bold text-primary-foreground transition active:scale-95"
+              >
+                {t("cart.viewCart")}
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
       )}

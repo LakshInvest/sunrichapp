@@ -168,6 +168,8 @@ export type InboxTab = "new" | "toDeliver" | "done";
 export function inboxGroup(order: OrderDto): InboxTab {
   const ds = order.distributorStatus;
   if (ds === "pending") return "new";
+  if (ds === "delivered" || ds === "not_delivered" || ds === "rejected") return "done";
+  if (order.status === "delivered" || order.status === "closed") return "done";
   if (ds === "accepted" || order.status === "processing" || order.status === "dispatched") return "toDeliver";
   return "done";
 }

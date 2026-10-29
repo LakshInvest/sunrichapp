@@ -730,7 +730,7 @@ function DocsStep({
                 accept="image/*"
                 capture="environment"
                 className="hidden"
-                disabled={!!uploadingCode}
+                disabled={!!uploadingCode || offline}
                 onChange={onFilePicked(code)}
               />
             </label>
@@ -740,7 +740,7 @@ function DocsStep({
                 type="file"
                 accept={`${req?.acceptsImage ? "image/*," : ""}${req?.acceptsPdf ? "application/pdf" : ""}` || undefined}
                 className="hidden"
-                disabled={!!uploadingCode}
+                disabled={!!uploadingCode || offline}
                 onChange={onFilePicked(code)}
               />
             </label>
@@ -807,7 +807,8 @@ function DocsStep({
       <button
         type="button"
         onClick={() => void submit()}
-        disabled={!readyToSubmit || submitting}
+        disabled={!readyToSubmit || submitting || offline}
+        title={offline ? t("offline.hint") : undefined}
         className="flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md transition active:scale-[0.98] disabled:opacity-50"
       >
         {submitting && <Loader2 className="h-5 w-5 animate-spin" />}

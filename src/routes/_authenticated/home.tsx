@@ -1,4 +1,4 @@
-import { createFileRoute, useRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { ErrorComponentProps } from "@tanstack/react-router";

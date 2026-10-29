@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Logo } from "@/components/Logo";
@@ -79,9 +79,12 @@ function Index() {
             <h1 className="text-4xl font-bold leading-tight text-primary">{t("welcomeTitle")}</h1>
             <p className="text-lg text-muted-foreground">{t("welcomeSubtitle")}</p>
           </div>
-          <button className="min-h-14 rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md active:scale-[0.98]">
+          <Link
+            to="/auth"
+            className="flex min-h-14 items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md active:scale-[0.98]"
+          >
             {t("getStarted")}
-          </button>
+          </Link>
         </div>
       )}
     </main>

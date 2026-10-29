@@ -28,6 +28,7 @@ function Account() {
   const { t } = useTranslation();
   const { lang, choose } = useLang();
   const navigate = useNavigate();
+  const { queryClient } = Route.useRouteContext();
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -41,8 +42,8 @@ function Account() {
   }, []);
 
   const signOut = async () => {
-    await navigate.context.queryClient.cancelQueries();
-    navigate.context.queryClient.clear();
+    await queryClient.cancelQueries();
+    queryClient.clear();
     await supabase.auth.signOut();
     await navigate({ to: "/auth", replace: true });
   };

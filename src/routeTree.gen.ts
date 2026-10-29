@@ -18,6 +18,7 @@ import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedHoldRouteImport } from './routes/_authenticated/hold'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedOrderRouteImport } from './routes/_authenticated/order'
+import { Route as AuthenticatedOrderSuccessRouteImport } from './routes/_authenticated/order-success'
 import { Route as AuthenticatedQueriesRouteImport } from './routes/_authenticated/queries'
 import { Route as AuthenticatedRegistrationRouteImport } from './routes/_authenticated/registration'
 import { Route as AuthenticatedTrackRouteImport } from './routes/_authenticated/track'
@@ -70,6 +71,12 @@ const AuthenticatedOrderRoute = AuthenticatedOrderRouteImport.update({
   path: '/order',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOrderSuccessRoute =
+  AuthenticatedOrderSuccessRouteImport.update({
+    id: '/order-success',
+    path: '/order-success',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedQueriesRoute = AuthenticatedQueriesRouteImport.update({
   id: '/queries',
   path: '/queries',
@@ -117,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/hold': typeof AuthenticatedHoldRoute
   '/home': typeof AuthenticatedHomeRoute
   '/order': typeof AuthenticatedOrderRoute
+  '/order-success': typeof AuthenticatedOrderSuccessRoute
   '/queries': typeof AuthenticatedQueriesRouteWithChildren
   '/registration': typeof AuthenticatedRegistrationRoute
   '/track': typeof AuthenticatedTrackRoute
@@ -134,6 +142,7 @@ export interface FileRoutesByTo {
   '/hold': typeof AuthenticatedHoldRoute
   '/home': typeof AuthenticatedHomeRoute
   '/order': typeof AuthenticatedOrderRoute
+  '/order-success': typeof AuthenticatedOrderSuccessRoute
   '/registration': typeof AuthenticatedRegistrationRoute
   '/track': typeof AuthenticatedTrackRoute
   '/product/$id': typeof AuthenticatedProductIdRoute
@@ -152,6 +161,7 @@ export interface FileRoutesById {
   '/_authenticated/hold': typeof AuthenticatedHoldRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/order': typeof AuthenticatedOrderRoute
+  '/_authenticated/order-success': typeof AuthenticatedOrderSuccessRoute
   '/_authenticated/queries': typeof AuthenticatedQueriesRouteWithChildren
   '/_authenticated/registration': typeof AuthenticatedRegistrationRoute
   '/_authenticated/track': typeof AuthenticatedTrackRoute
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/hold'
     | '/home'
     | '/order'
+    | '/order-success'
     | '/queries'
     | '/registration'
     | '/track'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/hold'
     | '/home'
     | '/order'
+    | '/order-success'
     | '/registration'
     | '/track'
     | '/product/$id'
@@ -205,6 +217,7 @@ export interface FileRouteTypes {
     | '/_authenticated/hold'
     | '/_authenticated/home'
     | '/_authenticated/order'
+    | '/_authenticated/order-success'
     | '/_authenticated/queries'
     | '/_authenticated/registration'
     | '/_authenticated/track'
@@ -285,6 +298,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrderRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/order-success': {
+      id: '/_authenticated/order-success'
+      path: '/order-success'
+      fullPath: '/order-success'
+      preLoaderRoute: typeof AuthenticatedOrderSuccessRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/queries': {
       id: '/_authenticated/queries'
       path: '/queries'
@@ -359,6 +379,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHoldRoute: typeof AuthenticatedHoldRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedOrderRoute: typeof AuthenticatedOrderRoute
+  AuthenticatedOrderSuccessRoute: typeof AuthenticatedOrderSuccessRoute
   AuthenticatedQueriesRoute: typeof AuthenticatedQueriesRouteWithChildren
   AuthenticatedRegistrationRoute: typeof AuthenticatedRegistrationRoute
   AuthenticatedTrackRoute: typeof AuthenticatedTrackRoute
@@ -372,6 +393,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHoldRoute: AuthenticatedHoldRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedOrderRoute: AuthenticatedOrderRoute,
+  AuthenticatedOrderSuccessRoute: AuthenticatedOrderSuccessRoute,
   AuthenticatedQueriesRoute: AuthenticatedQueriesRouteWithChildren,
   AuthenticatedRegistrationRoute: AuthenticatedRegistrationRoute,
   AuthenticatedTrackRoute: AuthenticatedTrackRoute,

@@ -1,11 +1,1 @@
-{
-  "brand": "Sunrich",
-  "chooseLanguage": "Choose your language",
-  "chooseLanguageHint": "You can change this later",
-  "welcomeTitle": "Welcome to Sunrich",
-  "welcomeSubtitle": "Pure packaged drinking water, delivered to your shop or home.",
-  "getStarted": "Get started",
-  "changeLanguage": "Change language",
-  "metaTitle": "Sunrich — Order Packaged Drinking Water",
-  "metaDescription": "Order Sunrich packaged drinking water for retail, distribution and home."
-}
+{"brand": "Sunrich", "chooseLanguage": "Choose your language", "chooseLanguageHint": "You can change this later", "welcomeTitle": "Welcome to Sunrich", "welcomeSubtitle": "Pure packaged drinking water, delivered to your shop or home.", "getStarted": "Get started", "changeLanguage": "Change language", "metaTitle": "Sunrich — Order Packaged Drinking Water", "metaDescription": "Order Sunrich packaged drinking water for retail, distribution and home.", "auth": {"title": "Log in", "subtitle": "Use your Sunrich account to continue", "emailLabel": "Email", "emailPlaceholder": "you@example.com", "passwordLabel": "Password", "loginButton": "Log in", "loggingIn": "Logging in…", "enterEmail": "Please enter your email", "enterPassword": "Please enter your password", "wrongPassword": "Wrong email or password. Please try again.", "loginFailed": "Could not log in. Please try again.", "metaTitle": "Sunrich — Log in", "metaDescription": "Log in to your Sunrich account to order packaged drinking water."}, "nav": {"home": "Home", "order": "Order", "track": "Track", "account": "Account"}, "home": {"title": "Our brands", "loadError": "Could not load brands.", "retry": "Try again", "metaTitle": "Sunrich — Home", "metaDescription": "Choose a Sunrich water brand to order."}, "order": {"title": "Order", "comingSoon": "Ordering is coming soon.", "metaTitle": "Sunrich — Order", "metaDescription": "Place your Sunrich water order."}, "track": {"title": "Track", "comingSoon": "Order tracking is coming soon.", "metaTitle": "Sunrich — Track", "metaDescription": "Track your Sunrich water order."}, "account": {"title": "Account", "signedInAs": "Signed in as", "language": "Language", "logout": "Log out", "metaTitle": "Sunrich — Account", "metaDescription": "Manage your Sunrich account and language."}}

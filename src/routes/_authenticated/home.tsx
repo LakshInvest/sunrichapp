@@ -1,25 +1,29 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState, type UIEvent } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  ArrowRight,
   ChevronDown,
+  CupSoda,
+  GlassWater,
+  LayoutGrid,
   MapPin,
+  Milk,
   Minus,
+  Package,
   Plus,
   Search,
-  ShoppingCart,
+  X,
+  type LucideIcon,
 } from "lucide-react";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
+import { SmartImage } from "@/components/SmartImage";
+import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { useLang } from "@/hooks/use-lang";
-import {
-  localizedPackSize,
-  localizedName,
-  sampleProducts,
-  type Product,
-  type ProductCategory,
-} from "@/data/sampleProducts";
+import { useCart } from "@/hooks/use-cart";
+import { homeContent, pick, type Product } from "@/data/homeContent";
 
 export const Route = createFileRoute("/_authenticated/home")({
   head: () => ({
@@ -35,15 +39,13 @@ export const Route = createFileRoute("/_authenticated/home")({
   component: Home,
 });
 
-type CategoryFilter = "all" | ProductCategory;
-
-const CATEGORIES: { value: CategoryFilter; key: string }[] = [
-  { value: "all", key: "home.categoryAll" },
-  { value: "jars", key: "home.categoryJars" },
-  { value: "bottles", key: "home.categoryBottles" },
-  { value: "bulk", key: "home.categoryBulk" },
-  { value: "beverages", key: "home.categoryBeverages" },
-];
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  grid: LayoutGrid,
+  jar: GlassWater,
+  bottle: Milk,
+  box: Package,
+  glass: CupSoda,
+};
 
 function ProductCard({
   product,
@@ -62,24 +64,21 @@ function ProductCard({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="flex animate-in flex-col rounded-2xl border border-border bg-card p-2.5 shadow-sm fade-in slide-in-from-bottom-2 duration-300">
+    <div className="flex flex-col rounded-2xl border border-border bg-card p-2.5 shadow-sm">
       <div className="overflow-hidden rounded-xl bg-secondary/10">
-        <img
-          src={product.image}
-          alt={localizedName(product, lang)}
-          loading="lazy"
-          width={1024}
-          height={1024}
+        <SmartImage
+          src={product.imageUrl}
+          alt={pick(product.name, lang)}
           className="aspect-square w-full object-cover"
         />
       </div>
-      <p className="mt-2 line-clamp-2 min-h-10 text-sm font-semibold leading-snug text-foreground">
-        {localizedName(product, lang)}
+      <p className="mt-2 line-clamp-2 min-h-10 text-sm font-bold leading-snug text-foreground">
+        {pick(product.name, lang)}
       </p>
-      <p className="mt-0.5 text-xs text-muted-foreground">
-        {localizedPackSize(product, lang)}
+      <p className="text-xs leading-tight text-muted-foreground">
+        {pick(product.packLabel, lang)}
       </p>
-      <div className="mt-2.5 flex items-center justify-between">
+      <div className="mt-2 flex items-center justify-between">
         <span className="text-base font-bold text-primary">₹{product.price}</span>
         {qty === 0 ? (
           <button
@@ -118,9 +117,13 @@ function ProductCard({
 function Home() {
   const { t } = useTranslation();
   const { lang } = useLang();
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const navigate = useNavigate();
+  const { quantities, setQty, clear, count } = useCart();
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<CategoryFilter>("all");
+  const [category, setCategory] = useState("all");
+  const [showAll, setShowAll] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [bannerIndex, setBannerIndex] = useState(0);
   const [initial, setInitial] = useState("S");
 
   useEffect(() => {
@@ -133,44 +136,267 @@ function Home() {
     };
   }, []);
 
-  const cartCount = useMemo(
-    () => Object.values(quantities).reduce((sum, n) => sum + n, 0),
-    [quantities],
+  const { hero, banners, categories, products, sections } = homeContent;
+  const deva = lang === "en" ? "" : "font-deva";
+
+  const activeBanners = useMemo(
+    () => banners.filter((b) => b.isActive).sort((a, b) => a.sortOrder - b.sortOrder),
+    [banners],
+  );
+  const activeCategories = useMemo(
+    () => categories.filter((c) => c.isActive).sort((a, b) => a.sortOrder - b.sortOrder),
+    [categories],
+  );
+  const activeSections = useMemo(
+    () =>
+      sections
+        .filter((s) => s.isActive)
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map((s) => s.key),
+    [sections],
   );
 
-  const products = useMemo(() => {
+  const total = useMemo(
+    () =>
+      Object.entries(quantities).reduce((sum, [id, qty]) => {
+        const product = products.find((p) => p.id === id);
+        return product ? sum + product.price * qty : sum;
+      }, 0),
+    [quantities, products],
+  );
+
+  const hasQuery = search.trim() !== "";
+  const defaultPopularView = category === "all" && !hasQuery && !showAll;
+
+  const visibleProducts = useMemo(() => {
     const query = search.trim().toLowerCase();
-    return sampleProducts.filter((product) => {
-      if (category !== "all" && product.category !== category) return false;
-      if (!query) return true;
-      const haystack = [product.name.en, localizedName(product, lang), localizedPackSize(product, lang)]
-        .join(" ")
-        .toLowerCase();
-      return haystack.includes(query);
-    });
-  }, [category, search, lang]);
+    const filtered = products
+      .filter((p) => p.isActive)
+      .filter((p) => category === "all" || p.categoryCode === category)
+      .filter((p) => {
+        if (!query) return true;
+        const haystack = [p.name.en, pick(p.name, lang), pick(p.packLabel, lang)]
+          .join(" ")
+          .toLowerCase();
+        return haystack.includes(query);
+      })
+      .sort((a, b) => a.sortOrder - b.sortOrder);
+    if (defaultPopularView) return filtered.filter((p) => p.isPopular);
+    return filtered;
+  }, [products, category, search, lang, defaultPopularView]);
 
-  const setQty = (id: string, qty: number) =>
-    setQuantities((prev) => {
-      const next = { ...prev };
-      if (qty <= 0) delete next[id];
-      else next[id] = qty;
-      return next;
-    });
+  const onBannerScroll = (event: UIEvent<HTMLDivElement>) => {
+    const el = event.currentTarget;
+    if (activeBanners.length === 0 || el.scrollWidth === 0) return;
+    const slide = el.scrollWidth / activeBanners.length;
+    const idx = Math.round(el.scrollLeft / slide);
+    setBannerIndex(Math.max(0, Math.min(activeBanners.length - 1, idx)));
+  };
 
-  const deva = lang === "en" ? "" : "font-deva";
+  const renderSection = (key: string) => {
+    if (key === "categories") {
+      return (
+        <div key="categories" className="no-scrollbar mt-5 flex gap-2 overflow-x-auto px-5">
+          <button
+            type="button"
+            onClick={() => {
+              setCategory("all");
+              setShowAll(false);
+            }}
+            aria-pressed={category === "all"}
+            className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition active:scale-95 ${
+              category === "all"
+                ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                : "border-border bg-card text-foreground"
+            }`}
+          >
+            <LayoutGrid className="h-4 w-4" aria-hidden />
+            {t("home.categoryAll")}
+          </button>
+          {activeCategories.map((cat) => {
+            const Icon = CATEGORY_ICONS[cat.iconKey] ?? LayoutGrid;
+            const selected = category === cat.code;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => {
+                  setCategory(cat.code);
+                  setShowAll(true);
+                }}
+                aria-pressed={selected}
+                className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition active:scale-95 ${
+                  selected
+                    ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                    : "border-border bg-card text-foreground"
+                }`}
+              >
+                <Icon className="h-4 w-4" aria-hidden />
+                {pick(cat.name, lang)}
+              </button>
+            );
+          })}
+        </div>
+      );
+    }
+
+    if (key === "banners" && activeBanners.length > 0) {
+      return (
+        <div key="banners" className="mt-5">
+          <div
+            className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-5"
+            onScroll={onBannerScroll}
+          >
+            {activeBanners.map((banner) => (
+              <article
+                key={banner.id}
+                className="relative flex min-h-32 w-[82%] shrink-0 snap-center overflow-hidden rounded-2xl shadow-md shadow-primary/10"
+                style={
+                  banner.imageUrl
+                    ? undefined
+                    : { background: "linear-gradient(120deg, #2EA3C7 0%, #103A66 75%)" }
+                }
+              >
+                {banner.imageUrl && (
+                  <img
+                    src={banner.imageUrl}
+                    alt={pick(banner.title, lang)}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                )}
+                {banner.imageUrl && (
+                  <div className="absolute inset-0 bg-primary/60" aria-hidden />
+                )}
+                <SmartImage
+                  src={hero.productImageUrl}
+                  alt=""
+                  className="absolute -right-2 bottom-0 h-28 w-24 rotate-6 object-contain opacity-90 drop-shadow-lg"
+                />
+                <div className="relative z-10 flex max-w-[75%] flex-col gap-1 p-4">
+                  {banner.tag && (
+                    <span className="w-fit rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-bold text-accent-foreground">
+                      {pick(banner.tag, lang)}
+                    </span>
+                  )}
+                  <h3 className={`text-sm font-bold leading-snug text-white ${deva}`}>
+                    {pick(banner.title, lang)}
+                  </h3>
+                  <p className={`text-xs text-white/80 ${deva}`}>{pick(banner.subtitle, lang)}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+          {activeBanners.length > 1 && (
+            <div className="mt-2.5 flex justify-center gap-1.5 px-5">
+              {activeBanners.map((banner, i) => (
+                <span
+                  key={banner.id}
+                  aria-hidden
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === bannerIndex ? "w-4 bg-primary" : "w-1.5 bg-primary/25"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (key === "popular") {
+      return (
+        <div key="popular" className="mt-6 px-5">
+          <div className="flex items-center justify-between">
+            <h2 className={`text-lg font-bold text-foreground ${deva}`}>
+              {t(defaultPopularView ? "home.popularTitle" : "home.allProducts")}
+            </h2>
+            {defaultPopularView ? (
+              <button
+                type="button"
+                onClick={() => setShowAll(true)}
+                className="min-h-9 text-sm font-semibold text-secondary"
+              >
+                {t("home.seeAll")}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAll(false);
+                  setCategory("all");
+                }}
+                className="min-h-9 text-sm font-semibold text-secondary"
+              >
+                {t("home.showLess")}
+              </button>
+            )}
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            {visibleProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                qty={quantities[product.id] ?? 0}
+                lang={lang}
+                onAdd={() => setQty(product.id, 1)}
+                onInc={() => setQty(product.id, (quantities[product.id] ?? 0) + 1)}
+                onDec={() => setQty(product.id, (quantities[product.id] ?? 0) - 1)}
+              />
+            ))}
+          </div>
+          {visibleProducts.length === 0 && (
+            <p className={`mt-10 text-center text-sm text-muted-foreground ${deva}`}>
+              {t("home.searchNoResults")}
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <main className={`mx-auto min-h-screen max-w-md bg-background ${deva}`}>
       {/* Hero */}
       <div
-        className="relative px-5 pb-24 pt-6"
+        className="relative px-5 pb-20 pt-6"
         style={{
           background:
             "linear-gradient(175deg, #0B2545 0%, #103A66 55%, #2EA3C7 140%)",
         }}
       >
-        <div className="flex items-start justify-between">
+        {hero.backgroundImageUrl && (
+          <>
+            <img
+              src={hero.backgroundImageUrl}
+              alt=""
+              aria-hidden
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-primary/70" aria-hidden />
+          </>
+        )}
+
+        {/* Soft rising bubbles */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <span className="animate-bubble absolute bottom-16 left-8 h-8 w-8 rounded-full bg-white/10" />
+          <span
+            className="animate-bubble absolute bottom-24 left-1/3 h-5 w-5 rounded-full bg-white/10"
+            style={{ animationDelay: "1.2s" }}
+          />
+          <span
+            className="animate-bubble absolute bottom-10 left-2/3 h-10 w-10 rounded-full bg-white/10"
+            style={{ animationDelay: "2.4s" }}
+          />
+          <span
+            className="animate-bubble absolute bottom-20 right-10 h-6 w-6 rounded-full bg-white/10"
+            style={{ animationDelay: "0.6s" }}
+          />
+        </div>
+
+        <div className="relative z-10 flex items-start justify-between">
           <button
             type="button"
             aria-label={`${t("home.locationLabel")}: ${t("home.locationArea")}`}
@@ -188,36 +414,32 @@ function Home() {
             </span>
           </button>
 
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              aria-label={`${t("home.itemsInCart")}: ${cartCount}`}
-              className="relative flex h-11 w-11 items-center justify-center rounded-full text-white transition active:scale-95"
-            >
-              <ShoppingCart className="h-6 w-6" />
-              {cartCount > 0 && (
-                <span className="absolute right-0.5 top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[11px] font-bold text-accent-foreground">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-            <button
-              type="button"
-              aria-label={t("home.profile")}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/15 text-sm font-semibold text-white transition active:scale-95"
-            >
-              {initial}
-            </button>
-          </div>
+          <button
+            type="button"
+            aria-label={t("home.profile")}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/15 text-sm font-semibold text-white transition active:scale-95"
+          >
+            {initial}
+          </button>
         </div>
 
-        <h1 className="mt-9 text-3xl font-bold leading-tight text-white">
-          {t("home.greeting")}
+        <h1 className={`relative z-10 mt-6 max-w-[65%] text-3xl font-bold leading-tight text-white ${deva}`}>
+          {pick(hero.greeting, lang)}
         </h1>
-        <p className="mt-2.5 flex items-center gap-2 text-sm text-white/85">
+        <p className={`relative z-10 mt-2.5 flex items-center gap-2 text-sm text-white/85 ${deva}`}>
           <span className="h-2 w-2 shrink-0 rounded-full bg-accent" aria-hidden />
-          {t("home.deliveryToday")}
+          {pick(hero.deliveryLine, lang)}
         </p>
+
+        {/* Tilted jar with a soft glow, resting on the hero's bottom edge */}
+        <div aria-hidden className="absolute bottom-3 right-1 z-10 w-36">
+          <div className="absolute inset-2 -z-10 rounded-full bg-secondary/50 blur-2xl" />
+          <SmartImage
+            src={hero.productImageUrl}
+            alt=""
+            className="w-full rotate-[9deg] rounded-2xl object-cover drop-shadow-[0_16px_24px_rgba(11,37,69,0.45)]"
+          />
+        </div>
 
         {/* Soft water wave along the hero's bottom edge */}
         <svg
@@ -245,8 +467,8 @@ function Home() {
       </div>
 
       {/* Content sheet sliding over the hero */}
-      <div className="relative z-10 -mt-4 rounded-t-3xl bg-background pb-28">
-        <div className="relative z-10 -mt-7 px-5">
+      <div className="relative z-10 -mt-4 rounded-t-3xl bg-background pb-44">
+        <div className="relative z-30 -mt-7 px-5">
           <div className="flex min-h-12 items-center gap-3 rounded-2xl border border-border bg-card px-4 shadow-lg shadow-primary/5">
             <Search className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
             <input
@@ -260,50 +482,46 @@ function Home() {
           </div>
         </div>
 
-        {/* Category chips */}
-        <div className="no-scrollbar mt-5 flex gap-2 overflow-x-auto px-5">
-          {CATEGORIES.map(({ value, key }) => {
-            const selected = category === value;
-            return (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setCategory(value)}
-                aria-pressed={selected}
-                className={`min-h-11 shrink-0 rounded-full border px-4 text-sm font-medium transition active:scale-95 ${
-                  selected
-                    ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/20"
-                    : "border-border bg-card text-foreground"
-                }`}
-              >
-                {t(key)}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Products */}
-        <div className="mt-5 grid grid-cols-2 gap-3 px-5">
-          {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              qty={quantities[product.id] ?? 0}
-              lang={lang}
-              onAdd={() => setQty(product.id, 1)}
-              onInc={() => setQty(product.id, (quantities[product.id] ?? 0) + 1)}
-              onDec={() => setQty(product.id, (quantities[product.id] ?? 0) - 1)}
-            />
-          ))}
-        </div>
-        {products.length === 0 && (
-          <p className={`mt-10 text-center text-sm text-muted-foreground ${deva}`}>
-            {t("home.searchNoResults")}
-          </p>
-        )}
-
-        <BottomNav />
+        {activeSections
+          .filter((key) => key !== "hero")
+          .map((key) => renderSection(key))}
       </div>
+
+      {/* Zomato-style floating cart bar */}
+      {count > 0 && (
+        <div className="fixed inset-x-0 bottom-[4.75rem] z-40 px-4">
+          <div className="relative mx-auto flex max-w-md items-center justify-between gap-3 rounded-2xl bg-primary px-4 py-3 text-primary-foreground shadow-xl shadow-primary/30 animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <button
+              type="button"
+              aria-label={t("cart.clear")}
+              onClick={() => setConfirmClear(true)}
+              className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-md transition active:scale-90"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <p className="text-sm font-semibold">{t("cart.itemsSummary", { count, total })}</p>
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/cart" })}
+              className="flex min-h-11 items-center gap-1.5 rounded-xl bg-primary-foreground/15 px-4 text-sm font-bold text-primary-foreground transition active:scale-95"
+            >
+              {t("cart.viewCart")}
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      <ClearCartDialog
+        open={confirmClear}
+        onOpenChange={setConfirmClear}
+        onConfirm={() => {
+          clear();
+          setConfirmClear(false);
+        }}
+      />
+
+      <BottomNav />
     </main>
   );
 }

@@ -88,7 +88,9 @@
     "decreaseQty": "Decrease quantity",
     "itemsInCart": "Items in cart",
     "metaTitle": "Sunrich — Home",
-    "metaDescription": "Order Sunrich packaged drinking water — jars, bottles and more, delivered to your door."
+    "metaDescription": "Order Sunrich packaged drinking water — jars, bottles and more, delivered to your door.",
+    "needsAction": "Sunrich needs something from you",
+    "open": "Open"
   },
   "cart": {
     "title": "Cart",
@@ -135,7 +137,31 @@
     "mobile": "Mobile",
     "customerCode": "Customer code",
     "customerType": "Customer type",
-    "address": "Address"
+    "address": "Address",
+    "edit": "Edit",
+    "changePhoto": "Change photo",
+    "editNameTitle": "Edit your name",
+    "nameLabel": "Your name",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saving": "Saving…",
+    "photoUpdated": "Photo updated",
+    "errPhoto": "Could not update photo. Please try again.",
+    "nameUpdated": "Name updated",
+    "myOrders": "My orders",
+    "payments": "Payments & ledger",
+    "deliveryAddress": "Delivery address",
+    "deliveryAddressTitle": "Delivery address",
+    "helpQueries": "Help & queries",
+    "openQueries": "{{count}} open",
+    "about": "About Sunrich",
+    "aboutVersion": "Version {{version}}",
+    "aboutBody": "Pure packaged drinking water for homes, shops and businesses.",
+    "comingSoon": "Coming soon",
+    "moreAddresses": "More delivery addresses coming soon",
+    "logoutTitle": "Log out?",
+    "logoutBody": "You'll need to log in again with your number.",
+    "logoutConfirm": "Log out"
   },
   "register": {
     "title": "Complete your registration",
@@ -216,5 +242,27 @@
   "hold": {
     "title": "Your account is on hold",
     "body": "Your account is on hold. Please contact Sunrich."
+  },
+  "queries": {
+    "title": "Help & queries",
+    "metaTitle": "Sunrich — Help & queries",
+    "metaDescription": "Ask the Sunrich team about your account or deliveries.",
+    "emptyTitle": "No queries yet",
+    "emptyBody": "When you ask the Sunrich team something, it will show up here.",
+    "chipOpen": "Action needed",
+    "chipAnswered": "Replied",
+    "chipClosed": "Closed",
+    "notFound": "This query is not available.",
+    "replyPlaceholder": "Write a reply…",
+    "attach": "Attach",
+    "camera": "Take photo",
+    "chooseFile": "Choose file",
+    "attached": "Attached: {{name}}",
+    "remove": "Remove",
+    "send": "Send",
+    "sending": "Sending…",
+    "closedNote": "This query is closed",
+    "attachLocked": "You can attach files while your query is open.",
+    "errSend": "Could not send. Please try again."
   }
 }

@@ -59,10 +59,24 @@ function StaffAvatar() {
   );
 }
 
-function Message({ m, url, lang }: { m: Msg; url: string | null; lang: string }) {
+function Message({
+  m,
+  url,
+  lang,
+  staffName,
+  onOpenImage,
+}: {
+  m: Msg;
+  url: string | null;
+  lang: string;
+  staffName?: string;
+  onOpenImage: (url: string) => void;
+}) {
   const { t } = useTranslation();
   const staff = m.senderType === "staff";
+  const [failed, setFailed] = useState(false);
   const image = isImage(m.attachmentName) || isImage(m.attachmentPath);
+  const broken = !url || failed;
   return (
     <div className={`flex items-start gap-2 ${staff ? "" : "flex-row-reverse"}`}>
       {staff && <StaffAvatar />}
@@ -73,13 +87,28 @@ function Message({ m, url, lang }: { m: Msg; url: string | null; lang: string })
             : "rounded-tr-sm bg-primary text-primary-foreground"
         }`}
       >
-        {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
-        {m.attachmentPath && url && image && (
-          <a href={url} target="_blank" rel="noreferrer" className={m.body ? "mt-2 block" : "block"}>
-            <img src={url} alt={m.attachmentName ?? ""} className="max-h-56 w-48 rounded-xl object-cover" />
-          </a>
+        {staff && (
+          <p className="mb-0.5 text-[11px] font-bold text-secondary">
+            {t("queries.staffLabel", { name: staffName || "Sunrich" })}
+          </p>
         )}
-        {m.attachmentPath && (!image || !url) && (
+        {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
+        {m.attachmentPath && url && image && !failed && (
+          <button
+            type="button"
+            onClick={() => onOpenImage(url)}
+            aria-label={m.attachmentName ?? t("queries.attach")}
+            className={m.body ? "mt-2 block" : "block"}
+          >
+            <img
+              src={url}
+              alt={m.attachmentName ?? ""}
+              onError={() => setFailed(true)}
+              className="max-h-56 w-48 rounded-xl object-cover"
+            />
+          </button>
+        )}
+        {m.attachmentPath && (!image || broken) && (
           <a
             href={url ?? "#"}
             target="_blank"
@@ -88,8 +117,9 @@ function Message({ m, url, lang }: { m: Msg; url: string | null; lang: string })
               staff ? "bg-secondary/10 text-secondary" : "bg-primary-foreground/15 text-primary-foreground"
             }`}
           >
-            <FileText className="h-4 w-4 shrink-0" aria-hidden />
+            {broken ? <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden /> : <FileText className="h-4 w-4 shrink-0" aria-hidden />}
             <span className="truncate">{m.attachmentName ?? t("queries.attach")}</span>
+            {broken && <span className="sr-only">{t("queries.attachFailed")}</span>}
           </a>
         )}
         <p className={`mt-1 text-[11px] ${staff ? "text-muted-foreground" : "text-primary-foreground/70"}`}>

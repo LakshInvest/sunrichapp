@@ -37,7 +37,7 @@ export type RegistrationDto = {
   gstin: string | null;
 };
 
-const EMPTY_REGISTRATION: RegistrationDto = {
+export const EMPTY_REGISTRATION: RegistrationDto = {
   customerId: null,
   status: null,
   rejectionReason: null,
@@ -156,9 +156,22 @@ export type UploadedDocDto = {
 export const getDocumentRequirements = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const customerId = await context.supabase.rpc("my_customer_id");
-    const cid = customerId.data as string | null;
+    const { data: prof } = await context.supabase
+      .from("user_profiles")
+      .select("customer_id")
+      .eq("id", context.userId)
+      .maybeSingle();
+    const cid = prof?.customer_id ?? null;
     if (!cid) return { customerId: null, requirements: [] as RequirementDto[], uploaded: [] as UploadedDocDto[] };
+
+    const { data: customer } = await context.supabase
+      .from("customers")
+      .select("customer_type_id")
+      .eq("id", cid)
+      .maybeSingle();
+    if (!customer?.customer_type_id) {
+      return { customerId: cid, requirements: [] as RequirementDto[], uploaded: [] as UploadedDocDto[] };
+    }
 
     const { data: ctd } = await context.supabase
       .from("customer_type_documents")
@@ -166,7 +179,7 @@ export const getDocumentRequirements = createServerFn({ method: "GET" })
         `requirement, one_of_group,
          document_types(code, name, name_hi, name_mr, accepts_image, accepts_pdf, has_number)`,
       )
-      .eq("customer_type_id", (await typeOf(context, cid)) ?? "");
+      .eq("customer_type_id", customer.customer_type_id);
 
     const requirements: RequirementDto[] = (ctd ?? [])
       .map((row) => {
@@ -199,7 +212,3 @@ export const getDocumentRequirements = createServerFn({ method: "GET" })
 
     return { customerId: cid, requirements, uploaded };
   });
-
-async function typeOf(context: { supabase: Parameters<NonNullable<Parameters<typeof getMyRegistration>>>[0] }, _cid: string) {
-  return null;
-}

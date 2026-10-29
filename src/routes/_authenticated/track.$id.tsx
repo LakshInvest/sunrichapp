@@ -190,7 +190,7 @@ function OrderDetail() {
                       {!isLast && <span className={`h-8 w-0.5 ${i < reached ? "bg-secondary" : "bg-border"}`} />}
                     </div>
                     <div className={isLast ? "pb-0" : "pb-2"}>
-                      <p className={`text-sm font-semibold ${current && !step.time ? "text-primary" : done || step.time ? "text-foreground" : "text-muted-foreground"}`}>
+                      <p className={`text-sm font-semibold ${current && !step.time ? "text-primary" : i < reached || step.time ? "text-foreground" : "text-muted-foreground"}`}>
                         {t(`trackDetail.step.${step.key}`)}
                       </p>
                       {time && <p className="text-xs text-muted-foreground">{time}</p>}

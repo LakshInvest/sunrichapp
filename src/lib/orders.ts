@@ -182,7 +182,7 @@ export function buildTimeline(status: string, history: OrderHistoryRow[]): { ste
     const rows = history.filter((h) => h.toStatus === key && h.changedAt);
     return rows.length ? rows[rows.length - 1].changedAt : null;
   };
-  const placedAt = history.length && history[0].changedAt ? history[0].changedAt : null;
+  const placedAt = history[0]?.changedAt || null;
   const steps: TimelineStep[] = [
     { key: "placed", time: placedAt },
     { key: "approved", time: timeFor("approved") },
@@ -311,16 +311,11 @@ export async function cancelMyOrder(orderId: string, reason: string): Promise<vo
   if (error) throw new Error(error.message);
 }
 
-export async function distributorRespond(orderId: string, accept: boolean, reason?: string): Promise<void> {
-  const { error } = await supabase.rpc("distributor_respond", { p_order_id: orderId, p_accept: accept, p_reason: reason ?? null });
-  if (error) throw new Error(error.message);
-}
-
 export async function distributorMarkDelivered(orderId: string, delivered: boolean, reason?: string): Promise<void> {
   const { error } = await supabase.rpc("distributor_mark_delivered", {
     p_order_id: orderId,
     p_delivered: delivered,
-    p_reason: reason ?? null,
+    p_reason: reason ? reason : undefined,
   });
   if (error) throw new Error(error.message);
 }

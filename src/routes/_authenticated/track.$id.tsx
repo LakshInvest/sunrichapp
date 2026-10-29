@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { ArrowLeft, Ban, HelpCircle, Repeat2, X } from "lucide-react";
+import { ArrowLeft, Ban, HelpCircle, Repeat2 } from "lucide-react";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SheetDrawer } from "@/components/SheetDrawer";
@@ -41,8 +41,6 @@ export const Route = createFileRoute("/_authenticated/track/$id")({
 });
 
 const MapPreview = lazy(() => import("@/components/MapPreview"));
-
-const STEP_KEYS = ["placed", "approved", "processing", "dispatched", "delivered"] as const;
 
 function OrderDetail() {
   const { id } = Route.useParams();
@@ -181,14 +179,14 @@ function OrderDetail() {
                     <div className="flex flex-col items-center">
                       <span
                         className={`flex h-6 w-6 items-center justify-center rounded-full border-2 ${
-                          done || (current && step.time)
-                            ? "border-secondary bg-secondary text-white"
+                          i < reached || (current && step.time)
+                            ? "border-secondary bg-secondary"
                             : current
                               ? "animate-pulse border-secondary bg-background"
                               : "border-border bg-background"
                         }`}
                       >
-                        {(done || (current && step.time)) && <span className="h-2 w-2 rounded-full bg-white" />}
+                        {(i < reached || (current && step.time)) && <span className="h-2 w-2 rounded-full bg-white" />}
                       </span>
                       {!isLast && <span className={`h-8 w-0.5 ${i < reached ? "bg-secondary" : "bg-border"}`} />}
                     </div>
@@ -335,7 +333,3 @@ function OrderDetail() {
     </main>
   );
 }
-
-// keep X import used by nothing — removed intentionally below
-void X;
-void STEP_KEYS;

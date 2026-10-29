@@ -19,6 +19,7 @@ import { Route as AuthenticatedHoldRouteImport } from './routes/_authenticated/h
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedOrderRouteImport } from './routes/_authenticated/order'
 import { Route as AuthenticatedOrderSuccessRouteImport } from './routes/_authenticated/order-success'
+import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
 import { Route as AuthenticatedQueriesRouteImport } from './routes/_authenticated/queries'
 import { Route as AuthenticatedRegistrationRouteImport } from './routes/_authenticated/registration'
 import { Route as AuthenticatedTrackRouteImport } from './routes/_authenticated/track'
@@ -26,6 +27,7 @@ import { Route as AuthenticatedProductIdRouteImport } from './routes/_authentica
 import { Route as AuthenticatedQueriesIndexRouteImport } from './routes/_authenticated/queries.index'
 import { Route as AuthenticatedQueriesIdRouteImport } from './routes/_authenticated/queries.$id'
 import { Route as AuthenticatedQueriesAskRouteImport } from './routes/_authenticated/queries.ask'
+import { Route as AuthenticatedTrackIdRouteImport } from './routes/_authenticated/track.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -77,6 +79,11 @@ const AuthenticatedOrderSuccessRoute =
     path: '/order-success',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedQueriesRoute = AuthenticatedQueriesRouteImport.update({
   id: '/queries',
   path: '/queries',
@@ -114,6 +121,11 @@ const AuthenticatedQueriesAskRoute = AuthenticatedQueriesAskRouteImport.update({
   path: '/ask',
   getParentRoute: () => AuthenticatedQueriesRoute,
 } as any)
+const AuthenticatedTrackIdRoute = AuthenticatedTrackIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedTrackRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -125,12 +137,14 @@ export interface FileRoutesByFullPath {
   '/home': typeof AuthenticatedHomeRoute
   '/order': typeof AuthenticatedOrderRoute
   '/order-success': typeof AuthenticatedOrderSuccessRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
   '/queries': typeof AuthenticatedQueriesRouteWithChildren
   '/registration': typeof AuthenticatedRegistrationRoute
-  '/track': typeof AuthenticatedTrackRoute
+  '/track': typeof AuthenticatedTrackRouteWithChildren
   '/product/$id': typeof AuthenticatedProductIdRoute
   '/queries/$id': typeof AuthenticatedQueriesIdRoute
   '/queries/ask': typeof AuthenticatedQueriesAskRoute
+  '/track/$id': typeof AuthenticatedTrackIdRoute
   '/queries/': typeof AuthenticatedQueriesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -143,11 +157,13 @@ export interface FileRoutesByTo {
   '/home': typeof AuthenticatedHomeRoute
   '/order': typeof AuthenticatedOrderRoute
   '/order-success': typeof AuthenticatedOrderSuccessRoute
+  '/payments': typeof AuthenticatedPaymentsRoute
   '/registration': typeof AuthenticatedRegistrationRoute
-  '/track': typeof AuthenticatedTrackRoute
+  '/track': typeof AuthenticatedTrackRouteWithChildren
   '/product/$id': typeof AuthenticatedProductIdRoute
   '/queries/$id': typeof AuthenticatedQueriesIdRoute
   '/queries/ask': typeof AuthenticatedQueriesAskRoute
+  '/track/$id': typeof AuthenticatedTrackIdRoute
   '/queries': typeof AuthenticatedQueriesIndexRoute
 }
 export interface FileRoutesById {
@@ -162,12 +178,14 @@ export interface FileRoutesById {
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/order': typeof AuthenticatedOrderRoute
   '/_authenticated/order-success': typeof AuthenticatedOrderSuccessRoute
+  '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/queries': typeof AuthenticatedQueriesRouteWithChildren
   '/_authenticated/registration': typeof AuthenticatedRegistrationRoute
-  '/_authenticated/track': typeof AuthenticatedTrackRoute
+  '/_authenticated/track': typeof AuthenticatedTrackRouteWithChildren
   '/_authenticated/product/$id': typeof AuthenticatedProductIdRoute
   '/_authenticated/queries/$id': typeof AuthenticatedQueriesIdRoute
   '/_authenticated/queries/ask': typeof AuthenticatedQueriesAskRoute
+  '/_authenticated/track/$id': typeof AuthenticatedTrackIdRoute
   '/_authenticated/queries/': typeof AuthenticatedQueriesIndexRoute
 }
 export interface FileRouteTypes {
@@ -182,12 +200,14 @@ export interface FileRouteTypes {
     | '/home'
     | '/order'
     | '/order-success'
+    | '/payments'
     | '/queries'
     | '/registration'
     | '/track'
     | '/product/$id'
     | '/queries/$id'
     | '/queries/ask'
+    | '/track/$id'
     | '/queries/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -200,11 +220,13 @@ export interface FileRouteTypes {
     | '/home'
     | '/order'
     | '/order-success'
+    | '/payments'
     | '/registration'
     | '/track'
     | '/product/$id'
     | '/queries/$id'
     | '/queries/ask'
+    | '/track/$id'
     | '/queries'
   id:
     | '__root__'
@@ -218,12 +240,14 @@ export interface FileRouteTypes {
     | '/_authenticated/home'
     | '/_authenticated/order'
     | '/_authenticated/order-success'
+    | '/_authenticated/payments'
     | '/_authenticated/queries'
     | '/_authenticated/registration'
     | '/_authenticated/track'
     | '/_authenticated/product/$id'
     | '/_authenticated/queries/$id'
     | '/_authenticated/queries/ask'
+    | '/_authenticated/track/$id'
     | '/_authenticated/queries/'
   fileRoutesById: FileRoutesById
 }
@@ -305,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrderSuccessRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/payments': {
+      id: '/_authenticated/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/queries': {
       id: '/_authenticated/queries'
       path: '/queries'
@@ -354,6 +385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedQueriesAskRouteImport
       parentRoute: typeof AuthenticatedQueriesRoute
     }
+    '/_authenticated/track/$id': {
+      id: '/_authenticated/track/$id'
+      path: '/$id'
+      fullPath: '/track/$id'
+      preLoaderRoute: typeof AuthenticatedTrackIdRouteImport
+      parentRoute: typeof AuthenticatedTrackRoute
+    }
   }
 }
 
@@ -372,6 +410,17 @@ const AuthenticatedQueriesRouteChildren: AuthenticatedQueriesRouteChildren = {
 const AuthenticatedQueriesRouteWithChildren =
   AuthenticatedQueriesRoute._addFileChildren(AuthenticatedQueriesRouteChildren)
 
+interface AuthenticatedTrackRouteChildren {
+  AuthenticatedTrackIdRoute: typeof AuthenticatedTrackIdRoute
+}
+
+const AuthenticatedTrackRouteChildren: AuthenticatedTrackRouteChildren = {
+  AuthenticatedTrackIdRoute: AuthenticatedTrackIdRoute,
+}
+
+const AuthenticatedTrackRouteWithChildren =
+  AuthenticatedTrackRoute._addFileChildren(AuthenticatedTrackRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedCartRoute: typeof AuthenticatedCartRoute
@@ -380,9 +429,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedOrderRoute: typeof AuthenticatedOrderRoute
   AuthenticatedOrderSuccessRoute: typeof AuthenticatedOrderSuccessRoute
+  AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedQueriesRoute: typeof AuthenticatedQueriesRouteWithChildren
   AuthenticatedRegistrationRoute: typeof AuthenticatedRegistrationRoute
-  AuthenticatedTrackRoute: typeof AuthenticatedTrackRoute
+  AuthenticatedTrackRoute: typeof AuthenticatedTrackRouteWithChildren
   AuthenticatedProductIdRoute: typeof AuthenticatedProductIdRoute
 }
 
@@ -394,9 +444,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedOrderRoute: AuthenticatedOrderRoute,
   AuthenticatedOrderSuccessRoute: AuthenticatedOrderSuccessRoute,
+  AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedQueriesRoute: AuthenticatedQueriesRouteWithChildren,
   AuthenticatedRegistrationRoute: AuthenticatedRegistrationRoute,
-  AuthenticatedTrackRoute: AuthenticatedTrackRoute,
+  AuthenticatedTrackRoute: AuthenticatedTrackRouteWithChildren,
   AuthenticatedProductIdRoute: AuthenticatedProductIdRoute,
 }
 

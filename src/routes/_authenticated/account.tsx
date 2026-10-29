@@ -495,12 +495,35 @@ function Account() {
           <div className="flex flex-col items-center gap-3 px-4 pb-10 text-center">
             <Logo size="md" />
             <p className="max-w-64 text-sm text-muted-foreground">{t("account.aboutBody")}</p>
+            <div className="flex flex-col items-center gap-1.5">
+              <a
+                href="https://sunrichaqua.com/privacy"
+                target="_blank"
+                rel="noreferrer"
+                className="flex min-h-10 items-center gap-1.5 text-sm font-semibold text-secondary underline underline-offset-4"
+              >
+                <ShieldCheck className="h-4 w-4" aria-hidden />
+                {t("account.privacyPolicy")}
+                <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+              </a>
+              <a
+                href="https://sunrichaqua.com/terms"
+                target="_blank"
+                rel="noreferrer"
+                className="flex min-h-10 items-center gap-1.5 text-sm font-semibold text-secondary underline underline-offset-4"
+              >
+                <FileText className="h-4 w-4" aria-hidden />
+                {t("account.termsOfUse")}
+                <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+              </a>
+            </div>
             <p className="text-xs font-medium text-muted-foreground">
               {t("account.aboutVersion", { version: APP_VERSION })}
             </p>
+            <p className="text-xs text-muted-foreground">{t("account.madeBy")}</p>
           </div>
-        </DrawerContent>
-      </Drawer>
+      </SheetDrawer>
+
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="mx-auto max-w-sm rounded-2xl">

@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
+import { Route as AuthenticatedCartRouteImport } from './routes/_authenticated/cart'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedOrderRouteImport } from './routes/_authenticated/order'
 import { Route as AuthenticatedTrackRouteImport } from './routes/_authenticated/track'
@@ -36,6 +37,11 @@ const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCartRoute = AuthenticatedCartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   id: '/home',
   path: '/home',
@@ -56,6 +62,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/account': typeof AuthenticatedAccountRoute
+  '/cart': typeof AuthenticatedCartRoute
   '/home': typeof AuthenticatedHomeRoute
   '/order': typeof AuthenticatedOrderRoute
   '/track': typeof AuthenticatedTrackRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/account': typeof AuthenticatedAccountRoute
+  '/cart': typeof AuthenticatedCartRoute
   '/home': typeof AuthenticatedHomeRoute
   '/order': typeof AuthenticatedOrderRoute
   '/track': typeof AuthenticatedTrackRoute
@@ -74,21 +82,24 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
+  '/_authenticated/cart': typeof AuthenticatedCartRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/order': typeof AuthenticatedOrderRoute
   '/_authenticated/track': typeof AuthenticatedTrackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/account' | '/home' | '/order' | '/track'
+  fullPaths:
+    '/' | '/auth' | '/account' | '/cart' | '/home' | '/order' | '/track'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/account' | '/home' | '/order' | '/track'
+  to: '/' | '/auth' | '/account' | '/cart' | '/home' | '/order' | '/track'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/account'
+    | '/_authenticated/cart'
     | '/_authenticated/home'
     | '/_authenticated/order'
     | '/_authenticated/track'
@@ -130,6 +141,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccountRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/cart': {
+      id: '/_authenticated/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof AuthenticatedCartRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/home': {
       id: '/_authenticated/home'
       path: '/home'
@@ -156,6 +174,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
+  AuthenticatedCartRoute: typeof AuthenticatedCartRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedOrderRoute: typeof AuthenticatedOrderRoute
   AuthenticatedTrackRoute: typeof AuthenticatedTrackRoute
@@ -163,6 +182,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
+  AuthenticatedCartRoute: AuthenticatedCartRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedOrderRoute: AuthenticatedOrderRoute,
   AuthenticatedTrackRoute: AuthenticatedTrackRoute,

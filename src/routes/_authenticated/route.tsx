@@ -1,11 +1,13 @@
 import { Outlet, redirect, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getMyCustomerId } from "@/lib/otp.functions";
 
 /**
  * Auth gate: every route under this pathless layout requires a signed-in
  * session. It runs client-side only (ssr: false) because the session lives
- * in browser storage. Unauthenticated visitors are sent to /auth.
+ * in browser storage. Unauthenticated visitors are sent to /auth; signed-in
+ * users without a customer on their profile are sent to /registration.
  */
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -13,6 +15,10 @@ export const Route = createFileRoute("/_authenticated")({
     const { data } = await supabase.auth.getUser();
     if (!data.user) {
       throw redirect({ to: "/auth" });
+    }
+    const { customerId } = await getMyCustomerId();
+    if (!customerId) {
+      throw redirect({ to: "/registration" });
     }
   },
   component: Gate,

@@ -349,6 +349,7 @@ function Login() {
         }
         return;
       }
+      sessionStorage.setItem(AUTH_FLOW_KEY, "1");
       const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: r.tokenHash, type: "magiclink" });
       if (vErr) {
         setError(t("auth.errors.generic"));

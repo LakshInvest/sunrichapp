@@ -63,8 +63,8 @@ function AskQuery() {
     if (!subj || !body || sending || offline) return;
     setSending(true);
     setError(null);
-    let attachmentPath: string | null = null;
-    let attachmentName: string | null = null;
+    let attachmentPath: string | undefined;
+    let attachmentName: string | undefined;
     try {
       if (file && customerId) {
         const prepared = await prepareUpload(file);
@@ -82,7 +82,7 @@ function AskQuery() {
           // Storage only allows attachments while the query is open — send
           // the question anyway and tell the user exactly why.
           setError(upErr.message);
-          attachmentPath = null;
+          attachmentPath = undefined;
         } else {
           attachmentName = file.name;
         }

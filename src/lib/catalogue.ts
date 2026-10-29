@@ -94,7 +94,7 @@ type RawProduct = Record<string, unknown>;
 
 function asLoc(v: unknown): Loc {
   const o = (v ?? {}) as Record<string, unknown>;
-  return { en: String(o.en ?? ""), hi: (o.hi as string) ?? null, mr: (o.mr as string) ?? null };
+  return { en: String(o["en"] ?? ""), hi: (o["hi"] as string) ?? null, mr: (o["mr"] as string) ?? null };
 }
 
 function num(v: unknown): number | null {

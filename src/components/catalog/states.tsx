@@ -113,7 +113,7 @@ export function CatalogueImage({
   className,
   fallbackSrc,
 }: {
-  src?: string | null;
+  src?: string | null | undefined;
   alt: string;
   className?: string;
   fallbackSrc?: string | null | undefined;

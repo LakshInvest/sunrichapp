@@ -27,7 +27,7 @@ import {
 
 export const Route = createFileRoute("/_authenticated/order")({
   validateSearch: (search: Record<string, unknown>) => ({
-    category: typeof search.category === "string" ? search.category : undefined,
+    category: typeof search["category"] === "string" ? search["category"] : undefined,
   }),
   head: () => ({
     meta: [
@@ -153,10 +153,7 @@ function Order() {
         <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto">
           <button
             type="button"
-            onClick={() => {
-              setSelected("all");
-              void navigate({ to: "/order", search: {} });
-            }}
+            onClick={() => setSelected("all")}
             aria-pressed={selected === "all"}
             className={`flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition active:scale-95 ${
               selected === "all"

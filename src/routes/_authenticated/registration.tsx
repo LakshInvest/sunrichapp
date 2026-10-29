@@ -363,10 +363,10 @@ function DetailsStep({
       const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
       const json: unknown = await res.json();
       const entry = Array.isArray(json) ? (json[0] as Record<string, unknown> | undefined) : undefined;
-      const offices = entry?.PostOffice as Record<string, unknown>[] | undefined;
+      const offices = entry?.["PostOffice"] as Record<string, unknown>[] | undefined;
       const office = offices?.[0];
-      const district = typeof office?.District === "string" ? office.District : "";
-      const state = typeof office?.State === "string" ? office.State : "";
+      const district = typeof office?.["District"] === "string" ? office["District"] : "";
+      const state = typeof office?.["State"] === "string" ? office["State"] : "";
       if (district || state) {
         setFields((f) => ({
           ...f,

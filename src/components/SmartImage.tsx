@@ -13,11 +13,11 @@ export function SmartImage({
   iconClassName,
   fallbackSrc,
 }: {
-  src?: string | null;
+  src?: string | null | undefined;
   alt: string;
   className?: string;
   iconClassName?: string;
-  fallbackSrc?: string | null;
+  fallbackSrc?: string | null | undefined;
 }) {
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);

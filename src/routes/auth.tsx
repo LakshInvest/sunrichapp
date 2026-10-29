@@ -335,6 +335,10 @@ function Login() {
   const submitPinLogin = async (pinValue: string) => {
     const m = lastMobile;
     if (!m || !deviceId || busy) return;
+    if (offline) {
+      setError(t("offline.hint"));
+      return;
+    }
     setError(null);
     setBusy(true);
     try {

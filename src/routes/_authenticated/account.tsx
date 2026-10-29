@@ -17,7 +17,9 @@ import {
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
+import { PhotoCrop } from "@/components/PhotoCrop";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
+import { clearMyPhoto } from "@/lib/profile.functions";
 import { AddressSheet } from "@/components/AddressSheet";
 import { LanguageSheet } from "@/components/LanguageSheet";
 import { Logo } from "@/components/Logo";

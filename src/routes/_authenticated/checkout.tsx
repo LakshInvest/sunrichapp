@@ -22,6 +22,9 @@ import {
 import {
   isoDaysFromToday,
   placeMyOrder,
+  fetchMyDefaultDeliveryMode,
+  setOrderDeliveryMode,
+  type DeliveryMode,
   quoteMyOrder,
   type PlacedOrder,
   type QuoteResult,
@@ -30,6 +33,7 @@ import { getMyRegistration, type RegistrationDto } from "@/lib/registration.func
 import { useServerFn } from "@tanstack/react-start";
 import { SheetDrawer } from "@/components/SheetDrawer";
 import { AddressEditor } from "@/components/AddressEditor";
+import { readSelectedAddressId, setSelectedAddressId } from "@/lib/selected-address";
 import { addressText, labelKey, listMyAddresses, setMyOrderAddress, type SavedAddress } from "@/lib/addresses";
 import { deliveryDays, minOrderShortfall, slotName, slotsFor, useAppSettings } from "@/lib/app-settings";
 import { Check, Plus } from "lucide-react";
@@ -48,6 +52,7 @@ export const Route = createFileRoute("/_authenticated/checkout")({
   component: Checkout,
 });
 
+const PLANT_MAP_URL = "https://www.google.com/maps/search/?api=1&query=Sunrich+MIDC+Latur";
 const SLOTS = ["morning", "afternoon", "evening"] as const;
 
 const MapPreview = lazy(() => import("@/components/MapPreview"));
@@ -72,6 +77,15 @@ function Checkout() {
   const [savedId, setSavedId] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [newAddrOpen, setNewAddrOpen] = useState(false);
+  const [mode, setMode] = useState<DeliveryMode>("sunrich");
+  const [defaultMode, setDefaultMode] = useState<DeliveryMode>("sunrich");
+  const [vehicle, setVehicle] = useState("");
+  useEffect(() => {
+    void fetchMyDefaultDeliveryMode().then((m) => {
+      setDefaultMode(m);
+      setMode(m);
+    });
+  }, []);
   const [day, setDay] = useState<string | null>(null);
   const [slot, setSlot] = useState<string | null>(null);
   const [newc, setNewc] = useState<Record<string, number>>({});
@@ -126,7 +140,11 @@ function Checkout() {
     try {
       const list = await listMyAddresses();
       setSaved(list);
-      setSavedId((cur) => pick ?? cur ?? list.find((a) => a.isDefault)?.id ?? list[0]?.id ?? null);
+      const remembered = readSelectedAddressId();
+      setSavedId(
+        (cur) =>
+          pick ?? cur ?? list.find((a) => a.id === remembered)?.id ?? list.find((a) => a.isDefault)?.id ?? list[0]?.id ?? null,
+      );
     } catch {
       /* fall back to the registered address */
     }
@@ -221,7 +239,8 @@ function Checkout() {
   const itemsTotal = rows.reduce((a, r) => a + (r.product.price ?? 0) * r.qty, 0);
   const shortfall = minOrderShortfall(quote?.items_total ?? itemsTotal, settings?.minOrderValue ?? 0);
   const notesAllowed = settings?.allowOrderNotes ?? true;
-  const noSlot = slots.length > 0 && !slots.some((x) => x.code === slot && !x.disabled);
+  const pickup = mode === "pickup";
+  const noSlot = !pickup && slots.length > 0 && !slots.some((x) => x.code === slot && !x.disabled);
 
   const addressLines = [addr.line1, addr.line2, addr.landmark, addr.city, addr.pincode].filter(Boolean);
 
@@ -242,7 +261,7 @@ function Checkout() {
           latitude: loc_?.lat ?? null,
           longitude: loc_?.lng ?? null,
           delivery_date: deliveryDate,
-          delivery_slot: slotLabel,
+          delivery_slot: pickup ? t("delivery.pickupSlot") : slotLabel,
         },
         notesAllowed ? notes.trim() || null : null,
       );
@@ -251,6 +270,15 @@ function Checkout() {
           await setMyOrderAddress(parts.map((p) => p.order_id), savedAddr.id);
         } catch (e) {
           console.warn("set_my_order_address failed", e);
+        }
+      }
+      if (pickup !== (defaultMode === "pickup") || (pickup && vehicle.trim())) {
+        for (const p of parts) {
+          try {
+            await setOrderDeliveryMode(p.order_id, mode, pickup ? vehicle : null);
+          } catch (e) {
+            console.warn("set_order_delivery_mode failed", e);
+          }
         }
       }
       sessionStorage.setItem("sunrich.lastOrder", JSON.stringify({ parts, deliveryDate, slot: slotLabel }));
@@ -295,8 +323,53 @@ function Checkout() {
       </header>
 
       <div className="px-5 pt-5">
-        {/* Delivery address */}
+        {/* Delivery mode */}
         <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <p className="text-sm font-bold text-foreground">{t("delivery.title")}</p>
+          <div className="mt-3 grid grid-cols-2 gap-2" role="group" aria-label={t("delivery.title")}>
+            {(["sunrich", "pickup"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMode(m)}
+                aria-pressed={mode === m}
+                className={`${chipCls(mode === m)} min-h-12`}
+              >
+                {t(`delivery.${m}`)}
+              </button>
+            ))}
+          </div>
+          {pickup && (
+            <div className="mt-3 space-y-3">
+              <div className="rounded-xl bg-secondary/10 px-3 py-2.5">
+                <p className="text-sm font-semibold text-foreground">{t("delivery.pickupFrom")}</p>
+                <a
+                  href={PLANT_MAP_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 inline-flex min-h-9 items-center gap-1 text-sm font-semibold text-secondary underline"
+                >
+                  <MapPin className="h-4 w-4" aria-hidden />
+                  {t("delivery.openMap")}
+                </a>
+              </div>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium text-foreground">{t("delivery.vehicle")}</span>
+                <input
+                  value={vehicle}
+                  onChange={(e) => setVehicle(e.target.value.toUpperCase().slice(0, 15))}
+                  placeholder="MH24AB1234"
+                  className={inputCls}
+                />
+              </label>
+            </div>
+          )}
+        </section>
+
+        {!pickup && (
+          <>
+        {/* Delivery address */}
+        <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
           <div className="flex items-center justify-between">
             <p className="flex items-center gap-2 text-sm font-bold text-foreground">
               <MapPin className="h-4 w-4 text-secondary" aria-hidden />
@@ -363,11 +436,13 @@ function Checkout() {
           )}
         </section>
 
+          </>
+        )}
         {/* Delivery date & slot */}
         <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
           <p className="flex items-center gap-2 text-sm font-bold text-foreground">
             <CalendarDays className="h-4 w-4 text-secondary" aria-hidden />
-            {t("checkout.whenTitle")}
+            {pickup ? t("delivery.pickupDate") : t("checkout.whenTitle")}
           </p>
           <div className="no-scrollbar -mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1" role="group" aria-label={t("checkout.whenTitle")}>
             {days.map((d, i) => (
@@ -386,7 +461,7 @@ function Checkout() {
               </button>
             ))}
           </div>
-          {slots.length > 0 ? (
+          {pickup ? null : slots.length > 0 ? (
             <div className="mt-3 grid grid-cols-2 gap-2" role="group" aria-label={t("checkout.slotLabel")}>
               {slots.map((x) => (
                 <button

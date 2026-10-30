@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { ArrowLeft, Clock, Download, FileText, IndianRupee, Loader2, Paperclip, Share2, Wallet, X } from "lucide-react";
+import { ArrowLeft, Clock, Download, FileText, IndianRupee, Loader2, Paperclip, Share2, X } from "lucide-react";
+import { BalanceCard } from "@/components/BalanceCard";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SheetDrawer } from "@/components/SheetDrawer";
@@ -29,7 +30,6 @@ import {
   rangeFor,
   shareOrDownload,
   statementPdf,
-  type Balance,
   type PayMode,
   type RangeKey,
   type ReportedPayment,
@@ -229,43 +229,6 @@ function entryLabel(type: string, t: (k: string) => string): string {
   if (k.includes("credit")) return t("balance.entry.creditNote");
   if (k.includes("debit")) return t("balance.entry.debitNote");
   return "";
-}
-
-export function BalanceCard({ bal, compact }: { bal: Balance | null; compact?: boolean }) {
-  const { t } = useTranslation();
-  const { lang } = useLang();
-  if (!bal)
-    return <div className="h-36 animate-pulse rounded-2xl bg-muted" aria-busy aria-label={t("common.loading")} />;
-  return (
-    <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-      <p className="flex items-center gap-2 text-sm font-bold">
-        <Wallet className="h-4 w-4 text-secondary" aria-hidden /> {t("balance.title")}
-      </p>
-      <p className="mt-2 text-xs text-muted-foreground">{t("balance.outstanding")}</p>
-      <p className="text-2xl font-extrabold text-primary">{formatINR(bal.outstanding)}</p>
-      {bal.overdue > 0 && (
-        <p className="mt-1 text-sm font-semibold text-destructive">
-          {t("balance.overdue", { amount: formatINR(bal.overdue), days: bal.overdueDays })}
-        </p>
-      )}
-      {!compact && (
-        <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <dt className="text-xs text-muted-foreground">{t("balance.limit")}</dt>
-            <dd className="font-semibold">{bal.limit > 0 ? formatINR(bal.limit) : t("balance.noCredit")}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground">{t("balance.available")}</dt>
-            <dd className="font-semibold text-primary">{bal.limit > 0 ? formatINR(bal.available) : "—"}</dd>
-          </div>
-          <div className="col-span-2">
-            <dt className="text-xs text-muted-foreground">{t("balance.nextDue")}</dt>
-            <dd className="font-semibold">{bal.nextDue ? dateLabel(bal.nextDue, lang) : t("balance.nothingDue")}</dd>
-          </div>
-        </dl>
-      )}
-    </section>
-  );
 }
 
 function DateRange({ value, onChange }: { value: { from: string; to: string }; onChange: (v: { from: string; to: string }) => void }) {

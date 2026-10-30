@@ -17,6 +17,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedAddressesRouteImport } from './routes/_authenticated/addresses'
+import { Route as AuthenticatedBalanceRouteImport } from './routes/_authenticated/balance'
 import { Route as AuthenticatedCartRouteImport } from './routes/_authenticated/cart'
 import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/checkout'
 import { Route as AuthenticatedHoldRouteImport } from './routes/_authenticated/hold'
@@ -74,6 +75,11 @@ const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
 const AuthenticatedAddressesRoute = AuthenticatedAddressesRouteImport.update({
   id: '/addresses',
   path: '/addresses',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBalanceRoute = AuthenticatedBalanceRouteImport.update({
+  id: '/balance',
+  path: '/balance',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCartRoute = AuthenticatedCartRouteImport.update({
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/account': typeof AuthenticatedAccountRoute
   '/addresses': typeof AuthenticatedAddressesRoute
+  '/balance': typeof AuthenticatedBalanceRoute
   '/cart': typeof AuthenticatedCartRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
   '/hold': typeof AuthenticatedHoldRoute
@@ -211,6 +218,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/account': typeof AuthenticatedAccountRoute
   '/addresses': typeof AuthenticatedAddressesRoute
+  '/balance': typeof AuthenticatedBalanceRoute
   '/cart': typeof AuthenticatedCartRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
   '/hold': typeof AuthenticatedHoldRoute
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/addresses': typeof AuthenticatedAddressesRoute
+  '/_authenticated/balance': typeof AuthenticatedBalanceRoute
   '/_authenticated/cart': typeof AuthenticatedCartRoute
   '/_authenticated/checkout': typeof AuthenticatedCheckoutRoute
   '/_authenticated/hold': typeof AuthenticatedHoldRoute
@@ -269,6 +278,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/account'
     | '/addresses'
+    | '/balance'
     | '/cart'
     | '/checkout'
     | '/hold'
@@ -297,6 +307,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/account'
     | '/addresses'
+    | '/balance'
     | '/cart'
     | '/checkout'
     | '/hold'
@@ -324,6 +335,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/_authenticated/account'
     | '/_authenticated/addresses'
+    | '/_authenticated/balance'
     | '/_authenticated/cart'
     | '/_authenticated/checkout'
     | '/_authenticated/hold'
@@ -410,6 +422,13 @@ declare module '@tanstack/react-router' {
       path: '/addresses'
       fullPath: '/addresses'
       preLoaderRoute: typeof AuthenticatedAddressesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/balance': {
+      id: '/_authenticated/balance'
+      path: '/balance'
+      fullPath: '/balance'
+      preLoaderRoute: typeof AuthenticatedBalanceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/cart': {
@@ -579,6 +598,7 @@ const AuthenticatedTrackRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedAddressesRoute: typeof AuthenticatedAddressesRoute
+  AuthenticatedBalanceRoute: typeof AuthenticatedBalanceRoute
   AuthenticatedCartRoute: typeof AuthenticatedCartRoute
   AuthenticatedCheckoutRoute: typeof AuthenticatedCheckoutRoute
   AuthenticatedHoldRoute: typeof AuthenticatedHoldRoute
@@ -598,6 +618,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedAddressesRoute: AuthenticatedAddressesRoute,
+  AuthenticatedBalanceRoute: AuthenticatedBalanceRoute,
   AuthenticatedCartRoute: AuthenticatedCartRoute,
   AuthenticatedCheckoutRoute: AuthenticatedCheckoutRoute,
   AuthenticatedHoldRoute: AuthenticatedHoldRoute,

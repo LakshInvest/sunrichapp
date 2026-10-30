@@ -5,7 +5,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, CalendarDays, ChevronDown, Loader2, MapPin, Wallet } from "lucide-react";
 import { Banknote, FileCheck2, Landmark as LandmarkIcon, Smartphone as PhoneIcon } from "lucide-react";
-import { defaultPayMethod, setOrderPaymentMethod, PAY_METHODS, type PayMethod } from "@/lib/payments";
+import { defaultPayMethod, setOrderPaymentMethod, type PayMethod } from "@/lib/payments";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SmartImage } from "@/components/SmartImage";

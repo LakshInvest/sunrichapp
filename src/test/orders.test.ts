@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   buildTimeline,
+  canChangeDeliveryMode,
+  resolveDeliveryMode,
   inboxGroup,
   isoDaysFromToday,
   itemsSummary,
@@ -29,6 +31,8 @@ const history = (rows: Array<[string | null, string]>): OrderHistoryRow[] =>
 
 const order = (over: Partial<OrderDto>): OrderDto => ({
   id: "o1",
+  deliveryMode: "sunrich",
+  pickupVehicleNo: null,
   deliveryLine2: null,
   assignedAt: null,
   orderNo: "ORD/1",
@@ -122,9 +126,9 @@ describe("buildTimeline", () => {
 
 describe("itemsSummary", () => {
   it("shows the first item with quantity and counts the rest", () => {
-    expect(itemsSummary([line("20 L Water Jar", 2)])).toEqual({ first: "20 L Water Jar ×2", more: 0 });
+    expect(itemsSummary([line("20 L Water Jar", 2)])).toEqual({ first: "20 L Water Jar · ×2", more: 0 });
     expect(itemsSummary([line("20 L Water Jar", 1), line("5 L Can", 1), line("Jar", 1)])).toEqual({
-      first: "20 L Water Jar ×1",
+      first: "20 L Water Jar · ×1",
       more: 2,
     });
     expect(itemsSummary([])).toEqual({ first: "—", more: 0 });
@@ -140,5 +144,19 @@ describe("isoDaysFromToday", () => {
     const plus7 = new Date();
     plus7.setDate(plus7.getDate() + 7);
     expect(isoDaysFromToday(7)).toBe(expectIso(plus7));
+  });
+});
+
+describe("delivery mode rules", () => {
+  it("uses the customer's own default first, then the type default, else Sunrich", () => {
+    expect(resolveDeliveryMode("pickup", "sunrich")).toBe("pickup");
+    expect(resolveDeliveryMode(null, "pickup")).toBe("pickup");
+    expect(resolveDeliveryMode(null, null)).toBe("sunrich");
+  });
+  it("customer can switch only while placed or on credit hold", () => {
+    expect(canChangeDeliveryMode("placed")).toBe(true);
+    expect(canChangeDeliveryMode("credit_hold")).toBe(true);
+    expect(canChangeDeliveryMode("approved")).toBe(false);
+    expect(canChangeDeliveryMode("dispatched")).toBe(false);
   });
 });

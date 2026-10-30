@@ -62,7 +62,6 @@ export function AddressSheet({
               </div>
             )}
           </div>
-          <p className="mt-3 text-center text-xs text-muted-foreground">{t("account.moreAddresses")}</p>
         </div>
     </SheetDrawer>
   );

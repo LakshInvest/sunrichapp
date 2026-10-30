@@ -131,7 +131,8 @@
     "emptyTitle": "No products yet",
     "emptyBody": "The Sunrich catalogue is being set up. Please check back soon.",
     "askUs": "Ask the Sunrich team",
-    "sortArranged": "As arranged"
+    "sortArranged": "As arranged",
+    "perPack": "/pack"
   },
   "product": {
     "quantity": "Quantity",
@@ -149,8 +150,8 @@
     "title": "Cart",
     "metaTitle": "Sunrich — Cart",
     "metaDescription": "Review your Sunrich water order before placing it.",
-    "itemsSummary_one": "{{count}} item · {{total}}",
-    "itemsSummary_other": "{{count}} items · {{total}}",
+    "itemsSummary_one": "{{count}} pack · {{total}}",
+    "itemsSummary_other": "{{count}} packs · {{total}}",
     "viewCart": "View cart",
     "clear": "Clear",
     "clearCart": "Clear cart",
@@ -246,7 +247,6 @@
     "termsOfUse": "Terms of use",
     "madeBy": "Made by Growth Story",
     "comingSoon": "Coming soon",
-    "moreAddresses": "More delivery addresses coming soon",
     "logoutTitle": "Log out?",
     "logoutBody": "You'll need to log in again with your number.",
     "logoutConfirm": "Log out",
@@ -449,7 +449,7 @@
     "expected": "Expected delivery: {{date}} · {{slot}}",
     "statusConfirmed": "Confirmed",
     "statusReceived": "Received — waiting for confirmation",
-    "statusUnderReview": "Under review",
+    "statusUnderReview": "Waiting for approval from Sunrich",
     "deliveredBy": "Delivered by {{who}}",
     "bySunrich": "Sunrich",
     "byDistributor": "your distributor",
@@ -559,7 +559,9 @@
     "loading": "Loading…",
     "slow": "Taking longer than usual…",
     "retry": "Retry",
-    "loadError": "Couldn't load. Please try again."
+    "loadError": "Couldn't load. Please try again.",
+    "packs_one": "{{count}} pack",
+    "packs_other": "{{count}} packs"
   },
   "invoice": {
     "metaTitle": "Invoice — Sunrich",
@@ -626,7 +628,12 @@
     "deleted": "Address deleted",
     "errDelete": "Couldn't delete the address.",
     "emptyTitle": "No saved addresses yet",
-    "emptyBody": "Add your shop, home or godown to choose it at checkout."
+    "emptyBody": "Add your shop, home or godown to choose it at checkout.",
+    "line1": "Address (house / shop no., street)",
+    "line2": "Area / colony (optional)",
+    "errLine1": "Enter the house / shop number and street",
+    "errMobile": "Enter a valid 10-digit mobile number",
+    "errPincode": "Enter a valid 6-digit pincode"
   },
   "feedback": {
     "title": "How was your delivery?",
@@ -645,7 +652,8 @@
       "late": "Late",
       "damaged": "Damaged",
       "wrong_items": "Wrong items"
-    }
+    },
+    "stars": "{{count}} stars"
   },
   "jars": {
     "withYou_one": "You have {{count}} jar with you",
@@ -682,5 +690,28 @@
     "askSub": "Track replies inside the app",
     "hours": "Support hours: {{hours}}",
     "waMessage": "Hello Sunrich, I need help."
+  },
+  "switcher": {
+    "title": "Deliver to",
+    "useCurrent": "Use current location",
+    "saved": "Saved addresses",
+    "selected": "Selected",
+    "more": "More options"
+  },
+  "delivery": {
+    "title": "How do you want it?",
+    "sunrich": "🚚 Sunrich delivers",
+    "pickup": "🏭 I'll pick up",
+    "pickupFrom": "Pick up from Sunrich plant, MIDC Latur",
+    "openMap": "Open in map",
+    "vehicle": "Vehicle number (optional)",
+    "pickupDate": "Pickup date",
+    "pickupSlot": "Pickup",
+    "modeLabel": "Delivery",
+    "switchToPickup": "Switch to I'll pick up",
+    "switchToSunrich": "Switch to Sunrich delivers",
+    "changed": "Delivery mode updated",
+    "vehicleShown": "Vehicle {{no}}",
+    "creditHold": "Waiting for approval from Sunrich"
   }
 }

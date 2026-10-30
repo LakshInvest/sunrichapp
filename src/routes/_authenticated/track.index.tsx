@@ -122,7 +122,7 @@ function MyOrders() {
         ) : (
           <ul className="space-y-3">
             {visible.map((o) => {
-              const s = itemsSummary(o.lines);
+              const s = itemsSummary(o.lines, (n) => t("common.packs", { count: n }));
               return (
                 <li key={o.id}>
                   <button

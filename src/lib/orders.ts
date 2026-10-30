@@ -54,12 +54,14 @@ export type OrderDto = {
   distributorStatus: string | null;
   businessName: string | null;
   customerMobile: string | null;
+  deliveryMode: "sunrich" | "pickup";
+  pickupVehicleNo: string | null;
   lines: OrderLineDto[];
   history: OrderHistoryRow[];
 };
 
 const ORDER_SELECT =
-  "id, customer_id, order_no, status, hold_reason, cancel_reason, items_total, deposit_total, grand_total, amount_paid, payment_status, payment_mode, created_at, due_date, delivery_date, delivery_slot, delivery_address_line1, delivery_address_line2, delivery_landmark, delivery_city, delivery_pincode, delivery_latitude, delivery_longitude, notes, fulfiller_customer_id, distributor_status, distributor_assigned_at, business_name, customer_mobile, order_lines(id, product_id, product_code, product_name, pack_label, qty, unit_price, mrp, line_total, deposit_total, new_containers, sort_order), order_status_history(to_status, changed_at, note)";
+  "id, customer_id, order_no, status, hold_reason, cancel_reason, items_total, deposit_total, grand_total, amount_paid, payment_status, payment_mode, created_at, due_date, delivery_date, delivery_slot, delivery_address_line1, delivery_address_line2, delivery_landmark, delivery_city, delivery_pincode, delivery_latitude, delivery_longitude, notes, fulfiller_customer_id, distributor_status, distributor_assigned_at, business_name, customer_mobile, delivery_mode, pickup_vehicle_no, order_lines(id, product_id, product_code, product_name, pack_label, qty, unit_price, mrp, line_total, deposit_total, new_containers, sort_order), order_status_history(to_status, changed_at, note)";
 
 function n(v: unknown): number {
   const num = Number(v);
@@ -98,6 +100,8 @@ function mapOrder(r: any): OrderDto {
     distributorStatus: (r["distributor_status"] as string) ?? null,
     businessName: (r["business_name"] as string) ?? null,
     customerMobile: (r["customer_mobile"] as string) ?? null,
+    deliveryMode: r["delivery_mode"] === "pickup" ? "pickup" : "sunrich",
+    pickupVehicleNo: (r["pickup_vehicle_no"] as string) ?? null,
     lines: ((r["order_lines"] ?? []) as any[])
       .map((l) => ({
         id: String(l["id"]),
@@ -425,11 +429,13 @@ export function useDistributorNav(): { isDistributor: boolean; newCount: number 
 /* ---------- misc helpers ---------- */
 
 /** "20 L Water Jar ×2 +1 more" style summary for a list card. */
-export function itemsSummary(lines: OrderLineDto[]): { first: string; more: number } {
+export function itemsSummary(
+  lines: OrderLineDto[],
+  packs: (n: number) => string = (n) => `×${n}`,
+): { first: string; more: number } {
   const first = lines[0];
   if (!first) return { first: "—", more: 0 };
-  const unit = first.qty === 1 ? "×1" : `×${first.qty}`;
-  return { first: `${first.productName} ${unit}`, more: Math.max(0, lines.length - 1) };
+  return { first: `${first.productName} · ${packs(first.qty)}`, more: Math.max(0, lines.length - 1) };
 }
 
 /** yyyy-mm-dd for a date input, n days from today (local time). */
@@ -439,4 +445,35 @@ export function isoDaysFromToday(days: number): string {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${d.getFullYear()}-${m}-${day}`;
+}
+
+export type DeliveryMode = "sunrich" | "pickup";
+
+/** Customer default: customers.default_delivery_mode, else its type's default, else Sunrich. */
+export async function fetchMyDefaultDeliveryMode(): Promise<DeliveryMode> {
+  const { data } = await supabase
+    .from("customers")
+    .select("default_delivery_mode, customer_types(default_delivery_mode)")
+    .maybeSingle();
+  const r = data as { default_delivery_mode: string | null; customer_types: { default_delivery_mode: string | null } | null } | null;
+  return resolveDeliveryMode(r?.default_delivery_mode, r?.customer_types?.default_delivery_mode);
+}
+
+export function resolveDeliveryMode(own?: string | null, type?: string | null): DeliveryMode {
+  const v = own || type;
+  return v === "pickup" ? "pickup" : "sunrich";
+}
+
+/** Customer may switch only while placed / credit hold (enforced by the RPC too). */
+export function canChangeDeliveryMode(status: string): boolean {
+  return status === "placed" || status === "credit_hold";
+}
+
+export async function setOrderDeliveryMode(orderId: string, mode: DeliveryMode, vehicleNo: string | null): Promise<void> {
+  const { error } = await supabase.rpc("set_order_delivery_mode", {
+    p_order_id: orderId,
+    p_mode: mode,
+    ...(mode === "pickup" && vehicleNo?.trim() ? { p_vehicle_no: vehicleNo.trim() } : {}),
+  });
+  if (error) throw new Error(error.message);
 }

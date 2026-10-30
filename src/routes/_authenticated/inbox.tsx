@@ -194,7 +194,7 @@ function Inbox() {
         ) : (
           <ul className="space-y-3">
             {visible.map((o) => {
-              const s = itemsSummary(o.lines);
+              const s = itemsSummary(o.lines, (n) => t("common.packs", { count: n }));
               const isNew = o.distributorStatus === "pending";
               return (
                 <li

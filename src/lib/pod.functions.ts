@@ -15,12 +15,14 @@ export function storagePathParts(
 ): { bucket: string; object: string } | null {
   const clean = path.replace(/^\/+|\/+$/g, "");
   if (!clean) return null;
-  const [first, ...rest] = clean.split("/");
-  if (!rest.length) return null;
+  const first = clean.split("/")[0] ?? "";
+  const rest = clean.split("/").slice(1);
   // A bare single-segment path is not a bucket name; treat it as operations content.
   const known = ["operations", "customer-docs", "avatars", "company-assets", "catalogue"];
-  const bucket = known.includes(first) ? first : defaultBucket;
-  return { bucket, object: bucket === first ? rest.join("/") : clean };
+  if (known.includes(first) && rest.length) {
+    return { bucket: first, object: rest.join("/") };
+  }
+  return { bucket: defaultBucket, object: clean };
 }
 
 /**

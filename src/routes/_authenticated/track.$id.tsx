@@ -2,7 +2,8 @@ import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { ArrowLeft, Ban, HelpCircle, Repeat2 } from "lucide-react";
+import { ArrowLeft, Ban, FileText, HelpCircle, Loader2, Repeat2 } from "lucide-react";
+import { fetchInvoiceIdForOrder } from "@/lib/billing";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SheetDrawer } from "@/components/SheetDrawer";
@@ -57,6 +58,7 @@ function OrderDetail() {
   const [reason, setReason] = useState("");
   const [cancelling, setCancelling] = useState(false);
   const [reordering, setReordering] = useState(false);
+  const [invoiceId, setInvoiceId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -64,6 +66,7 @@ function OrderDetail() {
       const found = list.find((o) => o.id === id) ?? null;
       setOrder(found);
       setError(found ? null : "not-found");
+      if (found) setInvoiceId(await fetchInvoiceIdForOrder(found.id).catch(() => null));
     } catch (e) {
       setError((e as Error).message);
     }
@@ -277,6 +280,16 @@ function OrderDetail() {
               {t("trackDetail.cancelOrder")}
             </button>
           )}
+          {invoiceId && (
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/invoice/$id", params: { id: invoiceId } })}
+              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-primary-foreground transition active:scale-[0.98]"
+            >
+              <FileText className="h-5 w-5" aria-hidden />
+              {t("invoice.view")}
+            </button>
+          )}
           {!isCancelled && order.lines.length > 0 && (
             <button
               type="button"
@@ -285,7 +298,7 @@ function OrderDetail() {
               title={offline ? t("offline.hint") : undefined}
               className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-card text-base font-semibold text-foreground transition active:scale-[0.98] disabled:opacity-50"
             >
-              <Repeat2 className="h-5 w-5 text-secondary" aria-hidden />
+              {reordering ? <Loader2 className="h-5 w-5 animate-spin" /> : <Repeat2 className="h-5 w-5 text-secondary" aria-hidden />}
               {reordering ? t("trackDetail.reordering") : t("trackDetail.reorder")}
             </button>
           )}

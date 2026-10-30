@@ -56,12 +56,13 @@ export type OrderDto = {
   customerMobile: string | null;
   deliveryMode: "sunrich" | "pickup";
   pickupVehicleNo: string | null;
+  deliveryOtp: string | null;
   lines: OrderLineDto[];
   history: OrderHistoryRow[];
 };
 
 const ORDER_SELECT =
-  "id, customer_id, order_no, status, hold_reason, cancel_reason, items_total, deposit_total, grand_total, amount_paid, payment_status, payment_mode, created_at, due_date, delivery_date, delivery_slot, delivery_address_line1, delivery_address_line2, delivery_landmark, delivery_city, delivery_pincode, delivery_latitude, delivery_longitude, notes, fulfiller_customer_id, distributor_status, distributor_assigned_at, business_name, customer_mobile, delivery_mode, pickup_vehicle_no, order_lines(id, product_id, product_code, product_name, pack_label, qty, unit_price, mrp, line_total, deposit_total, new_containers, sort_order), order_status_history(to_status, changed_at, note)";
+  "id, customer_id, order_no, status, hold_reason, cancel_reason, items_total, deposit_total, grand_total, amount_paid, payment_status, payment_mode, created_at, due_date, delivery_date, delivery_slot, delivery_address_line1, delivery_address_line2, delivery_landmark, delivery_city, delivery_pincode, delivery_latitude, delivery_longitude, notes, fulfiller_customer_id, distributor_status, distributor_assigned_at, business_name, customer_mobile, delivery_mode, pickup_vehicle_no, delivery_otp, order_lines(id, product_id, product_code, product_name, pack_label, qty, unit_price, mrp, line_total, deposit_total, new_containers, sort_order), order_status_history(to_status, changed_at, note)";
 
 function n(v: unknown): number {
   const num = Number(v);
@@ -102,6 +103,7 @@ function mapOrder(r: any): OrderDto {
     customerMobile: (r["customer_mobile"] as string) ?? null,
     deliveryMode: r["delivery_mode"] === "pickup" ? "pickup" : "sunrich",
     pickupVehicleNo: (r["pickup_vehicle_no"] as string) ?? null,
+    deliveryOtp: r["delivery_otp"] != null ? String(r["delivery_otp"]) : null,
     lines: ((r["order_lines"] ?? []) as any[])
       .map((l) => ({
         id: String(l["id"]),

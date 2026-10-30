@@ -265,7 +265,7 @@ function Checkout() {
           latitude: loc_?.lat ?? null,
           longitude: loc_?.lng ?? null,
           delivery_date: deliveryDate,
-          delivery_slot: pickup ? t("delivery.pickupSlot") : slotLabel,
+          delivery_slot: pickup ? t("delivery.pickupSlot") : (slots.find((y) => y.code === slot)?.name ?? slotLabel),
         },
         notesAllowed ? notes.trim() || null : null,
       );

@@ -1,6 +1,9 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { SlotText } from "@/components/SlotText";
+import { DeliveredLines, DeliveryOtpCard, PickupPass, ProofOfDelivery } from "@/components/OrderExtras";
+import { fetchDeliveryProof, showDeliveryOtp, type DeliveryProof } from "@/lib/delivery";
 import { toast } from "sonner";
 import { ArrowLeft, Ban, FileText, HelpCircle, Loader2, Repeat2 } from "lucide-react";
 import { fetchInvoiceIdForOrder } from "@/lib/billing";
@@ -68,6 +71,7 @@ function OrderDetail() {
   const [switching, setSwitching] = useState(false);
   const [invoiceId, setInvoiceId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<OrderFeedback | null | undefined>(undefined);
+  const [proof, setProof] = useState<DeliveryProof | null>(null);
   const settings = useAppSettings();
   const isDemo = useIsDemo();
 
@@ -79,6 +83,8 @@ function OrderDetail() {
       setError(found ? null : "not-found");
       if (found) {
         setInvoiceId(await fetchInvoiceIdForOrder(found.id).catch(() => null));
+        if (["dispatched", "delivered", "closed"].includes(found.status))
+          setProof(await fetchDeliveryProof(found.id).catch(() => null));
         if (found.status === "delivered" || found.status === "closed")
           setFeedback((await fetchMyFeedback([found.id]).catch(() => ({}) as Record<string, OrderFeedback>))[found.id] ?? null);
       }
@@ -248,6 +254,11 @@ function OrderDetail() {
           )}
         </section>
 
+        {showDeliveryOtp(order.status, order.deliveryOtp) && <DeliveryOtpCard otp={order.deliveryOtp!} />}
+        {order.deliveryMode === "pickup" && !isCancelled && !isDelivered && (
+          <PickupPass order={order} lang={lang} offline={offline} onChanged={() => void load()} />
+        )}
+
         {/* Lines */}
         <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
           <ul className="space-y-2.5">
@@ -281,6 +292,9 @@ function OrderDetail() {
             </p>
           </div>
         </section>
+
+        {proof && <DeliveredLines order={order} proof={proof} />}
+        {proof && <ProofOfDelivery proof={proof} />}
 
         {/* Delivery mode */}
         <section className="mt-4 flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm">
@@ -319,7 +333,7 @@ function OrderDetail() {
               who: order.fulfillerCustomerId ? t("success.byDistributor") : t("success.bySunrich"),
             })}
             {order.deliveryDate ? ` · ${t("checkout.deliversOn", { date: dateLabel(order.deliveryDate, lang) })}` : ""}
-            {order.deliverySlot ? ` · ${order.deliverySlot}` : ""}
+            <SlotText value={order.deliverySlot} />
           </p>
           <div className="mt-3">
             <Suspense fallback={<div className="h-36 w-full animate-pulse rounded-xl bg-muted" />}>

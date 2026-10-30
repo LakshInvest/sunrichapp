@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { SlotText } from "@/components/SlotText";
 import { toast } from "sonner";
 import { Check, CheckCheck, Clock, Copy, MapPin, Phone, X } from "lucide-react";
 import en from "@/locales/en.json";
@@ -231,7 +232,7 @@ function Inbox() {
                       {[o.deliveryLine2, o.deliveryLandmark, o.deliveryCity].filter(Boolean).join(", ")}
                     </p>
                   )}
-                  <p className="mt-0.5 text-xs text-muted-foreground">{dateLabel(o.deliveryDate ?? o.createdAt, lang)}{o.deliverySlot ? ` · ${o.deliverySlot}` : ""}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{dateLabel(o.deliveryDate ?? o.createdAt, lang)}<SlotText value={o.deliverySlot} /></p>
                   <div className="mt-2 flex items-center justify-between gap-3">
                     <p className="min-w-0 flex-1 truncate text-sm text-foreground">
                       {s.first}

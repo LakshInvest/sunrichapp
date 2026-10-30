@@ -17,6 +17,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import i18n from "../lib/i18n";
 import { initNative } from "@/lib/native";
+import { AppGate } from "@/components/AppGate";
+import { refreshPushToken } from "@/lib/push";
 
 function NotFoundComponent() {
   return (
@@ -129,6 +131,7 @@ function RootComponent() {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      if (event === "SIGNED_IN") void refreshPushToken();
       void router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });
@@ -145,6 +148,13 @@ function RootComponent() {
     return () => cleanup?.();
   }, [router]);
 
+  // Push token carries the language: refresh it when the language changes.
+  useEffect(() => {
+    const on = () => void refreshPushToken();
+    i18n.on("languageChanged", on);
+    return () => i18n.off("languageChanged", on);
+  }, []);
+
   // Keep the focused field visible above the on-screen keyboard.
   useEffect(() => {
     const onFocus = (e: FocusEvent) => {
@@ -160,6 +170,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <AppGate />
       <Toaster position="top-center" />
     </QueryClientProvider>
   );

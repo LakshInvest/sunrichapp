@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   Trash2,
   Wallet,
+  Smartphone,
   type LucideIcon,
 } from "lucide-react";
 import en from "@/locales/en.json";
@@ -56,7 +57,6 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useLang } from "@/hooks/use-lang";
 import { useAppSettings } from "@/lib/app-settings";
-import { openInApp } from "@/lib/native";
 import { loc, readCatalogueCache } from "@/lib/catalogue";
 import { getMyRegistration, type DbLocalized, type RegistrationDto } from "@/lib/registration.functions";
 
@@ -92,7 +92,9 @@ export const Route = createFileRoute("/_authenticated/account")({
   component: Account,
 });
 
-const APP_VERSION = "1.0.0";
+import { APP_VERSION } from "@/lib/version";
+import { BalanceCard } from "@/components/BalanceCard";
+import { fetchBalance, type Balance } from "@/lib/ledger";
 
 function MenuItem({
   icon: Icon,
@@ -129,6 +131,11 @@ function Account() {
   const { t } = useTranslation();
   const { lang, choose } = useLang();
   const navigate = useNavigate();
+  const [balance, setBalance] = useState<Balance | null>(null);
+  const [balanceFailed, setBalanceFailed] = useState(false);
+  useEffect(() => {
+    fetchBalance().then(setBalance, () => setBalanceFailed(true));
+  }, []);
   const { queryClient } = Route.useRouteContext();
   const myReg = useServerFn(getMyRegistration);
   const clearPhoto = useServerFn(clearMyPhoto);
@@ -427,6 +434,11 @@ function Account() {
         </section>
       )}
 
+      {/* My account balance (tap → full screen) */}
+      {!balanceFailed && <button type="button" onClick={() => navigate({ to: "/balance" })} className="mt-4 block w-full text-left" aria-label={t("balance.title")}>
+        <BalanceCard bal={balance} compact />
+      </button>}
+
       {/* Menu groups */}
       <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">
         <MenuItem icon={Wallet} label={t("account.payments")} onClick={() => navigate({ to: "/payments" })} />
@@ -438,6 +450,8 @@ function Account() {
         ) : (
           <MenuItem icon={MapPin} label={t("addresses.title")} onClick={() => navigate({ to: "/addresses" })} />
         )}
+        <Separator />
+        <MenuItem icon={Smartphone} label={t("devices.title")} onClick={() => navigate({ to: "/devices" })} />
         <Separator />
         <MenuItem icon={LifeBuoy} label={t("support.title")} onClick={() => navigate({ to: "/support" })} />
         <Separator />
@@ -570,26 +584,26 @@ function Account() {
               {settings?.about.en ? loc(settings.about, lang) : t("account.aboutBody")}
             </p>
             <div className="flex flex-col items-center gap-1.5">
-              {settings?.privacyUrl && (
+              {(
                 <button
                   type="button"
-                  onClick={() => void openInApp(settings.privacyUrl!)}
+                  onClick={() => void navigate({ to: "/privacy" })}
                   className="flex min-h-11 items-center gap-1.5 text-sm font-semibold text-secondary underline underline-offset-4"
                 >
                   <ShieldCheck className="h-4 w-4" aria-hidden />
                   {t("account.privacyPolicy")}
-                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                  
                 </button>
               )}
-              {settings?.termsUrl && (
+              {(
                 <button
                   type="button"
-                  onClick={() => void openInApp(settings.termsUrl!)}
+                  onClick={() => void navigate({ to: "/terms" })}
                   className="flex min-h-11 items-center gap-1.5 text-sm font-semibold text-secondary underline underline-offset-4"
                 >
                   <FileText className="h-4 w-4" aria-hidden />
                   {t("account.termsOfUse")}
-                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                  
                 </button>
               )}
             </div>

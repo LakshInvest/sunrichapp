@@ -34,7 +34,8 @@ import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
 import { useFavourites } from "@/hooks/use-favourites";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
-import { fetchMyOrders, hasOrderUpdates, type OrderDto } from "@/lib/orders";
+import { fetchMyOrders, type OrderDto } from "@/lib/orders";
+import { hasUnreadNotices } from "@/lib/notifications";
 import { fetchMyFeedback, planReorder, skippedRatings } from "@/lib/feedback";
 import { RateOrderCard } from "@/components/RateOrderCard";
 import { useAppSettings } from "@/lib/app-settings";
@@ -184,7 +185,7 @@ function Home() {
     let active = true;
     const check = async () => {
       try {
-        const has = await hasOrderUpdates();
+        const has = await hasUnreadNotices();
         if (active) setOrderUpdates(has);
       } catch {
         /* offline — keep current state */
@@ -613,7 +614,7 @@ function Home() {
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
-                      onClick={() => navigate({ to: "/track" })}
+                      onClick={() => navigate({ to: "/notifications" })}
                       aria-label={t("home.updatesBell")}
                       className="relative flex h-10 w-10 items-center justify-center rounded-full transition active:scale-95"
                     >

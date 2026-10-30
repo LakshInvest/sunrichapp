@@ -98,12 +98,15 @@ function Checkout() {
     if (error) scrollToFirstError();
   }, [error]);
   const placingRef = useRef(false);
+  const savedAppliedRef = useRef(false);
 
   useEffect(() => {
     let active = true;
     void myReg().then((r) => {
       if (!active) return;
       setReg(r);
+      // A saved address chosen earlier wins over the registered one (they load in parallel).
+      if (savedAppliedRef.current) return;
       setAddr({
         line1: r.addressLine1 ?? "",
         line2: r.addressLine2 ?? "",
@@ -155,6 +158,7 @@ function Checkout() {
   const savedAddr = useSaved ? saved.find((a) => a.id === savedId) ?? null : null;
   useEffect(() => {
     if (!savedAddr) return;
+    savedAppliedRef.current = true;
     setAddr({
       line1: savedAddr.line1,
       line2: savedAddr.line2 ?? "",

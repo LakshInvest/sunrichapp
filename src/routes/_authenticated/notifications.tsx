@@ -95,7 +95,7 @@ function Notifications() {
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-semibold">
-                      {t(`notices.kind.${n.kind}`, { status: n.status ? t(`orders.status.${n.status}`, { defaultValue: n.status }) : "" })}
+                      {t(`notices.kind.${n.kind}`, { status: n.status ? t(`status.${n.status}`, { defaultValue: n.status }) : "" })}
                     </span>
                     <span className="block truncate text-xs text-muted-foreground">
                       {n.ref} · {dateLabel(n.at, lang)}

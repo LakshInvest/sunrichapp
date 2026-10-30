@@ -1,4 +1,5 @@
 import { serverMessage } from "@/lib/form-errors";
+import { useIsDemo } from "@/hooks/use-demo";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Suspense, lazy, useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
@@ -133,6 +134,7 @@ function Account() {
   const [profile, setProfile] = useState<{ name: string; mobile: string; photoUrl: string | null } | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [customer, setCustomer] = useState<RegistrationDto | null>(null);
+  const isDemo = useIsDemo();
   const [openCount, setOpenCount] = useState(0);
   const [addressOpen, setAddressOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
@@ -342,6 +344,11 @@ function Account() {
                   {typeLabel}
                 </span>
               )}
+              {isDemo && (
+                <span className="ml-1.5 mt-1.5 inline-block rounded-full bg-accent px-2.5 py-0.5 text-xs font-semibold text-accent-foreground">
+                  {t("demo.chip")}
+                </span>
+              )}
             </div>
             <button
               type="button"
@@ -371,8 +378,6 @@ function Account() {
 
       {/* Menu groups */}
       <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">
-        <MenuItem icon={Package} label={t("account.myOrders")} onClick={() => navigate({ to: "/track" })} />
-        <Separator />
         <MenuItem icon={Wallet} label={t("account.payments")} onClick={() => navigate({ to: "/payments" })} />
       </section>
 

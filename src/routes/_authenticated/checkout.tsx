@@ -1,3 +1,4 @@
+import { useIsDemo } from "@/hooks/use-demo";
 import { scrollToFirstError } from "@/lib/form-errors";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -201,6 +202,11 @@ function Checkout() {
   return (
     <main className={`mx-auto min-h-screen max-w-md bg-background pb-16 ${deva}`}>
       <OfflineBanner />
+      {isDemo && (
+        <p role="status" className="bg-accent px-5 py-1.5 text-center text-xs font-semibold text-accent-foreground">
+          {t("demo.checkoutBanner")}
+        </p>
+      )}
       <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 py-2.5 backdrop-blur-md">
         <button
           type="button"

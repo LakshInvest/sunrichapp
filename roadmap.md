@@ -60,3 +60,28 @@ Fixes during this task: ORDER_SELECT now includes customer_id (own-order filter 
 - [x] 5 Order again  - [x] 6 Delivery rating  - [x] 7 Jar balance  - [x] 8 Help/About/Legal/Delete
 - [x] 9 Location disclosure  - [x] 10 Android shell config (native build itself is done by the owner)
 - [x] 11–13 Offline/errors, image sizes, en/hi/mr  - [x] 14 Demo QA at 360/390 (768 not re-checked)
+
+# Prompt-25 — 18-task go-live table (final)
+
+Constraint kept: existing DB tables/RPCs/RLS only — no schema, policy or function changes.
+
+- [x] 1  Query status labels + Account-tab unread dot (answered = Waiting for reply, open = Sunrich replied, closed = Closed).
+- [x] 2  Delivery slots localized (name_hi/name_mr fallback English) via localSlot/SlotText; canonical English slot stored.
+- [x] 3  Real delete-account request sent live from QA Home → appears in Help & queries as "Delete my account — Waiting for reply" (2 copies exist, QA records kept).
+- [x] 4  Order detail: delivery OTP card (dispatched + otp present), delivered-vs-ordered lines, POD section, pickup pass. NOTE: trip_stops/delivery_lines RLS blocks customers (ts_read→trips_read allows only drivers/dispatch), so proof data renders only if Sunrich grants customers read access — code is live and correct.
+- [x] 5  Invoice view + Share + Download PDF + WhatsApp, verified live on MFTI/26-27/00002 (₹865, GST breakdown, amount in words).
+- [x] 6  Pickup pass verified live on MFO/26-27/00015: QR of order no, "Show this at the gate", pickup date, plant address + map link, vehicle field.
+- [x] 7  Balance card on Account + /balance full screen (outstanding, credit limit/available per firm, next due).
+- [x] 8  Ledger date filters + running entries; tap invoice opens it.
+- [x] 9  Statement PDF download/share (customer_statement).
+- [x] 10 "I have paid" → customer_raise_query(context payment); reported payments shown in ledger.
+- [x] 11 Notifications feed (orders/invoices/queries, newest first, per-device seen marker, deep taps); no cross-customer leak (checked).
+- [x] 12 Push prep: consent sheet after first order → system permission → save_my_push_token; refresh on login/language change. Untestable in browser (native only).
+- [x] 13 Logged-in phones via my_devices/revoke_my_device.
+- [x] 14 Public /privacy /terms /delete-account from public_app_info, placeholders replaced, language switch; cold-load in Hindi verified.
+- [x] 15 AppGate: min/latest version + maintenance from public_app_info.
+- [x] 16 docs/PLAY_STORE.md + docs/ANDROID.md, version single source (src/lib/version.ts), assets icon/splash SVGs, /order/$id deep-link route + appUrlOpen (manifest registration documented for the Android build).
+- [x] 17 Accessibility: 44px+ touch areas (invisible hit-area expansion on compact steppers), 130% font-size sweep at 360px — no overflow on 7 screens, aria-labels on icon-only controls.
+- [x] 18 QA matrix: 99 page checks across 360/390/768 × en/hi/mr — 0 overflow, 0 missing keys; live signed-in checks for orders/invoices/pickup/balance/notifications/devices/queries.
+
+Untested / blocked: real Android push (needs google-services.json + build), POD + delivered-vs-ordered display (DB RLS blocks customer reads), delivery OTP card (no dispatched order with an OTP in data), vehicle-number save (no QA write), camera capture (needs a device).

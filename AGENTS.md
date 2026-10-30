@@ -20,3 +20,4 @@ Subdirectories `src/lib/` and `src/routes/` have their own `AGENTS.md`; read the
 - Signed-in server reads use `createServerFn` + `requireSupabaseAuth`; bearer attached by `attachSupabaseAuth` in `src/start.ts`. Service-role reads first verify caller access through RLS. Why: server fns are callable without the route gate.
 - All screens apply the saved language via `useLang`. Offline: mutating screens disable actions and show `offline.hint`; catalogue falls back to cache. Why: patchy mobile data; only the picker seeds language otherwise.
 - Form errors use `data-field-error` + `scrollToFirstError()` (`src/lib/form-errors.ts`). Why: consistent jump-to-first-error.
+- Shared-order deep links: `sunrich://order/<id>` and `https://…/order/<id>` land on `/order/$id`, which redirects to `/track/$id`; the Android shell maps `appUrlOpen` to the same path (`src/lib/native.ts`). Why: order links must open the order on web and in the app.

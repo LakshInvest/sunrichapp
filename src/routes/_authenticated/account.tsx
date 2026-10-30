@@ -56,7 +56,6 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useLang } from "@/hooks/use-lang";
 import { useAppSettings } from "@/lib/app-settings";
-import { openInApp } from "@/lib/native";
 import { loc, readCatalogueCache } from "@/lib/catalogue";
 import { getMyRegistration, type DbLocalized, type RegistrationDto } from "@/lib/registration.functions";
 
@@ -92,7 +91,7 @@ export const Route = createFileRoute("/_authenticated/account")({
   component: Account,
 });
 
-const APP_VERSION = "1.0.0";
+import { APP_VERSION } from "@/lib/version";
 
 function MenuItem({
   icon: Icon,
@@ -578,7 +577,7 @@ function Account() {
                 >
                   <ShieldCheck className="h-4 w-4" aria-hidden />
                   {t("account.privacyPolicy")}
-                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                  
                 </button>
               )}
               {(
@@ -589,7 +588,7 @@ function Account() {
                 >
                   <FileText className="h-4 w-4" aria-hidden />
                   {t("account.termsOfUse")}
-                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                  
                 </button>
               )}
             </div>

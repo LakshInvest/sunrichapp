@@ -21,7 +21,7 @@ import {
 } from "@/lib/billing";
 import { dateLabel } from "@/lib/order-format";
 
-const TABS = ["bills", "payments", "statement"] as const;
+const TABS = ["bills", "payments", "statement", "mine"] as const;
 type Tab = (typeof TABS)[number];
 
 export const Route = createFileRoute("/_authenticated/payments")({
@@ -92,7 +92,7 @@ function Payments() {
           </button>
           <p className="min-w-0 flex-1 truncate text-base font-bold text-foreground">{t("payments.title")}</p>
         </div>
-        <div role="tablist" className="grid grid-cols-3 gap-1 px-4 pb-2">
+        <div role="tablist" className="grid grid-cols-4 gap-1 px-4 pb-2">
           {TABS.map((k) => (
             <button
               key={k}
@@ -100,7 +100,7 @@ function Payments() {
               aria-selected={tab === k}
               type="button"
               onClick={() => navigate({ to: "/payments", search: { tab: k }, replace: true })}
-              className={`min-h-11 rounded-xl text-sm font-semibold transition ${
+              className={`min-h-11 rounded-xl text-[13px] font-semibold transition ${
                 tab === k ? "bg-primary text-primary-foreground" : "text-muted-foreground"
               }`}
             >
@@ -143,6 +143,7 @@ function Payments() {
         {tab === "bills" && <BillsTab lang={lang} />}
         {tab === "payments" && <ReceiptsTab lang={lang} />}
         {tab === "statement" && <StatementTab lang={lang} />}
+        {tab === "mine" && <MineTab lang={lang} />}
       </div>
     </main>
   );

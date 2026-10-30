@@ -136,8 +136,8 @@ function MyOrders() {
                   >
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-bold text-foreground">{o.orderNo}</p>
-                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${statusChipClass(o.status)}`}>
-                        {t(`status.${o.status}`)}
+                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${statusChipClass(unpaid.has(o.id) && o.status === "approved" ? "placed" : o.status)}`}>
+                        {t(`status.${unpaid.has(o.id) && o.status === "approved" ? "placed" : o.status}`)}
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">{dateLabel(o.createdAt, lang)}</p>

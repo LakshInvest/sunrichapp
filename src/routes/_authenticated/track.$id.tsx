@@ -175,6 +175,9 @@ function OrderDetail() {
   }
 
   const { steps, reached } = buildTimeline(order.status, order.history);
+  // Never "Confirmed" while a UPI / bank payment is still pending.
+  const payPending = ["upi", "bank"].includes(order.paymentMethod ?? "") && payProof?.status !== "verified" && order.paymentStatus !== "paid";
+  const shownStatus = order.status === "approved" && payPending ? "placed" : order.status;
   const cancellable = canCustomerCancel(order.status, settings?.allowCancelBefore ?? "approved");
   const pastCancel = !cancellable && ["approved", "processing", "dispatched"].includes(order.status);
   const isDelivered = order.status === "delivered" || order.status === "closed";
@@ -251,8 +254,8 @@ function OrderDetail() {
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
         <p className="min-w-0 flex-1 truncate text-base font-bold text-foreground">{order.orderNo}</p>
-        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${statusChipClass(order.status)}`}>
-          {t(`status.${order.status}`)}
+        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${statusChipClass(shownStatus)}`}>
+          {t(`status.${shownStatus}`)}
         </span>
       </header>
 

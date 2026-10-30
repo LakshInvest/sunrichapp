@@ -4,6 +4,7 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } fro
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Banknote, CalendarDays, ChevronDown, Loader2, MapPin, Wallet } from "lucide-react";
+import { defaultPayMethod, setOrderPaymentMethod, PAY_METHODS, type PayMethod } from "@/lib/payments";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SmartImage } from "@/components/SmartImage";
@@ -91,6 +92,8 @@ function Checkout() {
   const [newc, setNewc] = useState<Record<string, number>>({});
   const [notes, setNotes] = useState("");
   const [quote, setQuote] = useState<QuoteResult | null>(null);
+  const [pay, setPay] = useState<PayMethod>("cash");
+  const payTouched = useRef(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -297,6 +300,10 @@ function Checkout() {
   };
 
   const onCredit = quote != null && quote.credit_limit > 0;
+  const creditAllowed = quote != null && quote.credit_limit > 0 && !quote.credit_blocked;
+  useEffect(() => {
+    if (!payTouched.current && quote) setPay(defaultPayMethod(quote));
+  }, [quote]);
   const exceedsCredit =
     quote != null &&
     onCredit &&

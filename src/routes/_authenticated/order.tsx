@@ -203,13 +203,13 @@ function Order() {
           })}
         </div>
         <div className="mt-3 flex items-center justify-between gap-2">
-          <p className="text-sm text-muted-foreground">
+          <p className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
             {t("catalog.resultsCount", { count: visible.length })}
           </p>
           <div
             role="group"
             aria-label={t("catalog.sortLabel")}
-            className="flex items-center gap-1 rounded-full border border-border bg-card p-0.5"
+            className="no-scrollbar flex min-w-0 items-center gap-1 overflow-x-auto rounded-full border border-border bg-card p-0.5"
           >
             <ArrowDownWideNarrow className="ml-1.5 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
             {(
@@ -225,7 +225,7 @@ function Order() {
                 type="button"
                 onClick={() => setSort(key)}
                 aria-pressed={sort === key}
-                className={`min-h-8 rounded-full px-2.5 text-xs font-semibold transition ${
+                className={`min-h-8 shrink-0 whitespace-nowrap rounded-full px-2.5 text-xs font-semibold transition ${
                   sort === key ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                 }`}
               >

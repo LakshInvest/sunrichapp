@@ -13,7 +13,7 @@ export function storagePathParts(
   path: string,
   defaultBucket = "operations",
 ): { bucket: string; object: string } | null {
-  const clean = path.replace(/^\/+|\/+$/g, "");
+  const clean = path.trim().replace(/^\/+|\/+$/g, "");
   if (!clean) return null;
   const first = clean.split("/")[0] ?? "";
   const rest = clean.split("/").slice(1);

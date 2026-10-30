@@ -132,8 +132,9 @@ function Account() {
   const { lang, choose } = useLang();
   const navigate = useNavigate();
   const [balance, setBalance] = useState<Balance | null>(null);
+  const [balanceFailed, setBalanceFailed] = useState(false);
   useEffect(() => {
-    fetchBalance().then(setBalance, () => setBalance(null));
+    fetchBalance().then(setBalance, () => setBalanceFailed(true));
   }, []);
   const { queryClient } = Route.useRouteContext();
   const myReg = useServerFn(getMyRegistration);
@@ -434,9 +435,9 @@ function Account() {
       )}
 
       {/* My account balance (tap → full screen) */}
-      <button type="button" onClick={() => navigate({ to: "/balance" })} className="mt-4 block w-full text-left" aria-label={t("balance.title")}>
+      {!balanceFailed && <button type="button" onClick={() => navigate({ to: "/balance" })} className="mt-4 block w-full text-left" aria-label={t("balance.title")}>
         <BalanceCard bal={balance} compact />
-      </button>
+      </button>}
 
       {/* Menu groups */}
       <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">

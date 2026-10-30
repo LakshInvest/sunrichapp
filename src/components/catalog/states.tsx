@@ -79,10 +79,14 @@ export function EmptyState({
   title,
   body,
   icon = PackageSearch,
+  action,
+  onAction,
 }: {
   title: string;
   body?: string;
   icon?: typeof PackageSearch;
+  action?: string;
+  onAction?: () => void;
 }) {
   const Icon = icon;
   return (
@@ -92,6 +96,15 @@ export function EmptyState({
       </span>
       <p className="mt-4 text-base font-semibold text-foreground">{title}</p>
       {body && <p className="mt-1 max-w-72 text-sm text-muted-foreground">{body}</p>}
+      {action && onAction && (
+        <button
+          type="button"
+          onClick={onAction}
+          className="mt-4 min-h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition active:scale-95"
+        >
+          {action}
+        </button>
+      )}
     </div>
   );
 }

@@ -209,8 +209,13 @@ function Cart() {
                         {t("cart.priceUpdated")}
                       </p>
                     )}
-                    <p className="mt-0.5 text-sm font-bold text-primary">
-                      {product.price === null ? t("catalog.priceOnRequest") : formatINR(product.price * qty)}
+                    <p className="mt-0.5 flex items-baseline gap-1.5 whitespace-nowrap">
+                      <span className="text-base font-bold text-primary">
+                        {product.price === null ? t("catalog.priceOnRequest") : formatINR(product.price * qty)}
+                      </span>
+                      {product.price !== null && product.mrp !== null && product.mrp > product.price && (
+                        <span className="text-xs text-muted-foreground line-through">{formatINR(product.mrp * qty)}</span>
+                      )}
                     </p>
                     {product.isReturnable && product.depositAmount != null && product.depositAmount > 0 && (
                       <p className="text-[11px] text-muted-foreground">

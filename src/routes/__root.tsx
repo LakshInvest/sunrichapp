@@ -17,6 +17,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import i18n from "../lib/i18n";
 import { initNative } from "@/lib/native";
+import { AppGate } from "@/components/AppGate";
 
 function NotFoundComponent() {
   return (
@@ -160,6 +161,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <AppGate />
       <Toaster position="top-center" />
     </QueryClientProvider>
   );

@@ -67,8 +67,12 @@
       "reenter": "PIN पुन्हा टाका",
       "digit": "PIN अंक {{n}}",
       "enterRow": "PIN टाका",
-      "confirmRow": "PIN नक्की करा"
-    }
+      "confirmRow": "PIN नक्की करा",
+      "deviceNotRecognised": "हे डिव्हाइस ओळखले नाही — एकदा OTP ने पडताळणी करा.",
+      "success": "पुन्हा स्वागत आहे!",
+      "checking": "PIN तपासत आहे…"
+    },
+    "otpSentToast": "OTP व्हॉट्सॲप {{mobile}} वर पाठवला"
   },
   "nav": {
     "home": "होम",
@@ -379,7 +383,9 @@
       "messagePlaceholder": "कशी मदत हवी आहे ते सांगा…",
       "attachHint": "फोटो किंवा PDF (ऐच्छिक). फाइला खुल्या प्रश्नावर जोडता येते.",
       "sendQuestion": "प्रश्न पाठवा",
-      "sent": "प्रश्न पाठवला — Sunrich टीम लवकरच उत्तर देईल."
+      "sent": "प्रश्न पाठवला — Sunrich टीम लवकरच उत्तर देईल.",
+      "errSubject": "कृपया विषय लिहा",
+      "errMessage": "कृपया तुमचा प्रश्न लिहा"
     }
   },
   "checkout": {
@@ -478,7 +484,35 @@
     "payOnDelivery": "तुम्ही डिलिव्हरीवर पैसे द्या",
     "payOnDeliveryBody": "उधार खाते नाही — ऑर्डर आल्यावर रोख द्या.",
     "deliveredTitle": "पोहोचलेले ऑर्डर",
-    "comingSoon": "इन्व्हॉइस आणि स्टेटमेंट लवकरच."
+    "comingSoon": "इन्व्हॉइस आणि स्टेटमेंट लवकरच.",
+    "tabs": {
+      "bills": "बिले",
+      "payments": "पेमेंट",
+      "statement": "स्टेटमेंट"
+    },
+    "openBills": "थकीत बिले",
+    "paidBills": "भरलेली बिले",
+    "dueOn": "देय {{date}}",
+    "balance": "बाकी",
+    "noBillsTitle": "अजून बिले नाहीत",
+    "noBillsBody": "ऑर्डर डिलिव्हर झाल्यावर बिले येथे दिसतील.",
+    "noReceiptsTitle": "अजून पेमेंट नाही",
+    "noReceiptsBody": "तुमची पेमेंट येथे दिसतील.",
+    "mode": {
+      "cash": "रोख",
+      "upi": "UPI",
+      "cheque": "चेक",
+      "bank": "बँक ट्रान्सफर",
+      "neft": "NEFT",
+      "card": "कार्ड"
+    },
+    "prevMonth": "मागील महिना",
+    "nextMonth": "पुढील महिना",
+    "noEntriesTitle": "या महिन्यात काही नाही",
+    "noEntriesBody": "या महिन्यात बिल किंवा पेमेंट नाही.",
+    "closing": "अंतिम शिल्लक",
+    "debit": "बिले",
+    "credit": "पेमेंट"
   },
   "inbox": {
     "title": "इनबॉक्स",
@@ -504,6 +538,37 @@
     "accepted": "ऑर्डर स्वीकारले",
     "rejected": "हे ऑर्डर सनरिच डिलिव्हर करेल",
     "markedDelivered": "पोहोचले चिन्हांकित",
-    "markedNotDelivered": "पोहोचले नाही चिन्हांकित"
+    "markedNotDelivered": "पोहोचले नाही चिन्हांकित",
+    "waiting": "{{n}} मिनिटांपासून प्रतीक्षा",
+    "waitingHours": "{{h}} ता {{m}} मिनिटांपासून प्रतीक्षा"
+  },
+  "common": {
+    "loading": "लोड होत आहे…",
+    "slow": "नेहमीपेक्षा जास्त वेळ लागत आहे…",
+    "retry": "पुन्हा प्रयत्न करा"
+  },
+  "invoice": {
+    "metaTitle": "इनव्हॉइस — सनरिच",
+    "metaDescription": "तुमचे सनरिच GST इनव्हॉइस.",
+    "title": "इनव्हॉइस",
+    "share": "शेअर करा",
+    "copied": "इनव्हॉइस कॉपी झाले",
+    "shareFailed": "शेअर करता आले नाही",
+    "notFound": "इनव्हॉइस सापडले नाही",
+    "notFoundBody": "हे इनव्हॉइस उपलब्ध नाही.",
+    "no": "इनव्हॉइस क्र.",
+    "date": "तारीख",
+    "billedTo": "बिल प्राप्तकर्ता",
+    "gst": "GST",
+    "taxable": "करपात्र मूल्य",
+    "deposit": "जार ठेव",
+    "roundOff": "राउंड ऑफ",
+    "total": "एकूण",
+    "paid": "भरले",
+    "balanceDue": "बाकी रक्कम",
+    "scanToPay": "पेमेंटसाठी कोणत्याही UPI ॲपने स्कॅन करा",
+    "noUpi": "डिलिव्हरी टीमला रोख किंवा UPI ने पेमेंट करा.",
+    "fullyPaid": "पूर्ण पेमेंट झाले",
+    "view": "इनव्हॉइस पहा"
   }
 }

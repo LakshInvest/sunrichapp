@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { ArrowLeft, Camera, FileText, Paperclip, Send, X } from "lucide-react";
+import { ArrowLeft, Camera, FileText, Loader2, Paperclip, Send, X } from "lucide-react";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { OfflineBanner } from "@/components/OfflineBanner";

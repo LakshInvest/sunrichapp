@@ -9,6 +9,8 @@ import {
   Camera,
   ChevronRight,
   ExternalLink,
+  GlassWater,
+  LifeBuoy,
   FileText,
   Image as ImageIcon,
   Info,
@@ -53,6 +55,9 @@ import { DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useLang } from "@/hooks/use-lang";
+import { useAppSettings } from "@/lib/app-settings";
+import { openInApp } from "@/lib/native";
+import { loc, readCatalogueCache } from "@/lib/catalogue";
 import { getMyRegistration, type DbLocalized, type RegistrationDto } from "@/lib/registration.functions";
 
 function pl(v: DbLocalized | null | undefined, lang: string): string {
@@ -151,7 +156,25 @@ function Account() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteDone, setDeleteDone] = useState(false);
+  const settings = useAppSettings();
+  const [jars, setJars] = useState<{ productId: string; balance: number }[]>([]);
   const cameraInput = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!settings?.showJarBalance) return;
+    let active = true;
+    void supabase
+      .from("container_balances")
+      .select("product_id, balance")
+      .gt("balance", 0)
+      .then(({ data }) => {
+        if (active)
+          setJars((data ?? []).map((r) => ({ productId: r.product_id ?? "", balance: Number(r.balance ?? 0) })).filter((r) => r.balance > 0));
+      });
+    return () => {
+      active = false;
+    };
+  }, [settings?.showJarBalance]);
   const galleryInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -375,13 +398,48 @@ function Account() {
         )}
       </section>
 
+      {settings?.showJarBalance && jars.length > 0 && (
+        <section className="mt-4 flex items-start gap-3 rounded-2xl border border-secondary/30 bg-secondary/5 p-4">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary/15">
+            <GlassWater className="h-5 w-5 text-secondary" aria-hidden />
+          </span>
+          <div className="min-w-0 flex-1">
+            {jars.length === 1 ? (
+              <p className="text-base font-bold text-foreground">{t("jars.withYou", { count: jars[0]!.balance })}</p>
+            ) : (
+              <>
+                <p className="text-base font-bold text-foreground">{t("jars.withYou", { count: jars.reduce((a, j) => a + j.balance, 0) })}</p>
+                <ul className="mt-1 space-y-0.5">
+                  {jars.map((j) => {
+                    const p = readCatalogueCache()?.products.find((x) => x.id === j.productId);
+                    return (
+                      <li key={j.productId} className="flex justify-between text-sm text-foreground">
+                        <span className="truncate">{p ? loc(p.name, lang) : t("jars.container")}</span>
+                        <span className="font-semibold">{j.balance}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
+            )}
+            <p className="mt-1 text-xs text-muted-foreground">{t("jars.returnHint")}</p>
+          </div>
+        </section>
+      )}
+
       {/* Menu groups */}
       <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">
         <MenuItem icon={Wallet} label={t("account.payments")} onClick={() => navigate({ to: "/payments" })} />
       </section>
 
       <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">
-        <MenuItem icon={MapPin} label={t("account.deliveryAddress")} onClick={() => setAddressOpen(true)} />
+        {settings?.multipleAddresses === false ? (
+          <MenuItem icon={MapPin} label={t("account.deliveryAddress")} onClick={() => setAddressOpen(true)} />
+        ) : (
+          <MenuItem icon={MapPin} label={t("addresses.title")} onClick={() => navigate({ to: "/addresses" })} />
+        )}
+        <Separator />
+        <MenuItem icon={LifeBuoy} label={t("support.title")} onClick={() => navigate({ to: "/support" })} />
         <Separator />
         <MenuItem
           icon={MessagesSquare}
@@ -508,28 +566,32 @@ function Account() {
           </DrawerHeader>
           <div className="flex flex-col items-center gap-3 px-4 pb-10 text-center">
             <Logo size="md" />
-            <p className="max-w-64 text-sm text-muted-foreground">{t("account.aboutBody")}</p>
+            <p className="max-w-72 whitespace-pre-line text-sm text-muted-foreground">
+              {settings?.about.en ? loc(settings.about, lang) : t("account.aboutBody")}
+            </p>
             <div className="flex flex-col items-center gap-1.5">
-              <a
-                href="https://sunrichaqua.com/privacy"
-                target="_blank"
-                rel="noreferrer"
-                className="flex min-h-10 items-center gap-1.5 text-sm font-semibold text-secondary underline underline-offset-4"
-              >
-                <ShieldCheck className="h-4 w-4" aria-hidden />
-                {t("account.privacyPolicy")}
-                <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-              </a>
-              <a
-                href="https://sunrichaqua.com/terms"
-                target="_blank"
-                rel="noreferrer"
-                className="flex min-h-10 items-center gap-1.5 text-sm font-semibold text-secondary underline underline-offset-4"
-              >
-                <FileText className="h-4 w-4" aria-hidden />
-                {t("account.termsOfUse")}
-                <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-              </a>
+              {settings?.privacyUrl && (
+                <button
+                  type="button"
+                  onClick={() => void openInApp(settings.privacyUrl!)}
+                  className="flex min-h-11 items-center gap-1.5 text-sm font-semibold text-secondary underline underline-offset-4"
+                >
+                  <ShieldCheck className="h-4 w-4" aria-hidden />
+                  {t("account.privacyPolicy")}
+                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                </button>
+              )}
+              {settings?.termsUrl && (
+                <button
+                  type="button"
+                  onClick={() => void openInApp(settings.termsUrl!)}
+                  className="flex min-h-11 items-center gap-1.5 text-sm font-semibold text-secondary underline underline-offset-4"
+                >
+                  <FileText className="h-4 w-4" aria-hidden />
+                  {t("account.termsOfUse")}
+                  <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                </button>
+              )}
             </div>
             <p className="text-xs font-medium text-muted-foreground">
               {t("account.aboutVersion", { version: APP_VERSION })}

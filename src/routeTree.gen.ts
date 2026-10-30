@@ -24,6 +24,7 @@ import { Route as AuthenticatedOrderSuccessRouteImport } from './routes/_authent
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
 import { Route as AuthenticatedQueriesRouteImport } from './routes/_authenticated/queries'
 import { Route as AuthenticatedRegistrationRouteImport } from './routes/_authenticated/registration'
+import { Route as AuthenticatedSupportRouteImport } from './routes/_authenticated/support'
 import { Route as AuthenticatedTrackRouteImport } from './routes/_authenticated/track'
 import { Route as AuthenticatedInvoiceIdRouteImport } from './routes/_authenticated/invoice.$id'
 import { Route as AuthenticatedProductIdRouteImport } from './routes/_authenticated/product.$id'
@@ -109,6 +110,11 @@ const AuthenticatedRegistrationRoute =
     path: '/registration',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSupportRoute = AuthenticatedSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedTrackRoute = AuthenticatedTrackRouteImport.update({
   id: '/track',
   path: '/track',
@@ -166,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/payments': typeof AuthenticatedPaymentsRoute
   '/queries': typeof AuthenticatedQueriesRouteWithChildren
   '/registration': typeof AuthenticatedRegistrationRoute
+  '/support': typeof AuthenticatedSupportRoute
   '/track': typeof AuthenticatedTrackRouteWithChildren
   '/invoice/$id': typeof AuthenticatedInvoiceIdRoute
   '/product/$id': typeof AuthenticatedProductIdRoute
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/order-success': typeof AuthenticatedOrderSuccessRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/registration': typeof AuthenticatedRegistrationRoute
+  '/support': typeof AuthenticatedSupportRoute
   '/invoice/$id': typeof AuthenticatedInvoiceIdRoute
   '/product/$id': typeof AuthenticatedProductIdRoute
   '/queries/$id': typeof AuthenticatedQueriesIdRoute
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/queries': typeof AuthenticatedQueriesRouteWithChildren
   '/_authenticated/registration': typeof AuthenticatedRegistrationRoute
+  '/_authenticated/support': typeof AuthenticatedSupportRoute
   '/_authenticated/track': typeof AuthenticatedTrackRouteWithChildren
   '/_authenticated/invoice/$id': typeof AuthenticatedInvoiceIdRoute
   '/_authenticated/product/$id': typeof AuthenticatedProductIdRoute
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/payments'
     | '/queries'
     | '/registration'
+    | '/support'
     | '/track'
     | '/invoice/$id'
     | '/product/$id'
@@ -263,6 +273,7 @@ export interface FileRouteTypes {
     | '/order-success'
     | '/payments'
     | '/registration'
+    | '/support'
     | '/invoice/$id'
     | '/product/$id'
     | '/queries/$id'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/_authenticated/payments'
     | '/_authenticated/queries'
     | '/_authenticated/registration'
+    | '/_authenticated/support'
     | '/_authenticated/track'
     | '/_authenticated/invoice/$id'
     | '/_authenticated/product/$id'
@@ -410,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRegistrationRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/support': {
+      id: '/_authenticated/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof AuthenticatedSupportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/track': {
       id: '/_authenticated/track'
       path: '/track'
@@ -510,6 +529,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedQueriesRoute: typeof AuthenticatedQueriesRouteWithChildren
   AuthenticatedRegistrationRoute: typeof AuthenticatedRegistrationRoute
+  AuthenticatedSupportRoute: typeof AuthenticatedSupportRoute
   AuthenticatedTrackRoute: typeof AuthenticatedTrackRouteWithChildren
   AuthenticatedInvoiceIdRoute: typeof AuthenticatedInvoiceIdRoute
   AuthenticatedProductIdRoute: typeof AuthenticatedProductIdRoute
@@ -528,6 +548,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedQueriesRoute: AuthenticatedQueriesRouteWithChildren,
   AuthenticatedRegistrationRoute: AuthenticatedRegistrationRoute,
+  AuthenticatedSupportRoute: AuthenticatedSupportRoute,
   AuthenticatedTrackRoute: AuthenticatedTrackRouteWithChildren,
   AuthenticatedInvoiceIdRoute: AuthenticatedInvoiceIdRoute,
   AuthenticatedProductIdRoute: AuthenticatedProductIdRoute,

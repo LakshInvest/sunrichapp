@@ -79,6 +79,7 @@ export const sendOtp = createServerFn({ method: "POST" })
     // Store reviewer demo numbers: no WhatsApp, open the PIN screen instead.
     const { data: isDemo, error: demoErr } = await supabaseAdmin.rpc("is_demo_mobile", { p_mobile: mobile });
     if (demoErr) console.error("is_demo_mobile failed", demoErr.message);
+    else console.info("[sunrich] is_demo_mobile", mobile.slice(-4), isDemo);
     if (isDemo === true) return { ok: true, use_pin: true };
 
     const hourAgo = new Date(Date.now() - 3600_000).toISOString();

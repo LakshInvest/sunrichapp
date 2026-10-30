@@ -117,14 +117,12 @@ export function CatalogueImage({
   src,
   alt,
   className,
-  fallbackSrc,
 }: {
   src?: string | null | undefined;
   alt: string;
   className?: string | undefined;
-  fallbackSrc?: string | null | undefined;
 }) {
-  return <SmartImage src={src} alt={alt} className={className} fallbackSrc={fallbackSrc} />;
+  return <SmartImage src={src} alt={alt} className={className} />;
 }
 
 /** Shows "Taking longer than usual… Retry" once `loading` has lasted 10 s. */

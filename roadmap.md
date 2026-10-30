@@ -32,6 +32,6 @@ Constraint: existing DB tables/RPCs only. No schema/policy changes.
 - [x] 5. Payments (/payments): credit_status gauge, unpaid ledger by outstanding (grand_total − amount_paid) with due-date overdue chip; COD customers see pay-on-delivery + delivered history.
 - [x] 6. Distributor Inbox (/inbox): New/To deliver/Done tabs, accept/reject with reason, mark delivered, map, distributor_respond/distributor_mark_delivered. No distributor fixture exists — flows unit-tested (inboxGroup), not live E2E.
 - [x] 7. Order-update bell on Home (hasOrderUpdates + markOrdersSeen, 60s poll, badge).
-- [-] 8. Responsive + multilingual QA at 360/390/768 × en/hi/mr — live run delayed behind the OTP rate limit (background job qa20b); rerun after the window reopens.
+- [x] 8. Responsive + multilingual QA at 360/390/768 × en/hi/mr — live E2E passed (real OTP sign-in): place → success → detail timeline → cancel with reason → list filters → payments → bell (dot + tap → /track) → hi/mr headers → no horizontal scroll at 360/768. Test orders 00001–00005 cancelled afterwards with a QA note.
 
 Fixes during this task: ORDER_SELECT now includes customer_id (own-order filter worked against undefined before); /track restructured into layout + track.index + track.$id (detail previously rendered the list because /track/$id nests under /track); order-format.ts shared helpers; OrderDto gained paidAmount/paymentStatus.

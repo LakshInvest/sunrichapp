@@ -277,6 +277,7 @@ export type QuoteResult = {
     deposit_total: number;
     new_containers: number;
     fulfiller_customer_id: string | null;
+    firm_id?: string | null;
   }>;
   items_total: number;
   deposit_total: number;
@@ -286,12 +287,45 @@ export type QuoteResult = {
   credit_available: number;
   credit_blocked: boolean;
   overdue: number;
+  /** True when some firm's share of this order is above that firm's available credit (server holds it). */
+  credit_exceeds?: boolean;
 };
 
+/**
+ * The server checks credit per firm (a firm-specific limit beats the customer
+ * limit), while quote_my_order reports the firm-less limit. Re-read credit per
+ * firm so checkout shows what the server will actually do.
+ */
 export async function quoteMyOrder(lines: QuoteLine[]): Promise<QuoteResult> {
   const { data, error } = await supabase.rpc("quote_my_order", { p_lines: lines });
   if (error) throw new Error(error.message);
-  return data as QuoteResult;
+  const q = data as QuoteResult;
+  try {
+    const cid = await getMyCustomerId();
+    const byFirm = new Map<string, number>();
+    for (const l of q.lines ?? []) {
+      if (!l.firm_id) continue;
+      byFirm.set(l.firm_id, (byFirm.get(l.firm_id) ?? 0) + Number(l.line_total) + Number(l.deposit_total));
+    }
+    if (cid && byFirm.size > 0) {
+      let limit = 0;
+      let available = 0;
+      let exceeds = false;
+      for (const [firm, total] of byFirm) {
+        const { data: cs, error: csErr } = await supabase.rpc("credit_status", { p_customer_id: cid, p_firm_id: firm });
+        if (csErr) throw csErr;
+        const row = (Array.isArray(cs) ? cs[0] : cs) as CreditStatus | undefined;
+        if (!row) continue;
+        limit += Number(row.out_limit);
+        available += Number(row.out_available);
+        if (Number(row.out_limit) > 0 && total > Number(row.out_available)) exceeds = true;
+      }
+      return { ...q, credit_limit: limit, credit_available: available, credit_exceeds: exceeds };
+    }
+  } catch {
+    /* fall back to the firm-less figures */
+  }
+  return q;
 }
 
 export type PlacedOrder = {

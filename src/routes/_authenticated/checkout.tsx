@@ -98,12 +98,15 @@ function Checkout() {
     if (error) scrollToFirstError();
   }, [error]);
   const placingRef = useRef(false);
+  const savedAppliedRef = useRef(false);
 
   useEffect(() => {
     let active = true;
     void myReg().then((r) => {
       if (!active) return;
       setReg(r);
+      // A saved address chosen earlier wins over the registered one (they load in parallel).
+      if (savedAppliedRef.current) return;
       setAddr({
         line1: r.addressLine1 ?? "",
         line2: r.addressLine2 ?? "",
@@ -155,6 +158,7 @@ function Checkout() {
   const savedAddr = useSaved ? saved.find((a) => a.id === savedId) ?? null : null;
   useEffect(() => {
     if (!savedAddr) return;
+    savedAppliedRef.current = true;
     setAddr({
       line1: savedAddr.line1,
       line2: savedAddr.line2 ?? "",
@@ -293,7 +297,10 @@ function Checkout() {
   };
 
   const onCredit = quote != null && quote.credit_limit > 0;
-  const exceedsCredit = quote != null && onCredit && quote.items_total + quote.deposit_total > quote.credit_available;
+  const exceedsCredit =
+    quote != null &&
+    onCredit &&
+    (quote.credit_exceeds ?? quote.items_total + quote.deposit_total > quote.credit_available);
 
   const inputCls =
     "min-h-12 w-full rounded-xl border border-input bg-card px-4 text-base text-foreground outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30";

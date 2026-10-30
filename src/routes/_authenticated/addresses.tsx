@@ -20,7 +20,7 @@ import {
 import { useLang } from "@/hooks/use-lang";
 import { useOffline } from "@/hooks/use-offline";
 import { serverMessage } from "@/lib/form-errors";
-import { ADDRESS_LABELS, addressText, deleteMyAddress, listMyAddresses, saveMyAddress, type SavedAddress } from "@/lib/addresses";
+import { addressText, labelKey, deleteMyAddress, listMyAddresses, saveMyAddress, type SavedAddress } from "@/lib/addresses";
 
 export const Route = createFileRoute("/_authenticated/addresses")({
   head: () => ({
@@ -36,9 +36,6 @@ export const Route = createFileRoute("/_authenticated/addresses")({
   component: Addresses,
 });
 
-export function labelKey(label: string): string {
-  return (ADDRESS_LABELS as readonly string[]).includes(label) ? `addresses.labels.${label}` : "addresses.labels.other";
-}
 
 function Addresses() {
   const { t } = useTranslation();

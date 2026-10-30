@@ -30,9 +30,8 @@ import { getMyRegistration, type RegistrationDto } from "@/lib/registration.func
 import { useServerFn } from "@tanstack/react-start";
 import { SheetDrawer } from "@/components/SheetDrawer";
 import { AddressEditor } from "@/components/AddressEditor";
-import { addressText, listMyAddresses, setMyOrderAddress, type SavedAddress } from "@/lib/addresses";
+import { addressText, labelKey, listMyAddresses, setMyOrderAddress, type SavedAddress } from "@/lib/addresses";
 import { deliveryDays, minOrderShortfall, slotName, slotsFor, useAppSettings } from "@/lib/app-settings";
-import { labelKey } from "@/routes/_authenticated/addresses";
 import { Check, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/checkout")({

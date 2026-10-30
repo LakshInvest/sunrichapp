@@ -95,3 +95,7 @@ export function validateAddress(a: Pick<AddressInput, "line1" | "pincode" | "con
   if (a.contactMobile && !/^\d{10}$/.test(a.contactMobile.replace(/\D/g, ""))) e["contactMobile"] = "addresses.errMobile";
   return e;
 }
+
+export function labelKey(label: string): string {
+  return (ADDRESS_LABELS as readonly string[]).includes(label) ? `addresses.labels.${label}` : "addresses.labels.other";
+}

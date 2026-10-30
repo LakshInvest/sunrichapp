@@ -294,7 +294,7 @@ function OrderDetail() {
               </p>
             )}
           </div>
-          {canChangeDeliveryMode(order.status) && !isDemo && (
+          {canChangeDeliveryMode(order.status) && (
             <button
               type="button"
               onClick={() => void switchMode()}
@@ -306,6 +306,7 @@ function OrderDetail() {
           )}
         </section>
 
+        {order.deliveryMode !== "pickup" && (
         {/* Delivery address + map */}
         <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
           <p className="flex items-center gap-2 text-sm font-bold text-foreground">
@@ -327,6 +328,7 @@ function OrderDetail() {
           </div>
           {order.notes && <p className="mt-3 text-xs text-muted-foreground">{t("checkout.notesLabel")}: {order.notes}</p>}
         </section>
+        )}
 
         {isDemo && (
           <p className="mt-4 rounded-xl bg-accent/15 px-4 py-2.5 text-center text-xs font-semibold text-foreground">{t("demo.orderBadge")}</p>

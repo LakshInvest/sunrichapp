@@ -19,6 +19,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
 import { formatINR, readCatalogueCache, fetchCatalogue } from "@/lib/catalogue";
 import { canCustomerCancel, useAppSettings, waLink } from "@/lib/app-settings";
+import { canChangeDeliveryMode, setOrderDeliveryMode } from "@/lib/orders";
 import { fetchMyFeedback, planReorder, type OrderFeedback } from "@/lib/feedback";
 import { RateOrderCard } from "@/components/RateOrderCard";
 import { useIsDemo } from "@/hooks/use-demo";
@@ -64,6 +65,7 @@ function OrderDetail() {
   const [reason, setReason] = useState("");
   const [cancelling, setCancelling] = useState(false);
   const [reordering, setReordering] = useState(false);
+  const [switching, setSwitching] = useState(false);
   const [invoiceId, setInvoiceId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<OrderFeedback | null | undefined>(undefined);
   const settings = useAppSettings();
@@ -147,6 +149,20 @@ function OrderDetail() {
     }
   };
 
+  const switchMode = async () => {
+    if (switching) return;
+    setSwitching(true);
+    try {
+      await setOrderDeliveryMode(order.id, order.deliveryMode === "pickup" ? "sunrich" : "pickup", null);
+      toast.success(t("delivery.changed"));
+      await load();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSwitching(false);
+    }
+  };
+
   const reorder = async () => {
     if (reordering) return;
     setReordering(true);
@@ -225,9 +241,9 @@ function OrderDetail() {
               })}
             </ol>
           )}
-          {order.status === "credit_hold" && order.holdReason && (
+          {order.status === "credit_hold" && (
             <p className="mt-3 rounded-xl bg-accent/15 px-3 py-2 text-xs font-medium text-accent-foreground">
-              {order.holdReason}
+              {t("delivery.creditHold")}
             </p>
           )}
         </section>
@@ -264,6 +280,30 @@ function OrderDetail() {
               {order.paymentMode === "credit" ? t("trackDetail.paidOnCredit") : t("trackDetail.paidOnDelivery")}
             </p>
           </div>
+        </section>
+
+        {/* Delivery mode */}
+        <section className="mt-4 flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-muted-foreground">{t("delivery.modeLabel")}</p>
+            <p className="text-sm font-bold text-foreground">{t(`delivery.${order.deliveryMode}`)}</p>
+            {order.deliveryMode === "pickup" && (
+              <p className="text-xs text-muted-foreground">
+                {t("delivery.pickupFrom")}
+                {order.pickupVehicleNo ? ` · ${t("delivery.vehicleShown", { no: order.pickupVehicleNo })}` : ""}
+              </p>
+            )}
+          </div>
+          {canChangeDeliveryMode(order.status) && !isDemo && (
+            <button
+              type="button"
+              onClick={() => void switchMode()}
+              disabled={offline || switching}
+              className="min-h-11 shrink-0 rounded-xl border border-border px-3 text-xs font-semibold text-secondary disabled:opacity-50"
+            >
+              {switching ? <Loader2 className="h-4 w-4 animate-spin" /> : t(order.deliveryMode === "pickup" ? "delivery.switchToSunrich" : "delivery.switchToPickup")}
+            </button>
+          )}
         </section>
 
         {/* Delivery address + map */}

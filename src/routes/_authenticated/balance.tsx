@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { ArrowLeft, Clock, Download, FileText, IndianRupee, Loader2, Paperclip, Share2, X } from "lucide-react";
+import { ArrowLeft, Download, FileText, IndianRupee, Loader2, Paperclip, Share2, X } from "lucide-react";
 import { BalanceCard } from "@/components/BalanceCard";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";

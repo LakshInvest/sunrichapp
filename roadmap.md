@@ -53,3 +53,10 @@ Fixes during this task: ORDER_SELECT now includes customer_id (own-order filter 
 - [ ] Live re-test of Ask attachments + 360/390/768 en/hi/mr — blocked: needs working demo login
 - [x] Speed: 5-min catalogue cache, lazy cropper (maps already lazy); Home timing not measured (no sign-in)
 - [x] Bottom nav Home · Shop · Orders · Account, live order card, Orders badge
+
+## Prompt-23
+- [x] 1 No bundled product/banner photos (placeholders only)  - [x] 2 Category chips from Command Center
+- [x] 3 App settings (days, slots, min order, notes, cancel)  - [x] 4 Saved addresses + order address
+- [x] 5 Order again  - [x] 6 Delivery rating  - [x] 7 Jar balance  - [x] 8 Help/About/Legal/Delete
+- [x] 9 Location disclosure  - [x] 10 Android shell config (native build itself is done by the owner)
+- [x] 11–13 Offline/errors, image sizes, en/hi/mr  - [x] 14 Demo QA at 360/390 (768 not re-checked)

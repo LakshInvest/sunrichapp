@@ -33,6 +33,7 @@ const order = (over: Partial<OrderDto>): OrderDto => ({
   id: "o1",
   deliveryMode: "sunrich",
   pickupVehicleNo: null,
+  deliveryOtp: null,
   deliveryLine2: null,
   assignedAt: null,
   orderNo: "ORD/1",

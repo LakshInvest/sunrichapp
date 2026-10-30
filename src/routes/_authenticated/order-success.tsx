@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { BellRing } from "lucide-react";
+import { SheetDrawer } from "@/components/SheetDrawer";
+import { acceptPush, declinePush, shouldOfferPush } from "@/lib/push";
 import { ArrowRight, Check } from "lucide-react";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -44,6 +47,11 @@ function OrderSuccess() {
   const [parts, setParts] = useState<Part[]>([]);
   const [deliveryDate, setDeliveryDate] = useState<string>("");
   const [slot, setSlot] = useState<string>("");
+
+  const [pushOpen, setPushOpen] = useState(false);
+  useEffect(() => {
+    if (shouldOfferPush()) setTimeout(() => setPushOpen(true), 1200);
+  }, []);
 
   useEffect(() => {
     try {
@@ -140,6 +148,21 @@ function OrderSuccess() {
           {t("success.continueShopping")}
         </button>
       </div>
+      <SheetDrawer open={pushOpen} onOpenChange={(o) => { if (!o) declinePush(); setPushOpen(o); }}>
+        <div className="px-5 pb-8 pt-2 text-center">
+          <BellRing className="mx-auto h-10 w-10 text-secondary" aria-hidden />
+          <h2 className="mt-3 text-lg font-bold">{t("push.title")}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t("push.body")}</p>
+          <div className="mt-5 grid grid-cols-2 gap-2">
+            <button type="button" className="min-h-12 rounded-xl border border-border font-semibold" onClick={() => { declinePush(); setPushOpen(false); }}>
+              {t("push.no")}
+            </button>
+            <button type="button" className="min-h-12 rounded-xl bg-primary font-semibold text-primary-foreground" onClick={() => { setPushOpen(false); void acceptPush(); }}>
+              {t("push.yes")}
+            </button>
+          </div>
+        </div>
+      </SheetDrawer>
     </main>
   );
 }

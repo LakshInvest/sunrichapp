@@ -95,9 +95,9 @@ Constraint kept: existing DB tables/RPCs/RLS only (orders.payment_method, submit
 - [x] 3 Bank transfer: firm bank details with copy buttons + UTR/screenshot proof.
 - [x] 4 Cheque/cash: "give it to the delivery person" note, no proof.
 - [x] 5 Order status: payment-hold "checking your payment" line, rejected-proof red note + reason + Send again, verified green "Payment received".
-- [x] 6 Delivery time one-liner from release_batch_at/released_at/express.
+- [x] 6 Delivery time one-liner from release_batch_at/released_at/express. Live-verified with QA data (set then reverted): 00019 batch 31 Oct 10:00 UTC → "Leaves tomorrow 10:00"; 00017 batch 30 Oct 23:00 UTC → "Leaves in today's 23:00 dispatch"; released orders show "Dispatching now" (unit-tested).
 - [x] 7 Balance "I have paid" → submit_payment_proof; reported payments read payment_proofs with status chips.
-- [x] 8 POD: signature/photo + "Verified with OTP" (otp_verified).
+- [x] 8 POD: signature/photo + "Verified with OTP" (otp_verified). Finished: POD files land in the staff-only `operations` bucket, so the browser could not sign URLs — new `pod.functions.ts` `getPodUrls` (server fn) verifies the caller's order via RLS, then signs photo/signature with the service role; delivery.ts uses it with the client-side fallback. Live-verified with QA data (set then reverted): signature + photo rendered from signed URLs and "Verified with OTP" chip shown on order 00016 (English + Hindi).
 - [x] 9 Status word "Placed" everywhere (no "Received").
 - [x] 10 QA: 9999900001/03 PIN 1234 at 360/390/768 × en/hi/mr — credit order (no payment step, method saved `credit`), UPI order with UTR+screenshot → "Checking your payment", bank transfer (SBI details + copy, UTR-only proof), cash note, My payments list (chips), Balance "I have paid" proof, delivered-order POD. Live-verified notes:
       - Firms.upi_id / upi_qr_path are EMPTY in the database → UPI step shows "payment details will be shared" + "I've paid" (UTR/screenshot still works). QR appears automatically once Sunrich fills the firm's UPI ID / uploads a QR image — data entry, no code change.

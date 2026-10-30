@@ -87,7 +87,7 @@ export function ProofOfDelivery({ proof }: { proof: DeliveryProof }) {
           <div className="flex justify-between gap-3">
             <dt className="text-muted-foreground">{t("pod.deliveredAt")}</dt>
             <dd className="font-semibold">
-              {new Date(proof.deliveredAt).toLocaleString(i18n.language === "en" ? "en-IN" : `${i18n.language}-IN`, { dateStyle: "medium", timeStyle: "short" })}
+              {dateLabel(proof.deliveredAt, i18n.language)}, {new Date(proof.deliveredAt).toLocaleTimeString(i18n.language === "en" ? "en-IN" : `${i18n.language}-IN`, { hour: "numeric", minute: "2-digit" })}
             </dd>
           </div>
         )}

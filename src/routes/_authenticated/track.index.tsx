@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { SlotText } from "@/components/SlotText";
 import { ChevronRight, RefreshCw, Truck } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { ErrorState, EmptyState } from "@/components/catalog/states";
@@ -182,7 +183,7 @@ function LiveOrderCard({ order, lang, onTrack }: { order: OrderDto; lang: string
         <span className="truncate">
           {t("success.deliveredBy", { who: order.fulfillerCustomerId ? t("success.byDistributor") : t("success.bySunrich") })}
           {order.deliveryDate ? ` · ${dateLabel(order.deliveryDate, lang)}` : ""}
-          {order.deliverySlot ? ` · ${localSlot(order.deliverySlot, slotSettings?.slots, i18n.language)}` : ""}
+          <SlotText value={order.deliverySlot} />
         </span>
       </p>
       <button

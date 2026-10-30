@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { SlotText } from "@/components/SlotText";
 import { toast } from "sonner";
 import { ArrowLeft, Ban, FileText, HelpCircle, Loader2, Repeat2 } from "lucide-react";
 import { fetchInvoiceIdForOrder } from "@/lib/billing";
@@ -319,7 +320,7 @@ function OrderDetail() {
               who: order.fulfillerCustomerId ? t("success.byDistributor") : t("success.bySunrich"),
             })}
             {order.deliveryDate ? ` · ${t("checkout.deliversOn", { date: dateLabel(order.deliveryDate, lang) })}` : ""}
-            {order.deliverySlot ? ` · ${localSlot(order.deliverySlot, slotSettings?.slots, i18n.language)}` : ""}
+            <SlotText value={order.deliverySlot} />
           </p>
           <div className="mt-3">
             <Suspense fallback={<div className="h-36 w-full animate-pulse rounded-xl bg-muted" />}>

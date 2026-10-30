@@ -172,7 +172,9 @@
     "priceUpdated": "Price updated",
     "bulkNote": "For bulk orders our team will confirm the rate.",
     "removedFromCatalogue": "Some items are no longer available and were removed from your cart.",
-    "proceed": "Proceed"
+    "proceed": "Proceed",
+    "addMore": "Add {{amount}} more to place your order",
+    "minOrder": "Minimum order {{amount}}"
   },
   "order": {
     "title": "Shop",
@@ -435,7 +437,9 @@
     "errPlace": "Could not place the order.",
     "deliversOn": "delivery {{date}}",
     "priceOnRequestNote": "{{count}} item(s) without a price are not included — ask the Sunrich team.",
-    "termsNote": "By placing the order you accept Sunrich's terms."
+    "termsNote": "By placing the order you accept Sunrich's terms.",
+    "closed": "Closed",
+    "noSlotToday": "No delivery slot left for this day — please pick another day."
   },
   "success": {
     "title": "Order placed",
@@ -474,7 +478,9 @@
     "cancelled": "Order cancelled",
     "reorder": "Reorder",
     "reordering": "Adding to cart…",
-    "needHelp": "Need help?"
+    "needHelp": "Need help?",
+    "cancelViaSupport": "This order can no longer be cancelled in the app. Contact support to cancel.",
+    "cancelWaMsg": "Hello Sunrich, please cancel my order {{no}}."
   },
   "payments": {
     "title": "Payments & ledger",
@@ -546,12 +552,14 @@
     "markedDelivered": "Marked delivered",
     "markedNotDelivered": "Marked not delivered",
     "waiting": "Waiting {{n}} min",
-    "waitingHours": "Waiting {{h}} h {{m}} min"
+    "waitingHours": "Waiting {{h}} h {{m}} min",
+    "empty": "No orders here right now."
   },
   "common": {
     "loading": "Loading…",
     "slow": "Taking longer than usual…",
-    "retry": "Retry"
+    "retry": "Retry",
+    "loadError": "Couldn't load. Please try again."
   },
   "invoice": {
     "metaTitle": "Invoice — Sunrich",
@@ -579,6 +587,100 @@
   },
   "demo": {
     "chip": "Demo account",
-    "checkoutBanner": "Demo account — orders are not delivered"
+    "checkoutBanner": "Demo account — orders are not delivered",
+    "orderBadge": "Demo order — it will never be delivered."
+  },
+  "addresses": {
+    "metaTitle": "My addresses · Sunrich",
+    "metaDescription": "Manage your saved Sunrich delivery addresses.",
+    "title": "My addresses",
+    "add": "Add address",
+    "addNew": "Add new address",
+    "addTitle": "New address",
+    "editTitle": "Edit address",
+    "change": "Change",
+    "pickTitle": "Deliver to",
+    "default": "Default",
+    "setDefault": "Set as default",
+    "makeDefault": "Make this my default address",
+    "label": "Save as",
+    "labels": {
+      "shop": "Shop",
+      "home": "Home",
+      "godown": "Godown",
+      "office": "Office",
+      "other": "Other"
+    },
+    "landmark": "Landmark (optional)",
+    "city": "City",
+    "pincode": "Pincode",
+    "receiverTitle": "Who receives the order?",
+    "receiverHint": "Leave blank to use your own name and number.",
+    "contactName": "Receiver name",
+    "contactMobile": "Receiver mobile",
+    "save": "Save address",
+    "saved": "Address saved",
+    "errSave": "Couldn't save the address.",
+    "delete": "Delete",
+    "deleteTitle": "Delete this address?",
+    "deleted": "Address deleted",
+    "errDelete": "Couldn't delete the address.",
+    "emptyTitle": "No saved addresses yet",
+    "emptyBody": "Add your shop, home or godown to choose it at checkout."
+  },
+  "feedback": {
+    "title": "How was your delivery?",
+    "sub": "Order {{no}}",
+    "stars_one": "{{count}} star",
+    "stars_other": "{{count}} stars",
+    "commentPh": "Anything else? (optional)",
+    "skip": "Not now",
+    "submit": "Submit",
+    "thanks": "Thanks for your feedback!",
+    "yourRating": "Your rating",
+    "tags": {
+      "on_time": "On time",
+      "polite": "Polite staff",
+      "clean_jars": "Clean jars",
+      "late": "Late",
+      "damaged": "Damaged",
+      "wrong_items": "Wrong items"
+    }
+  },
+  "jars": {
+    "withYou_one": "You have {{count}} jar with you",
+    "withYou_other": "You have {{count}} jars with you",
+    "container": "Containers",
+    "returnHint": "Please return empty jars to the delivery person."
+  },
+  "location": {
+    "title": "Use your location?",
+    "body": "Sunrich uses your location only to place your delivery pin on the map. It's not tracked in the background.",
+    "continue": "Continue",
+    "notNow": "Not now"
+  },
+  "native": {
+    "backToExit": "Press back again to exit"
+  },
+  "reorder": {
+    "title": "Order again",
+    "sub_one": "Same as {{no}} · {{count}} item",
+    "sub_other": "Same as {{no}} · {{count}} items",
+    "noneAvailable": "None of those products are available right now.",
+    "someSkipped_one": "{{count}} item is no longer available and was skipped.",
+    "someSkipped_other": "{{count}} items are no longer available and were skipped."
+  },
+  "support": {
+    "metaTitle": "Help & support · Sunrich",
+    "metaDescription": "Call, WhatsApp or email the Sunrich team.",
+    "title": "Help & support",
+    "intro": "We're happy to help with orders, payments or jars.",
+    "call": "Call us",
+    "whatsapp": "WhatsApp us",
+    "email": "Email us",
+    "ask": "Raise a query",
+    "askSub": "Track replies inside the app",
+    "hours": "Support hours: {{hours}}",
+    "waMessage": "Hello Sunrich, I need help."
   }
 }

@@ -246,6 +246,15 @@ function Login() {
         if (r.code === "wait" && r.seconds && step === "code") setCountdown(r.seconds);
         return;
       }
+      if (r.use_pin) {
+        // Demo reviewer number: PIN works on any device, no OTP is sent.
+        setLastMobile(mobile);
+        setLastMobileState(mobile);
+        setPin(Array(4).fill(""));
+        setForcePin(false);
+        setStep("welcome");
+        return;
+      }
       setDigits(Array(6).fill(""));
       toast.success(t("auth.otpSentToast", { mobile: `+91 ••••• ${mobile.slice(-4)}` }));
       setStep("code");

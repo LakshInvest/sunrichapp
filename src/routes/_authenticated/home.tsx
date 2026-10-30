@@ -21,8 +21,9 @@ import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { SmartImage } from "@/components/SmartImage";
-import { AddressSheet } from "@/components/AddressSheet";
-import { ProfileAvatar } from "@/components/ProfileAvatar";
+import { AddressSwitcher } from "@/components/AddressSwitcher";
+import { listMyAddresses, labelKey, type SavedAddress } from "@/lib/addresses";
+import { pickSelected, shortArea, useSelectedAddressId } from "@/lib/selected-address";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ProductCard } from "@/components/catalog/ProductCard";
@@ -95,6 +96,18 @@ function Home() {
   const [profile, setProfile] = useState({ name: "", photoUrl: null as string | null });
   const [orderUpdates, setOrderUpdates] = useState(false);
   const [addressOpen, setAddressOpen] = useState(false);
+  const [addrList, setAddrList] = useState<SavedAddress[]>([]);
+  const selectedId = useSelectedAddressId();
+  const loadAddresses = useCallback(async () => {
+    try {
+      setAddrList(await listMyAddresses());
+    } catch {
+      /* header falls back to the registered address */
+    }
+  }, []);
+  useEffect(() => {
+    void loadAddresses();
+  }, [loadAddresses]);
   const [openQuery, setOpenQuery] = useState<{ id: string; subject: string } | null>(null);
   const myReg = useServerFn(getMyRegistration);
 
@@ -256,8 +269,11 @@ function Home() {
     [quantities, products],
   );
 
-  const areaLabel = reg?.city || reg?.addressLine1 || t("home.locationArea");
-  const typeLabel = reg?.typeName ? loc(reg.typeName, lang) : "";
+  const selectedAddr = pickSelected(addrList, selectedId);
+  const headerLabel = selectedAddr ? t(labelKey(selectedAddr.label)) : t("addresses.labels.shop");
+  const areaLabel = selectedAddr
+    ? shortArea(selectedAddr)
+    : [reg?.addressLine2 || reg?.landmark || reg?.addressLine1, reg?.city].filter(Boolean).join(", ") || t("home.locationArea");
 
   const openBanner = (linkType: string, linkValue: string | null) => {
     if (linkType === "url" && linkValue) {
@@ -581,16 +597,16 @@ function Home() {
                   <button
                     type="button"
                     onClick={() => setAddressOpen(true)}
-                    aria-label={`${t("home.locationLabel")}: ${areaLabel}`}
-                    className="flex min-h-11 items-start gap-1.5 text-left"
+                    aria-label={`${headerLabel}: ${areaLabel}`}
+                    className="flex min-h-11 min-w-0 max-w-[75%] items-start gap-1.5 text-left"
                   >
                     <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-white/80" />
-                    <span>
-                      <span className="flex items-center gap-1 text-sm font-semibold text-white">
-                        {t("home.locationLabel")}
+                    <span className="min-w-0">
+                      <span className="flex items-center gap-1 text-sm font-bold text-white">
+                        {headerLabel}
                         <ChevronDown className="h-4 w-4" />
                       </span>
-                      <span className={`block text-xs text-white/70 ${deva}`}>{areaLabel}</span>
+                      <span className={`block truncate text-xs text-white/70 ${deva}`}>{areaLabel}</span>
                     </span>
                   </button>
 
@@ -608,18 +624,6 @@ function Home() {
                           className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-[#103A66] bg-accent"
                         />
                       )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => navigate({ to: "/account" })}
-                      aria-label={t("home.profile")}
-                      className="rounded-full transition active:scale-95"
-                    >
-                      <ProfileAvatar
-                        src={profile.photoUrl}
-                        name={profile.name}
-                        className="h-10 w-10 border border-white/30 text-sm"
-                      />
                     </button>
                   </div>
                 </div>
@@ -784,23 +788,12 @@ function Home() {
             }}
           />
 
-          <AddressSheet
+          <AddressSwitcher
             open={addressOpen}
             onOpenChange={setAddressOpen}
-            address={
-              reg
-                ? {
-                    line1: reg.addressLine1 ?? "",
-                    line2: reg.addressLine2,
-                    landmark: reg.landmark,
-                    city: reg.city,
-                    pincode: reg.pincode,
-                    lat: reg.latitude,
-                    lng: reg.longitude,
-                  }
-                : null
-            }
-            typeLabel={typeLabel}
+            list={addrList}
+            selectedId={selectedAddr?.id ?? null}
+            onChanged={loadAddresses}
           />
         </>
       )}

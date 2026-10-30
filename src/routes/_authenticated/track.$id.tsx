@@ -7,7 +7,19 @@ import { fetchDeliveryProof, showDeliveryOtp, type DeliveryProof } from "@/lib/d
 import { toast } from "sonner";
 import { ArrowLeft, Ban, FileText, HelpCircle, Loader2, Repeat2, Truck } from "lucide-react";
 import { fetchInvoiceIdForOrder } from "@/lib/billing";
-import { fetchMyPaymentProofs, fetchPaymentHold, latestProofFor, releaseLine, type PaymentProof } from "@/lib/payments";
+import {
+  awaitingPayment,
+  canChangePayMethod,
+  fetchMyPaymentProofs,
+  fetchPaymentHold,
+  latestProofFor,
+  releaseLine,
+  setOrderPaymentMethod,
+  type PayMethod,
+  type PaymentProof,
+} from "@/lib/payments";
+import { PayCard } from "@/components/PayCard";
+import { getFirmPaymentInfo, type FirmPayInfo } from "@/lib/payments.functions";
 import { PaymentProofSheet, PaymentStatusNote, type ProofTarget } from "@/components/PaymentProofSheet";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -50,6 +62,7 @@ export const Route = createFileRoute("/_authenticated/track/$id")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>): { pay?: 1 } => (s["pay"] ? { pay: 1 } : {}),
   component: OrderDetail,
 });
 
@@ -77,6 +90,10 @@ function OrderDetail() {
   const [payProof, setPayProof] = useState<PaymentProof | null>(null);
   const [payHold, setPayHold] = useState(false);
   const [payTarget, setPayTarget] = useState<ProofTarget | null>(null);
+  const [payInfo, setPayInfo] = useState<FirmPayInfo | null>(null);
+  const [methodOpen, setMethodOpen] = useState(false);
+  const [savingMethod, setSavingMethod] = useState(false);
+  const { pay: wantPay } = Route.useSearch();
   const settings = useAppSettings();
   const isDemo = useIsDemo();
 
@@ -95,6 +112,9 @@ function OrderDetail() {
         } else {
           setPayHold(false);
         }
+        if (["upi", "bank"].includes(found.paymentMethod ?? "")) {
+          getFirmPaymentInfo({ data: { orderIds: [found.id] } }).then((r) => setPayInfo(r[found.id] ?? null), () => undefined);
+        }
         const proofs = await fetchMyPaymentProofs().catch(() => [] as PaymentProof[]);
         setPayProof(latestProofFor(proofs, found.id));
         if (found.status === "delivered" || found.status === "closed")
@@ -110,6 +130,25 @@ function OrderDetail() {
     const timer = setInterval(() => void load(), 60_000);
     return () => clearInterval(timer);
   }, [load]);
+
+  useEffect(() => {
+    if (wantPay && order) setTimeout(() => document.getElementById("pay-now")?.scrollIntoView({ behavior: "smooth" }), 300);
+  }, [wantPay, order?.id]);
+
+  const chooseMethod = async (m: PayMethod) => {
+    if (!order || savingMethod) return;
+    setSavingMethod(true);
+    try {
+      await setOrderPaymentMethod([order.id], m);
+      toast.success(t("pay.methodChanged"));
+      setMethodOpen(false);
+      await load();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSavingMethod(false);
+    }
+  };
 
   if (error === "not-found") {
     return (
@@ -136,6 +175,9 @@ function OrderDetail() {
   }
 
   const { steps, reached } = buildTimeline(order.status, order.history);
+  // Never "Confirmed" while a UPI / bank payment is still pending.
+  const payPending = ["upi", "bank"].includes(order.paymentMethod ?? "") && payProof?.status !== "verified" && order.paymentStatus !== "paid";
+  const shownStatus = order.status === "approved" && payPending ? "placed" : order.status;
   const cancellable = canCustomerCancel(order.status, settings?.allowCancelBefore ?? "approved");
   const pastCancel = !cancellable && ["approved", "processing", "dispatched"].includes(order.status);
   const isDelivered = order.status === "delivered" || order.status === "closed";
@@ -212,8 +254,8 @@ function OrderDetail() {
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
         <p className="min-w-0 flex-1 truncate text-base font-bold text-foreground">{order.orderNo}</p>
-        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${statusChipClass(order.status)}`}>
-          {t(`status.${order.status}`)}
+        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${statusChipClass(shownStatus)}`}>
+          {t(`status.${shownStatus}`)}
         </span>
       </header>
 
@@ -276,7 +318,30 @@ function OrderDetail() {
           })()}
         </section>
 
-        {/* Payment method + proof status */}
+        {/* Payment: pay-now card while a UPI / bank payment is due, then method + status */}
+        {awaitingPayment(order, payProof?.status ?? null) && (
+          <div id="pay-now" className="mt-4 scroll-mt-4">
+            {payProof?.status === "rejected" && <PaymentStatusNote proof={payProof} />}
+            <div className="mt-2">
+              <PayCard
+                method={order.paymentMethod === "bank" ? "bank" : "upi"}
+                info={payInfo}
+                amount={payInfo?.grandTotal ?? order.grandTotal}
+                orderNo={order.orderNo}
+                hold={payHold}
+                title={t("pay.pendingTitle", { amount: formatINR(order.grandTotal) })}
+                onPaid={() =>
+                  setPayTarget({
+                    orderId: order.id,
+                    orderNo: order.orderNo,
+                    amount: order.grandTotal,
+                    method: order.paymentMethod === "bank" ? "bank" : "upi",
+                  })
+                }
+              />
+            </div>
+          </div>
+        )}
         <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm font-bold text-foreground">{t("trackDetail.payMethodLabel")}</p>
@@ -287,21 +352,18 @@ function OrderDetail() {
               )}
             </span>
           </div>
-          <PaymentStatusNote
-            proof={payProof}
-            hold={payHold}
-            onSendAgain={
-              order.paymentMethod === "upi" || order.paymentMethod === "bank"
-                ? () =>
-                    setPayTarget({
-                      orderId: order.id,
-                      orderNo: order.orderNo,
-                      amount: order.grandTotal,
-                      method: order.paymentMethod === "bank" ? "bank" : "upi",
-                    })
-                : undefined
-            }
-          />
+          {payProof && payProof.status !== "rejected" && <PaymentStatusNote proof={payProof} />}
+          {!payProof && payHold && !awaitingPayment(order, null) && <PaymentStatusNote proof={null} hold />}
+          {canChangePayMethod(order.status) && payProof?.status !== "verified" && payProof?.status !== "pending" && (
+            <button
+              type="button"
+              disabled={offline}
+              onClick={() => setMethodOpen(true)}
+              className="mt-3 min-h-11 text-sm font-semibold text-secondary disabled:opacity-50"
+            >
+              {t("pay.changeMethod")}
+            </button>
+          )}
         </section>
 
         {showDeliveryOtp(order.status, order.deliveryOtp) && <DeliveryOtpCard otp={order.deliveryOtp!} />}
@@ -506,6 +568,35 @@ function OrderDetail() {
             {cancelling ? t("trackDetail.cancelling") : t("trackDetail.cancelConfirm")}
           </button>
           {offline && <p className="mt-2 text-center text-xs text-muted-foreground">{t("offline.hint")}</p>}
+        </div>
+      </SheetDrawer>
+      <SheetDrawer open={methodOpen} onOpenChange={setMethodOpen}>
+        <div className="px-5 pb-8 pt-2">
+          <h2 className="text-lg font-bold text-foreground">{t("pay.changeMethod")}</h2>
+          <div className="mt-4 space-y-2" role="radiogroup">
+            {(["upi", "bank", "cash", "cheque"] as const).map((m) => {
+              const on = order?.paymentMethod === m;
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  disabled={savingMethod}
+                  onClick={() => void chooseMethod(m)}
+                  className={`flex min-h-14 w-full items-center justify-between gap-3 rounded-xl border px-4 text-left disabled:opacity-60 ${on ? "border-secondary bg-secondary/5" : "border-border bg-card"}`}
+                >
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-foreground">{t(`checkout.payMethod.${m}`)}</span>
+                    <span className="block text-xs text-muted-foreground">{t(`checkout.paySub.${m}`)}</span>
+                  </span>
+                  <span aria-hidden className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${on ? "border-secondary" : "border-border"}`}>
+                    {on && <span className="h-2.5 w-2.5 rounded-full bg-secondary" />}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </SheetDrawer>
       <PaymentProofSheet

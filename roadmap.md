@@ -105,3 +105,6 @@ Constraint kept: existing DB tables/RPCs/RLS only (orders.payment_method, submit
       - 5 test orders (00027–00031) auto-approved before the in-app cancel window → cancelled by database update with note "Prompt-26 QA — cancel (test order)"; 3 payment proofs kept as QA records.
       - Screenshot uploads go to <customer_id>/queries/… (the only customer-writable prefix in customer-docs policy); submit_payment_proof accepts it.
       - "Pay with UPI app" handoff to GPay/PhonePe needs a real phone — not testable here.
+
+## Prompt-27 — checkout / order-placed redesign
+- [x] Payment list rows, order-placed screen, UPI & bank cards, friendly dates, pay-later from order, Pay now in My Orders, Home reminder

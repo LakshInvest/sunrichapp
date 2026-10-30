@@ -4,7 +4,8 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } fro
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, CalendarDays, ChevronDown, Loader2, MapPin, Wallet } from "lucide-react";
-import { defaultPayMethod, setOrderPaymentMethod, PAY_METHODS, type PayMethod } from "@/lib/payments";
+import { Banknote, FileCheck2, Landmark as LandmarkIcon, Smartphone as PhoneIcon } from "lucide-react";
+import { defaultPayMethod, setOrderPaymentMethod, type PayMethod } from "@/lib/payments";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SmartImage } from "@/components/SmartImage";
@@ -38,6 +39,8 @@ import { readSelectedAddressId, setSelectedAddressId } from "@/lib/selected-addr
 import { addressText, labelKey, listMyAddresses, setMyOrderAddress, type SavedAddress } from "@/lib/addresses";
 import { deliveryDays, minOrderShortfall, slotName, slotsFor, useAppSettings } from "@/lib/app-settings";
 import { Check, Plus } from "lucide-react";
+
+const PAY_ICONS = { credit: Wallet, upi: PhoneIcon, bank: LandmarkIcon, cash: Banknote, cheque: FileCheck2 } as const;
 
 export const Route = createFileRoute("/_authenticated/checkout")({
   head: () => ({
@@ -293,7 +296,7 @@ function Checkout() {
       } catch (e) {
         console.warn("set_order_payment_method failed", e);
       }
-      sessionStorage.setItem("sunrich.lastOrder", JSON.stringify({ parts, deliveryDate, slot: slotLabel, payMethod: pay }));
+      sessionStorage.setItem("sunrich.lastOrder", JSON.stringify({ parts, deliveryDate, slot: slotLabel, payMethod: pay, pickup }));
       clear();
       await navigate({ to: "/order-success" });
     } catch (e) {
@@ -602,53 +605,51 @@ function Checkout() {
         {quote && (
           <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
             <p className="text-sm font-bold text-foreground">{t("checkout.paymentTitle")}</p>
-            <div role="radiogroup" aria-label={t("checkout.paymentTitle")} className="mt-3 grid grid-cols-3 gap-2">
-              {PAY_METHODS.filter((m) => m !== "credit" || creditAllowed).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  role="radio"
-                  aria-checked={pay === m}
-                  onClick={() => {
-                    payTouched.current = true;
-                    setPay(m);
-                  }}
-                  className={`flex min-h-12 items-center justify-center rounded-xl border px-2 text-sm font-semibold transition active:scale-95 ${
-                    pay === m ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground"
-                  }`}
-                >
-                  {t(`checkout.payMethod.${m}`)}
-                </button>
-              ))}
+            <div role="radiogroup" aria-label={t("checkout.paymentTitle")} className="mt-3 space-y-2">
+              {(["credit", "upi", "bank", "cash", "cheque"] as const)
+                .filter((m) => m !== "credit" || creditAllowed)
+                .map((m) => {
+                  const Icon = PAY_ICONS[m];
+                  const on = pay === m;
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      role="radio"
+                      aria-checked={on}
+                      onClick={() => {
+                        payTouched.current = true;
+                        setPay(m);
+                      }}
+                      className={`flex min-h-16 w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition active:scale-[0.99] ${
+                        on ? "border-secondary bg-secondary/5" : "border-border bg-card"
+                      }`}
+                    >
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary/10">
+                        <Icon className="h-5 w-5 text-secondary" aria-hidden />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-semibold text-foreground">{t(`checkout.payMethod.${m}`)}</span>
+                        <span className="block text-xs text-muted-foreground">
+                          {m === "credit"
+                            ? t("checkout.paySub.credit", { amount: formatINR(quote.credit_available) })
+                            : t(`checkout.paySub.${m}`)}
+                        </span>
+                      </span>
+                      <span
+                        aria-hidden
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${on ? "border-secondary" : "border-border"}`}
+                      >
+                        {on && <span className="h-2.5 w-2.5 rounded-full bg-secondary" />}
+                      </span>
+                    </button>
+                  );
+                })}
             </div>
-            {pay === "credit" && quote && (
-              <div className="mt-3 flex items-start gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary/15">
-                  <Wallet className="h-4 w-4 text-secondary" aria-hidden />
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">
-                    {t("checkout.onCredit", { amount: formatINR(quote.credit_available) })}
-                  </p>
-                  {exceedsCredit && (
-                    <p className="mt-1.5 rounded-lg bg-accent/15 px-2.5 py-1.5 text-xs font-medium text-accent-foreground">
-                      {t("checkout.creditReview")}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-            {pay === "cash" && (
-              <p className="mt-3 text-sm text-muted-foreground">{t("checkout.cashNote")}</p>
-            )}
-            {pay === "upi" && (
-              <p className="mt-3 text-sm text-muted-foreground">{t("checkout.upiNote")}</p>
-            )}
-            {pay === "bank" && (
-              <p className="mt-3 text-sm text-muted-foreground">{t("checkout.bankNote")}</p>
-            )}
-            {pay === "cheque" && (
-              <p className="mt-3 text-sm text-muted-foreground">{t("checkout.chequeNote")}</p>
+            {pay === "credit" && exceedsCredit && (
+              <p className="mt-3 rounded-lg bg-accent/15 px-2.5 py-1.5 text-xs font-medium text-accent-foreground">
+                {t("checkout.creditReview")}
+              </p>
             )}
           </section>
         )}

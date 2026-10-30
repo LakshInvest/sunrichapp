@@ -142,3 +142,40 @@ export function releaseLine(
   if (bday === dayOf(tomorrow)) return { key: "leavesTomorrow", time };
   return { key: "leavesOn", time, date: bday };
 }
+
+/** Payment chip on the order-placed screen / order detail. Never "confirmed" while money is pending. */
+export function paymentChip(
+  method: string | null,
+  proofStatus: ProofStatus | null,
+): { key: "paid" | "checking" | "pending" | "onDelivery" | "onCredit"; tone: "ok" | "amber" | "grey" } {
+  if (proofStatus === "verified") return { key: "paid", tone: "ok" };
+  if (method === "credit") return { key: "onCredit", tone: "grey" };
+  if (method === "upi" || method === "bank") {
+    return proofStatus === "pending" ? { key: "checking", tone: "amber" } : { key: "pending", tone: "amber" };
+  }
+  return { key: "onDelivery", tone: "grey" };
+}
+
+/** Order status word for the order-placed screen: "Confirmed" only once no payment is pending. */
+export function successStatusKey(status: string, method: string | null, proofStatus: ProofStatus | null): string {
+  const chip = paymentChip(method, proofStatus);
+  if (status === "credit_hold") return "success.statusUnderReview";
+  if (status === "approved" && chip.tone !== "amber") return "success.statusConfirmed";
+  return "status.placed";
+}
+
+/** UPI / bank order still waiting for the customer to pay (no proof, or proof rejected). */
+export function awaitingPayment(
+  order: { status: string; paymentMethod: string | null; paymentStatus?: string | null },
+  proofStatus: ProofStatus | null,
+): boolean {
+  if (order.paymentMethod !== "upi" && order.paymentMethod !== "bank") return false;
+  if (["cancelled", "rejected", "delivered", "closed"].includes(order.status)) return false;
+  if (order.paymentStatus === "paid") return false;
+  return proofStatus == null || proofStatus === "rejected";
+}
+
+/** The customer may switch payment method until the order is dispatched. */
+export function canChangePayMethod(status: string): boolean {
+  return ["placed", "credit_hold", "approved"].includes(status);
+}

@@ -201,7 +201,7 @@
     "notFound": "This order is not on your account.",
     "liveTitle": "Active order",
     "trackBtn": "Track",
-    "deliveredBy": "Delivered by {{name}}",
+    "deliveredBy": "Delivery by {{name}}",
     "bySunrich": "Sunrich"
   },
   "account": {
@@ -450,7 +450,14 @@
     "cashNote": "Pay cash to the delivery person when the order arrives.",
     "upiNote": "After placing, we show the UPI QR — pay and tap “I’ve paid”.",
     "bankNote": "After placing, we show the firm’s bank account to transfer to.",
-    "chequeNote": "Give the cheque to the delivery person when the order arrives."
+    "chequeNote": "Give the cheque to the delivery person when the order arrives.",
+    "paySub": {
+      "credit": "Pay later · {{amount}} available",
+      "upi": "Pay now with any UPI app",
+      "bank": "NEFT / IMPS, share the UTR",
+      "cash": "Pay cash to the delivery person",
+      "cheque": "Give a cheque at delivery"
+    }
   },
   "success": {
     "title": "Order placed",
@@ -460,7 +467,7 @@
     "expected": "Expected delivery: {{date}} · {{slot}}",
     "statusConfirmed": "Confirmed",
     "statusUnderReview": "Waiting for approval from Sunrich",
-    "deliveredBy": "Delivered by {{who}}",
+    "deliveredBy": "Delivery by {{who}}",
     "bySunrich": "Sunrich",
     "byDistributor": "your distributor",
     "trackOrder": "Track order",
@@ -909,7 +916,7 @@
     "empties": "Empty jars collected: {{count}}",
     "title": "Proof of delivery",
     "deliveredAt": "Delivered at",
-    "deliveredBy": "Delivered by",
+    "deliveredBy": "Delivery by",
     "photo": "Delivery photo",
     "signature": "Signature",
     "otpVerified": "Verified with OTP"
@@ -930,5 +937,34 @@
     "leavesToday": "Leaves in today’s {{time}} dispatch",
     "leavesTomorrow": "Leaves tomorrow {{time}}",
     "leavesOn": "Leaves {{date}} at {{time}}"
+  },
+  "dates": {
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "yesterday": "Yesterday"
+  },
+  "pay": {
+    "payTo": "Pay to {{name}}",
+    "qrAlt": "UPI QR code",
+    "qrHint": "Paying from another phone? Scan this QR.",
+    "ivePaidUtr": "I’ve paid — add UTR",
+    "holdNote": "Your order is dispatched after the payment is checked.",
+    "pendingTitle": "Payment pending · {{amount}}",
+    "changeMethod": "Change payment method",
+    "methodChanged": "Payment method updated",
+    "viewOrder": "View order",
+    "payNow": "Pay now",
+    "deliveryBySunrich": "Delivery by Sunrich",
+    "deliveryByDistributor": "Delivery by your distributor",
+    "pickupFromPlant": "Pickup from plant",
+    "reminder_one": "{{count}} order waiting for payment",
+    "reminder_other": "{{count}} orders waiting for payment",
+    "chip": {
+      "paid": "Paid",
+      "checking": "Checking payment",
+      "pending": "Payment pending",
+      "onDelivery": "Pay on delivery",
+      "onCredit": "On credit"
+    }
   }
 }

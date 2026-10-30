@@ -19,6 +19,7 @@ import {
   type OrderDto,
   type OrderGroup,
 } from "@/lib/orders";
+import { fetchOrdersAwaitingPayment } from "@/lib/pay-reminder";
 
 export const Route = createFileRoute("/_authenticated/track/")({
   component: MyOrders,
@@ -34,12 +35,14 @@ function MyOrders() {
   const [orders, setOrders] = useState<OrderDto[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<OrderGroup>("active");
+  const [unpaid, setUnpaid] = useState<Set<string>>(new Set());
 
   const load = useCallback(async () => {
     try {
       const list = await fetchMyOrders();
       setOrders(list);
       setError(null);
+      fetchOrdersAwaitingPayment(list).then((u) => setUnpaid(new Set(u.map((o) => o.id))), () => undefined);
     } catch (e) {
       setError((e as Error).message);
       throw e;
@@ -133,8 +136,8 @@ function MyOrders() {
                   >
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-bold text-foreground">{o.orderNo}</p>
-                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${statusChipClass(o.status)}`}>
-                        {t(`status.${o.status}`)}
+                      <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${statusChipClass(unpaid.has(o.id) && o.status === "approved" ? "placed" : o.status)}`}>
+                        {t(`status.${unpaid.has(o.id) && o.status === "approved" ? "placed" : o.status}`)}
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">{dateLabel(o.createdAt, lang)}</p>
@@ -147,6 +150,16 @@ function MyOrders() {
                       <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                     </div>
                   </button>
+                  {unpaid.has(o.id) && (
+                    <button
+                      type="button"
+                      onClick={() => navigate({ to: "/track/$id", params: { id: o.id }, search: { pay: 1 } })}
+                      className="mt-1.5 flex min-h-11 w-full items-center justify-between gap-2 rounded-xl bg-warning/15 px-4 text-sm font-semibold text-warning-foreground"
+                    >
+                      <span>{t("pay.chip.pending")} · {formatINR(o.grandTotal)}</span>
+                      <span className="rounded-full bg-warning px-3 py-1 text-xs font-bold text-primary">{t("pay.payNow")}</span>
+                    </button>
+                  )}
                 </li>
               );
             })}

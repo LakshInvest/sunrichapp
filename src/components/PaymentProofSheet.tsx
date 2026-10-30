@@ -67,7 +67,8 @@ export function PaymentProofSheet({
         const cid = await getMyCustomerId();
         const prep = await prepareUpload(file);
         if (!prep.ok) throw new Error(t(prep.reason === "tooLarge" ? "registration.errFileTooLarge" : "registration.errFileType"));
-        path = `${cid}/payments/${Date.now()}-${file.name.replace(/[^\w.-]+/g, "-")}`;
+        // customer-docs policy allows customer uploads only under <id>/queries/
+        path = `${cid}/queries/${Date.now()}-${file.name.replace(/[^\w.-]+/g, "-")}`;
         const { error } = await supabaseUpload(path, prep.blob, prep.mime);
         if (error) throw new Error(error.message);
       }

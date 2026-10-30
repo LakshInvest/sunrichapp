@@ -10,11 +10,13 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
-import "../lib/i18n";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
+import i18n from "../lib/i18n";
+import { initNative } from "@/lib/native";
 
 function NotFoundComponent() {
   return (
@@ -80,7 +82,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" },
+      { name: "theme-color", content: "#0B2545" },
       { title: "Sunrich" },
       { name: "description", content: "Order Sunrich packaged drinking water." },
       { property: "og:type", content: "website" },
@@ -131,6 +134,27 @@ function RootComponent() {
     });
     return () => subscription.unsubscribe();
   }, [router, queryClient]);
+
+  // Android shell: status bar, splash, hardware back (no-op on the web).
+  useEffect(() => {
+    let cleanup: (() => void) | undefined;
+    void initNative({
+      isHome: () => router.state.location.pathname === "/home",
+      onExitHint: () => toast(i18n.t("native.backToExit"), { duration: 2000 }),
+    }).then((c) => (cleanup = c));
+    return () => cleanup?.();
+  }, [router]);
+
+  // Keep the focused field visible above the on-screen keyboard.
+  useEffect(() => {
+    const onFocus = (e: FocusEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (!el || !/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
+      setTimeout(() => el.scrollIntoView({ block: "center", behavior: "smooth" }), 300);
+    };
+    document.addEventListener("focusin", onFocus);
+    return () => document.removeEventListener("focusin", onFocus);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

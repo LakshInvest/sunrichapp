@@ -77,8 +77,8 @@
   },
   "nav": {
     "home": "Home",
-    "order": "Order",
-    "track": "Track",
+    "order": "Shop",
+    "track": "Orders",
     "account": "Account",
     "inbox": "Inbox"
   },
@@ -113,7 +113,7 @@
   "catalog": {
     "priceOnRequest": "Price on request",
     "save": "Save {{amount}}",
-    "depositLine": "+ {{amount}} jar deposit (refundable)",
+    "depositLine": "+ {{amount}} deposit",
     "yourFavourites": "Your favourites",
     "addFavourite": "Add to favourites",
     "removeFavourite": "Remove from favourites",
@@ -130,7 +130,8 @@
     "sortPriceDesc": "Price high–low",
     "emptyTitle": "No products yet",
     "emptyBody": "The Sunrich catalogue is being set up. Please check back soon.",
-    "askUs": "Ask the Sunrich team"
+    "askUs": "Ask the Sunrich team",
+    "sortArranged": "As arranged"
   },
   "product": {
     "quantity": "Quantity",
@@ -174,7 +175,7 @@
     "proceed": "Proceed"
   },
   "order": {
-    "title": "Order",
+    "title": "Shop",
     "comingSoon": "Ordering is coming soon.",
     "metaTitle": "Sunrich — Order",
     "metaDescription": "Place your Sunrich water order.",
@@ -194,7 +195,11 @@
     "moreItems": "+{{count}} more",
     "emptyTitle": "No orders here yet",
     "emptyBody": "Orders you place will appear here.",
-    "notFound": "This order is not on your account."
+    "notFound": "This order is not on your account.",
+    "liveTitle": "Active order",
+    "trackBtn": "Track",
+    "deliveredBy": "Delivered by {{name}}",
+    "bySunrich": "Sunrich"
   },
   "account": {
     "title": "Account",
@@ -571,5 +576,9 @@
     "noUpi": "Pay by cash or UPI to our delivery team.",
     "fullyPaid": "Fully paid",
     "view": "View invoice"
+  },
+  "demo": {
+    "chip": "Demo account",
+    "checkoutBanner": "Demo account — orders are not delivered"
   }
 }

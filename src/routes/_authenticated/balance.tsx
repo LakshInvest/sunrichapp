@@ -359,7 +359,11 @@ function PaidSheet({ open, onOpenChange, onSent }: { open: boolean; onOpenChange
     const e: Partial<Record<"amount" | "ref" | "date", string>> = {};
     const amt = Number(amount);
     if (!(amt > 0)) e.amount = t("balance.errAmount");
-    if (mode !== "cash" && !ref.trim()) e.ref = t("balance.errRef");
+    if (mode === "upi" || mode === "bank") {
+      const r = ref.trim();
+      if (r && !validUtr(r)) e.ref = t("success.utrErr");
+      else if (!r && !file) e.ref = t("success.errRefOrShot");
+    }
     if (!date) e.date = t("balance.errDate");
     setErrs(e);
     if (Object.keys(e).length) {
@@ -369,25 +373,21 @@ function PaidSheet({ open, onOpenChange, onSent }: { open: boolean; onOpenChange
     setSending(true);
     try {
       let path: string | undefined;
-      let name: string | undefined;
       if (file) {
         const cid = await getMyCustomerId();
         const prep = await prepareUpload(file);
         if (!prep.ok) throw new Error(t(prep.reason === "tooLarge" ? "registration.errFileTooLarge" : "registration.errFileType"));
-        path = `${cid}/queries/${Date.now()}-${file.name.replace(/[^\w.-]+/g, "-")}`;
+        path = `${cid}/payments/${Date.now()}-${file.name.replace(/[^\w.-]+/g, "-")}`;
         const { error } = await supabase.storage.from("customer-docs").upload(path, prep.blob, { contentType: prep.mime });
         if (error) throw new Error(error.message);
-        name = file.name;
       }
-      const args: { p_subject: string; p_message: string; p_context: string; p_attachment_path?: string; p_attachment_name?: string } = {
-        p_subject: PAYMENT_SUBJECT,
-        p_message: paymentMessage({ amount: amt, mode, reference: ref.trim(), date }),
-        p_context: "payment",
-      };
-      if (path) args.p_attachment_path = path;
-      if (name) args.p_attachment_name = name;
-      const { error } = await supabase.rpc("customer_raise_query", args);
-      if (error) throw new Error(error.message);
+      await submitPaymentProof({
+        amount: amt,
+        method: mode,
+        reference: ref.trim() || null,
+        paidOn: date,
+        screenshotPath: path ?? null,
+      });
       toast.success(t("balance.paidSent"));
       setAmount("");
       setRef("");

@@ -170,6 +170,92 @@ export type Database = {
           },
         ]
       }
+      app_settings: {
+        Row: {
+          about_text: string | null
+          about_text_hi: string | null
+          about_text_mr: string | null
+          allow_cancel_before: string
+          allow_order_notes: boolean
+          closed_weekdays: number[]
+          company_id: string
+          delivery_days_ahead: number
+          delivery_slots: Json
+          feedback_enabled: boolean
+          holidays: string[]
+          min_order_value: number
+          multiple_addresses: boolean
+          privacy_url: string | null
+          same_day_cutoff: string
+          show_jar_balance: boolean
+          support_email: string | null
+          support_hours: string | null
+          support_phone: string | null
+          support_whatsapp: string | null
+          terms_url: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          about_text?: string | null
+          about_text_hi?: string | null
+          about_text_mr?: string | null
+          allow_cancel_before?: string
+          allow_order_notes?: boolean
+          closed_weekdays?: number[]
+          company_id: string
+          delivery_days_ahead?: number
+          delivery_slots?: Json
+          feedback_enabled?: boolean
+          holidays?: string[]
+          min_order_value?: number
+          multiple_addresses?: boolean
+          privacy_url?: string | null
+          same_day_cutoff?: string
+          show_jar_balance?: boolean
+          support_email?: string | null
+          support_hours?: string | null
+          support_phone?: string | null
+          support_whatsapp?: string | null
+          terms_url?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          about_text?: string | null
+          about_text_hi?: string | null
+          about_text_mr?: string | null
+          allow_cancel_before?: string
+          allow_order_notes?: boolean
+          closed_weekdays?: number[]
+          company_id?: string
+          delivery_days_ahead?: number
+          delivery_slots?: Json
+          feedback_enabled?: boolean
+          holidays?: string[]
+          min_order_value?: number
+          multiple_addresses?: boolean
+          privacy_url?: string | null
+          same_day_cutoff?: string
+          show_jar_balance?: boolean
+          support_email?: string | null
+          support_hours?: string | null
+          support_phone?: string | null
+          support_whatsapp?: string | null
+          terms_url?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -641,6 +727,74 @@ export type Database = {
             columns: ["zone_id"]
             isOneToOne: false
             referencedRelation: "geo_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_addresses: {
+        Row: {
+          address_line1: string
+          address_line2: string | null
+          city: string | null
+          contact_mobile: string | null
+          contact_name: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          is_active: boolean
+          is_default: boolean
+          label: string
+          landmark: string | null
+          latitude: number | null
+          longitude: number | null
+          pincode: string | null
+          state: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_line1: string
+          address_line2?: string | null
+          city?: string | null
+          contact_mobile?: string | null
+          contact_name?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          label?: string
+          landmark?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          pincode?: string | null
+          state?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_line1?: string
+          address_line2?: string | null
+          city?: string | null
+          contact_mobile?: string | null
+          contact_name?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          label?: string
+          landmark?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          pincode?: string | null
+          state?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_addresses_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
             referencedColumns: ["id"]
           },
         ]
@@ -2369,6 +2523,48 @@ export type Database = {
           },
         ]
       }
+      order_feedback: {
+        Row: {
+          comment: string | null
+          created_at: string
+          customer_id: string
+          order_id: string
+          rating: number
+          tags: string[]
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          customer_id: string
+          order_id: string
+          rating: number
+          tags?: string[]
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          customer_id?: string
+          order_id?: string
+          rating?: number
+          tags?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_feedback_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_feedback_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_lines: {
         Row: {
           deposit_per_unit: number
@@ -2501,13 +2697,17 @@ export type Database = {
           customer_mobile: string | null
           customer_name: string | null
           customer_type_code: string | null
+          delivery_address_id: string | null
           delivery_address_line1: string | null
           delivery_address_line2: string | null
+          delivery_address_text: string | null
           delivery_charge: number
           delivery_city: string | null
           delivery_date: string | null
           delivery_landmark: string | null
+          delivery_lat: number | null
           delivery_latitude: number | null
+          delivery_lng: number | null
           delivery_longitude: number | null
           delivery_otp: string | null
           delivery_pincode: string | null
@@ -2557,13 +2757,17 @@ export type Database = {
           customer_mobile?: string | null
           customer_name?: string | null
           customer_type_code?: string | null
+          delivery_address_id?: string | null
           delivery_address_line1?: string | null
           delivery_address_line2?: string | null
+          delivery_address_text?: string | null
           delivery_charge?: number
           delivery_city?: string | null
           delivery_date?: string | null
           delivery_landmark?: string | null
+          delivery_lat?: number | null
           delivery_latitude?: number | null
+          delivery_lng?: number | null
           delivery_longitude?: number | null
           delivery_otp?: string | null
           delivery_pincode?: string | null
@@ -2613,13 +2817,17 @@ export type Database = {
           customer_mobile?: string | null
           customer_name?: string | null
           customer_type_code?: string | null
+          delivery_address_id?: string | null
           delivery_address_line1?: string | null
           delivery_address_line2?: string | null
+          delivery_address_text?: string | null
           delivery_charge?: number
           delivery_city?: string | null
           delivery_date?: string | null
           delivery_landmark?: string | null
+          delivery_lat?: number | null
           delivery_latitude?: number | null
+          delivery_lng?: number | null
           delivery_longitude?: number | null
           delivery_otp?: string | null
           delivery_pincode?: string | null
@@ -2674,6 +2882,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_delivery_address_id_fkey"
+            columns: ["delivery_address_id"]
+            isOneToOne: false
+            referencedRelation: "customer_addresses"
             referencedColumns: ["id"]
           },
           {
@@ -4883,6 +5098,7 @@ export type Database = {
           ref_no: string
         }[]
       }
+      delete_my_address: { Args: { p_id: string }; Returns: undefined }
       deliver_stop: {
         Args: {
           p_fail_reason?: string
@@ -5123,6 +5339,15 @@ export type Database = {
         }
         Returns: string
       }
+      rate_my_order: {
+        Args: {
+          p_comment?: string
+          p_order_id: string
+          p_rating: number
+          p_tags?: string[]
+        }
+        Returns: undefined
+      }
       record_cash_handover: {
         Args: {
           p_amount: number
@@ -5248,6 +5473,24 @@ export type Database = {
         Returns: undefined
       }
       revoke_user_devices: { Args: { p_user_id: string }; Returns: number }
+      save_my_address: {
+        Args: {
+          p_address_line1: string
+          p_address_line2?: string
+          p_city?: string
+          p_contact_mobile?: string
+          p_contact_name?: string
+          p_id: string
+          p_is_default?: boolean
+          p_label: string
+          p_landmark?: string
+          p_latitude?: number
+          p_longitude?: number
+          p_pincode?: string
+          p_state?: string
+        }
+        Returns: string
+      }
       save_my_preferences: {
         Args: { p_dashboard?: Json; p_sidebar?: Json }
         Returns: undefined
@@ -5259,6 +5502,10 @@ export type Database = {
       }
       set_extra_load: {
         Args: { p_product_id: string; p_qty: number; p_trip_id: string }
+        Returns: undefined
+      }
+      set_my_order_address: {
+        Args: { p_address_id: string; p_order_ids: string[] }
         Returns: undefined
       }
       set_my_pin: {

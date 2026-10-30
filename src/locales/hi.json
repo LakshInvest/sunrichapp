@@ -131,7 +131,8 @@
     "emptyTitle": "अभी कोई उत्पाद नहीं",
     "emptyBody": "Sunrich कैटलॉग तैयार हो रहा है। कृपया थोड़ी देर बाद देखें।",
     "askUs": "सनरिच टीम से पूछें",
-    "sortArranged": "सनरिच क्रम"
+    "sortArranged": "सनरिच क्रम",
+    "perPack": "/पैक"
   },
   "product": {
     "quantity": "मात्रा",
@@ -149,8 +150,8 @@
     "title": "कार्ट",
     "metaTitle": "सनरिच — कार्ट",
     "metaDescription": "ऑर्डर करने से पहले अपना सनरिच पानी का ऑर्डर देखें।",
-    "itemsSummary_one": "{{count}} आइटम · ₹{{total}}",
-    "itemsSummary_other": "{{count}} आइटम · ₹{{total}}",
+    "itemsSummary_one": "{{count}} पैक · {{total}}",
+    "itemsSummary_other": "{{count}} पैक · {{total}}",
     "viewCart": "कार्ट देखें",
     "clear": "खाली करें",
     "clearCart": "कार्ट खाली करें",
@@ -243,7 +244,6 @@
     "aboutVersion": "वर्शन {{version}}",
     "aboutBody": "घरों, दुकानों और व्यापार के लिए शुद्ध पैकेज्ड पीने का पानी।",
     "comingSoon": "जल्द आ रहा है",
-    "moreAddresses": "और डिलीवरी पते जल्द आ रहे हैं",
     "logoutTitle": "लॉग आउट करें?",
     "logoutBody": "आपको अपने नंबर से दोबारा लॉग इन करना होगा।",
     "logoutConfirm": "लॉग आउट",
@@ -449,7 +449,7 @@
     "expected": "संभावित डिलीवरी: {{date}} · {{slot}}",
     "statusConfirmed": "पक्का हुआ",
     "statusReceived": "मिल गया — पुष्टि का इंतज़ार",
-    "statusUnderReview": "समीक्षा में",
+    "statusUnderReview": "सनरिच की मंज़ूरी का इंतज़ार",
     "deliveredBy": "{{who}} डिलीवर करेंगे",
     "bySunrich": "सनरिच",
     "byDistributor": "आपके डिस्ट्रीब्यूटर",
@@ -559,7 +559,9 @@
     "loading": "लोड हो रहा है…",
     "slow": "सामान्य से ज़्यादा समय लग रहा है…",
     "retry": "फिर से कोशिश करें",
-    "loadError": "लोड नहीं हो सका। कृपया फिर से कोशिश करें।"
+    "loadError": "लोड नहीं हो सका। कृपया फिर से कोशिश करें।",
+    "packs_one": "{{count}} पैक",
+    "packs_other": "{{count}} पैक"
   },
   "invoice": {
     "metaTitle": "इनवॉइस — सनरिच",
@@ -682,5 +684,28 @@
     "askSub": "जवाब ऐप में देखें",
     "hours": "सहायता समय: {{hours}}",
     "waMessage": "नमस्ते Sunrich, मुझे मदद चाहिए।"
+  },
+  "switcher": {
+    "title": "कहाँ डिलीवर करें",
+    "useCurrent": "मौजूदा लोकेशन इस्तेमाल करें",
+    "saved": "सेव किए पते",
+    "selected": "चुना गया",
+    "more": "और विकल्प"
+  },
+  "delivery": {
+    "title": "ऑर्डर कैसे लेंगे?",
+    "sunrich": "🚚 सनरिच पहुँचाएगा",
+    "pickup": "🏭 मैं खुद ले जाऊँगा",
+    "pickupFrom": "सनरिच प्लांट, MIDC लातूर से लें",
+    "openMap": "मैप में खोलें",
+    "vehicle": "गाड़ी नंबर (वैकल्पिक)",
+    "pickupDate": "लेने की तारीख",
+    "pickupSlot": "खुद लेंगे",
+    "modeLabel": "डिलीवरी",
+    "switchToPickup": "खुद लेने में बदलें",
+    "switchToSunrich": "सनरिच डिलीवरी में बदलें",
+    "changed": "डिलीवरी का तरीका बदल गया",
+    "vehicleShown": "गाड़ी {{no}}",
+    "creditHold": "सनरिच की मंज़ूरी का इंतज़ार"
   }
 }

@@ -14,6 +14,7 @@ export type DeliveryProof = {
   deliveredAt: string | null;
   photoUrl: string | null;
   signatureUrl: string | null;
+  otpVerified: boolean;
   deliveredBy: string | null;
   failReason: string | null;
   lines: DeliveredLine[];
@@ -25,7 +26,7 @@ const n = (v: unknown) => Number(v ?? 0) || 0;
 export async function fetchDeliveryProof(orderId: string): Promise<DeliveryProof | null> {
   const { data: stops, error } = await supabase
     .from("trip_stops")
-    .select("id, delivered_at, photo_url, signature_url, fail_reason, trip_id, delivery_lines(order_line_id, delivered_qty, short_qty, damaged_qty, refused_qty, empties_returned)")
+    .select("id, delivered_at, photo_url, signature_url, otp_verified, fail_reason, trip_id, delivery_lines(order_line_id, delivered_qty, short_qty, damaged_qty, refused_qty, empties_returned)")
     .eq("order_id", orderId)
     .order("delivered_at", { ascending: false, nullsFirst: false })
     .limit(1);
@@ -43,6 +44,7 @@ export async function fetchDeliveryProof(orderId: string): Promise<DeliveryProof
     deliveredAt: s.delivered_at,
     photoUrl: await signed(s.photo_url),
     signatureUrl: await signed(s.signature_url),
+    otpVerified: s.otp_verified === true,
     deliveredBy,
     failReason: s.fail_reason,
     lines: ((s.delivery_lines ?? []) as Record<string, unknown>[]).map((l) => ({

@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { getLastMobile } from "@/lib/device";
 import { useTranslation } from "react-i18next";
 import { Logo } from "@/components/Logo";
 import en from "@/locales/en.json";
@@ -24,11 +26,17 @@ const LABELS: Record<Lang, string> = { en: "English", hi: "हिंदी", mr:
 function Index() {
   const { t } = useTranslation();
   const [lang, setLang] = useState<Lang | null | undefined>(undefined);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const saved = localStorage.getItem(LANG_KEY) as Lang | null;
     if (saved && LANGUAGES.includes(saved)) {
       applyLang(saved);
+      // Returning customer: go straight to "Welcome back" PIN.
+      if (getLastMobile()) {
+        void navigate({ to: "/auth", replace: true });
+        return;
+      }
       setLang(saved);
     } else setLang(null);
   }, []);

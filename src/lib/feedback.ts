@@ -27,7 +27,7 @@ export async function rateMyOrder(orderId: string, rating: number, tags: string[
     p_order_id: orderId,
     p_rating: rating,
     p_tags: tags,
-    p_comment: comment.trim() || undefined,
+    ...(comment.trim() ? { p_comment: comment.trim() } : {}),
   });
   if (error) throw new Error(error.message);
 }

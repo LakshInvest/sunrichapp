@@ -1,6 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { getLastMobile } from "@/lib/device";
 import { useTranslation } from "react-i18next";
 import { Logo } from "@/components/Logo";

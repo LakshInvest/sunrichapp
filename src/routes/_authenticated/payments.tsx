@@ -195,7 +195,7 @@ function BillsTab({ lang }: { lang: string }) {
           </div>
           <ul className="mt-3 space-y-3">
             {open.map((b) => {
-              const isInvoice = b.kind === "invoice" || b.kind === "INV";
+              const isInvoice = /inv/i.test(b.kind);
               const body = (
                 <>
                   <div className="flex items-center justify-between gap-3">

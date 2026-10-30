@@ -104,48 +104,6 @@ export async function invoiceIdByNo(no: string): Promise<string | null> {
 
 export const PAY_MODES = ["upi", "bank", "cheque", "cash"] as const;
 export type PayMode = (typeof PAY_MODES)[number];
-export type PaymentReport = { amount: number; mode: PayMode; reference: string; date: string };
-
-export const PAYMENT_SUBJECT = "Payment reported";
-
-export function paymentMessage(r: PaymentReport): string {
-  return [
-    `Amount: ₹${r.amount.toFixed(2)}`,
-    `Mode: ${r.mode.toUpperCase()}`,
-    `Reference: ${r.reference || "-"}`,
-    `Paid on: ${r.date}`,
-  ].join("\n");
-}
-
-export function parsePaymentMessage(msg: string): { amount?: number | undefined; mode?: PayMode | undefined; reference?: string | undefined; date?: string | undefined } {
-  const get = (k: string) => msg.match(new RegExp(`^${k}: (.*)$`, "m"))?.[1]?.trim();
-  const amt = get("Amount")?.replace(/[₹,]/g, "");
-  return {
-    amount: amt ? Number(amt) : undefined,
-    mode: get("Mode")?.toLowerCase() as PayMode | undefined,
-    reference: get("Reference"),
-    date: get("Paid on"),
-  };
-}
-
-export type ReportedPayment = { id: string; createdAt: string; status: string } & ReturnType<typeof parsePaymentMessage>;
-
-/** Payment reports still waiting for accounts (not closed). */
-export async function fetchReportedPayments(): Promise<ReportedPayment[]> {
-  const { data, error } = await supabase
-    .from("customer_queries")
-    .select("id, created_at, status, customer_query_messages(body, created_at)")
-    .eq("context", "payment")
-    .neq("status", "closed")
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
-  return (data ?? []).map((q) => {
-    const msgs = ((q as { customer_query_messages?: { body: string; created_at: string }[] }).customer_query_messages ?? [])
-      .slice()
-      .sort((a, b) => a.created_at.localeCompare(b.created_at));
-    return { id: q.id, createdAt: q.created_at, status: q.status, ...parsePaymentMessage(msgs[0]?.body ?? "") };
-  });
-}
 
 /* ---------- Statement PDF ---------- */
 

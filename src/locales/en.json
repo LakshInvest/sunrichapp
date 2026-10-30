@@ -338,7 +338,7 @@
     "rejected": "Rejected",
     "draft": "Incomplete",
     "blocked": "On hold",
-    "placed": "Received",
+    "placed": "Placed",
     "credit_hold": "Waiting for approval",
     "approved": "Confirmed",
     "processing": "Packed",
@@ -426,7 +426,7 @@
     "billTitle": "Your bill",
     "quoting": "Getting your prices…",
     "gstIncluded": "GST included in the prices.",
-    "paymentTitle": "Payment",
+    "paymentTitle": "How will you pay?",
     "cashOnDelivery": "Cash on delivery",
     "onCredit": "On credit — {{amount}} available",
     "creditReview": "Your order will be reviewed by Sunrich.",
@@ -439,7 +439,18 @@
     "priceOnRequestNote": "{{count}} item(s) without a price are not included — ask the Sunrich team.",
     "termsNote": "By placing the order you accept Sunrich's terms.",
     "closed": "Closed",
-    "noSlotToday": "No delivery slot left for this day — please pick another day."
+    "noSlotToday": "No delivery slot left for this day — please pick another day.",
+    "payMethod": {
+      "credit": "Credit",
+      "cash": "Cash on delivery",
+      "upi": "UPI",
+      "bank": "Bank transfer",
+      "cheque": "Cheque on delivery"
+    },
+    "cashNote": "Pay cash to the delivery person when the order arrives.",
+    "upiNote": "After placing, we show the UPI QR — pay and tap “I’ve paid”.",
+    "bankNote": "After placing, we show the firm’s bank account to transfer to.",
+    "chequeNote": "Give the cheque to the delivery person when the order arrives."
   },
   "success": {
     "title": "Order placed",
@@ -448,13 +459,45 @@
     "subtitle": "Thank you! Your water is on its way soon.",
     "expected": "Expected delivery: {{date}} · {{slot}}",
     "statusConfirmed": "Confirmed",
-    "statusReceived": "Received — waiting for confirmation",
     "statusUnderReview": "Waiting for approval from Sunrich",
     "deliveredBy": "Delivered by {{who}}",
     "bySunrich": "Sunrich",
     "byDistributor": "your distributor",
     "trackOrder": "Track order",
-    "continueShopping": "Continue shopping"
+    "continueShopping": "Continue shopping",
+    "payCredit": "Payment: on credit",
+    "payCash": "Pay cash to the delivery person when the order arrives.",
+    "payCheque": "Give the cheque to the delivery person when the order arrives.",
+    "payUpiTitle": "Pay by UPI",
+    "payWithApp": "Pay with UPI app",
+    "ivePaid": "I’ve paid",
+    "orderNoLabel": "Order no. {{no}}",
+    "infoMissing": "Payment details will be shared with you shortly.",
+    "bankTitle": "Bank transfer",
+    "bankName": "Bank name",
+    "accountNo": "Account no.",
+    "ifsc": "IFSC",
+    "accountName": "Account name",
+    "copy": "Copy",
+    "copied": "Copied",
+    "proofTitle": "I’ve paid",
+    "proofBody": "Add the UTR number or a payment screenshot so we can verify it and dispatch your order.",
+    "utrLabel": {
+      "upi": "UPI reference no. (12 digits)",
+      "bank": "UTR no. (12 digits)"
+    },
+    "utrErr": "Enter the full 12-digit number",
+    "errRefOrShot": "Add the reference number or a payment screenshot",
+    "paidOnLabel": "Paid on",
+    "addShot": "Add payment screenshot (optional)",
+    "removeShot": "Remove screenshot",
+    "proofSubmit": "Send for checking",
+    "proofSent": "Got it. We are checking your payment.",
+    "paymentReceived": "Payment received",
+    "notAccepted": "Payment not accepted",
+    "sendAgain": "Send again",
+    "checking": "Checking your payment — we’ll dispatch as soon as it’s verified",
+    "shotMissing": "Could not open the screenshot right now."
   },
   "trackDetail": {
     "metaTitle": "Sunrich — Order detail",
@@ -467,8 +510,6 @@
       "dispatched": "Out for delivery",
       "delivered": "Delivered"
     },
-    "paidOnCredit": "Payment: on credit",
-    "paidOnDelivery": "Payment: cash on delivery",
     "cancelOrder": "Cancel order",
     "cancelTitle": "Cancel this order?",
     "reasonLabel": "Reason",
@@ -480,7 +521,15 @@
     "reordering": "Adding to cart…",
     "needHelp": "Need help?",
     "cancelViaSupport": "This order can no longer be cancelled in the app. Contact support to cancel.",
-    "cancelWaMsg": "Hello Sunrich, please cancel my order {{no}}."
+    "cancelWaMsg": "Hello Sunrich, please cancel my order {{no}}.",
+    "payMethodLabel": "Payment",
+    "payMethod": {
+      "credit": "On credit",
+      "cash": "Cash on delivery",
+      "upi": "UPI",
+      "bank": "Bank transfer",
+      "cheque": "Cheque on delivery"
+    }
   },
   "payments": {
     "title": "Payments & ledger",
@@ -500,7 +549,8 @@
     "tabs": {
       "bills": "Bills",
       "payments": "Payments",
-      "statement": "Statement"
+      "statement": "Statement",
+      "mine": "My payments"
     },
     "openBills": "Open bills",
     "paidBills": "Paid bills",
@@ -524,7 +574,15 @@
     "noEntriesBody": "No bills or payments in this month.",
     "closing": "Closing balance",
     "debit": "Bills",
-    "credit": "Payments"
+    "credit": "Payments",
+    "proof": {
+      "pending": "Checking",
+      "verified": "Verified",
+      "rejected": "Rejected"
+    },
+    "mineEmptyTitle": "No payments sent yet",
+    "mineEmptyBody": "Payments you tell us about will show here.",
+    "viewShot": "View screenshot"
   },
   "inbox": {
     "title": "Inbox",
@@ -853,7 +911,8 @@
     "deliveredAt": "Delivered at",
     "deliveredBy": "Delivered by",
     "photo": "Delivery photo",
-    "signature": "Signature"
+    "signature": "Signature",
+    "otpVerified": "Verified with OTP"
   },
   "pickupPass": {
     "title": "Pickup pass",
@@ -865,5 +924,11 @@
     "vehicle": "Vehicle number",
     "save": "Save",
     "saved": "Vehicle number saved"
+  },
+  "dispatch": {
+    "dispatchingNow": "Dispatching now",
+    "leavesToday": "Leaves in today’s {{time}} dispatch",
+    "leavesTomorrow": "Leaves tomorrow {{time}}",
+    "leavesOn": "Leaves {{date}} at {{time}}"
   }
 }

@@ -3,7 +3,8 @@ import { scrollToFirstError } from "@/lib/form-errors";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Banknote, CalendarDays, ChevronDown, Loader2, MapPin, Wallet } from "lucide-react";
+import { ArrowLeft, CalendarDays, ChevronDown, Loader2, MapPin, Wallet } from "lucide-react";
+import { defaultPayMethod, setOrderPaymentMethod, PAY_METHODS, type PayMethod } from "@/lib/payments";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SmartImage } from "@/components/SmartImage";
@@ -91,6 +92,8 @@ function Checkout() {
   const [newc, setNewc] = useState<Record<string, number>>({});
   const [notes, setNotes] = useState("");
   const [quote, setQuote] = useState<QuoteResult | null>(null);
+  const [pay, setPay] = useState<PayMethod>("cash");
+  const payTouched = useRef(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -285,7 +288,12 @@ function Checkout() {
           }
         }
       }
-      sessionStorage.setItem("sunrich.lastOrder", JSON.stringify({ parts, deliveryDate, slot: slotLabel }));
+      try {
+        await setOrderPaymentMethod(parts.map((p) => p.order_id), pay);
+      } catch (e) {
+        console.warn("set_order_payment_method failed", e);
+      }
+      sessionStorage.setItem("sunrich.lastOrder", JSON.stringify({ parts, deliveryDate, slot: slotLabel, payMethod: pay }));
       clear();
       await navigate({ to: "/order-success" });
     } catch (e) {
@@ -296,10 +304,13 @@ function Checkout() {
     }
   };
 
-  const onCredit = quote != null && quote.credit_limit > 0;
+  const creditAllowed = quote != null && quote.credit_limit > 0 && !quote.credit_blocked;
+  useEffect(() => {
+    if (!payTouched.current && quote) setPay(defaultPayMethod(quote));
+  }, [quote]);
   const exceedsCredit =
     quote != null &&
-    onCredit &&
+    quote.credit_limit > 0 &&
     (quote.credit_exceeds ?? quote.items_total + quote.deposit_total > quote.credit_available);
 
   const inputCls =
@@ -587,11 +598,30 @@ function Checkout() {
           )}
         </section>
 
-        {/* Payment */}
+        {/* Payment — "How will you pay?" */}
         {quote && (
           <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
             <p className="text-sm font-bold text-foreground">{t("checkout.paymentTitle")}</p>
-            {onCredit ? (
+            <div role="radiogroup" aria-label={t("checkout.paymentTitle")} className="mt-3 grid grid-cols-3 gap-2">
+              {PAY_METHODS.filter((m) => m !== "credit" || creditAllowed).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  role="radio"
+                  aria-checked={pay === m}
+                  onClick={() => {
+                    payTouched.current = true;
+                    setPay(m);
+                  }}
+                  className={`flex min-h-12 items-center justify-center rounded-xl border px-2 text-sm font-semibold transition active:scale-95 ${
+                    pay === m ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground"
+                  }`}
+                >
+                  {t(`checkout.payMethod.${m}`)}
+                </button>
+              ))}
+            </div>
+            {pay === "credit" && quote && (
               <div className="mt-3 flex items-start gap-3">
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary/15">
                   <Wallet className="h-4 w-4 text-secondary" aria-hidden />
@@ -607,13 +637,18 @@ function Checkout() {
                   )}
                 </div>
               </div>
-            ) : (
-              <div className="mt-3 flex items-start gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary/15">
-                  <Banknote className="h-4 w-4 text-secondary" aria-hidden />
-                </span>
-                <p className="text-sm font-semibold text-foreground">{t("checkout.cashOnDelivery")}</p>
-              </div>
+            )}
+            {pay === "cash" && (
+              <p className="mt-3 text-sm text-muted-foreground">{t("checkout.cashNote")}</p>
+            )}
+            {pay === "upi" && (
+              <p className="mt-3 text-sm text-muted-foreground">{t("checkout.upiNote")}</p>
+            )}
+            {pay === "bank" && (
+              <p className="mt-3 text-sm text-muted-foreground">{t("checkout.bankNote")}</p>
+            )}
+            {pay === "cheque" && (
+              <p className="mt-3 text-sm text-muted-foreground">{t("checkout.chequeNote")}</p>
             )}
           </section>
         )}

@@ -201,6 +201,8 @@ export type Database = {
           terms_url: string | null
           updated_at: string
           updated_by: string | null
+          verify_new_customer_payment: boolean
+          verify_payment_above: number
         }
         Insert: {
           about_text?: string | null
@@ -232,6 +234,8 @@ export type Database = {
           terms_url?: string | null
           updated_at?: string
           updated_by?: string | null
+          verify_new_customer_payment?: boolean
+          verify_payment_above?: number
         }
         Update: {
           about_text?: string | null
@@ -263,6 +267,8 @@ export type Database = {
           terms_url?: string | null
           updated_at?: string
           updated_by?: string | null
+          verify_new_customer_payment?: boolean
+          verify_payment_above?: number
         }
         Relationships: [
           {
@@ -1152,7 +1158,10 @@ export type Database = {
       }
       customer_types: {
         Row: {
+          auto_approve_max_value: number | null
           auto_approve_orders: boolean
+          auto_approve_skip_first_order: boolean
+          auto_approve_within_credit: boolean
           code: string
           company_id: string
           created_at: string
@@ -1177,7 +1186,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          auto_approve_max_value?: number | null
           auto_approve_orders?: boolean
+          auto_approve_skip_first_order?: boolean
+          auto_approve_within_credit?: boolean
           code: string
           company_id: string
           created_at?: string
@@ -1202,7 +1214,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          auto_approve_max_value?: number | null
           auto_approve_orders?: boolean
+          auto_approve_skip_first_order?: boolean
+          auto_approve_within_credit?: boolean
           code?: string
           company_id?: string
           created_at?: string
@@ -1607,6 +1622,63 @@ export type Database = {
           },
         ]
       }
+      dispatch_schedules: {
+        Row: {
+          active_days: number[]
+          company_id: string
+          fixed_times: string[]
+          id: string
+          interval_hours: number
+          is_active: boolean
+          mode: string
+          updated_at: string
+          window_end: string
+          window_start: string
+          zone_id: string | null
+        }
+        Insert: {
+          active_days?: number[]
+          company_id: string
+          fixed_times?: string[]
+          id?: string
+          interval_hours?: number
+          is_active?: boolean
+          mode?: string
+          updated_at?: string
+          window_end?: string
+          window_start?: string
+          zone_id?: string | null
+        }
+        Update: {
+          active_days?: number[]
+          company_id?: string
+          fixed_times?: string[]
+          id?: string
+          interval_hours?: number
+          is_active?: boolean
+          mode?: string
+          updated_at?: string
+          window_end?: string
+          window_start?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispatch_schedules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dispatch_schedules_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "geo_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_series: {
         Row: {
           company_id: string
@@ -1874,6 +1946,9 @@ export type Database = {
           state: string | null
           state_code: string | null
           updated_at: string
+          upi_id: string | null
+          upi_payee_name: string | null
+          upi_qr_path: string | null
           website: string | null
         }
         Insert: {
@@ -1912,6 +1987,9 @@ export type Database = {
           state?: string | null
           state_code?: string | null
           updated_at?: string
+          upi_id?: string | null
+          upi_payee_name?: string | null
+          upi_qr_path?: string | null
           website?: string | null
         }
         Update: {
@@ -1950,6 +2028,9 @@ export type Database = {
           state?: string | null
           state_code?: string | null
           updated_at?: string
+          upi_id?: string | null
+          upi_payee_name?: string | null
+          upi_qr_path?: string | null
           website?: string | null
         }
         Relationships: [
@@ -2748,17 +2829,21 @@ export type Database = {
           grand_total: number
           hold_reason: string | null
           id: string
+          is_express: boolean
           items_total: number
           notes: string | null
           order_group_id: string
           order_no: string
           order_type: string
           outstanding_snapshot: number | null
+          payment_method: string | null
           payment_mode: string
           payment_status: string
           pickup_vehicle_no: string | null
           placed_by: string | null
           price_plan_id: string | null
+          release_batch_at: string | null
+          released_at: string | null
           round_off: number
           route_id: string | null
           source: string
@@ -2810,17 +2895,21 @@ export type Database = {
           grand_total?: number
           hold_reason?: string | null
           id?: string
+          is_express?: boolean
           items_total?: number
           notes?: string | null
           order_group_id: string
           order_no: string
           order_type?: string
           outstanding_snapshot?: number | null
+          payment_method?: string | null
           payment_mode?: string
           payment_status?: string
           pickup_vehicle_no?: string | null
           placed_by?: string | null
           price_plan_id?: string | null
+          release_batch_at?: string | null
+          released_at?: string | null
           round_off?: number
           route_id?: string | null
           source?: string
@@ -2872,17 +2961,21 @@ export type Database = {
           grand_total?: number
           hold_reason?: string | null
           id?: string
+          is_express?: boolean
           items_total?: number
           notes?: string | null
           order_group_id?: string
           order_no?: string
           order_type?: string
           outstanding_snapshot?: number | null
+          payment_method?: string | null
           payment_mode?: string
           payment_status?: string
           pickup_vehicle_no?: string | null
           placed_by?: string | null
           price_plan_id?: string | null
+          release_batch_at?: string | null
+          released_at?: string | null
           round_off?: number
           route_id?: string | null
           source?: string
@@ -3008,6 +3101,85 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      payment_proofs: {
+        Row: {
+          amount: number
+          company_id: string
+          created_at: string
+          customer_id: string
+          id: string
+          method: string
+          order_id: string | null
+          paid_on: string
+          receipt_id: string | null
+          reference: string | null
+          reject_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          screenshot_path: string | null
+          status: string
+          submitted_by: string | null
+        }
+        Insert: {
+          amount: number
+          company_id: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          method: string
+          order_id?: string | null
+          paid_on?: string
+          receipt_id?: string | null
+          reference?: string | null
+          reject_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          screenshot_path?: string | null
+          status?: string
+          submitted_by?: string | null
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          method?: string
+          order_id?: string | null
+          paid_on?: string
+          receipt_id?: string | null
+          reference?: string | null
+          reject_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          screenshot_path?: string | null
+          status?: string
+          submitted_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_proofs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_proofs_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_proofs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       price_plan_items: {
         Row: {
@@ -4967,6 +5139,10 @@ export type Database = {
         Returns: string
       }
       _is_my_trip: { Args: { p_trip_id: string }; Returns: boolean }
+      _is_new_customer: {
+        Args: { p_customer_id: string; p_except_order?: string }
+        Returns: boolean
+      }
       _next_order_no: { Args: { p_firm_id: string }; Returns: string }
       _price_lines: {
         Args: { p_customer_id: string; p_lines: Json; p_office: boolean }
@@ -5208,6 +5384,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      express_order: {
+        Args: { p_note?: string; p_order_id: string }
+        Returns: undefined
+      }
       finalize_loading: { Args: { p_trip_id: string }; Returns: Json }
       force_logout: {
         Args: { p_reason?: string; p_user_id: string }
@@ -5234,6 +5414,7 @@ export type Database = {
       is_staff: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       job_auto_block_overdue: { Args: never; Returns: number }
+      job_release_dispatch_batches: { Args: never; Returns: number }
       job_reroute_stale_orders: { Args: never; Returns: number }
       log_location: {
         Args: {
@@ -5368,6 +5549,11 @@ export type Database = {
         }
         Returns: string
       }
+      next_release_time: {
+        Args: { p_company: string; p_from?: string; p_zone: string }
+        Returns: string
+      }
+      order_payment_hold: { Args: { p_order_id: string }; Returns: boolean }
       place_my_order: {
         Args: { p_delivery?: Json; p_lines: Json; p_notes?: string }
         Returns: Json
@@ -5564,6 +5750,15 @@ export type Database = {
         Args: { p_alert_id: string; p_resolution: string }
         Returns: undefined
       }
+      review_payment_proof: {
+        Args: {
+          p_id: string
+          p_reason?: string
+          p_receipt_id?: string
+          p_verified: boolean
+        }
+        Returns: undefined
+      }
       review_trip_expense: {
         Args: { p_approve: boolean; p_expense_id: string }
         Returns: undefined
@@ -5637,6 +5832,10 @@ export type Database = {
         Args: { p_mode: string; p_order_id: string; p_vehicle_no?: string }
         Returns: undefined
       }
+      set_order_payment_method: {
+        Args: { p_method: string; p_order_ids: string[] }
+        Returns: undefined
+      }
       set_order_status: {
         Args: {
           p_note?: string
@@ -5701,6 +5900,17 @@ export type Database = {
       stop_customer_summary: {
         Args: { p_customer_id: string; p_trip_id: string }
         Returns: Json
+      }
+      submit_payment_proof: {
+        Args: {
+          p_amount: number
+          p_method: string
+          p_order_id?: string
+          p_paid_on?: string
+          p_reference?: string
+          p_screenshot_path?: string
+        }
+        Returns: string
       }
       submit_registration: { Args: never; Returns: undefined }
       tally_export: {

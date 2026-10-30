@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { ArrowLeft, ChevronLeft, ChevronRight, ChevronRight as Go, Wallet } from "lucide-react";
 import { z } from "zod";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { SheetDrawer } from "@/components/SheetDrawer";
 import { ErrorState, EmptyState, SlowNotice } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
 import { formatINR } from "@/lib/catalogue";
@@ -20,8 +22,10 @@ import {
   type StatementRow,
 } from "@/lib/billing";
 import { dateLabel } from "@/lib/order-format";
+import { fetchMyPaymentProofs, signedProofUrl, type PaymentProof } from "@/lib/payments";
+import { PaymentProofSheet, ProofChip, type ProofTarget } from "@/components/PaymentProofSheet";
 
-const TABS = ["bills", "payments", "statement"] as const;
+const TABS = ["bills", "payments", "statement", "mine"] as const;
 type Tab = (typeof TABS)[number];
 
 export const Route = createFileRoute("/_authenticated/payments")({
@@ -92,7 +96,7 @@ function Payments() {
           </button>
           <p className="min-w-0 flex-1 truncate text-base font-bold text-foreground">{t("payments.title")}</p>
         </div>
-        <div role="tablist" className="grid grid-cols-3 gap-1 px-4 pb-2">
+        <div role="tablist" className="grid grid-cols-4 gap-1 px-4 pb-2">
           {TABS.map((k) => (
             <button
               key={k}
@@ -100,7 +104,7 @@ function Payments() {
               aria-selected={tab === k}
               type="button"
               onClick={() => navigate({ to: "/payments", search: { tab: k }, replace: true })}
-              className={`min-h-11 rounded-xl text-sm font-semibold transition ${
+              className={`min-h-11 rounded-xl text-[13px] font-semibold transition ${
                 tab === k ? "bg-primary text-primary-foreground" : "text-muted-foreground"
               }`}
             >
@@ -143,6 +147,7 @@ function Payments() {
         {tab === "bills" && <BillsTab lang={lang} />}
         {tab === "payments" && <ReceiptsTab lang={lang} />}
         {tab === "statement" && <StatementTab lang={lang} />}
+        {tab === "mine" && <MineTab lang={lang} />}
       </div>
     </main>
   );
@@ -286,6 +291,105 @@ function ReceiptsTab({ lang }: { lang: string }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+function MineTab({ lang }: { lang: string }) {
+  const { t } = useTranslation();
+  const [proofs, setProofs] = useState<PaymentProof[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [target, setTarget] = useState<ProofTarget | null>(null);
+  const [shot, setShot] = useState<string | null>(null);
+  const [proofsTick, setProofsTick] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    setError(null);
+    fetchMyPaymentProofs()
+      .then((list) => active && setProofs(list))
+      .catch((e: Error) => active && setError(e.message));
+    return () => {
+      active = false;
+    };
+  }, [proofsTick]);
+
+  const openShot = async (p: PaymentProof) => {
+    const url = await signedProofUrl(p.screenshotPath).catch(() => null);
+    if (url) {
+      setShot(url);
+    } else {
+      toast.error(t("success.shotMissing"));
+    }
+  };
+
+  if (error) return <ErrorState message={error} onRetry={() => setProofsTick((v) => v + 1)} />;
+  if (!proofs)
+    return (
+      <>
+        <ListSkeleton />
+        <SlowNotice loading onRetry={() => setProofsTick((v) => v + 1)} />
+      </>
+    );
+  if (!proofs.length) return <EmptyState title={t("payments.mineEmptyTitle")} body={t("payments.mineEmptyBody")} />;
+  return (
+    <>
+      <ul className="space-y-3">
+        {proofs.map((p) => (
+          <li key={p.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+            <div className="flex items-center justify-between gap-3">
+              <p className="min-w-0 truncate text-sm font-bold text-foreground">
+                {t(`payments.mode.${p.method}`, { defaultValue: p.method })}
+                {p.orderNo ? ` · ${p.orderNo}` : ""}
+              </p>
+              <ProofChip status={p.status} />
+            </div>
+            <div className="mt-1.5 flex items-center justify-between gap-3 text-sm">
+              <span className="text-muted-foreground">{dateLabel(p.paidOn, lang)}</span>
+              <span className="font-bold text-primary">{formatINR(p.amount)}</span>
+            </div>
+            {p.reference && <p className="mt-1 truncate font-mono text-xs text-muted-foreground">{p.reference}</p>}
+            {p.status === "rejected" && p.rejectReason && (
+              <p className="mt-2 rounded-lg bg-destructive/10 px-2.5 py-1.5 text-xs font-medium text-destructive">
+                {p.rejectReason}
+              </p>
+            )}
+            <div className="mt-2 flex flex-wrap gap-2">
+              {p.screenshotPath && (
+                <button
+                  type="button"
+                  onClick={() => void openShot(p)}
+                  className="min-h-9 rounded-xl border border-border px-3 text-xs font-semibold text-secondary"
+                >
+                  {t("payments.viewShot")}
+                </button>
+              )}
+              {p.status === "rejected" && (p.method === "upi" || p.method === "bank") && (
+                <button
+                  type="button"
+                  onClick={() => setTarget({ orderId: p.orderId, orderNo: p.orderNo, amount: p.amount, method: p.method === "bank" ? "bank" : "upi" })}
+                  className="min-h-9 rounded-xl bg-primary px-3 text-xs font-semibold text-primary-foreground"
+                >
+                  {t("success.sendAgain")}
+                </button>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+      <PaymentProofSheet
+        open={target != null}
+        onOpenChange={(o) => {
+          if (!o) setTarget(null);
+        }}
+        target={target}
+        onDone={() => setProofsTick((v) => v + 1)}
+      />
+      <SheetDrawer open={shot != null} onOpenChange={(o) => !o && setShot(null)}>
+        <div className="px-5 pb-8 pt-2">
+          {shot && <img src={shot} alt={t("payments.viewShot")} className="max-h-[70vh] w-full rounded-xl bg-muted object-contain" />}
+        </div>
+      </SheetDrawer>
+    </>
   );
 }
 

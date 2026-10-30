@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getMyCustomerId } from "@/lib/orders";
 
-/** True when the signed-in profile is a store-reviewer demo account (user_profiles.is_demo). */
+/** True only when the signed-in customer is the store-reviewer demo shop (customers.is_demo). */
 export function useIsDemo(): boolean {
   const [demo, setDemo] = useState(false);
   useEffect(() => {
     let active = true;
     void (async () => {
-      const { data: auth } = await supabase.auth.getUser();
-      const uid = auth.user?.id;
-      if (!uid) return;
-      const { data } = await supabase.from("user_profiles").select("is_demo").eq("id", uid).maybeSingle();
+      const cid = await getMyCustomerId();
+      if (!cid) return;
+      const { data } = await supabase.from("customers").select("is_demo").eq("id", cid).maybeSingle();
       if (active) setDemo(Boolean(data?.is_demo));
     })();
     return () => {

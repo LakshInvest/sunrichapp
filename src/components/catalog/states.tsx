@@ -125,3 +125,24 @@ export function CatalogueImage({
 }) {
   return <SmartImage src={src} alt={alt} className={className} fallbackSrc={fallbackSrc} />;
 }
+
+/** Shows "Taking longer than usual… Retry" once `loading` has lasted 10 s. */
+export function SlowNotice({ loading, onRetry }: { loading: boolean; onRetry: () => void }) {
+  const { t } = useTranslation();
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    setSlow(false);
+    if (!loading) return;
+    const id = setTimeout(() => setSlow(true), 10_000);
+    return () => clearTimeout(id);
+  }, [loading]);
+  if (!loading || !slow) return null;
+  return (
+    <p role="status" className="mt-3 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+      {t("common.slow")}
+      <button type="button" onClick={onRetry} className="min-h-11 font-semibold text-secondary underline underline-offset-4">
+        {t("common.retry")}
+      </button>
+    </p>
+  );
+}

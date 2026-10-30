@@ -570,10 +570,10 @@ function Account() {
               {settings?.about.en ? loc(settings.about, lang) : t("account.aboutBody")}
             </p>
             <div className="flex flex-col items-center gap-1.5">
-              {settings?.privacyUrl && (
+              {(
                 <button
                   type="button"
-                  onClick={() => void openInApp(settings.privacyUrl!)}
+                  onClick={() => void navigate({ to: "/privacy" })}
                   className="flex min-h-11 items-center gap-1.5 text-sm font-semibold text-secondary underline underline-offset-4"
                 >
                   <ShieldCheck className="h-4 w-4" aria-hidden />
@@ -581,10 +581,10 @@ function Account() {
                   <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                 </button>
               )}
-              {settings?.termsUrl && (
+              {(
                 <button
                   type="button"
-                  onClick={() => void openInApp(settings.termsUrl!)}
+                  onClick={() => void navigate({ to: "/terms" })}
                   className="flex min-h-11 items-center gap-1.5 text-sm font-semibold text-secondary underline underline-offset-4"
                 >
                   <FileText className="h-4 w-4" aria-hidden />

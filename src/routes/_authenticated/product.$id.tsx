@@ -8,7 +8,6 @@ import { SmartImage } from "@/components/SmartImage";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ErrorState, EmptyState, GridSkeleton } from "@/components/catalog/states";
 import { PriceBlock } from "@/components/catalog/ProductCard";
-import { fallbackImageFor } from "@/components/catalog/image-fallbacks";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
@@ -198,7 +197,6 @@ function ProductDetail() {
             <SmartImage
               src={null}
               alt={loc(product.name, lang)}
-              fallbackSrc={fallbackImageFor(product)}
               className="aspect-square w-full object-cover"
             />
           </div>
@@ -290,10 +288,9 @@ function ProductDetail() {
                     onClick={() => navigate({ to: "/product/$id", params: { id: s.id } })}
                     className="block w-full overflow-hidden rounded-2xl border border-border bg-card p-2.5 text-left shadow-sm transition active:scale-[0.98]"
                   >
-                    <SmartImage
+                    <SmartImage width={160}
                       src={s.imageUrl ?? s.images[0] ?? null}
                       alt={loc(s.name, lang)}
-                      fallbackSrc={fallbackImageFor(s)}
                       className="aspect-square w-full rounded-xl object-cover"
                     />
                     <p className="mt-2 line-clamp-2 min-h-10 text-sm font-bold leading-snug text-foreground">

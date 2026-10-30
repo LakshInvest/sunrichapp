@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Crosshair, Loader2 } from "lucide-react";
+import { Crosshair, Loader2, MapPin } from "lucide-react";
+import { SheetDrawer } from "./SheetDrawer";
 import { DEFAULT_LOCATION, type LocationValue } from "./locationShared";
 
 // Leaflet touches browser APIs at import time — keep it out of the SSR graph.
@@ -18,8 +19,19 @@ export function LocationPicker({
   const [locating, setLocating] = useState(false);
   const [denied, setDenied] = useState(false);
 
+  const [disclose, setDisclose] = useState(false);
+
+  // Play policy: our own prominent disclosure before the system prompt.
   const locate = () => {
     if (locating) return;
+    if (localStorage.getItem("sunrich.locConsent") !== "1") {
+      setDisclose(true);
+      return;
+    }
+    runLocate();
+  };
+
+  const runLocate = () => {
     setDenied(false);
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
@@ -41,6 +53,33 @@ export function LocationPicker({
 
   return (
     <div className="flex flex-col gap-3">
+      <SheetDrawer open={disclose} onOpenChange={setDisclose}>
+        <div className="px-5 pb-8 pt-4 text-center">
+          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-secondary/15">
+            <MapPin className="h-6 w-6 text-secondary" aria-hidden />
+          </span>
+          <h2 className="mt-3 text-lg font-bold text-foreground">{t("location.title")}</h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("location.body")}</p>
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.setItem("sunrich.locConsent", "1");
+              setDisclose(false);
+              runLocate();
+            }}
+            className="mt-5 min-h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground transition active:scale-[0.98]"
+          >
+            {t("location.continue")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setDisclose(false)}
+            className="mt-2 min-h-12 w-full rounded-xl text-base font-semibold text-muted-foreground"
+          >
+            {t("location.notNow")}
+          </button>
+        </div>
+      </SheetDrawer>
       <button
         type="button"
         onClick={locate}

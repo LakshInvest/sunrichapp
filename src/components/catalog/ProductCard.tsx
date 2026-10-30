@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Heart, Minus, Plus } from "lucide-react";
 import { SmartImage } from "@/components/SmartImage";
-import { fallbackImageFor } from "@/components/catalog/image-fallbacks";
 import { formatINR, loc, priceSave, type CatalogProduct } from "@/lib/catalogue";
 
 /** Price + struck MRP on one line. Shared by cards, the detail screen and the cart. */
@@ -94,9 +93,8 @@ export function ProductCard({
   return (
     <div className="relative flex h-full flex-col rounded-2xl border border-border bg-card p-2 shadow-sm">
       <button type="button" onClick={onOpen} aria-label={name} className="block aspect-square w-full overflow-hidden rounded-xl bg-secondary/10">
-        <SmartImage
+        <SmartImage width={180}
           src={product.imageUrl ?? product.images[0] ?? null}
-          fallbackSrc={fallbackImageFor(product)}
           alt={name}
           className="h-full w-full object-contain p-2"
         />

@@ -7,7 +7,6 @@ import { ArrowLeft, Banknote, CalendarDays, ChevronDown, Loader2, MapPin, Wallet
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SmartImage } from "@/components/SmartImage";
-import { fallbackImageFor } from "@/components/catalog/image-fallbacks";
 import { LocationPicker } from "@/components/LocationPicker";
 import { DEFAULT_LOCATION, type LocationValue } from "@/components/locationShared";
 import { useLang } from "@/hooks/use-lang";
@@ -29,6 +28,11 @@ import {
 } from "@/lib/orders";
 import { getMyRegistration, type RegistrationDto } from "@/lib/registration.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { SheetDrawer } from "@/components/SheetDrawer";
+import { AddressEditor } from "@/components/AddressEditor";
+import { addressText, labelKey, listMyAddresses, setMyOrderAddress, type SavedAddress } from "@/lib/addresses";
+import { deliveryDays, minOrderShortfall, slotName, slotsFor, useAppSettings } from "@/lib/app-settings";
+import { Check, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/checkout")({
   head: () => ({
@@ -63,9 +67,13 @@ function Checkout() {
   const [editingAddress, setEditingAddress] = useState(false);
   const [addr, setAddr] = useState({ line1: "", line2: "", landmark: "", city: "", pincode: "" });
   const [loc_, setLoc_] = useState<LocationValue | null>(null);
-  const [when, setWhen] = useState<"today" | "tomorrow" | "pick">("today");
-  const [customDate, setCustomDate] = useState(isoDaysFromToday(2));
-  const [slot, setSlot] = useState<(typeof SLOTS)[number]>("morning");
+  const settings = useAppSettings();
+  const [saved, setSaved] = useState<SavedAddress[]>([]);
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [newAddrOpen, setNewAddrOpen] = useState(false);
+  const [day, setDay] = useState<string | null>(null);
+  const [slot, setSlot] = useState<string | null>(null);
   const [newc, setNewc] = useState<Record<string, number>>({});
   const [notes, setNotes] = useState("");
   const [quote, setQuote] = useState<QuoteResult | null>(null);
@@ -112,6 +120,61 @@ function Checkout() {
 
   const products = data?.products ?? [];
 
+  // Saved addresses (Task 4): default preselected; registered address otherwise.
+  const useSaved = settings?.multipleAddresses !== false && saved.length > 0;
+  const loadSaved = useCallback(async (pick?: string) => {
+    try {
+      const list = await listMyAddresses();
+      setSaved(list);
+      setSavedId((cur) => pick ?? cur ?? list.find((a) => a.isDefault)?.id ?? list[0]?.id ?? null);
+    } catch {
+      /* fall back to the registered address */
+    }
+  }, []);
+  useEffect(() => {
+    void loadSaved();
+  }, [loadSaved]);
+  const savedAddr = useSaved ? saved.find((a) => a.id === savedId) ?? null : null;
+  useEffect(() => {
+    if (!savedAddr) return;
+    setAddr({
+      line1: savedAddr.line1,
+      line2: savedAddr.line2 ?? "",
+      landmark: savedAddr.landmark ?? "",
+      city: savedAddr.city ?? "",
+      pincode: savedAddr.pincode ?? "",
+    });
+    setLoc_(savedAddr.lat != null && savedAddr.lng != null ? { lat: savedAddr.lat, lng: savedAddr.lng, accuracy: null } : null);
+  }, [savedAddr]);
+
+  // Delivery days & slots from Command Center settings (Task 3).
+  const now = useMemo(() => new Date(), []);
+  const days = useMemo(
+    () =>
+      deliveryDays(
+        settings ?? { deliveryDaysAhead: 6, sameDayCutoff: "23:59", closedWeekdays: [], holidays: [] },
+        now,
+      ),
+    [settings, now],
+  );
+  useEffect(() => {
+    if (day && days.some((d) => d.iso === day && !d.closed)) return;
+    setDay(days.find((d) => !d.closed)?.iso ?? null);
+  }, [days, day]);
+  const slots = useMemo(() => (settings && day ? slotsFor(settings, day, now) : []), [settings, day, now]);
+  useEffect(() => {
+    if (slots.length === 0) return;
+    if (slot && slots.some((x) => x.code === slot && !x.disabled)) return;
+    setSlot(slots.find((x) => !x.disabled)?.code ?? null);
+  }, [slots, slot]);
+  const slotLabel = (() => {
+    const x = slots.find((y) => y.code === slot);
+    if (x) return slotName(x, lang);
+    return SLOTS.includes(slot as never) ? t(`checkout.slot.${slot}`) : slot ?? "";
+  })();
+  const fmtDay = (d: Date) =>
+    new Intl.DateTimeFormat(lang === "en" ? "en-IN" : `${lang}-IN`, { weekday: "short", day: "numeric", month: "short" }).format(d);
+
   const rows = useMemo(() => {
     return Object.entries(quantities)
       .map(([id, qty]) => {
@@ -154,12 +217,16 @@ function Checkout() {
     return () => clearTimeout(id);
   }, [refreshQuote]);
 
-  const deliveryDate = when === "today" ? isoDaysFromToday(0) : when === "tomorrow" ? isoDaysFromToday(1) : customDate;
+  const deliveryDate = day ?? isoDaysFromToday(1);
+  const itemsTotal = rows.reduce((a, r) => a + (r.product.price ?? 0) * r.qty, 0);
+  const shortfall = minOrderShortfall(quote?.items_total ?? itemsTotal, settings?.minOrderValue ?? 0);
+  const notesAllowed = settings?.allowOrderNotes ?? true;
+  const noSlot = slots.length > 0 && !slots.some((x) => x.code === slot && !x.disabled);
 
   const addressLines = [addr.line1, addr.line2, addr.landmark, addr.city, addr.pincode].filter(Boolean);
 
   const place = async () => {
-    if (placingRef.current || offline || rows.length === 0) return;
+    if (placingRef.current || offline || rows.length === 0 || shortfall > 0 || !day || noSlot) return;
     placingRef.current = true;
     setPlacing(true);
     setError(null);
@@ -175,11 +242,18 @@ function Checkout() {
           latitude: loc_?.lat ?? null,
           longitude: loc_?.lng ?? null,
           delivery_date: deliveryDate,
-          delivery_slot: t(`checkout.slot.${slot}`),
+          delivery_slot: slotLabel,
         },
-        notes.trim() || null,
+        notesAllowed ? notes.trim() || null : null,
       );
-      sessionStorage.setItem("sunrich.lastOrder", JSON.stringify({ parts, deliveryDate, slot: t(`checkout.slot.${slot}`) }));
+      if (savedAddr && parts.length > 0) {
+        try {
+          await setMyOrderAddress(parts.map((p) => p.order_id), savedAddr.id);
+        } catch (e) {
+          console.warn("set_my_order_address failed", e);
+        }
+      }
+      sessionStorage.setItem("sunrich.lastOrder", JSON.stringify({ parts, deliveryDate, slot: slotLabel }));
       clear();
       await navigate({ to: "/order-success" });
     } catch (e) {
@@ -228,15 +302,26 @@ function Checkout() {
               <MapPin className="h-4 w-4 text-secondary" aria-hidden />
               {t("checkout.addressTitle")}
             </p>
-            <button
-              type="button"
-              onClick={() => setEditingAddress((v) => !v)}
-              aria-expanded={editingAddress}
-              className="min-h-9 text-sm font-semibold text-secondary"
-            >
-              {editingAddress ? t("account.cancel") : t("account.edit")}
-            </button>
+            {useSaved ? (
+              <button type="button" onClick={() => setPickerOpen(true)} className="min-h-11 px-2 text-sm font-semibold text-secondary">
+                {t("addresses.change")}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setEditingAddress((v) => !v)}
+                aria-expanded={editingAddress}
+                className="min-h-11 px-2 text-sm font-semibold text-secondary"
+              >
+                {editingAddress ? t("account.cancel") : t("account.edit")}
+              </button>
+            )}
           </div>
+          {savedAddr && (
+            <span className="mt-2 inline-block rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
+              {t(labelKey(savedAddr.label))}
+            </span>
+          )}
           <p className="mt-2 text-sm leading-relaxed text-foreground">{addressLines.join(", ") || "—"}</p>
           {loc_?.lat != null && loc_?.lng != null ? (
             <div className="mt-3">
@@ -249,7 +334,7 @@ function Checkout() {
           )}
           <p className="mt-2 text-xs text-muted-foreground">{t("checkout.addressNote")}</p>
 
-          {editingAddress && (
+          {editingAddress && !useSaved && (
             <div className="mt-4 space-y-3 border-t border-border pt-4">
               <label className="flex flex-col gap-1.5">
                 <span className="text-sm font-medium text-foreground">{t("checkout.line1")}</span>
@@ -284,35 +369,43 @@ function Checkout() {
             <CalendarDays className="h-4 w-4 text-secondary" aria-hidden />
             {t("checkout.whenTitle")}
           </p>
-          <div className="mt-3 flex gap-2" role="group" aria-label={t("checkout.whenTitle")}>
-            <button type="button" onClick={() => setWhen("today")} aria-pressed={when === "today"} className={chipCls(when === "today")}>
-              {t("checkout.today")}
-            </button>
-            <button type="button" onClick={() => setWhen("tomorrow")} aria-pressed={when === "tomorrow"} className={chipCls(when === "tomorrow")}>
-              {t("checkout.tomorrow")}
-            </button>
-            <button type="button" onClick={() => setWhen("pick")} aria-pressed={when === "pick"} className={chipCls(when === "pick")}>
-              {t("checkout.pickDate")}
-            </button>
-          </div>
-          {when === "pick" && (
-            <input
-              type="date"
-              value={customDate}
-              min={isoDaysFromToday(0)}
-              max={isoDaysFromToday(6)}
-              onChange={(e) => setCustomDate(e.target.value)}
-              className={`${inputCls} mt-3`}
-              aria-label={t("checkout.pickDate")}
-            />
-          )}
-          <div className="mt-3 flex gap-2" role="group" aria-label={t("checkout.slotLabel")}>
-            {SLOTS.map((s) => (
-              <button key={s} type="button" onClick={() => setSlot(s)} aria-pressed={slot === s} className={chipCls(slot === s)}>
-                {t(`checkout.slot.${s}`)}
+          <div className="no-scrollbar -mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1" role="group" aria-label={t("checkout.whenTitle")}>
+            {days.map((d, i) => (
+              <button
+                key={d.iso}
+                type="button"
+                disabled={d.closed}
+                onClick={() => setDay(d.iso)}
+                aria-pressed={day === d.iso}
+                className={`flex min-h-14 min-w-[4.75rem] shrink-0 flex-col items-center justify-center rounded-xl border px-2 text-xs font-semibold transition active:scale-95 disabled:opacity-45 ${
+                  day === d.iso ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground"
+                }`}
+              >
+                <span>{d.isToday ? t("checkout.today") : i <= 1 && days[0]?.isToday ? t("checkout.tomorrow") : fmtDay(d.date).split(",")[0]}</span>
+                <span className="font-normal">{d.closed ? t("checkout.closed") : fmtDay(d.date).replace(/^[^,]*,\s*/, "")}</span>
               </button>
             ))}
           </div>
+          {slots.length > 0 ? (
+            <div className="mt-3 grid grid-cols-2 gap-2" role="group" aria-label={t("checkout.slotLabel")}>
+              {slots.map((x) => (
+                <button
+                  key={x.code}
+                  type="button"
+                  disabled={x.disabled}
+                  onClick={() => setSlot(x.code)}
+                  aria-pressed={slot === x.code}
+                  className={`${chipCls(slot === x.code)} flex flex-col items-center justify-center py-1.5 disabled:opacity-45`}
+                >
+                  <span>{slotName(x, lang)}</span>
+                  <span className="text-[11px] font-normal opacity-80">{x.from}–{x.to}</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            !settings && <div className="mt-3 h-11 animate-pulse rounded-xl bg-muted" />
+          )}
+          {noSlot && <p className="mt-2 text-xs font-medium text-destructive">{t("checkout.noSlotToday")}</p>}
         </section>
 
         {/* New jars needed? */}
@@ -329,10 +422,9 @@ function Checkout() {
                   return (
                     <li key={product.id} className="flex items-center gap-3">
                       <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-secondary/10">
-                        <SmartImage
+                        <SmartImage width={48}
                           src={product.imageUrl ?? product.images[0] ?? null}
                           alt={loc(product.name, lang)}
-                          fallbackSrc={fallbackImageFor(product)}
                           className="h-12 w-12 object-cover"
                           iconClassName="h-5 w-5 text-secondary/70"
                         />
@@ -445,6 +537,7 @@ function Checkout() {
         )}
 
         {/* Notes */}
+        {notesAllowed && (
         <label className="mt-4 flex flex-col gap-1.5">
           <span className="text-sm font-medium text-foreground">{t("checkout.notesLabel")}</span>
           <textarea
@@ -456,6 +549,13 @@ function Checkout() {
             className="rounded-xl border border-input bg-card px-4 py-3 text-base text-foreground outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30"
           />
         </label>
+        )}
+
+        {shortfall > 0 && (
+          <p role="status" className="mt-4 rounded-xl bg-accent/15 px-4 py-3 text-center text-sm font-semibold text-foreground">
+            {t("cart.addMore", { amount: formatINR(shortfall) })}
+          </p>
+        )}
 
         {error && (
           <p data-field-error role="alert" className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
@@ -466,7 +566,7 @@ function Checkout() {
         <button
           type="button"
           onClick={() => void place()}
-          disabled={placing || offline || rows.length === 0 || quote == null}
+          disabled={placing || offline || rows.length === 0 || quote == null || shortfall > 0 || !day || noSlot}
           title={offline ? t("offline.hint") : undefined}
           className="mt-5 flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98] disabled:opacity-50"
         >
@@ -481,6 +581,55 @@ function Checkout() {
         )}
         <p className="mt-3 text-center text-xs text-muted-foreground">{t("checkout.termsNote")}</p>
       </div>
+
+      <SheetDrawer open={pickerOpen} onOpenChange={setPickerOpen}>
+        <div className="max-h-[80vh] overflow-y-auto px-5 pb-8 pt-2">
+          <h2 className="text-lg font-bold text-foreground">{t("addresses.pickTitle")}</h2>
+          <ul className="mt-3 space-y-2">
+            {saved.map((a) => (
+              <li key={a.id}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSavedId(a.id);
+                    setPickerOpen(false);
+                  }}
+                  className={`flex min-h-14 w-full items-start gap-3 rounded-xl border p-3 text-left ${a.id === savedId ? "border-primary bg-primary/5" : "border-border bg-card"}`}
+                >
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-primary">
+                    {a.id === savedId && <Check className="h-3.5 w-3.5 text-primary" aria-hidden />}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="text-xs font-bold text-primary">
+                      {t(labelKey(a.label))}
+                      {a.isDefault ? ` · ${t("addresses.default")}` : ""}
+                    </span>
+                    <span className="block text-sm text-foreground">{addressText(a)}</span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            onClick={() => {
+              setPickerOpen(false);
+              setNewAddrOpen(true);
+            }}
+            className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-secondary/50 text-base font-semibold text-primary"
+          >
+            <Plus className="h-5 w-5" aria-hidden />
+            {t("addresses.addNew")}
+          </button>
+        </div>
+      </SheetDrawer>
+      <AddressEditor
+        open={newAddrOpen}
+        onOpenChange={setNewAddrOpen}
+        address={null}
+        isFirst={saved.length === 0}
+        onSaved={(id) => void loadSaved(id)}
+      />
     </main>
   );
 }

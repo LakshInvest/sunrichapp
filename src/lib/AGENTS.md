@@ -7,3 +7,5 @@
 - `query-staff.functions.ts` `getStaffNames` and `invoice.functions.ts` `getInvoiceFirm` verify access via RLS, then read `user_profiles` / `firms`+`firm_bank_accounts` with the service role. Why: customers cannot select those rows.
 - `billing.ts` reads invoices/receipts and `customer_open_bills`/`customer_statement` RPCs. Why: RLS scopes them to the customer.
 - `orders.ts`: own-order filter relies on `customer_id` in ORDER_SELECT; keep it in sync with `fetchMyOrders()`. Shared order/status label helpers live in `order-format.ts`. Why: RLS also returns distributor-routed rows.
+- `app-settings.ts` is the only reader of Command Center `app_settings`; screens use `useAppSettings()` and its pure rule helpers. Why: one cache, testable rules.
+- `native.ts` wraps Capacitor and must stay a no-op on the web; plugins are imported dynamically. Why: the web app must not depend on native APIs.

@@ -10,10 +10,10 @@ import { SmartImage } from "@/components/SmartImage";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ErrorState, GridSkeleton } from "@/components/catalog/states";
-import { fallbackImageFor } from "@/components/catalog/image-fallbacks";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
+import { minOrderShortfall, useAppSettings } from "@/lib/app-settings";
 import { getMyRegistration } from "@/lib/registration.functions";
 import {
   clampQty,
@@ -135,6 +135,9 @@ function Cart() {
   }, [products, quantities]);
 
   const itemTotal = rows.reduce((sum, r) => sum + (r.product.price ?? 0) * r.qty, 0);
+  const settings = useAppSettings();
+  const minValue = settings?.minOrderValue ?? 0;
+  const shortfall = minOrderShortfall(itemTotal, minValue);
   const jarDeposit = rows.reduce(
     (sum, r) =>
       r.product.isReturnable && r.product.depositAmount != null ? sum + r.product.depositAmount * r.qty : sum,
@@ -192,10 +195,9 @@ function Cart() {
                   className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm"
                 >
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-secondary/10">
-                    <SmartImage
+                    <SmartImage width={64}
                       src={product.imageUrl ?? product.images[0] ?? null}
                       alt={loc(product.name, lang)}
-                      fallbackSrc={fallbackImageFor(product)}
                       className="h-16 w-16 object-cover"
                       iconClassName="h-6 w-6 text-secondary/70"
                     />
@@ -283,6 +285,16 @@ function Cart() {
               )}
             </section>
 
+            {shortfall > 0 && (
+              <div role="status" className="mt-5 rounded-xl bg-accent/15 px-4 py-3">
+                <p className="text-sm font-semibold text-foreground">{t("cart.addMore", { amount: formatINR(shortfall) })}</p>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-card">
+                  <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${Math.min(100, (itemTotal / minValue) * 100)}%` }} />
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">{t("cart.minOrder", { amount: formatINR(minValue) })}</p>
+              </div>
+            )}
+
             {pending ? (
               <button
                 type="button"
@@ -295,7 +307,7 @@ function Cart() {
               <button
                 type="button"
                 onClick={() => navigate({ to: "/checkout" })}
-                disabled={offline}
+                disabled={offline || shortfall > 0}
                 title={offline ? t("offline.hint") : undefined}
                 className="mt-5 flex min-h-14 w-full items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >

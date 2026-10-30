@@ -17,7 +17,13 @@ import { ErrorState } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
-import { formatINR } from "@/lib/catalogue";
+import { formatINR, readCatalogueCache, fetchCatalogue } from "@/lib/catalogue";
+import { canCustomerCancel, useAppSettings, waLink } from "@/lib/app-settings";
+import { fetchMyFeedback, planReorder, type OrderFeedback } from "@/lib/feedback";
+import { RateOrderCard } from "@/components/RateOrderCard";
+import { useIsDemo } from "@/hooks/use-demo";
+import { openExternal } from "@/lib/native";
+import { Phone, Star } from "lucide-react";
 import {
   buildTimeline,
   cancelMyOrder,
@@ -59,6 +65,9 @@ function OrderDetail() {
   const [cancelling, setCancelling] = useState(false);
   const [reordering, setReordering] = useState(false);
   const [invoiceId, setInvoiceId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<OrderFeedback | null | undefined>(undefined);
+  const settings = useAppSettings();
+  const isDemo = useIsDemo();
 
   const load = useCallback(async () => {
     try {
@@ -66,7 +75,11 @@ function OrderDetail() {
       const found = list.find((o) => o.id === id) ?? null;
       setOrder(found);
       setError(found ? null : "not-found");
-      if (found) setInvoiceId(await fetchInvoiceIdForOrder(found.id).catch(() => null));
+      if (found) {
+        setInvoiceId(await fetchInvoiceIdForOrder(found.id).catch(() => null));
+        if (found.status === "delivered" || found.status === "closed")
+          setFeedback((await fetchMyFeedback([found.id]).catch(() => ({}) as Record<string, OrderFeedback>))[found.id] ?? null);
+      }
     } catch (e) {
       setError((e as Error).message);
     }
@@ -103,7 +116,9 @@ function OrderDetail() {
   }
 
   const { steps, reached } = buildTimeline(order.status, order.history);
-  const cancellable = order.status === "placed" || order.status === "credit_hold";
+  const cancellable = canCustomerCancel(order.status, settings?.allowCancelBefore ?? "approved");
+  const pastCancel = !cancellable && ["approved", "processing", "dispatched"].includes(order.status);
+  const isDelivered = order.status === "delivered" || order.status === "closed";
   const isCancelled = order.status === "cancelled" || order.status === "rejected";
   const cancelNote = order.status === "cancelled" ? order.cancelReason : order.status === "rejected" ? order.holdReason : null;
   const addrLines = [
@@ -136,7 +151,14 @@ function OrderDetail() {
     if (reordering) return;
     setReordering(true);
     try {
-      for (const line of order.lines) setQty(line.productId, line.qty);
+      const cat = readCatalogueCache() ?? (await fetchCatalogue().catch(() => null));
+      const { add, skipped } = planReorder(order.lines, cat?.products ?? []);
+      if (add.length === 0) {
+        toast.error(t("reorder.noneAvailable"));
+        return;
+      }
+      for (const line of add) setQty(line.productId, line.qty);
+      if (skipped > 0) toast(t("reorder.someSkipped", { count: skipped }));
       await navigate({ to: "/cart" });
     } finally {
       setReordering(false);
@@ -266,6 +288,28 @@ function OrderDetail() {
           {order.notes && <p className="mt-3 text-xs text-muted-foreground">{t("checkout.notesLabel")}: {order.notes}</p>}
         </section>
 
+        {isDemo && (
+          <p className="mt-4 rounded-xl bg-accent/15 px-4 py-2.5 text-center text-xs font-semibold text-foreground">{t("demo.orderBadge")}</p>
+        )}
+
+        {isDelivered && settings?.feedbackEnabled !== false && feedback === null && (
+          <div className="mt-4">
+            <RateOrderCard
+              orderId={order.id}
+              orderNo={order.orderNo}
+              onDone={(r) => setFeedback(r ? { orderId: order.id, rating: r, tags: [], comment: null } : null)}
+            />
+          </div>
+        )}
+        {feedback && (
+          <p className="mt-4 flex items-center justify-center gap-1 text-sm text-muted-foreground">
+            {t("feedback.yourRating")}
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Star key={n} className={`h-4 w-4 ${n <= feedback.rating ? "fill-accent text-accent" : ""}`} aria-hidden />
+            ))}
+          </p>
+        )}
+
         {/* Actions */}
         <div className="mt-4 grid gap-3">
           {cancellable && (
@@ -280,6 +324,25 @@ function OrderDetail() {
               {t("trackDetail.cancelOrder")}
             </button>
           )}
+          {pastCancel && (settings?.supportPhone || settings?.supportWhatsapp) && (
+            <div className="rounded-xl bg-muted/60 p-3 text-center">
+              <p className="text-xs text-muted-foreground">{t("trackDetail.cancelViaSupport")}</p>
+              <button
+                type="button"
+                onClick={() =>
+                  openExternal(
+                    settings.supportWhatsapp
+                      ? waLink(settings.supportWhatsapp, t("trackDetail.cancelWaMsg", { no: order.orderNo }))
+                      : `tel:${settings.supportPhone}`,
+                  )
+                }
+                className="mt-2 inline-flex min-h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground"
+              >
+                <Phone className="h-4 w-4 text-secondary" aria-hidden />
+                {t("support.title")}
+              </button>
+            </div>
+          )}
           {invoiceId && (
             <button
               type="button"
@@ -290,7 +353,7 @@ function OrderDetail() {
               {t("invoice.view")}
             </button>
           )}
-          {!isCancelled && order.lines.length > 0 && (
+          {order.lines.length > 0 && (
             <button
               type="button"
               onClick={() => void reorder()}

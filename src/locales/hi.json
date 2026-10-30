@@ -76,8 +76,8 @@
   },
   "nav": {
     "home": "होम",
-    "order": "ऑर्डर",
-    "track": "ट्रैक",
+    "order": "खरीदें",
+    "track": "ऑर्डर",
     "account": "अकाउंट",
     "inbox": "इनबॉक्स"
   },
@@ -112,7 +112,7 @@
   "catalog": {
     "priceOnRequest": "कीमत पूछें",
     "save": "{{amount}} बचाएँ",
-    "depositLine": "+ {{amount}} जार डिपॉज़िट (वापसी योग्य)",
+    "depositLine": "+ {{amount}} डिपॉज़िट",
     "yourFavourites": "आपके पसंदीदा",
     "addFavourite": "पसंदीदा में जोड़ें",
     "removeFavourite": "पसंदीदा से हटाएँ",
@@ -129,7 +129,8 @@
     "sortPriceDesc": "कीमत ज़्यादा–कम",
     "emptyTitle": "अभी कोई उत्पाद नहीं",
     "emptyBody": "Sunrich कैटलॉग तैयार हो रहा है। कृपया थोड़ी देर बाद देखें।",
-    "askUs": "सनरिच टीम से पूछें"
+    "askUs": "सनरिच टीम से पूछें",
+    "sortArranged": "सनरिच क्रम"
   },
   "product": {
     "quantity": "मात्रा",
@@ -173,7 +174,7 @@
     "proceed": "आगे बढ़ें"
   },
   "order": {
-    "title": "ऑर्डर",
+    "title": "खरीदें",
     "comingSoon": "ऑर्डर करने की सुविधा जल्द आ रही है।",
     "metaTitle": "सनरिच — ऑर्डर",
     "metaDescription": "सनरिच पानी का ऑर्डर दर्ज करें।",
@@ -193,7 +194,11 @@
     "moreItems": "+{{count}} और",
     "emptyTitle": "अभी कोई ऑर्डर नहीं",
     "emptyBody": "आपके ऑर्डर यहाँ दिखेंगे।",
-    "notFound": "यह ऑर्डर आपके खाते में नहीं है।"
+    "notFound": "यह ऑर्डर आपके खाते में नहीं है।",
+    "liveTitle": "चालू ऑर्डर",
+    "trackBtn": "ट्रैक करें",
+    "deliveredBy": "डिलीवरी: {{name}}",
+    "bySunrich": "सनरिच"
   },
   "account": {
     "title": "अकाउंट",
@@ -570,5 +575,9 @@
     "noUpi": "डिलीवरी टीम को नकद या UPI से भुगतान करें।",
     "fullyPaid": "पूरा भुगतान हो गया",
     "view": "इनवॉइस देखें"
+  },
+  "demo": {
+    "chip": "डेमो अकाउंट",
+    "checkoutBanner": "डेमो अकाउंट — ऑर्डर डिलीवर नहीं होंगे"
   }
 }

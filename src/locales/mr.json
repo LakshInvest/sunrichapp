@@ -76,8 +76,8 @@
   },
   "nav": {
     "home": "होम",
-    "order": "ऑर्डर",
-    "track": "ट्रॅक",
+    "order": "खरेदी",
+    "track": "ऑर्डर",
     "account": "खाते",
     "inbox": "इनबॉक्स"
   },
@@ -112,7 +112,7 @@
   "catalog": {
     "priceOnRequest": "किंमत विचारा",
     "save": "{{amount}} बचवा",
-    "depositLine": "+ {{amount}} जार डिपॉझिट (परत मिळणारे)",
+    "depositLine": "+ {{amount}} डिपॉझिट",
     "yourFavourites": "तुमचे आवडते",
     "addFavourite": "आवडत्यांत जोडा",
     "removeFavourite": "आवडत्यांतून काढा",
@@ -129,7 +129,8 @@
     "sortPriceDesc": "किंमत जास्त–कमी",
     "emptyTitle": "अजून उत्पादने नाहीत",
     "emptyBody": "Sunrich कॅटलॉग तयार होत आहे. कृपया थोड्या वेळाने पहा.",
-    "askUs": "सनरिच टीमला विचारा"
+    "askUs": "सनरिच टीमला विचारा",
+    "sortArranged": "सनरिच क्रम"
   },
   "product": {
     "quantity": "प्रमाण",
@@ -173,7 +174,7 @@
     "proceed": "पुढे चला"
   },
   "order": {
-    "title": "ऑर्डर",
+    "title": "खरेदी",
     "comingSoon": "ऑर्डर करण्याची सुविधा लवकरच येत आहे.",
     "metaTitle": "सनरिच — ऑर्डर",
     "metaDescription": "सनरिच पाण्याची ऑर्डर द्या.",
@@ -193,7 +194,11 @@
     "moreItems": "+{{count}} अधिक",
     "emptyTitle": "अजून ऑर्डर नाही",
     "emptyBody": "तुमचे ऑर्डर येथे दिसतील.",
-    "notFound": "हे ऑर्डर तुमच्या खात्यात नाही."
+    "notFound": "हे ऑर्डर तुमच्या खात्यात नाही.",
+    "liveTitle": "सुरू असलेली ऑर्डर",
+    "trackBtn": "ट्रॅक करा",
+    "deliveredBy": "डिलिव्हरी: {{name}}",
+    "bySunrich": "सनरिच"
   },
   "account": {
     "title": "खाते",
@@ -570,5 +575,9 @@
     "noUpi": "डिलिव्हरी टीमला रोख किंवा UPI ने पेमेंट करा.",
     "fullyPaid": "पूर्ण पेमेंट झाले",
     "view": "इनव्हॉइस पहा"
+  },
+  "demo": {
+    "chip": "डेमो खाते",
+    "checkoutBanner": "डेमो खाते — ऑर्डर डिलिव्हर होणार नाहीत"
   }
 }

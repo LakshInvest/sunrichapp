@@ -1,14 +1,15 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { Home, Inbox, MapPin, ShoppingCart, UserRound, type LucideIcon } from "lucide-react";
-import { useDistributorNav } from "@/lib/orders";
+import { useEffect, useState } from "react";
+import { Home, Inbox, Package, ShoppingBag, UserRound, type LucideIcon } from "lucide-react";
+import { hasOrderUpdates, useDistributorNav } from "@/lib/orders";
 
 type Tab = { to: "/home" | "/order" | "/track" | "/account" | "/inbox"; key: string; icon: LucideIcon };
 
 const TABS: Tab[] = [
   { to: "/home", key: "nav.home", icon: Home },
-  { to: "/order", key: "nav.order", icon: ShoppingCart },
-  { to: "/track", key: "nav.track", icon: MapPin },
+  { to: "/order", key: "nav.order", icon: ShoppingBag },
+  { to: "/track", key: "nav.track", icon: Package },
   { to: "/inbox", key: "nav.inbox", icon: Inbox },
   { to: "/account", key: "nav.account", icon: UserRound },
 ];
@@ -17,6 +18,18 @@ export function BottomNav() {
   const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { isDistributor, newCount } = useDistributorNav();
+  const [ordersChanged, setOrdersChanged] = useState(false);
+  useEffect(() => {
+    if (pathname.startsWith("/track")) {
+      setOrdersChanged(false);
+      return;
+    }
+    let active = true;
+    void hasOrderUpdates().then((v) => active && setOrdersChanged(v));
+    return () => {
+      active = false;
+    };
+  }, [pathname]);
 
   const tabs: Tab[] = isDistributor ? TABS : TABS.filter((tab) => tab.to !== "/inbox");
 
@@ -45,6 +58,9 @@ export function BottomNav() {
                   className={`transition-transform ${active ? "h-7 w-7" : "h-6 w-6"}`}
                   strokeWidth={active ? 2.4 : 1.8}
                 />
+                {to === "/track" && ordersChanged && (
+                  <span aria-hidden className="absolute -right-1 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-card bg-destructive" />
+                )}
                 {to === "/inbox" && newCount > 0 && (
                   <span
                     aria-hidden

@@ -133,7 +133,41 @@ function mapProduct(r: RawProduct): CatalogProduct {
   };
 }
 
-export async function fetchCatalogue(): Promise<CatalogData> {
+/** Cached copy younger than this is served without a network round-trip. */
+export const CATALOGUE_FRESH_MS = 5 * 60_000;
+let inflight: Promise<CatalogData> | null = null;
+
+/**
+ * Stale-while-revalidate: a cache under 5 min old is returned as-is; pass
+ * `{ force: true }` (pull-to-refresh, retry) to always hit the network.
+ */
+export async function fetchCatalogue(opts: { force?: boolean } = {}): Promise<CatalogData> {
+  if (!opts.force) {
+    const cached = readCatalogueCache();
+    if (cached && Date.now() - cached.fetchedAt < CATALOGUE_FRESH_MS) return cached;
+  }
+  inflight ??= loadCatalogue().finally(() => {
+    inflight = null;
+  });
+  return inflight;
+}
+
+/**
+ * Command Center order: category sort_order, then product sort_order.
+ * Categories without any in-app product are dropped.
+ */
+export function arrangeCatalogue<T extends { categories: CatalogCategory[]; products: CatalogProduct[] }>(d: T): T {
+  const cats = [...d.categories].sort((a, b) => a.sortOrder - b.sortOrder);
+  const rank = new Map(cats.map((c, i) => [c.code, i]));
+  const products = [...d.products].sort(
+    (a, b) =>
+      (rank.get(a.categoryCode ?? "") ?? 9999) - (rank.get(b.categoryCode ?? "") ?? 9999) || a.sortOrder - b.sortOrder,
+  );
+  const used = new Set(products.map((p) => p.categoryCode));
+  return { ...d, categories: cats.filter((c) => used.has(c.code)), products };
+}
+
+async function loadCatalogue(): Promise<CatalogData> {
   const now = Date.now();
   const [
     { data: catalogue, error: catErr },
@@ -217,7 +251,7 @@ export async function fetchCatalogue(): Promise<CatalogData> {
       }
     : null;
 
-  const data: CatalogData = {
+  const data: CatalogData = arrangeCatalogue({
     fetchedAt: now,
     sections: (sectionRows ?? []).map((s: { key: string }) => s.key),
     hero,
@@ -231,7 +265,7 @@ export async function fetchCatalogue(): Promise<CatalogData> {
     })),
     banners,
     products: (catalogue ?? []).map((p: RawProduct) => mapProduct(p)),
-  };
+  });
   writeCatalogueCache(data);
   return data;
 }

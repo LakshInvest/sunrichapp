@@ -1,7 +1,8 @@
 import { serverMessage } from "@/lib/form-errors";
+import { useIsDemo } from "@/hooks/use-demo";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
+import { Suspense, lazy, useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
@@ -16,7 +17,6 @@ import {
   LogOut,
   MapPin,
   MessagesSquare,
-  Package,
   ShieldCheck,
   Trash2,
   Wallet,
@@ -25,7 +25,6 @@ import {
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
-import { PhotoCrop } from "@/components/PhotoCrop";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { clearMyPhoto } from "@/lib/profile.functions";
 import { AddressSheet } from "@/components/AddressSheet";
@@ -70,6 +69,9 @@ function avatarStoragePath(url: string | null | undefined, userId: string): stri
   const p = m?.[1] ? decodeURIComponent(m[1]) : null;
   return p && p.startsWith(`${userId}/`) ? p : null;
 }
+
+// The cropper library only loads when a photo is picked.
+const PhotoCrop = lazy(() => import("@/components/PhotoCrop").then((m) => ({ default: m.PhotoCrop })));
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({
@@ -131,6 +133,7 @@ function Account() {
   const [profile, setProfile] = useState<{ name: string; mobile: string; photoUrl: string | null } | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [customer, setCustomer] = useState<RegistrationDto | null>(null);
+  const isDemo = useIsDemo();
   const [openCount, setOpenCount] = useState(0);
   const [addressOpen, setAddressOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
@@ -340,6 +343,11 @@ function Account() {
                   {typeLabel}
                 </span>
               )}
+              {isDemo && (
+                <span className="ml-1.5 mt-1.5 inline-block rounded-full bg-accent px-2.5 py-0.5 text-xs font-semibold text-accent-foreground">
+                  {t("demo.chip")}
+                </span>
+              )}
             </div>
             <button
               type="button"
@@ -369,8 +377,6 @@ function Account() {
 
       {/* Menu groups */}
       <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">
-        <MenuItem icon={Package} label={t("account.myOrders")} onClick={() => navigate({ to: "/track" })} />
-        <Separator />
         <MenuItem icon={Wallet} label={t("account.payments")} onClick={() => navigate({ to: "/payments" })} />
       </section>
 
@@ -486,12 +492,14 @@ function Account() {
       </SheetDrawer>
 
       {cropSrc && (
-        <PhotoCrop
-          src={cropSrc}
-          busy={uploading}
-          onCancel={() => setCropSrc(null)}
-          onSave={(b) => void onCropSave(b)}
-        />
+        <Suspense fallback={null}>
+          <PhotoCrop
+            src={cropSrc}
+            busy={uploading}
+            onCancel={() => setCropSrc(null)}
+            onSave={(b) => void onCropSave(b)}
+          />
+        </Suspense>
       )}
 
       <SheetDrawer open={aboutOpen} onOpenChange={setAboutOpen}>

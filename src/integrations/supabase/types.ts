@@ -402,6 +402,50 @@ export type Database = {
         }
         Relationships: []
       }
+      company_targets: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          metric: string
+          period_month: string
+          scope_id: string | null
+          scope_type: string
+          target: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          metric: string
+          period_month: string
+          scope_id?: string | null
+          scope_type?: string
+          target: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          metric?: string
+          period_month?: string
+          scope_id?: string | null
+          scope_type?: string
+          target?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_targets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       container_movements: {
         Row: {
           company_id: string
@@ -1046,6 +1090,7 @@ export type Database = {
           email: string | null
           gstin: string | null
           id: string
+          is_demo: boolean
           landmark: string | null
           latitude: number | null
           location_accuracy_m: number | null
@@ -1083,6 +1128,7 @@ export type Database = {
           email?: string | null
           gstin?: string | null
           id?: string
+          is_demo?: boolean
           landmark?: string | null
           latitude?: number | null
           location_accuracy_m?: number | null
@@ -1120,6 +1166,7 @@ export type Database = {
           email?: string | null
           gstin?: string | null
           id?: string
+          is_demo?: boolean
           landmark?: string | null
           latitude?: number | null
           location_accuracy_m?: number | null
@@ -1170,6 +1217,35 @@ export type Database = {
             columns: ["route_id"]
             isOneToOne: false
             referencedRelation: "geo_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dashboard_role_defaults: {
+        Row: {
+          dashboard: Json
+          role_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          dashboard: Json
+          role_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          dashboard?: Json
+          role_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dashboard_role_defaults_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: true
+            referencedRelation: "roles"
             referencedColumns: ["id"]
           },
         ]
@@ -1606,6 +1682,14 @@ export type Database = {
           pan: string | null
           phone: string | null
           pincode: string | null
+          print_copies: string[]
+          print_footer_note: string | null
+          print_paper: string
+          print_show_bank: boolean
+          print_show_hsn_summary: boolean
+          print_show_logo: boolean
+          print_show_signature: boolean
+          print_show_upi_qr: boolean
           short_name: string | null
           signatory_name: string | null
           signature_url: string | null
@@ -1636,6 +1720,14 @@ export type Database = {
           pan?: string | null
           phone?: string | null
           pincode?: string | null
+          print_copies?: string[]
+          print_footer_note?: string | null
+          print_paper?: string
+          print_show_bank?: boolean
+          print_show_hsn_summary?: boolean
+          print_show_logo?: boolean
+          print_show_signature?: boolean
+          print_show_upi_qr?: boolean
           short_name?: string | null
           signatory_name?: string | null
           signature_url?: string | null
@@ -1666,6 +1758,14 @@ export type Database = {
           pan?: string | null
           phone?: string | null
           pincode?: string | null
+          print_copies?: string[]
+          print_footer_note?: string | null
+          print_paper?: string
+          print_show_bank?: boolean
+          print_show_hsn_summary?: boolean
+          print_show_logo?: boolean
+          print_show_signature?: boolean
+          print_show_upi_qr?: boolean
           short_name?: string | null
           signatory_name?: string | null
           signature_url?: string | null
@@ -4140,6 +4240,35 @@ export type Database = {
         }
         Relationships: []
       }
+      user_preferences: {
+        Row: {
+          dashboard: Json | null
+          sidebar: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          dashboard?: Json | null
+          sidebar?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          dashboard?: Json | null
+          sidebar?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           company_id: string
@@ -4151,6 +4280,7 @@ export type Database = {
           full_name: string
           id: string
           is_active: boolean
+          is_demo: boolean
           is_super_admin: boolean
           last_login_at: string | null
           mobile: string | null
@@ -4170,6 +4300,7 @@ export type Database = {
           full_name: string
           id: string
           is_active?: boolean
+          is_demo?: boolean
           is_super_admin?: boolean
           last_login_at?: string | null
           mobile?: string | null
@@ -4189,6 +4320,7 @@ export type Database = {
           full_name?: string
           id?: string
           is_active?: boolean
+          is_demo?: boolean
           is_super_admin?: boolean
           last_login_at?: string | null
           mobile?: string | null
@@ -4798,6 +4930,7 @@ export type Database = {
         Args: { p_action: string; p_module: string }
         Returns: boolean
       }
+      is_demo_mobile: { Args: { p_mobile: string }; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       job_auto_block_overdue: { Args: never; Returns: number }
@@ -4858,6 +4991,7 @@ export type Database = {
       my_company_id: { Args: never; Returns: string }
       my_customer_can_edit: { Args: never; Returns: boolean }
       my_customer_id: { Args: never; Returns: string }
+      my_dashboard: { Args: never; Returns: Json }
       my_delivery_settings: {
         Args: never
         Returns: {
@@ -5104,6 +5238,7 @@ export type Database = {
         Args: { p_minutes?: number }
         Returns: number
       }
+      reset_my_dashboard: { Args: never; Returns: undefined }
       resolve_trip_alert: {
         Args: { p_alert_id: string; p_resolution: string }
         Returns: undefined
@@ -5113,6 +5248,10 @@ export type Database = {
         Returns: undefined
       }
       revoke_user_devices: { Args: { p_user_id: string }; Returns: number }
+      save_my_preferences: {
+        Args: { p_dashboard?: Json; p_sidebar?: Json }
+        Returns: undefined
+      }
       scope_ok: { Args: { p_id: string; p_type: string }; Returns: boolean }
       set_cheque_status: {
         Args: { p_note?: string; p_receipt_id: string; p_status: string }

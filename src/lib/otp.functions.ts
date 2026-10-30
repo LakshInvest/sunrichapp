@@ -5,7 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // Error codes are translated in the browser (auth.errors.*).
 export type OtpResult =
-  | { ok: true; tokenHash?: string; trusted?: boolean }
+  | { ok: true; tokenHash?: string; trusted?: boolean; use_pin?: boolean }
   | { ok: false; code: string; seconds?: number; left?: number; message?: string };
 
 // Statuses come from the check_pin RPC; translated in the browser (auth.pin.*).
@@ -75,6 +75,11 @@ export const sendOtp = createServerFn({ method: "POST" })
       if (!profile.is_active) return { ok: false, code: "blocked" };
       if (profile.user_type === "staff") return { ok: false, code: "staffApp" };
     }
+
+    // Store reviewer demo numbers: no WhatsApp, open the PIN screen instead.
+    const { data: isDemo, error: demoErr } = await supabaseAdmin.rpc("is_demo_mobile", { p_mobile: mobile });
+    if (demoErr) console.error("is_demo_mobile failed", demoErr.message);
+    if (isDemo === true) return { ok: true, use_pin: true };
 
     const hourAgo = new Date(Date.now() - 3600_000).toISOString();
     const { data: recent } = await supabaseAdmin

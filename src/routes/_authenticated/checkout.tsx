@@ -3,7 +3,7 @@ import { scrollToFirstError } from "@/lib/form-errors";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Banknote, CalendarDays, ChevronDown, Loader2, MapPin, Wallet } from "lucide-react";
+import { ArrowLeft, CalendarDays, ChevronDown, Loader2, MapPin, Wallet } from "lucide-react";
 import { defaultPayMethod, setOrderPaymentMethod, PAY_METHODS, type PayMethod } from "@/lib/payments";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -304,7 +304,6 @@ function Checkout() {
     }
   };
 
-  const onCredit = quote != null && quote.credit_limit > 0;
   const creditAllowed = quote != null && quote.credit_limit > 0 && !quote.credit_blocked;
   useEffect(() => {
     if (!payTouched.current && quote) setPay(defaultPayMethod(quote));

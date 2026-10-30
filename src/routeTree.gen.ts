@@ -32,6 +32,7 @@ import { Route as AuthenticatedQueriesRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedRegistrationRouteImport } from './routes/_authenticated/registration'
 import { Route as AuthenticatedSupportRouteImport } from './routes/_authenticated/support'
 import { Route as AuthenticatedTrackRouteImport } from './routes/_authenticated/track'
+import { Route as OrderIdRouteImport } from './routes/order.$id'
 import { Route as AuthenticatedInvoiceIdRouteImport } from './routes/_authenticated/invoice.$id'
 import { Route as AuthenticatedProductIdRouteImport } from './routes/_authenticated/product.$id'
 import { Route as AuthenticatedQueriesIndexRouteImport } from './routes/_authenticated/queries.index'
@@ -157,6 +158,11 @@ const AuthenticatedTrackRoute = AuthenticatedTrackRouteImport.update({
   path: '/track',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const OrderIdRoute = OrderIdRouteImport.update({
+  id: '/order/$id',
+  path: '/order/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedInvoiceIdRoute = AuthenticatedInvoiceIdRouteImport.update({
   id: '/invoice/$id',
   path: '/invoice/$id',
@@ -217,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/registration': typeof AuthenticatedRegistrationRoute
   '/support': typeof AuthenticatedSupportRoute
   '/track': typeof AuthenticatedTrackRouteWithChildren
+  '/order/$id': typeof OrderIdRoute
   '/invoice/$id': typeof AuthenticatedInvoiceIdRoute
   '/product/$id': typeof AuthenticatedProductIdRoute
   '/queries/$id': typeof AuthenticatedQueriesIdRoute
@@ -246,6 +253,7 @@ export interface FileRoutesByTo {
   '/payments': typeof AuthenticatedPaymentsRoute
   '/registration': typeof AuthenticatedRegistrationRoute
   '/support': typeof AuthenticatedSupportRoute
+  '/order/$id': typeof OrderIdRoute
   '/invoice/$id': typeof AuthenticatedInvoiceIdRoute
   '/product/$id': typeof AuthenticatedProductIdRoute
   '/queries/$id': typeof AuthenticatedQueriesIdRoute
@@ -279,6 +287,7 @@ export interface FileRoutesById {
   '/_authenticated/registration': typeof AuthenticatedRegistrationRoute
   '/_authenticated/support': typeof AuthenticatedSupportRoute
   '/_authenticated/track': typeof AuthenticatedTrackRouteWithChildren
+  '/order/$id': typeof OrderIdRoute
   '/_authenticated/invoice/$id': typeof AuthenticatedInvoiceIdRoute
   '/_authenticated/product/$id': typeof AuthenticatedProductIdRoute
   '/_authenticated/queries/$id': typeof AuthenticatedQueriesIdRoute
@@ -312,6 +321,7 @@ export interface FileRouteTypes {
     | '/registration'
     | '/support'
     | '/track'
+    | '/order/$id'
     | '/invoice/$id'
     | '/product/$id'
     | '/queries/$id'
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
     | '/payments'
     | '/registration'
     | '/support'
+    | '/order/$id'
     | '/invoice/$id'
     | '/product/$id'
     | '/queries/$id'
@@ -373,6 +384,7 @@ export interface FileRouteTypes {
     | '/_authenticated/registration'
     | '/_authenticated/support'
     | '/_authenticated/track'
+    | '/order/$id'
     | '/_authenticated/invoice/$id'
     | '/_authenticated/product/$id'
     | '/_authenticated/queries/$id'
@@ -389,6 +401,7 @@ export interface RootRouteChildren {
   DeleteAccountRoute: typeof DeleteAccountRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
+  OrderIdRoute: typeof OrderIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -554,6 +567,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTrackRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/order/$id': {
+      id: '/order/$id'
+      path: '/order/$id'
+      fullPath: '/order/$id'
+      preLoaderRoute: typeof OrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/invoice/$id': {
       id: '/_authenticated/invoice/$id'
       path: '/invoice/$id'
@@ -688,6 +708,7 @@ const rootRouteChildren: RootRouteChildren = {
   DeleteAccountRoute: DeleteAccountRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
+  OrderIdRoute: OrderIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

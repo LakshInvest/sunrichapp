@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
-import { KeyRound, Loader2, MapPin, PackageCheck, Ticket } from "lucide-react";
+import { BadgeCheck, KeyRound, Loader2, MapPin, PackageCheck, Ticket } from "lucide-react";
 import { fetchAppInfo } from "@/lib/app-info";
 import { lineIssues, type DeliveryProof } from "@/lib/delivery";
 import { dateLabel } from "@/lib/order-format";
@@ -77,6 +77,11 @@ export function ProofOfDelivery({ proof }: { proof: DeliveryProof }) {
   return (
     <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
       <p className="text-sm font-bold">{t("pod.title")}</p>
+      {proof.otpVerified && (
+        <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-secondary/15 px-2.5 py-1 text-[11px] font-bold text-primary">
+          <BadgeCheck className="h-3.5 w-3.5" aria-hidden /> {t("pod.otpVerified")}
+        </p>
+      )}
       <dl className="mt-2 space-y-1 text-sm">
         {proof.deliveredAt && (
           <div className="flex justify-between gap-3">

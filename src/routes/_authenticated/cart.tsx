@@ -204,7 +204,9 @@ function Cart() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-bold text-foreground">{loc(product.name, lang)}</p>
-                    <p className="text-xs text-muted-foreground">{loc(product.packLabel, lang)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {[loc(product.packLabel, lang), t("common.packs", { count: qty })].filter(Boolean).join(" · ")}
+                    </p>
                     {changed && (
                       <p className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-accent-foreground">
                         <CircleAlert className="h-3 w-3" aria-hidden />

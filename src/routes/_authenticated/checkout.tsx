@@ -7,7 +7,6 @@ import { ArrowLeft, Banknote, CalendarDays, ChevronDown, Loader2, MapPin, Wallet
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SmartImage } from "@/components/SmartImage";
-import { fallbackImageFor } from "@/components/catalog/image-fallbacks";
 import { LocationPicker } from "@/components/LocationPicker";
 import { DEFAULT_LOCATION, type LocationValue } from "@/components/locationShared";
 import { useLang } from "@/hooks/use-lang";
@@ -332,7 +331,6 @@ function Checkout() {
                         <SmartImage
                           src={product.imageUrl ?? product.images[0] ?? null}
                           alt={loc(product.name, lang)}
-                          fallbackSrc={fallbackImageFor(product)}
                           className="h-12 w-12 object-cover"
                           iconClassName="h-5 w-5 text-secondary/70"
                         />

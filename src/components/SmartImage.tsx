@@ -21,6 +21,7 @@ export function SmartImage({
   eager?: boolean | undefined;
 }) {
   const [failed, setFailed] = useState(false);
+  const [plain, setPlain] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   if (!src || failed) {
@@ -42,11 +43,11 @@ export function SmartImage({
 
   return (
     <img
-      src={sizedUrl(src, width)}
+      src={plain ? src : sizedUrl(src, width)}
       alt={alt}
       loading={eager ? "eager" : "lazy"}
       decoding="async"
-      onError={() => setFailed(true)}
+      onError={() => (plain || sizedUrl(src, width) === src ? setFailed(true) : setPlain(true))}
       onLoad={() => setLoaded(true)}
       className={`${className ?? ""} transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
     />

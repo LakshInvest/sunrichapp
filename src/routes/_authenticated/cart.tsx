@@ -10,7 +10,6 @@ import { SmartImage } from "@/components/SmartImage";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ErrorState, GridSkeleton } from "@/components/catalog/states";
-import { fallbackImageFor } from "@/components/catalog/image-fallbacks";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
@@ -195,7 +194,6 @@ function Cart() {
                     <SmartImage
                       src={product.imageUrl ?? product.images[0] ?? null}
                       alt={loc(product.name, lang)}
-                      fallbackSrc={fallbackImageFor(product)}
                       className="h-16 w-16 object-cover"
                       iconClassName="h-6 w-6 text-secondary/70"
                     />

@@ -34,7 +34,10 @@ export function LocationPicker({
     runLocate();
   };
   useEffect(() => {
-    if (autoLocate) locate();
+    if (!autoLocate) return;
+    // Wait for the parent sheet to finish opening before stacking the explanation sheet.
+    const id = setTimeout(locate, 450);
+    return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoLocate]);
 

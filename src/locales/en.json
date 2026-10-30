@@ -628,7 +628,9 @@
     "deleted": "Address deleted",
     "errDelete": "Couldn't delete the address.",
     "emptyTitle": "No saved addresses yet",
-    "emptyBody": "Add your shop, home or godown to choose it at checkout."
+    "emptyBody": "Add your shop, home or godown to choose it at checkout.",
+    "line1": "Address (house / shop no., street)",
+    "line2": "Area / colony (optional)"
   },
   "feedback": {
     "title": "How was your delivery?",

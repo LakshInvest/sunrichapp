@@ -8,10 +8,10 @@ export function QueryChip({ status, className }: { status: string; className?: s
   const key = queryChipKey(status);
   const styles =
     key === "open"
-      ? "bg-destructive/10 text-destructive"
+      ? "bg-secondary/15 text-secondary"
       : key === "answered"
-        ? "bg-secondary/15 text-secondary"
-        : "bg-muted text-muted-foreground";
+        ? "bg-muted text-muted-foreground"
+        : "bg-muted/60 text-muted-foreground";
   return (
     <span
       className={cn(
@@ -20,6 +20,7 @@ export function QueryChip({ status, className }: { status: string; className?: s
         className,
       )}
     >
+      {key === "open" ? <span aria-hidden className="mr-1 h-1.5 w-1.5 rounded-full bg-secondary" /> : null}
       {t(`queries.chip${key.charAt(0).toUpperCase()}${key.slice(1)}`)}
     </span>
   );

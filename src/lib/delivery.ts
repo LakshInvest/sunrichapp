@@ -41,10 +41,18 @@ export async function fetchDeliveryProof(orderId: string): Promise<DeliveryProof
       deliveredBy = p?.full_name ?? null;
     }
   }
+  // Signature/photo need server-side signing: POD files live in the staff-only
+  // operations bucket, so the browser cannot create its own signed URLs.
+  let podUrls: { photoUrl: string | null; signatureUrl: string | null } = { photoUrl: null, signatureUrl: null };
+  try {
+    podUrls = await getPodUrls({ data: { orderId } });
+  } catch {
+    podUrls = { photoUrl: await signed(s.photo_url), signatureUrl: await signed(s.signature_url) };
+  }
   return {
     deliveredAt: s.delivered_at,
-    photoUrl: await signed(s.photo_url),
-    signatureUrl: await signed(s.signature_url),
+    photoUrl: podUrls.photoUrl,
+    signatureUrl: podUrls.signatureUrl,
     otpVerified: s.otp_verified === true,
     deliveredBy,
     failReason: s.fail_reason,

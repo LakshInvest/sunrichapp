@@ -561,7 +561,8 @@
     "retry": "पुन्हा प्रयत्न करा",
     "loadError": "लोड झाले नाही. कृपया पुन्हा प्रयत्न करा.",
     "packs_one": "{{count}} पॅक",
-    "packs_other": "{{count}} पॅक"
+    "packs_other": "{{count}} पॅक",
+    "back": "मागे"
   },
   "invoice": {
     "metaTitle": "इनव्हॉइस — सनरिच",
@@ -585,7 +586,9 @@
     "scanToPay": "पेमेंटसाठी कोणत्याही UPI ॲपने स्कॅन करा",
     "noUpi": "डिलिव्हरी टीमला रोख किंवा UPI ने पेमेंट करा.",
     "fullyPaid": "पूर्ण पेमेंट झाले",
-    "view": "इनव्हॉइस पहा"
+    "view": "इनव्हॉइस पहा",
+    "downloadPdf": "PDF डाउनलोड",
+    "whatsapp": "WhatsApp"
   },
   "demo": {
     "chip": "डेमो खाते",
@@ -713,5 +716,154 @@
     "changed": "डिलिव्हरी पद्धत बदलली",
     "vehicleShown": "गाडी {{no}}",
     "creditHold": "सनरिचच्या मंजुरीची प्रतीक्षा"
+  },
+  "balance": {
+    "title": "थकबाकी आणि स्टेटमेंट",
+    "metaDescription": "तुमची थकबाकी, क्रेडिट आणि स्टेटमेंट.",
+    "outstanding": "थकबाकी",
+    "overdue": "{{amount}} — {{days}} दिवसांपासून देय",
+    "limit": "क्रेडिट मर्यादा",
+    "noCredit": "क्रेडिट नाही",
+    "available": "उपलब्ध",
+    "nextDue": "पुढील देय तारीख",
+    "nothingDue": "काही देय नाही",
+    "ledger": "खाते",
+    "period": "कालावधी",
+    "opening": "सुरुवातीची थकबाकी",
+    "from": "पासून",
+    "to": "पर्यंत",
+    "range": {
+      "thisMonth": "या महिन्यात",
+      "lastMonth": "मागील महिन्यात",
+      "thisYear": "या वर्षी",
+      "custom": "स्वतःची तारीख"
+    },
+    "entry": {
+      "opening": "सुरुवात",
+      "invoice": "बिल",
+      "payment": "पेमेंट",
+      "creditNote": "क्रेडिट नोट",
+      "debitNote": "डेबिट नोट"
+    },
+    "statement": "स्टेटमेंट डाउनलोड करा",
+    "statementBody": "PDF स्टेटमेंटसाठी तारखा निवडा.",
+    "download": "PDF डाउनलोड करा",
+    "shareWhatsapp": "WhatsApp वर पाठवा",
+    "shareText": "माझे Sunrich स्टेटमेंट",
+    "iHavePaid": "मी पैसे भरले",
+    "paidBody": "तुम्ही केलेल्या पेमेंटची माहिती द्या. आमची टीम तपासून थकबाकी अपडेट करेल.",
+    "amount": "रक्कम (₹)",
+    "modeLabel": "पैसे कसे भरले?",
+    "mode": {
+      "upi": "UPI",
+      "bank": "बँक ट्रान्सफर",
+      "cheque": "चेक",
+      "cash": "रोख"
+    },
+    "refLabel": {
+      "upi": "UPI रेफरन्स नंबर",
+      "bank": "UTR / रेफरन्स नंबर",
+      "cheque": "चेक नंबर",
+      "cash": "कोणी घेतले (नाव)"
+    },
+    "paidOn": "पेमेंटची तारीख",
+    "addScreenshot": "स्क्रीनशॉट जोडा (पर्यायी)",
+    "removeFile": "फाइल काढा",
+    "sendPaid": "पाठवा",
+    "paidSent": "पाठवले. आम्ही लवकरच पुष्टी करू.",
+    "reported": "पेमेंट कळवले",
+    "reportedTitle": "तुम्ही कळवलेली पेमेंट्स",
+    "errAmount": "रक्कम लिहा",
+    "errRef": "रेफरन्स लिहा",
+    "errDate": "तारीख निवडा"
+  },
+  "devices": {
+    "title": "लॉग-इन फोन",
+    "body": "ज्या फोनवर तुमचे खाते चालू आहे.",
+    "empty": "इतर फोन नाहीत.",
+    "thisPhone": "हा फोन",
+    "phone": "फोन",
+    "lastUsed": "शेवटचा वापर {{date}}",
+    "remove": "लॉग आउट",
+    "confirmTitle": "या फोनवरून लॉग आउट करायचे?",
+    "confirmBody": "त्या फोनवर पुन्हा OTP ने लॉग इन करावे लागेल.",
+    "cancel": "रद्द करा",
+    "removed": "फोन लॉग आउट झाला"
+  },
+  "gate": {
+    "maintenanceTitle": "आम्ही ॲप सुधारत आहोत",
+    "forceTitle": "कृपया ॲप अपडेट करा",
+    "forceBody": "ही आवृत्ती जुनी आहे. ऑर्डर चालू ठेवण्यासाठी अपडेट करा.",
+    "update": "अपडेट करा",
+    "openStore": "Play Store उघडा",
+    "updateAvailable": "नवीन आवृत्ती उपलब्ध आहे",
+    "dismiss": "नंतर"
+  },
+  "legal": {
+    "privacy": "गोपनीयता धोरण",
+    "terms": "वापराच्या अटी",
+    "contact": "संपर्क करा",
+    "notSet": "अजून ठरले नाही",
+    "englishOnly": "हे पान इंग्रजीत आहे.",
+    "askInApp": "ॲपमधून विनंती करा",
+    "deleteTitle": "तुमचे खाते हटवा",
+    "deleteIntro": "तुम्ही तुमचे Sunrich खाते आणि डेटा हटवण्याची विनंती करू शकता.",
+    "deleteStep1": "Sunrich ॲप उघडा आणि लॉग इन करा.",
+    "deleteStep2": "खाते वर जा.",
+    "deleteStep3": "“खाते हटवा” दाबा आणि पुष्टी करा.",
+    "deleteStep4": "आम्ही 30 दिवसांत पूर्ण करून WhatsApp वर कळवू.",
+    "deleteKept": "बिले आणि कर नोंदी कायद्यानुसार ठेवल्या जातात."
+  },
+  "notices": {
+    "title": "सूचना",
+    "metaDescription": "तुमच्या ऑर्डर, बिले आणि प्रश्नांचे अपडेट.",
+    "empty": "अजून सूचना नाहीत",
+    "emptyBody": "ऑर्डर अपडेट, बिले आणि उत्तरे इथे दिसतील.",
+    "unread": "नवीन",
+    "kind": {
+      "status": "ऑर्डर आता {{status}}",
+      "approved": "ऑर्डर मंजूर",
+      "credit_hold": "ऑर्डर क्रेडिट मंजुरीच्या प्रतीक्षेत",
+      "delivered": "ऑर्डर पोहोचली",
+      "dispatched": "ऑर्डर वाटेवर आहे",
+      "cancelled": "ऑर्डर {{status}}",
+      "invoice": "नवीन बिल तयार",
+      "reply": "Sunrich ने तुमच्या प्रश्नाला उत्तर दिले"
+    }
+  },
+  "push": {
+    "title": "ऑर्डर अपडेट हवे?",
+    "body": "ऑर्डर मंजूर, वाटेवर आणि पोहोचल्यावर आम्ही कळवू.",
+    "yes": "हो, कळवा",
+    "no": "आता नाही"
+  },
+  "pod": {
+    "otpTitle": "डिलिव्हरी कोड",
+    "otpHint": "हा कोड ड्रायव्हरला सांगा",
+    "deliveredTitle": "काय पोहोचले",
+    "deliveredOf": "{{ordered}} पैकी {{delivered}} पोहोचले",
+    "issue": {
+      "short": "{{count}} कमी",
+      "damaged": "{{count}} खराब",
+      "returned": "{{count}} परत"
+    },
+    "reason": "कारण: {{reason}}",
+    "empties": "रिकामे जार घेतले: {{count}}",
+    "title": "डिलिव्हरीचा पुरावा",
+    "deliveredAt": "डिलिव्हरीची वेळ",
+    "deliveredBy": "पोहोचवणारे",
+    "photo": "डिलिव्हरी फोटो",
+    "signature": "सही"
+  },
+  "pickupPass": {
+    "title": "पिकअप पास",
+    "qrLabel": "ऑर्डर {{no}} चा QR कोड",
+    "showAtGate": "गेटवर हे दाखवा",
+    "date": "पिकअप तारीख",
+    "plant": "इथून घ्या",
+    "openMap": "नकाशात उघडा",
+    "vehicle": "गाडी नंबर",
+    "save": "सेव्ह करा",
+    "saved": "गाडी नंबर सेव्ह झाला"
   }
 }

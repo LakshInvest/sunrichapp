@@ -561,7 +561,8 @@
     "retry": "Retry",
     "loadError": "Couldn't load. Please try again.",
     "packs_one": "{{count}} pack",
-    "packs_other": "{{count}} packs"
+    "packs_other": "{{count}} packs",
+    "back": "Back"
   },
   "invoice": {
     "metaTitle": "Invoice — Sunrich",
@@ -585,7 +586,9 @@
     "scanToPay": "Scan with any UPI app to pay",
     "noUpi": "Pay by cash or UPI to our delivery team.",
     "fullyPaid": "Fully paid",
-    "view": "View invoice"
+    "view": "View invoice",
+    "downloadPdf": "Download PDF",
+    "whatsapp": "WhatsApp"
   },
   "demo": {
     "chip": "Demo account",
@@ -713,5 +716,154 @@
     "changed": "Delivery mode updated",
     "vehicleShown": "Vehicle {{no}}",
     "creditHold": "Waiting for approval from Sunrich"
+  },
+  "balance": {
+    "title": "Balance & statement",
+    "metaDescription": "Your outstanding balance, credit and statement.",
+    "outstanding": "Outstanding",
+    "overdue": "{{amount}} overdue by {{days}} days",
+    "limit": "Credit limit",
+    "noCredit": "No credit",
+    "available": "Available",
+    "nextDue": "Next due",
+    "nothingDue": "Nothing due",
+    "ledger": "Ledger",
+    "period": "Period",
+    "opening": "Opening balance",
+    "from": "From",
+    "to": "To",
+    "range": {
+      "thisMonth": "This month",
+      "lastMonth": "Last month",
+      "thisYear": "This year",
+      "custom": "Custom"
+    },
+    "entry": {
+      "opening": "Opening",
+      "invoice": "Invoice",
+      "payment": "Payment",
+      "creditNote": "Credit note",
+      "debitNote": "Debit note"
+    },
+    "statement": "Download statement",
+    "statementBody": "Pick dates to make a PDF statement.",
+    "download": "Download PDF",
+    "shareWhatsapp": "Share on WhatsApp",
+    "shareText": "My Sunrich statement",
+    "iHavePaid": "I have paid",
+    "paidBody": "Tell us about a payment you made. Our team will check and update your balance.",
+    "amount": "Amount (₹)",
+    "modeLabel": "How did you pay?",
+    "mode": {
+      "upi": "UPI",
+      "bank": "Bank transfer",
+      "cheque": "Cheque",
+      "cash": "Cash"
+    },
+    "refLabel": {
+      "upi": "UPI reference no.",
+      "bank": "UTR / reference no.",
+      "cheque": "Cheque no.",
+      "cash": "Received by (name)"
+    },
+    "paidOn": "Paid on",
+    "addScreenshot": "Add screenshot (optional)",
+    "removeFile": "Remove file",
+    "sendPaid": "Send",
+    "paidSent": "Sent. We will confirm soon.",
+    "reported": "Payment reported",
+    "reportedTitle": "Payments you reported",
+    "errAmount": "Enter the amount",
+    "errRef": "Enter the reference",
+    "errDate": "Pick the date"
+  },
+  "devices": {
+    "title": "Logged-in phones",
+    "body": "Phones where your account is signed in.",
+    "empty": "No other phones.",
+    "thisPhone": "This phone",
+    "phone": "Phone",
+    "lastUsed": "Last used {{date}}",
+    "remove": "Log out",
+    "confirmTitle": "Log out this phone?",
+    "confirmBody": "That phone will need OTP to sign in again.",
+    "cancel": "Cancel",
+    "removed": "Phone logged out"
+  },
+  "gate": {
+    "maintenanceTitle": "We are improving the app",
+    "forceTitle": "Please update the app",
+    "forceBody": "This version is too old. Update to keep ordering.",
+    "update": "Update",
+    "openStore": "Open Play Store",
+    "updateAvailable": "A new version is available",
+    "dismiss": "Later"
+  },
+  "legal": {
+    "privacy": "Privacy policy",
+    "terms": "Terms of use",
+    "contact": "Contact us",
+    "notSet": "Not set yet",
+    "englishOnly": "This page is in English.",
+    "askInApp": "Request from the app",
+    "deleteTitle": "Delete your account",
+    "deleteIntro": "You can ask us to delete your Sunrich account and data.",
+    "deleteStep1": "Open the Sunrich app and sign in.",
+    "deleteStep2": "Go to Account.",
+    "deleteStep3": "Tap “Delete account” and confirm.",
+    "deleteStep4": "We will finish within 30 days and tell you on WhatsApp.",
+    "deleteKept": "Bills and tax records are kept as long as the law requires."
+  },
+  "notices": {
+    "title": "Notifications",
+    "metaDescription": "Updates on your orders, bills and questions.",
+    "empty": "No notifications yet",
+    "emptyBody": "Order updates, bills and replies will show here.",
+    "unread": "New",
+    "kind": {
+      "status": "Order is now {{status}}",
+      "approved": "Order approved",
+      "credit_hold": "Order waiting for credit approval",
+      "delivered": "Order delivered",
+      "dispatched": "Order is on the way",
+      "cancelled": "Order {{status}}",
+      "invoice": "New bill ready",
+      "reply": "Sunrich replied to your question"
+    }
+  },
+  "push": {
+    "title": "Get order updates?",
+    "body": "We will tell you when your order is approved, on the way and delivered.",
+    "yes": "Yes, notify me",
+    "no": "Not now"
+  },
+  "pod": {
+    "otpTitle": "Delivery code",
+    "otpHint": "Tell this code to the driver",
+    "deliveredTitle": "What was delivered",
+    "deliveredOf": "{{delivered}} of {{ordered}} delivered",
+    "issue": {
+      "short": "{{count}} short",
+      "damaged": "{{count}} damaged",
+      "returned": "{{count}} returned"
+    },
+    "reason": "Reason: {{reason}}",
+    "empties": "Empty jars collected: {{count}}",
+    "title": "Proof of delivery",
+    "deliveredAt": "Delivered at",
+    "deliveredBy": "Delivered by",
+    "photo": "Delivery photo",
+    "signature": "Signature"
+  },
+  "pickupPass": {
+    "title": "Pickup pass",
+    "qrLabel": "QR code for order {{no}}",
+    "showAtGate": "Show this at the gate",
+    "date": "Pickup date",
+    "plant": "Pickup from",
+    "openMap": "Open in map",
+    "vehicle": "Vehicle number",
+    "save": "Save",
+    "saved": "Vehicle number saved"
   }
 }

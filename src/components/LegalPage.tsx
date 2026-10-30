@@ -4,7 +4,7 @@ import { useRouter } from "@tanstack/react-router";
 import ReactMarkdown from "react-markdown";
 import { ArrowLeft, Languages, Mail, Phone } from "lucide-react";
 import { fetchAppInfo, fillPlaceholders, type AppInfo } from "@/lib/app-info";
-import { setLanguage } from "@/lib/i18n";
+import { LANG_KEY, applyLang, type Lang } from "@/lib/i18n";
 import { ErrorState } from "@/components/catalog/states";
 
 const LANGS = [
@@ -51,7 +51,11 @@ export function LegalPage({
             <span className="sr-only">{t("account.language")}</span>
             <select
               value={i18n.language}
-              onChange={(e) => setLanguage(e.target.value)}
+              onChange={(e) => {
+                const l = e.target.value as Lang;
+                applyLang(l);
+                try { localStorage.setItem(LANG_KEY, l); } catch { /* ignore */ }
+              }}
               className="min-h-11 rounded-lg border border-border bg-card px-2"
             >
               {LANGS.map((l) => (

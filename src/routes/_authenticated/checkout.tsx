@@ -293,7 +293,7 @@ function Checkout() {
       } catch (e) {
         console.warn("set_order_payment_method failed", e);
       }
-      sessionStorage.setItem("sunrich.lastOrder", JSON.stringify({ parts, deliveryDate, slot: slotLabel, payMethod: pay }));
+      sessionStorage.setItem("sunrich.lastOrder", JSON.stringify({ parts, deliveryDate, slot: slotLabel, payMethod: pay, pickup }));
       clear();
       await navigate({ to: "/order-success" });
     } catch (e) {

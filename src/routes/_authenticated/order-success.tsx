@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { QRCodeSVG } from "qrcode.react";
-import { BellRing, Landmark, Smartphone } from "lucide-react";
+import { BellRing, Truck } from "lucide-react";
 import { SheetDrawer } from "@/components/SheetDrawer";
 import { acceptPush, declinePush, shouldOfferPush } from "@/lib/push";
-import { ArrowRight, Check } from "lucide-react";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
-import { PaymentProofSheet, PaymentStatusNote, CopyRow, type ProofTarget } from "@/components/PaymentProofSheet";
+import { PaymentProofSheet, PaymentStatusNote, type ProofTarget } from "@/components/PaymentProofSheet";
+import { PayCard, PayChip } from "@/components/PayCard";
+import { dayAndDate } from "@/lib/order-format";
+import { fetchMyOrders, type OrderDto } from "@/lib/orders";
 import { formatINR } from "@/lib/catalogue";
 import { useLang } from "@/hooks/use-lang";
-import { fetchMyPaymentProofs, type PayMethod, type PaymentProof } from "@/lib/payments";
+import { fetchMyPaymentProofs, fetchPaymentHold, paymentChip, releaseLine, successStatusKey, type PayMethod, type PaymentProof } from "@/lib/payments";
 import { getFirmPaymentInfo, type FirmPayInfo } from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/_authenticated/order-success")({
@@ -36,12 +37,6 @@ type Part = {
   fulfilled_by: string;
 };
 
-function statusWord(status: string, t: (k: string) => string): string {
-  if (status === "approved") return t("success.statusConfirmed");
-  if (status === "credit_hold") return t("success.statusUnderReview");
-  return t("status.placed");
-}
-
 function OrderSuccess() {
   const { t } = useTranslation();
   const { lang } = useLang();
@@ -52,8 +47,11 @@ function OrderSuccess() {
   const [payMethod, setPayMethod] = useState<PayMethod>("cash");
   const [deliveryDate, setDeliveryDate] = useState<string>("");
   const [slot, setSlot] = useState<string>("");
+  const [pickup, setPickup] = useState(false);
   const [info, setInfo] = useState<Record<string, FirmPayInfo>>({});
   const [proofs, setProofs] = useState<PaymentProof[]>([]);
+  const [live, setLive] = useState<Record<string, OrderDto>>({});
+  const [holds, setHolds] = useState<Record<string, boolean>>({});
   const [proofFor, setProofFor] = useState<ProofTarget | null>(null);
 
   const [pushOpen, setPushOpen] = useState(false);
@@ -74,16 +72,31 @@ function OrderSuccess() {
     try {
       const raw = sessionStorage.getItem("sunrich.lastOrder");
       if (raw) {
-        const parsed = JSON.parse(raw) as { parts: Part[]; deliveryDate: string; slot: string; payMethod?: PayMethod };
+        const parsed = JSON.parse(raw) as { parts: Part[]; deliveryDate: string; slot: string; payMethod?: PayMethod; pickup?: boolean };
         setParts(parsed.parts ?? []);
         setDeliveryDate(parsed.deliveryDate ?? "");
         setSlot(parsed.slot ?? "");
+        setPickup(!!parsed.pickup);
         if (parsed.payMethod) setPayMethod(parsed.payMethod);
       }
     } catch {
       /* show the calm empty state */
     }
   }, []);
+
+  // Live order rows (status, dispatch batch, delivery mode) and payment hold flags.
+  useEffect(() => {
+    if (parts.length === 0) return;
+    const ids = new Set(parts.map((p) => p.order_id));
+    fetchMyOrders()
+      .then((list) => setLive(Object.fromEntries(list.filter((o) => ids.has(o.id)).map((o) => [o.id, o]))))
+      .catch(() => undefined);
+    if (payMethod === "upi" || payMethod === "bank") {
+      void Promise.all(parts.map(async (p) => [p.order_id, await fetchPaymentHold(p.order_id)] as const)).then((r) =>
+        setHolds(Object.fromEntries(r)),
+      );
+    }
+  }, [parts.length, payMethod]);
 
   // Firm UPI / bank details for the orders just placed (each firm has its own).
   useEffect(() => {
@@ -96,93 +109,94 @@ function OrderSuccess() {
 
   useEffect(loadProofs, [parts.length]);
 
+  const first = parts[0] ? live[parts[0].order_id] : undefined;
+  const isPickup = first ? first.deliveryMode === "pickup" : pickup;
+  const rl = first ? releaseLine(first) : null;
+  const deliveryLine = rl && rl.key !== "dispatchingNow"
+    ? t(`dispatch.${rl.key}`, { time: rl.time, date: rl.date ? dayAndDate(rl.date, lang) : undefined })
+    : deliveryDate
+      ? `${dayAndDate(deliveryDate, lang)}${slot && !isPickup ? ` · ${slot}` : ""}`
+      : "";
+
   return (
     <main className={`mx-auto flex min-h-screen max-w-md flex-col bg-background px-5 pb-10 ${deva}`}>
       <OfflineBanner />
-      <div className="flex flex-1 flex-col items-center justify-center py-8 text-center">
-        {/* Soft check animation */}
-        <svg viewBox="0 0 96 96" className="h-24 w-24" role="img" aria-label={t("success.title")}>
-          <circle
-            className="animate-check-ring"
-            cx="48"
-            cy="48"
-            r="42"
-            fill="none"
-            stroke="#2EA3C7"
-            strokeWidth="5"
-            strokeLinecap="round"
-            strokeDasharray="264"
-            strokeDashoffset="264"
-          />
-          <path
-            className="animate-check-mark"
-            d="M32 50 L44 62 L66 38"
-            fill="none"
-            stroke="#0B2545"
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeDasharray="60"
-            strokeDashoffset="60"
-          />
+      <div className="flex flex-col items-center pt-10 text-center">
+        <svg viewBox="0 0 96 96" className="h-20 w-20 shrink-0 overflow-visible" role="img" aria-label={t("success.title")}>
+          <circle className="animate-check-ring" cx="48" cy="48" r="42" fill="none" stroke="var(--secondary)" strokeWidth="5" strokeLinecap="round" strokeDasharray="264" strokeDashoffset="264" />
+          <path className="animate-check-mark" d="M32 50 L44 62 L66 38" fill="none" stroke="var(--primary)" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="60" strokeDashoffset="60" />
         </svg>
-
-        <h1 className="mt-6 text-2xl font-bold text-primary">{t("success.title")}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{t("success.subtitle")}</p>
-
-        {deliveryDate && (
-          <p className="mt-4 rounded-xl bg-secondary/10 px-4 py-2 text-sm font-semibold text-primary">
-            {t("success.expected", { date: deliveryDate, slot })}
-          </p>
+        <h1 className="mt-4 text-2xl font-bold text-primary">{t("success.title")}</h1>
+        {parts.length > 0 && (
+          <p className="mt-1 text-sm font-semibold text-muted-foreground">{parts.map((p) => p.order_no).join(" · ")}</p>
         )}
-
-        <ul className="mt-6 w-full space-y-3">
-          {parts.map((p) => (
-            <li key={p.order_id} className="rounded-2xl border border-border bg-card p-4 text-left shadow-sm">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-bold text-foreground">{p.order_no}</p>
-                <span className="rounded-full bg-secondary/15 px-2.5 py-1 text-[11px] font-bold text-primary">
-                  {statusWord(p.status, t)}
-                </span>
-              </div>
-              <div className="mt-2 flex items-center justify-between gap-3 text-sm">
-                <span className="text-muted-foreground">
-                  {t("success.deliveredBy", {
-                    who: p.fulfilled_by === "distributor" ? t("success.byDistributor") : t("success.bySunrich"),
-                  })}
-                </span>
-                <span className="font-bold text-primary">{formatINR(p.grand_total)}</span>
-              </div>
-              <PayBlock
-                part={p}
-                method={payMethod}
-                info={info[p.order_id] ?? null}
-                proof={proofs.find((x) => x.orderId === p.order_id) ?? null}
-                onPay={() =>
-                  setProofFor({ orderId: p.order_id, orderNo: p.order_no, amount: p.grand_total, method: payMethod === "bank" ? "bank" : "upi" })
-                }
-              />
-            </li>
-          ))}
-        </ul>
       </div>
 
-      <div className="space-y-3">
+      <ul className="mt-6 w-full space-y-4">
+        {parts.map((p) => {
+          const proof = proofs.find((x) => x.orderId === p.order_id) ?? null;
+          const status = live[p.order_id]?.status ?? p.status;
+          const chip = paymentChip(payMethod, proof?.status ?? null);
+          const showCard = (payMethod === "upi" || payMethod === "bank") && (!proof || proof.status === "rejected");
+          return (
+            <li key={p.order_id} className="space-y-3">
+              <div className="rounded-2xl border border-border bg-card p-4 text-left shadow-sm">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-secondary/15 px-2.5 py-1 text-[11px] font-bold text-primary" data-testid="order-chip">
+                    {t(successStatusKey(status, payMethod, proof?.status ?? null))}
+                  </span>
+                  <PayChip k={chip.key} tone={chip.tone} />
+                  <span className="ml-auto text-base font-bold text-primary">{formatINR(p.grand_total)}</span>
+                </div>
+                {deliveryLine && (
+                  <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-foreground" data-testid="delivery-line">
+                    <Truck className="h-4 w-4 shrink-0 text-secondary" aria-hidden />
+                    {deliveryLine}
+                  </p>
+                )}
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {isPickup
+                    ? t("pay.pickupFromPlant")
+                    : p.fulfilled_by === "distributor"
+                      ? t("pay.deliveryByDistributor")
+                      : t("pay.deliveryBySunrich")}
+                </p>
+                {proof && proof.status !== "rejected" && <PaymentStatusNote proof={proof} />}
+                {proof?.status === "rejected" && <PaymentStatusNote proof={proof} />}
+                {payMethod === "cash" && <p className="mt-3 text-sm text-muted-foreground">{t("success.payCash")}</p>}
+                {payMethod === "cheque" && <p className="mt-3 text-sm text-muted-foreground">{t("success.payCheque")}</p>}
+              </div>
+              {showCard && (
+                <PayCard
+                  method={payMethod === "bank" ? "bank" : "upi"}
+                  info={info[p.order_id] ?? null}
+                  amount={info[p.order_id]?.grandTotal ?? p.grand_total}
+                  orderNo={p.order_no}
+                  hold={holds[p.order_id]}
+                  onPaid={() =>
+                    setProofFor({ orderId: p.order_id, orderNo: p.order_no, amount: p.grand_total, method: payMethod === "bank" ? "bank" : "upi" })
+                  }
+                />
+              )}
+            </li>
+          );
+        })}
+      </ul>
+
+      <div className="mt-auto space-y-3 pt-8">
         <button
           type="button"
           onClick={() => navigate({ to: "/track/$id", params: { id: parts[0]?.order_id ?? "" } })}
           disabled={parts.length === 0}
-          className="flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98] disabled:opacity-50"
+          className="flex min-h-[52px] w-full items-center justify-center rounded-xl bg-primary text-base font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98] disabled:opacity-50"
         >
-          {t("success.trackOrder")}
-          <ArrowRight className="h-5 w-5" aria-hidden />
+          {t("pay.viewOrder")}
         </button>
         <button
           type="button"
           onClick={() => navigate({ to: "/home" })}
-          className="flex min-h-14 w-full items-center justify-center gap-2 rounded-xl border border-border bg-card text-lg font-semibold text-foreground transition active:scale-[0.98]"
+          className="flex min-h-[52px] w-full items-center justify-center rounded-xl border border-border bg-card text-base font-semibold text-foreground transition active:scale-[0.98]"
         >
-          <Check className="h-5 w-5 text-secondary" aria-hidden />
           {t("success.continueShopping")}
         </button>
       </div>
@@ -213,126 +227,3 @@ function OrderSuccess() {
   );
 }
 
-/** The payment step under one placed order, per the method chosen at checkout. */
-function PayBlock({
-  part,
-  method,
-  info,
-  proof,
-  onPay,
-}: {
-  part: Part;
-  method: PayMethod;
-  info: FirmPayInfo | null;
-  proof: PaymentProof | null;
-  onPay: () => void;
-}) {
-  const { t } = useTranslation();
-  const { lang } = useLang();
-  if (proof?.status === "verified" || proof?.status === "pending") {
-    return <PaymentStatusNote proof={proof} />;
-  }
-  if (method === "credit") {
-    return <p className="mt-3 text-sm text-muted-foreground">{t("success.payCredit")}</p>;
-  }
-  if (method === "cash" || method === "cheque") {
-    return <p className="mt-3 rounded-xl bg-muted px-3 py-2.5 text-sm font-medium text-foreground">{t(`success.pay${method === "cash" ? "Cash" : "Cheque"}`)}</p>;
-  }
-  if (proof?.status === "rejected") {
-    return <PaymentStatusNote proof={proof} onSendAgain={onPay} />;
-  }
-  const amount = info?.grandTotal ?? part.grand_total;
-  const payee = info?.payeeName ?? "";
-  const upiId = info?.upiId ?? "";
-  const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payee)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(part.order_no)}`;
-  if (method === "upi") {
-    if (!info || (!info.qrUrl && !upiId)) {
-      return (
-        <>
-          <PaymentStatusNote proof={proof} />
-          <p className="mt-3 text-sm text-muted-foreground">{t("success.infoMissing")}</p>
-          <button
-            type="button"
-            onClick={onPay}
-            className="mt-2 flex min-h-12 w-full items-center justify-center rounded-xl border border-border bg-card text-sm font-semibold text-foreground transition active:scale-[0.98]"
-          >
-            {t("success.ivePaid")}
-          </button>
-        </>
-      );
-    }
-    return (
-      <div className="mt-3 rounded-xl border border-border bg-background p-3">
-        <div className="flex flex-col items-center text-center">
-          <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
-            <Smartphone className="h-4 w-4 text-secondary" aria-hidden /> {t("success.payUpiTitle")}
-          </p>
-          <div className="mt-2 rounded-lg bg-white p-2">
-            {info.qrUrl ? (
-              <img src={info.qrUrl} alt={t("success.payUpiTitle")} width={168} height={168} className="h-42 w-42 rounded" />
-            ) : (
-              <QRCodeSVG value={upiLink} size={160} level="M" aria-label={t("success.payUpiTitle")} />
-            )}
-          </div>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {info.firmName}
-            {upiId ? ` · ${upiId}` : ""}
-          </p>
-          <p className="mt-1 text-lg font-bold text-primary">{formatINR(amount)}</p>
-          <p className="text-xs text-muted-foreground">{t("success.orderNoLabel", { no: part.order_no })}</p>
-          <a
-            href={upiLink}
-            className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground transition active:scale-[0.98]"
-          >
-            <Smartphone className="h-4 w-4" aria-hidden /> {t("success.payWithApp")}
-          </a>
-          <button
-            type="button"
-            onClick={onPay}
-            className="mt-2 flex min-h-12 w-full items-center justify-center rounded-xl border border-border bg-card text-sm font-semibold text-foreground transition active:scale-[0.98]"
-          >
-            {t("success.ivePaid")}
-          </button>
-        </div>
-      </div>
-    );
-  }
-  // bank transfer
-  if (!info?.bank) {
-    return (
-      <>
-        <PaymentStatusNote proof={proof} />
-        <p className="mt-3 text-sm text-muted-foreground">{t("success.infoMissing")}</p>
-        <button
-          type="button"
-          onClick={onPay}
-          className="mt-2 flex min-h-12 w-full items-center justify-center rounded-xl border border-border bg-card text-sm font-semibold text-foreground transition active:scale-[0.98]"
-        >
-          {t("success.ivePaid")}
-        </button>
-      </>
-    );
-  }
-  return (
-    <div className="mt-3 rounded-xl border border-border bg-background p-3">
-      <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
-        <Landmark className="h-4 w-4 text-secondary" aria-hidden /> {t("success.bankTitle")}
-      </p>
-      <div className="mt-1">
-        <CopyRow label={t("success.bankName")} value={info.bank.bankName} />
-        <CopyRow label={t("success.accountNo")} value={info.bank.accountNumber} />
-        <CopyRow label={t("success.ifsc")} value={info.bank.ifsc} />
-        <CopyRow label={t("success.accountName")} value={info.bank.accountName} />
-      </div>
-      <p className="mt-2 text-sm font-bold text-primary">{formatINR(amount)}</p>
-      <p className="text-xs text-muted-foreground">{t("success.orderNoLabel", { no: part.order_no })}</p>
-      <button
-        type="button"
-        onClick={onPay}
-        className="mt-2 flex min-h-12 w-full items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground transition active:scale-[0.98]"
-      >
-        {t("success.ivePaid")}
-      </button>
-    </div>
-  );
-}

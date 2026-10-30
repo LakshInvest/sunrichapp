@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { Home, Inbox, Package, ShoppingBag, UserRound, type LucideIcon } from "lucide-react";
 import { hasOrderUpdates, useDistributorNav } from "@/lib/orders";
+import { supabase } from "@/integrations/supabase/client";
 
 type Tab = { to: "/home" | "/order" | "/track" | "/account" | "/inbox"; key: string; icon: LucideIcon };
 
@@ -31,6 +32,19 @@ export function BottomNav() {
     };
   }, [pathname]);
 
+  const [replied, setReplied] = useState(false);
+  useEffect(() => {
+    let active = true;
+    void supabase
+      .from("customer_queries")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "open")
+      .then(({ count }) => active && setReplied((count ?? 0) > 0));
+    return () => {
+      active = false;
+    };
+  }, [pathname]);
+
   const tabs: Tab[] = isDistributor ? TABS : TABS.filter((tab) => tab.to !== "/inbox");
 
   return (
@@ -43,6 +57,7 @@ export function BottomNav() {
               key={to}
               to={to}
               aria-current={active ? "page" : undefined}
+              aria-label={to === "/account" && replied ? `${t(key)} · ${t("queries.chipOpen")}` : undefined}
               className={`relative flex min-h-16 flex-1 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors ${
                 active ? "text-primary" : "text-muted-foreground"
               }`}
@@ -60,6 +75,9 @@ export function BottomNav() {
                 />
                 {to === "/track" && ordersChanged && (
                   <span aria-hidden className="absolute -right-1 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-card bg-destructive" />
+                )}
+                {to === "/account" && replied && (
+                  <span aria-hidden className="absolute -right-1 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-card bg-secondary" />
                 )}
                 {to === "/inbox" && newCount > 0 && (
                   <span

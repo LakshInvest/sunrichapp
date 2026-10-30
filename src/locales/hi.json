@@ -67,8 +67,12 @@
       "reenter": "PIN फिर से दर्ज करें",
       "digit": "PIN अंक {{n}}",
       "enterRow": "PIN दर्ज करें",
-      "confirmRow": "PIN की पुष्टि करें"
-    }
+      "confirmRow": "PIN की पुष्टि करें",
+      "deviceNotRecognised": "यह डिवाइस पहचाना नहीं गया — एक बार OTP से सत्यापित करें।",
+      "success": "फिर से स्वागत है!",
+      "checking": "PIN जाँचा जा रहा है…"
+    },
+    "otpSentToast": "OTP व्हाट्सऐप {{mobile}} पर भेजा गया"
   },
   "nav": {
     "home": "होम",
@@ -379,7 +383,9 @@
       "messagePlaceholder": "बताएँ कि आपको किस मदद चाहिए…",
       "attachHint": "फ़ोटो या PDF (वैकल्पिक)। फ़ाइलें खुले सवाल पर ही जुड़ सकती हैं।",
       "sendQuestion": "सवाल भेजें",
-      "sent": "सवाल भेजा गया — Sunrich टीम जल्द जवाब देगी।"
+      "sent": "सवाल भेजा गया — Sunrich टीम जल्द जवाब देगी।",
+      "errSubject": "कृपया विषय लिखें",
+      "errMessage": "कृपया अपना सवाल लिखें"
     }
   },
   "checkout": {
@@ -478,7 +484,35 @@
     "payOnDelivery": "आप डिलीवरी पर भुगतान करते हैं",
     "payOnDeliveryBody": "उधार खाता नहीं है — ऑर्डर आने पर नकद दें।",
     "deliveredTitle": "पहुँचे हुए ऑर्डर",
-    "comingSoon": "इनवॉइस और स्टेटमेंट जल्द आ रहे हैं।"
+    "comingSoon": "इनवॉइस और स्टेटमेंट जल्द आ रहे हैं।",
+    "tabs": {
+      "bills": "बिल",
+      "payments": "भुगतान",
+      "statement": "स्टेटमेंट"
+    },
+    "openBills": "बकाया बिल",
+    "paidBills": "भुगतान किए बिल",
+    "dueOn": "देय {{date}}",
+    "balance": "बकाया",
+    "noBillsTitle": "अभी कोई बिल नहीं",
+    "noBillsBody": "ऑर्डर डिलीवर होने के बाद बिल यहाँ दिखेंगे।",
+    "noReceiptsTitle": "अभी कोई भुगतान नहीं",
+    "noReceiptsBody": "आपके भुगतान यहाँ दिखेंगे।",
+    "mode": {
+      "cash": "नकद",
+      "upi": "UPI",
+      "cheque": "चेक",
+      "bank": "बैंक ट्रांसफ़र",
+      "neft": "NEFT",
+      "card": "कार्ड"
+    },
+    "prevMonth": "पिछला महीना",
+    "nextMonth": "अगला महीना",
+    "noEntriesTitle": "इस महीने कुछ नहीं",
+    "noEntriesBody": "इस महीने कोई बिल या भुगतान नहीं।",
+    "closing": "अंतिम शेष",
+    "debit": "बिल",
+    "credit": "भुगतान"
   },
   "inbox": {
     "title": "इनबॉक्स",
@@ -504,6 +538,37 @@
     "accepted": "ऑर्डर स्वीकार हुआ",
     "rejected": "यह ऑर्डर सनरिच देगा",
     "markedDelivered": "पहुँच गया चिह्नित",
-    "markedNotDelivered": "नहीं पहुँचा चिह्नित"
+    "markedNotDelivered": "नहीं पहुँचा चिह्नित",
+    "waiting": "{{n}} मिनट से इंतज़ार",
+    "waitingHours": "{{h}} घं {{m}} मिनट से इंतज़ार"
+  },
+  "common": {
+    "loading": "लोड हो रहा है…",
+    "slow": "सामान्य से ज़्यादा समय लग रहा है…",
+    "retry": "फिर से कोशिश करें"
+  },
+  "invoice": {
+    "metaTitle": "इनवॉइस — सनरिच",
+    "metaDescription": "आपका सनरिच GST इनवॉइस।",
+    "title": "इनवॉइस",
+    "share": "शेयर करें",
+    "copied": "इनवॉइस कॉपी हुआ",
+    "shareFailed": "शेयर नहीं हो सका",
+    "notFound": "इनवॉइस नहीं मिला",
+    "notFoundBody": "यह इनवॉइस उपलब्ध नहीं है।",
+    "no": "इनवॉइस नं.",
+    "date": "तारीख",
+    "billedTo": "बिल प्राप्तकर्ता",
+    "gst": "GST",
+    "taxable": "कर योग्य मूल्य",
+    "deposit": "जार जमा",
+    "roundOff": "राउंड ऑफ़",
+    "total": "कुल",
+    "paid": "भुगतान किया",
+    "balanceDue": "बकाया राशि",
+    "scanToPay": "भुगतान के लिए किसी भी UPI ऐप से स्कैन करें",
+    "noUpi": "डिलीवरी टीम को नकद या UPI से भुगतान करें।",
+    "fullyPaid": "पूरा भुगतान हो गया",
+    "view": "इनवॉइस देखें"
   }
 }

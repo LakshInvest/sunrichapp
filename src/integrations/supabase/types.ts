@@ -1229,9 +1229,11 @@ export type Database = {
           allow_spot_sale: boolean
           allow_upi: boolean
           arrived_button_enabled: boolean
+          auto_credit_block_enabled: boolean
           collect_old_dues: boolean
           company_id: string
           default_language: string
+          distributor_reply_minutes: number
           expense_bill_photo_required: boolean
           expense_limit_per_trip: number
           expense_types: string[]
@@ -1268,9 +1270,11 @@ export type Database = {
           allow_spot_sale?: boolean
           allow_upi?: boolean
           arrived_button_enabled?: boolean
+          auto_credit_block_enabled?: boolean
           collect_old_dues?: boolean
           company_id: string
           default_language?: string
+          distributor_reply_minutes?: number
           expense_bill_photo_required?: boolean
           expense_limit_per_trip?: number
           expense_types?: string[]
@@ -1307,9 +1311,11 @@ export type Database = {
           allow_spot_sale?: boolean
           allow_upi?: boolean
           arrived_button_enabled?: boolean
+          auto_credit_block_enabled?: boolean
           collect_old_dues?: boolean
           company_id?: string
           default_language?: string
+          distributor_reply_minutes?: number
           expense_bill_photo_required?: boolean
           expense_limit_per_trip?: number
           expense_types?: string[]
@@ -4794,6 +4800,8 @@ export type Database = {
       }
       is_staff: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      job_auto_block_overdue: { Args: never; Returns: number }
+      job_reroute_stale_orders: { Args: never; Returns: number }
       log_location: {
         Args: {
           p_accuracy?: number
@@ -4861,9 +4869,11 @@ export type Database = {
           allow_spot_sale: boolean
           allow_upi: boolean
           arrived_button_enabled: boolean
+          auto_credit_block_enabled: boolean
           collect_old_dues: boolean
           company_id: string
           default_language: string
+          distributor_reply_minutes: number
           expense_bill_photo_required: boolean
           expense_limit_per_trip: number
           expense_types: string[]

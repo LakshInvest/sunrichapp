@@ -68,8 +68,12 @@
       "reenter": "Re-enter PIN",
       "digit": "PIN digit {{n}}",
       "enterRow": "Enter PIN",
-      "confirmRow": "Confirm PIN"
-    }
+      "confirmRow": "Confirm PIN",
+      "deviceNotRecognised": "This device is not recognised — verify once with OTP.",
+      "success": "Welcome back!",
+      "checking": "Checking PIN…"
+    },
+    "otpSentToast": "OTP sent to WhatsApp {{mobile}}"
   },
   "nav": {
     "home": "Home",
@@ -380,7 +384,9 @@
       "messagePlaceholder": "Tell us what you need help with…",
       "attachHint": "Photo or PDF (optional). Files can be attached while a query is open.",
       "sendQuestion": "Send question",
-      "sent": "Question sent — the Sunrich team will reply soon."
+      "sent": "Question sent — the Sunrich team will reply soon.",
+      "errSubject": "Please add a subject",
+      "errMessage": "Please write your question"
     }
   },
   "checkout": {
@@ -479,7 +485,35 @@
     "payOnDelivery": "You pay on delivery",
     "payOnDeliveryBody": "No credit account — pay cash when your order arrives.",
     "deliveredTitle": "Delivered orders",
-    "comingSoon": "Invoices and statements coming soon."
+    "comingSoon": "Invoices and statements coming soon.",
+    "tabs": {
+      "bills": "Bills",
+      "payments": "Payments",
+      "statement": "Statement"
+    },
+    "openBills": "Open bills",
+    "paidBills": "Paid bills",
+    "dueOn": "Due {{date}}",
+    "balance": "Balance",
+    "noBillsTitle": "No bills yet",
+    "noBillsBody": "Bills appear here after your orders are delivered.",
+    "noReceiptsTitle": "No payments yet",
+    "noReceiptsBody": "Your payments will show here.",
+    "mode": {
+      "cash": "Cash",
+      "upi": "UPI",
+      "cheque": "Cheque",
+      "bank": "Bank transfer",
+      "neft": "NEFT",
+      "card": "Card"
+    },
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "noEntriesTitle": "Nothing this month",
+    "noEntriesBody": "No bills or payments in this month.",
+    "closing": "Closing balance",
+    "debit": "Bills",
+    "credit": "Payments"
   },
   "inbox": {
     "title": "Inbox",
@@ -505,6 +539,37 @@
     "accepted": "Order accepted",
     "rejected": "Sunrich will deliver this order",
     "markedDelivered": "Marked delivered",
-    "markedNotDelivered": "Marked not delivered"
+    "markedNotDelivered": "Marked not delivered",
+    "waiting": "Waiting {{n}} min",
+    "waitingHours": "Waiting {{h}} h {{m}} min"
+  },
+  "common": {
+    "loading": "Loading…",
+    "slow": "Taking longer than usual…",
+    "retry": "Retry"
+  },
+  "invoice": {
+    "metaTitle": "Invoice — Sunrich",
+    "metaDescription": "Your Sunrich GST invoice.",
+    "title": "Invoice",
+    "share": "Share",
+    "copied": "Invoice copied",
+    "shareFailed": "Could not share",
+    "notFound": "Invoice not found",
+    "notFoundBody": "This invoice is not available.",
+    "no": "Invoice no.",
+    "date": "Date",
+    "billedTo": "Billed to",
+    "gst": "GST",
+    "taxable": "Taxable value",
+    "deposit": "Jar deposit",
+    "roundOff": "Round off",
+    "total": "Total",
+    "paid": "Paid",
+    "balanceDue": "Balance due",
+    "scanToPay": "Scan with any UPI app to pay",
+    "noUpi": "Pay by cash or UPI to our delivery team.",
+    "fullyPaid": "Fully paid",
+    "view": "View invoice"
   }
 }

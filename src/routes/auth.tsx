@@ -1,8 +1,10 @@
+import { AppLoader } from "@/components/AppLoader";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { Loader2 } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -25,6 +27,7 @@ import {
   setLastMobile,
   clearLastMobile,
   maskMobile,
+  savedDeviceIds,
 } from "@/lib/device";
 
 export const LOGGED_OUT_FLAG = "sunrich.loggedOut";
@@ -55,6 +58,8 @@ export const Route = createFileRoute("/auth")({
     }
   },
   component: Login,
+  pendingComponent: AppLoader,
+  pendingMs: 0,
 });
 
 const RESEND_SECONDS = 30;
@@ -80,7 +85,11 @@ function PinBoxes({
   shake,
   autoFocusFirst,
   label,
+  checking,
+  success,
 }: {
+  checking?: boolean;
+  success?: boolean;
   value: string[];
   onChange: (v: string[]) => void;
   onComplete: (pin: string) => void;
@@ -123,6 +132,7 @@ function PinBoxes({
     >
       {value.map((d, i) => (
         <input
+          style={checking ? { animationDelay: `${i * 0.12}s` } : undefined}
           key={i}
           ref={(el) => {
             refs.current[i] = el;
@@ -139,7 +149,7 @@ function PinBoxes({
           onKeyDown={(e) => onKey(i, e)}
           onPaste={(e) => onPaste(i, e)}
           onFocus={(e) => e.target.select()}
-          className="h-14 w-14 rounded-2xl border border-input bg-card text-center text-3xl font-bold text-primary outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30 disabled:opacity-60"
+          className={`h-14 w-14 rounded-2xl border bg-card text-center text-3xl font-bold outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30 disabled:opacity-60 ${success ? "border-success text-success" : "border-input text-primary"} ${checking ? "animate-pin-wave" : ""}`}
         />
       ))}
     </div>
@@ -171,12 +181,15 @@ function Login() {
   const [countdown, setCountdown] = useState(0);
   const [shaking, setShaking] = useState(false);
   const [forcePin, setForcePin] = useState(false);
+  const [pinOk, setPinOk] = useState(false);
   const boxes = useRef<(HTMLInputElement | null)[]>([]);
 
   const valid = /^[6-9]\d{9}$/.test(mobile);
 
   useEffect(() => {
-    setDeviceId(getDeviceId());
+    const id = getDeviceId();
+    setDeviceId(id);
+    console.info("[sunrich] device id", id);
     const saved = getLastMobile();
     if (saved) {
       setLastMobileState(saved);
@@ -234,6 +247,7 @@ function Login() {
         return;
       }
       setDigits(Array(6).fill(""));
+      toast.success(t("auth.otpSentToast", { mobile: `+91 ••••• ${mobile.slice(-4)}` }));
       setStep("code");
       setCountdown(RESEND_SECONDS);
       setTimeout(() => boxes.current[0]?.focus(), 50);
@@ -244,7 +258,14 @@ function Login() {
     }
   };
 
-  const afterOtpSession = async () => {
+  const goSetPin = () => {
+    setPin(Array(4).fill(""));
+    setConfirm(Array(4).fill(""));
+    setPinPhase("enter");
+    setStep("setpin");
+  };
+
+  const afterOtpSession = async (serverTrusted: boolean | undefined) => {
     // The session row must exist before Set PIN: set_my_pin validates it.
     const { error: rlErr } = await supabase.rpc("record_login", {
       p_user_agent: navigator.userAgent.slice(0, 500),
@@ -254,24 +275,17 @@ function Login() {
       setError(rlErr.message);
       return;
     }
-    setLastMobile(mobile);
-    try {
-      const { trusted } = await deviceStatus({ data: { deviceId } });
-      if (!trusted || forcePin) {
-        setPin(Array(4).fill(""));
-        setConfirm(Array(4).fill(""));
-        setPinPhase("enter");
-        setStep("setpin");
-        return;
+    if (setLastMobile(mobile)) setLastMobileState(mobile);
+    if (forcePin) return goSetPin();
+    let trusted = serverTrusted;
+    if (trusted === undefined) {
+      try {
+        trusted = (await deviceStatus({ data: { deviceId } })).trusted;
+      } catch {
+        trusted = false; // play safe and ask for the PIN now
       }
-    } catch {
-      // Device check failed — play safe and ask for the PIN now.
-      setPin(Array(4).fill(""));
-      setConfirm(Array(4).fill(""));
-      setPinPhase("enter");
-      setStep("setpin");
-      return;
     }
+    if (!trusted) return goSetPin();
     await routeAfterLogin();
   };
 
@@ -280,7 +294,7 @@ function Login() {
     setError(null);
     setBusy(true);
     try {
-      const r = await verify({ data: { mobile, code } });
+      const r = await verify({ data: { mobile, code, deviceId } });
       if (!r.ok || !r.tokenHash) {
         setError(r.ok ? t("auth.errors.generic") : errText(r));
         setDigits(Array(6).fill(""));
@@ -293,7 +307,7 @@ function Login() {
         setError(t("auth.errors.generic"));
         return;
       }
-      await afterOtpSession();
+      await afterOtpSession(r.trusted);
     } catch {
       setError(t("auth.errors.generic"));
     } finally {
@@ -353,6 +367,12 @@ function Login() {
           setMobile("");
           setForcePin(false);
           setStep("mobile");
+        } else if (r.status === "device_not_trusted") {
+          console.warn("[sunrich] device_not_trusted", { sent: deviceId, saved: savedDeviceIds() });
+          setNotice(t("auth.pin.deviceNotRecognised"));
+          setMobile(m);
+          setForcePin(false);
+          setStep("mobile");
         } else {
           setNotice(t("auth.pin.useOtp"));
           setMobile(m);
@@ -376,6 +396,8 @@ function Login() {
         return;
       }
       setLastMobile(m);
+      setPinOk(true);
+      await new Promise((res) => setTimeout(res, 450));
       await routeAfterLogin();
     } catch {
       setError(t("auth.errors.generic"));
@@ -467,13 +489,20 @@ function Login() {
               value={pin}
               onChange={setPin}
               onComplete={(p) => void submitPinLogin(p)}
-              disabled={busy}
+              disabled={busy || pinOk}
               shake={shaking}
+              checking={busy && !pinOk}
+              success={pinOk}
               label={t("auth.pin.group")}
             />
-            {busy && (
+            {pinOk && (
+              <p className="flex items-center justify-center gap-2 text-sm font-semibold text-success" role="status">
+                <Check className="h-5 w-5" /> {t("auth.pin.success")}
+              </p>
+            )}
+            {busy && !pinOk && (
               <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" /> {t("auth.verifying")}
+                <Loader2 className="h-4 w-4 animate-spin" /> {t("auth.pin.checking")}
               </p>
             )}
             {error && <p role="alert" className="text-center text-sm font-medium text-destructive">{error}</p>}

@@ -35,3 +35,13 @@ Constraint: existing DB tables/RPCs only. No schema/policy changes.
 - [x] 8. Responsive + multilingual QA at 360/390/768 × en/hi/mr — live E2E passed (real OTP sign-in): place → success → detail timeline → cancel with reason → list filters → payments → bell (dot + tap → /track) → hi/mr headers → no horizontal scroll at 360/768. Test orders 00001–00005 cancelled afterwards with a QA note.
 
 Fixes during this task: ORDER_SELECT now includes customer_id (own-order filter worked against undefined before); /track restructured into layout + track.index + track.$id (detail previously rendered the list because /track/$id nests under /track); order-format.ts shared helpers; OrderDto gained paidAmount/paymentStatus.
+
+# Prompt-21 roadmap
+
+- [x] 1. PIN survives logout: device id cookie backup + console log, last mobile saved only from a valid number, server-side trusted-device check in verifyOtp, device_not_trusted message + console diagnostics.
+- [x] 2. Loading feedback: water-drop startup loader, PIN wave/shake/tick, OTP-sent toast, button spinners, slow-load notice, reduced motion.
+- [x] 3. Form errors: scroll to first error, field errors on Ask, exact server messages (registration, ask, checkout, profile name, delete account, replies).
+- [x] 4. Bills · Payments · Statement tabs + GST invoice screen with UPI QR and share. Not live-verified: no invoices/receipts exist yet.
+- [x] 5. Inbox: waiting timer (amber ≥60 min), vibrate on new order, area + number. Not live-verified: no distributor account.
+- [ ] 6. Ask attachments — code fixed (upload failure no longer silently drops the file); live photo/PDF retest blocked: database connection expired.
+- [ ] 7. Signed-in screen QA at 360/390/768 — blocked for the same reason.

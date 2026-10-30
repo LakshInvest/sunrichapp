@@ -1,3 +1,4 @@
+import { AppLoader } from "@/components/AppLoader";
 import { Outlet, redirect, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +28,8 @@ export const Route = createFileRoute("/_authenticated")({
     }
   },
   component: Gate,
+  pendingComponent: AppLoader,
+  pendingMs: 0,
 });
 
 /** Signs the user out when their session row is missing or revoked. Checks on load and every 60s. */

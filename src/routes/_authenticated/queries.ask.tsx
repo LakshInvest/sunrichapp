@@ -1,9 +1,10 @@
+import { scrollToFirstError } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { ArrowLeft, Camera, FileText, Paperclip, Send, X } from "lucide-react";
+import { ArrowLeft, Camera, FileText, Loader2, Paperclip, Send, X } from "lucide-react";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -51,6 +52,10 @@ function AskQuery() {
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  useEffect(() => {
+    if (error) scrollToFirstError();
+  }, [error]);
   const cameraInput = useRef<HTMLInputElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -73,7 +78,15 @@ function AskQuery() {
   const send = async () => {
     const subj = subject.trim();
     const body = message.trim();
-    if (!subj || !body || sending || offline) return;
+    if (sending || offline) return;
+    const errs: Record<string, string> = {};
+    if (!subj) errs["subject"] = t("queries.ask.errSubject");
+    if (!body) errs["message"] = t("queries.ask.errMessage");
+    setFieldErrors(errs);
+    if (Object.keys(errs).length) {
+      scrollToFirstError();
+      return;
+    }
     setSending(true);
     setError(null);
     let attachmentPath: string | undefined;
@@ -92,13 +105,11 @@ function AskQuery() {
           .from("customer-docs")
           .upload(attachmentPath, prepared.blob, { contentType: prepared.mime });
         if (upErr) {
-          // Storage only allows attachments while the query is open — send
-          // the question anyway and tell the user exactly why.
+          // Keep the form so the customer can retry or remove the file.
           setError(upErr.message);
-          attachmentPath = undefined;
-        } else {
-          attachmentName = file.name;
+          return;
         }
+        attachmentName = file.name;
       }
       const rpcArgs: {
         p_subject: string;
@@ -166,10 +177,12 @@ function AskQuery() {
           <input
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
+            aria-invalid={!!fieldErrors["subject"]}
             maxLength={120}
             placeholder={t("queries.ask.subjectPlaceholder")}
-            className="min-h-12 rounded-xl border border-input bg-card px-4 text-base text-foreground outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30"
+            className="min-h-12 rounded-xl border border-input bg-card px-4 text-base text-foreground outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30 aria-[invalid=true]:border-destructive"
           />
+          {fieldErrors["subject"] && <span data-field-error className="text-xs font-medium text-destructive">{fieldErrors["subject"]}</span>}
         </label>
 
         <label className="mt-4 flex flex-col gap-1.5">
@@ -177,11 +190,13 @@ function AskQuery() {
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            aria-invalid={!!fieldErrors["message"]}
             rows={5}
             maxLength={2000}
             placeholder={t("queries.ask.messagePlaceholder")}
-            className="rounded-xl border border-input bg-card px-4 py-3 text-base text-foreground outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30"
+            className="rounded-xl border border-input bg-card px-4 py-3 text-base text-foreground outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30 aria-[invalid=true]:border-destructive"
           />
+          {fieldErrors["message"] && <span data-field-error className="text-xs font-medium text-destructive">{fieldErrors["message"]}</span>}
         </label>
 
         <div className="mt-4 flex items-center gap-2">
@@ -223,7 +238,7 @@ function AskQuery() {
         <p className="mt-2 text-xs text-muted-foreground">{t("queries.ask.attachHint")}</p>
 
         {error && (
-          <p role="alert" className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+          <p data-field-error role="alert" className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
             {error}
           </p>
         )}
@@ -231,10 +246,10 @@ function AskQuery() {
         <button
           type="button"
           onClick={() => void send()}
-          disabled={sending || offline || !subject.trim() || !message.trim()}
+          disabled={sending || offline}
           className="mt-6 flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md transition active:scale-[0.98] disabled:opacity-50"
         >
-          <Send className="h-5 w-5" aria-hidden />
+          {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" aria-hidden />}
           {sending ? t("queries.sending") : t("queries.ask.sendQuestion")}
         </button>
         {offline && <p className="mt-2 text-center text-xs text-muted-foreground">{t("offline.hint")}</p>}

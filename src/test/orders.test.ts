@@ -29,6 +29,8 @@ const history = (rows: Array<[string | null, string]>): OrderHistoryRow[] =>
 
 const order = (over: Partial<OrderDto>): OrderDto => ({
   id: "o1",
+  deliveryLine2: null,
+  assignedAt: null,
   orderNo: "ORD/1",
   status: "placed",
   holdReason: null,

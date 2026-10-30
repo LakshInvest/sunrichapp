@@ -43,6 +43,8 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
@@ -80,6 +82,8 @@
   --accent: oklch(0.73 0.11 85);
   --accent-foreground: oklch(0.255 0.07 255);
   --destructive: oklch(0.577 0.245 27.325);
+  --success: oklch(0.6 0.15 150);
+  --warning: oklch(0.72 0.16 70);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(0.9 0.01 240);
   --input: oklch(0.9 0.01 240);
@@ -115,6 +119,8 @@
   --accent: oklch(0.279 0.041 260.031);
   --accent-foreground: oklch(0.984 0.003 247.858);
   --destructive: oklch(0.704 0.191 22.216);
+  --success: oklch(0.7 0.15 150);
+  --warning: oklch(0.78 0.15 70);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
@@ -202,6 +208,38 @@
 
 @utility animate-shake {
   animation: pin-shake 0.5s ease-in-out;
+}
+
+@keyframes pin-wave {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+}
+@utility animate-pin-wave {
+  animation: pin-wave 0.9s ease-in-out infinite;
+}
+
+/* Startup loader: pulsing drop + soft ripple */
+@keyframes drop-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+@keyframes drop-ripple {
+  0% { transform: scale(0.6); opacity: 0.5; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+@utility animate-drop-pulse {
+  animation: drop-pulse 1.6s ease-in-out infinite;
+}
+@utility animate-drop-ripple {
+  animation: drop-ripple 1.8s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 @layer base {

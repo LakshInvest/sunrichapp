@@ -20,21 +20,20 @@ import { prepareUpload } from "@/lib/image-compress";
 import { scrollToFirstError } from "@/lib/form-errors";
 import {
   PAY_MODES,
-  PAYMENT_SUBJECT,
   fetchBalance,
   fetchLedger,
-  fetchReportedPayments,
   invoiceIdByNo,
   openingOf,
-  paymentMessage,
   rangeFor,
   shareOrDownload,
   statementPdf,
   type Balance,
   type PayMode,
   type RangeKey,
-  type ReportedPayment,
+  type StatementRow,
 } from "@/lib/ledger";
+import { fetchMyPaymentProofs, submitPaymentProof, validUtr, type PaymentProof } from "@/lib/payments";
+import { ProofChip } from "@/components/PaymentProofSheet";
 
 export const Route = createFileRoute("/_authenticated/balance")({
   head: () => ({
@@ -65,14 +64,14 @@ function BalancePage() {
   const period = range === "custom" ? custom : rangeFor(range);
   const [rows, setRows] = useState<StatementRow[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [reported, setReported] = useState<ReportedPayment[]>([]);
+  const [reported, setReported] = useState<PaymentProof[]>([]);
   const [payOpen, setPayOpen] = useState(false);
   const [stmtOpen, setStmtOpen] = useState(false);
 
   const loadBal = useCallback(() => {
     setBalErr(null);
     fetchBalance().then(setBal, (e: Error) => setBalErr(e.message));
-    fetchReportedPayments().then(setReported, () => setReported([]));
+    fetchMyPaymentProofs().then(setReported, () => setReported([]));
   }, []);
   useEffect(loadBal, [loadBal]);
 
@@ -117,21 +116,25 @@ function BalancePage() {
         {reported.length > 0 && (
           <section aria-label={t("balance.reportedTitle")} className="space-y-2">
             {reported.map((p) => (
-              <button
+              <div
                 key={p.id}
-                type="button"
-                onClick={() => navigate({ to: "/queries/$id", params: { id: p.id } })}
-                className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-secondary/50 bg-secondary/5 px-4 py-3 text-left"
+                className="rounded-2xl border border-dashed border-secondary/50 bg-secondary/5 px-4 py-3"
               >
-                <Clock className="h-5 w-5 shrink-0 text-secondary" aria-hidden />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold">{t("balance.reported")}</span>
-                  <span className="block text-xs text-muted-foreground">
-                    {p.amount != null ? formatINR(p.amount) : ""} · {p.mode ? t(`balance.mode.${p.mode}`) : ""} ·{" "}
-                    {dateLabel(p.date ?? p.createdAt, lang)}
+                <div className="flex items-center justify-between gap-3">
+                  <span className="min-w-0 truncate text-sm font-semibold">
+                    {p.amount != null ? formatINR(p.amount) : ""} · {p.method ? t(`balance.mode.${p.method}`, { defaultValue: p.method }) : ""}
                   </span>
+                  <ProofChip status={p.status} />
+                </div>
+                <span className="mt-0.5 block text-xs text-muted-foreground">
+                  {dateLabel(p.paidOn || p.createdAt, lang)}
+                  {p.reference ? ` · ${p.reference}` : ""}
+                  {p.orderNo ? ` · ${p.orderNo}` : ""}
                 </span>
-              </button>
+                {p.status === "rejected" && p.rejectReason && (
+                  <span className="mt-1 block text-xs font-medium text-destructive">{p.rejectReason}</span>
+                )}
+              </div>
             ))}
           </section>
         )}

@@ -1,7 +1,7 @@
 import { serverMessage } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
+import { Suspense, lazy, useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
@@ -25,7 +25,6 @@ import {
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
-import { PhotoCrop } from "@/components/PhotoCrop";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { clearMyPhoto } from "@/lib/profile.functions";
 import { AddressSheet } from "@/components/AddressSheet";
@@ -70,6 +69,9 @@ function avatarStoragePath(url: string | null | undefined, userId: string): stri
   const p = m?.[1] ? decodeURIComponent(m[1]) : null;
   return p && p.startsWith(`${userId}/`) ? p : null;
 }
+
+// The cropper library only loads when a photo is picked.
+const PhotoCrop = lazy(() => import("@/components/PhotoCrop").then((m) => ({ default: m.PhotoCrop })));
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({
@@ -486,12 +488,14 @@ function Account() {
       </SheetDrawer>
 
       {cropSrc && (
-        <PhotoCrop
-          src={cropSrc}
-          busy={uploading}
-          onCancel={() => setCropSrc(null)}
-          onSave={(b) => void onCropSave(b)}
-        />
+        <Suspense fallback={null}>
+          <PhotoCrop
+            src={cropSrc}
+            busy={uploading}
+            onCancel={() => setCropSrc(null)}
+            onSave={(b) => void onCropSave(b)}
+          />
+        </Suspense>
       )}
 
       <SheetDrawer open={aboutOpen} onOpenChange={setAboutOpen}>

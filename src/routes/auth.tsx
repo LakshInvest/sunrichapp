@@ -2,7 +2,8 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { Loader2 } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
 import { OfflineBanner } from "@/components/OfflineBanner";
@@ -81,7 +82,11 @@ function PinBoxes({
   shake,
   autoFocusFirst,
   label,
+  checking,
+  success,
 }: {
+  checking?: boolean;
+  success?: boolean;
   value: string[];
   onChange: (v: string[]) => void;
   onComplete: (pin: string) => void;
@@ -124,6 +129,7 @@ function PinBoxes({
     >
       {value.map((d, i) => (
         <input
+          style={checking ? { animationDelay: `${i * 0.12}s` } : undefined}
           key={i}
           ref={(el) => {
             refs.current[i] = el;
@@ -140,7 +146,7 @@ function PinBoxes({
           onKeyDown={(e) => onKey(i, e)}
           onPaste={(e) => onPaste(i, e)}
           onFocus={(e) => e.target.select()}
-          className="h-14 w-14 rounded-2xl border border-input bg-card text-center text-3xl font-bold text-primary outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30 disabled:opacity-60"
+          className={`h-14 w-14 rounded-2xl border bg-card text-center text-3xl font-bold outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30 disabled:opacity-60 ${success ? "border-success text-success" : "border-input text-primary"} ${checking ? "animate-pin-wave" : ""}`}
         />
       ))}
     </div>
@@ -172,6 +178,7 @@ function Login() {
   const [countdown, setCountdown] = useState(0);
   const [shaking, setShaking] = useState(false);
   const [forcePin, setForcePin] = useState(false);
+  const [pinOk, setPinOk] = useState(false);
   const boxes = useRef<(HTMLInputElement | null)[]>([]);
 
   const valid = /^[6-9]\d{9}$/.test(mobile);
@@ -237,6 +244,7 @@ function Login() {
         return;
       }
       setDigits(Array(6).fill(""));
+      toast.success(t("auth.otpSentToast", { mobile: `+91 ••••• ${mobile.slice(-4)}` }));
       setStep("code");
       setCountdown(RESEND_SECONDS);
       setTimeout(() => boxes.current[0]?.focus(), 50);
@@ -478,13 +486,20 @@ function Login() {
               value={pin}
               onChange={setPin}
               onComplete={(p) => void submitPinLogin(p)}
-              disabled={busy}
+              disabled={busy || pinOk}
               shake={shaking}
+              checking={busy && !pinOk}
+              success={pinOk}
               label={t("auth.pin.group")}
             />
-            {busy && (
+            {pinOk && (
+              <p className="flex items-center justify-center gap-2 text-sm font-semibold text-success" role="status">
+                <Check className="h-5 w-5" /> {t("auth.pin.success")}
+              </p>
+            )}
+            {busy && !pinOk && (
               <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" /> {t("auth.verifying")}
+                <Loader2 className="h-4 w-4 animate-spin" /> {t("auth.pin.checking")}
               </p>
             )}
             {error && <p role="alert" className="text-center text-sm font-medium text-destructive">{error}</p>}

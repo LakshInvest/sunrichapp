@@ -1,3 +1,4 @@
+import { AppLoader } from "@/components/AppLoader";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent } from "react";
@@ -57,6 +58,8 @@ export const Route = createFileRoute("/auth")({
     }
   },
   component: Login,
+  pendingComponent: AppLoader,
+  pendingMs: 0,
 });
 
 const RESEND_SECONDS = 30;

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" rx="180" fill="#0B2545"/>
+  <g transform="translate(512 470)">
+    <circle r="250" fill="none" stroke="#C9A44C" stroke-width="28" stroke-dasharray="1180 392" stroke-linecap="round" transform="rotate(-90)"/>
+    <path d="M0 -170 C 90 -60 150 10 150 70 A 150 150 0 0 1 -150 70 C -150 10 -90 -60 0 -170 Z" fill="#2EA3C7"/>
+    <path d="M0 -110 C 60 -35 100 18 100 62 A 100 100 0 0 1 -100 62 C -100 18 -60 -35 0 -110 Z" fill="#F8F7F3" opacity="0.35" transform="translate(-34 6) scale(0.5)"/>
+  </g>
+  <text x="512" y="850" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="120" font-weight="700" letter-spacing="6" fill="#F8F7F3">SUNRICH</text>
+</svg>

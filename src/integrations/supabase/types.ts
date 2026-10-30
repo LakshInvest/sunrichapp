@@ -1141,6 +1141,7 @@ export type Database = {
           created_by: string | null
           default_credit_days: number
           default_credit_limit: number
+          default_delivery_mode: string
           default_price_plan_id: string | null
           description: string | null
           description_hi: string | null
@@ -1165,6 +1166,7 @@ export type Database = {
           created_by?: string | null
           default_credit_days?: number
           default_credit_limit?: number
+          default_delivery_mode?: string
           default_price_plan_id?: string | null
           description?: string | null
           description_hi?: string | null
@@ -1189,6 +1191,7 @@ export type Database = {
           created_by?: string | null
           default_credit_days?: number
           default_credit_limit?: number
+          default_delivery_mode?: string
           default_price_plan_id?: string | null
           description?: string | null
           description_hi?: string | null
@@ -1241,6 +1244,7 @@ export type Database = {
           credit_limit: number | null
           customer_code: string
           customer_type_id: string
+          default_delivery_mode: string | null
           email: string | null
           gstin: string | null
           id: string
@@ -1279,6 +1283,7 @@ export type Database = {
           credit_limit?: number | null
           customer_code?: string
           customer_type_id: string
+          default_delivery_mode?: string | null
           email?: string | null
           gstin?: string | null
           id?: string
@@ -1317,6 +1322,7 @@ export type Database = {
           credit_limit?: number | null
           customer_code?: string
           customer_type_id?: string
+          default_delivery_mode?: string | null
           email?: string | null
           gstin?: string | null
           id?: string
@@ -2709,6 +2715,7 @@ export type Database = {
           delivery_latitude: number | null
           delivery_lng: number | null
           delivery_longitude: number | null
+          delivery_mode: string | null
           delivery_otp: string | null
           delivery_pincode: string | null
           delivery_slot: string | null
@@ -2731,6 +2738,7 @@ export type Database = {
           outstanding_snapshot: number | null
           payment_mode: string
           payment_status: string
+          pickup_vehicle_no: string | null
           placed_by: string | null
           price_plan_id: string | null
           round_off: number
@@ -2769,6 +2777,7 @@ export type Database = {
           delivery_latitude?: number | null
           delivery_lng?: number | null
           delivery_longitude?: number | null
+          delivery_mode?: string | null
           delivery_otp?: string | null
           delivery_pincode?: string | null
           delivery_slot?: string | null
@@ -2791,6 +2800,7 @@ export type Database = {
           outstanding_snapshot?: number | null
           payment_mode?: string
           payment_status?: string
+          pickup_vehicle_no?: string | null
           placed_by?: string | null
           price_plan_id?: string | null
           round_off?: number
@@ -2829,6 +2839,7 @@ export type Database = {
           delivery_latitude?: number | null
           delivery_lng?: number | null
           delivery_longitude?: number | null
+          delivery_mode?: string | null
           delivery_otp?: string | null
           delivery_pincode?: string | null
           delivery_slot?: string | null
@@ -2851,6 +2862,7 @@ export type Database = {
           outstanding_snapshot?: number | null
           payment_mode?: string
           payment_status?: string
+          pickup_vehicle_no?: string | null
           placed_by?: string | null
           price_plan_id?: string | null
           round_off?: number
@@ -5524,6 +5536,10 @@ export type Database = {
       }
       set_opening_jars: {
         Args: { p_customer_id: string; p_product_id: string; p_qty: number }
+        Returns: undefined
+      }
+      set_order_delivery_mode: {
+        Args: { p_mode: string; p_order_id: string; p_vehicle_no?: string }
         Returns: undefined
       }
       set_order_status: {

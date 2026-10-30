@@ -4510,6 +4510,7 @@ export type Database = {
           is_demo: boolean
           is_super_admin: boolean
           last_login_at: string | null
+          login_without_otp: boolean
           mobile: string | null
           photo_url: string | null
           preferred_language: string
@@ -4530,6 +4531,7 @@ export type Database = {
           is_demo?: boolean
           is_super_admin?: boolean
           last_login_at?: string | null
+          login_without_otp?: boolean
           mobile?: string | null
           photo_url?: string | null
           preferred_language?: string
@@ -4550,6 +4552,7 @@ export type Database = {
           is_demo?: boolean
           is_super_admin?: boolean
           last_login_at?: string | null
+          login_without_otp?: boolean
           mobile?: string | null
           photo_url?: string | null
           preferred_language?: string

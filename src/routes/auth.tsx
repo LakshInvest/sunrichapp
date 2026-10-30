@@ -25,6 +25,7 @@ import {
   setLastMobile,
   clearLastMobile,
   maskMobile,
+  savedDeviceIds,
 } from "@/lib/device";
 
 export const LOGGED_OUT_FLAG = "sunrich.loggedOut";
@@ -176,7 +177,9 @@ function Login() {
   const valid = /^[6-9]\d{9}$/.test(mobile);
 
   useEffect(() => {
-    setDeviceId(getDeviceId());
+    const id = getDeviceId();
+    setDeviceId(id);
+    console.info("[sunrich] device id", id);
     const saved = getLastMobile();
     if (saved) {
       setLastMobileState(saved);
@@ -244,7 +247,14 @@ function Login() {
     }
   };
 
-  const afterOtpSession = async () => {
+  const goSetPin = () => {
+    setPin(Array(4).fill(""));
+    setConfirm(Array(4).fill(""));
+    setPinPhase("enter");
+    setStep("setpin");
+  };
+
+  const afterOtpSession = async (serverTrusted: boolean | undefined) => {
     // The session row must exist before Set PIN: set_my_pin validates it.
     const { error: rlErr } = await supabase.rpc("record_login", {
       p_user_agent: navigator.userAgent.slice(0, 500),
@@ -254,24 +264,17 @@ function Login() {
       setError(rlErr.message);
       return;
     }
-    setLastMobile(mobile);
-    try {
-      const { trusted } = await deviceStatus({ data: { deviceId } });
-      if (!trusted || forcePin) {
-        setPin(Array(4).fill(""));
-        setConfirm(Array(4).fill(""));
-        setPinPhase("enter");
-        setStep("setpin");
-        return;
+    if (setLastMobile(mobile)) setLastMobileState(mobile);
+    if (forcePin) return goSetPin();
+    let trusted = serverTrusted;
+    if (trusted === undefined) {
+      try {
+        trusted = (await deviceStatus({ data: { deviceId } })).trusted;
+      } catch {
+        trusted = false; // play safe and ask for the PIN now
       }
-    } catch {
-      // Device check failed — play safe and ask for the PIN now.
-      setPin(Array(4).fill(""));
-      setConfirm(Array(4).fill(""));
-      setPinPhase("enter");
-      setStep("setpin");
-      return;
     }
+    if (!trusted) return goSetPin();
     await routeAfterLogin();
   };
 
@@ -280,7 +283,7 @@ function Login() {
     setError(null);
     setBusy(true);
     try {
-      const r = await verify({ data: { mobile, code } });
+      const r = await verify({ data: { mobile, code, deviceId } });
       if (!r.ok || !r.tokenHash) {
         setError(r.ok ? t("auth.errors.generic") : errText(r));
         setDigits(Array(6).fill(""));
@@ -293,7 +296,7 @@ function Login() {
         setError(t("auth.errors.generic"));
         return;
       }
-      await afterOtpSession();
+      await afterOtpSession(r.trusted);
     } catch {
       setError(t("auth.errors.generic"));
     } finally {
@@ -353,6 +356,12 @@ function Login() {
           setMobile("");
           setForcePin(false);
           setStep("mobile");
+        } else if (r.status === "device_not_trusted") {
+          console.warn("[sunrich] device_not_trusted", { sent: deviceId, saved: savedDeviceIds() });
+          setNotice(t("auth.pin.deviceNotRecognised"));
+          setMobile(m);
+          setForcePin(false);
+          setStep("mobile");
         } else {
           setNotice(t("auth.pin.useOtp"));
           setMobile(m);
@@ -376,6 +385,8 @@ function Login() {
         return;
       }
       setLastMobile(m);
+      setPinOk(true);
+      await new Promise((res) => setTimeout(res, 450));
       await routeAfterLogin();
     } catch {
       setError(t("auth.errors.generic"));

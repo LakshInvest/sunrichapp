@@ -5,7 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // Error codes are translated in the browser (auth.errors.*).
 export type OtpResult =
-  | { ok: true; tokenHash?: string }
+  | { ok: true; tokenHash?: string; trusted?: boolean }
   | { ok: false; code: string; seconds?: number; left?: number; message?: string };
 
 // Statuses come from the check_pin RPC; translated in the browser (auth.pin.*).
@@ -162,7 +162,7 @@ export const sendOtp = createServerFn({ method: "POST" })
 
 export const verifyOtp = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({ mobile: z.string(), code: z.string().regex(/^\d{6}$/) }).parse(d),
+    z.object({ mobile: z.string(), code: z.string().regex(/^\d{6}$/), deviceId: z.string().min(16).max(200).optional() }).parse(d),
   )
   .handler(async ({ data }): Promise<OtpResult> => {
     const m10 = data.mobile.replace(/\D/g, "").slice(-10);
@@ -250,7 +250,19 @@ export const verifyOtp = createServerFn({ method: "POST" })
       console.error("generateLink failed", error?.message);
       return { ok: false, code: "generic" };
     }
-    return { ok: true, tokenHash: link.properties.hashed_token };
+    // Trusted-device decision happens here, on the server, so the client can skip Set PIN.
+    let trusted = false;
+    if (data.deviceId) {
+      const { data: dev } = await supabaseAdmin
+        .from("user_devices")
+        .select("id")
+        .eq("user_id", uid)
+        .eq("device_id", data.deviceId)
+        .is("revoked_at", null)
+        .maybeSingle();
+      trusted = !!dev;
+    }
+    return { ok: true, tokenHash: link.properties.hashed_token, trusted };
   });
 
 /** PIN login: verifies against the check_pin RPC (service-role only) and returns a magic-link token. */

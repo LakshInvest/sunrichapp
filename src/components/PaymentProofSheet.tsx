@@ -168,8 +168,8 @@ export function PaymentStatusNote({
   onSendAgain,
 }: {
   proof: { status: string; rejectReason: string | null } | null;
-  hold?: boolean;
-  onSendAgain?: () => void;
+  hold?: boolean | undefined;
+  onSendAgain?: (() => void) | undefined;
 }) {
   const { t } = useTranslation();
   if (proof?.status === "verified") {

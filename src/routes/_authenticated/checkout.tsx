@@ -310,7 +310,7 @@ function Checkout() {
   }, [quote]);
   const exceedsCredit =
     quote != null &&
-    onCredit &&
+    quote.credit_limit > 0 &&
     (quote.credit_exceeds ?? quote.items_total + quote.deposit_total > quote.credit_available);
 
   const inputCls =

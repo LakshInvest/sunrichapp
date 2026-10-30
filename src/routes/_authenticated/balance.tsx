@@ -30,7 +30,6 @@ import {
   type Balance,
   type PayMode,
   type RangeKey,
-  type StatementRow,
 } from "@/lib/ledger";
 import { fetchMyPaymentProofs, submitPaymentProof, validUtr, type PaymentProof } from "@/lib/payments";
 import { ProofChip } from "@/components/PaymentProofSheet";

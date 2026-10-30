@@ -47,11 +47,18 @@ export type ProofInput = {
 };
 
 export async function submitPaymentProof(input: ProofInput): Promise<string> {
-  const args: Record<string, unknown> = { p_amount: input.amount, p_method: input.method };
-  if (input.reference?.trim()) args.p_reference = input.reference.trim();
-  if (input.paidOn) args.p_paid_on = input.paidOn;
-  if (input.screenshotPath) args.p_screenshot_path = input.screenshotPath;
-  if (input.orderId) args.p_order_id = input.orderId;
+  const args: {
+    p_amount: number;
+    p_method: string;
+    p_reference?: string;
+    p_paid_on?: string;
+    p_screenshot_path?: string;
+    p_order_id?: string;
+  } = { p_amount: input.amount, p_method: input.method };
+  if (input.reference?.trim()) args["p_reference"] = input.reference.trim();
+  if (input.paidOn) args["p_paid_on"] = input.paidOn;
+  if (input.screenshotPath) args["p_screenshot_path"] = input.screenshotPath;
+  if (input.orderId) args["p_order_id"] = input.orderId;
   const { data, error } = await supabase.rpc("submit_payment_proof", args);
   if (error) throw new Error(error.message);
   return String(data);

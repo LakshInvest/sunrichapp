@@ -45,8 +45,9 @@ export const getFirmPaymentInfo = createServerFn({ method: "POST" })
         .eq("is_active", true),
     ]);
     const firmById = new Map((firms ?? []).map((f) => [f.id, f]));
-    const bankByFirm = new Map<string, (typeof banks)[number]>();
-    for (const b of banks ?? []) {
+    const bankRows = banks ?? [];
+    const bankByFirm = new Map<string, (typeof bankRows)[number]>();
+    for (const b of bankRows) {
       const cur = bankByFirm.get(b.firm_id);
       if (!cur || (!cur.is_default && b.is_default)) bankByFirm.set(b.firm_id, b);
     }

@@ -238,7 +238,7 @@ function OrderDetail() {
             {order.lines.map((l) => (
               <li key={l.id} className="flex items-center justify-between gap-3 text-sm">
                 <span className="min-w-0 flex-1 truncate text-foreground">
-                  {l.productName} ×{l.qty}
+                  {l.productName} · {t("common.packs", { count: l.qty })}
                   {l.packLabel ? <span className="text-muted-foreground"> · {l.packLabel}</span> : null}
                 </span>
                 <span className="font-medium text-foreground">{formatINR(l.lineTotal)}</span>

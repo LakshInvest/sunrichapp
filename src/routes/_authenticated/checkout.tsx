@@ -475,7 +475,7 @@ function Checkout() {
                 {quote.lines.map((l) => (
                   <li key={l.product_id} className="flex items-center justify-between gap-3 text-sm">
                     <span className="min-w-0 flex-1 truncate text-muted-foreground">
-                      {l.product_name} ×{l.qty}
+                      {l.product_name} · {t("common.packs", { count: l.qty })}
                     </span>
                     <span className="font-medium text-foreground">{formatINR(l.line_total)}</span>
                   </li>

@@ -20,6 +20,7 @@ import { Route as AuthenticatedAddressesRouteImport } from './routes/_authentica
 import { Route as AuthenticatedBalanceRouteImport } from './routes/_authenticated/balance'
 import { Route as AuthenticatedCartRouteImport } from './routes/_authenticated/cart'
 import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/checkout'
+import { Route as AuthenticatedDevicesRouteImport } from './routes/_authenticated/devices'
 import { Route as AuthenticatedHoldRouteImport } from './routes/_authenticated/hold'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
@@ -90,6 +91,11 @@ const AuthenticatedCartRoute = AuthenticatedCartRouteImport.update({
 const AuthenticatedCheckoutRoute = AuthenticatedCheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDevicesRoute = AuthenticatedDevicesRouteImport.update({
+  id: '/devices',
+  path: '/devices',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedHoldRoute = AuthenticatedHoldRouteImport.update({
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/balance': typeof AuthenticatedBalanceRoute
   '/cart': typeof AuthenticatedCartRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
+  '/devices': typeof AuthenticatedDevicesRoute
   '/hold': typeof AuthenticatedHoldRoute
   '/home': typeof AuthenticatedHomeRoute
   '/inbox': typeof AuthenticatedInboxRoute
@@ -221,6 +228,7 @@ export interface FileRoutesByTo {
   '/balance': typeof AuthenticatedBalanceRoute
   '/cart': typeof AuthenticatedCartRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
+  '/devices': typeof AuthenticatedDevicesRoute
   '/hold': typeof AuthenticatedHoldRoute
   '/home': typeof AuthenticatedHomeRoute
   '/inbox': typeof AuthenticatedInboxRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/_authenticated/balance': typeof AuthenticatedBalanceRoute
   '/_authenticated/cart': typeof AuthenticatedCartRoute
   '/_authenticated/checkout': typeof AuthenticatedCheckoutRoute
+  '/_authenticated/devices': typeof AuthenticatedDevicesRoute
   '/_authenticated/hold': typeof AuthenticatedHoldRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
@@ -281,6 +290,7 @@ export interface FileRouteTypes {
     | '/balance'
     | '/cart'
     | '/checkout'
+    | '/devices'
     | '/hold'
     | '/home'
     | '/inbox'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/balance'
     | '/cart'
     | '/checkout'
+    | '/devices'
     | '/hold'
     | '/home'
     | '/inbox'
@@ -338,6 +349,7 @@ export interface FileRouteTypes {
     | '/_authenticated/balance'
     | '/_authenticated/cart'
     | '/_authenticated/checkout'
+    | '/_authenticated/devices'
     | '/_authenticated/hold'
     | '/_authenticated/home'
     | '/_authenticated/inbox'
@@ -443,6 +455,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/checkout'
       preLoaderRoute: typeof AuthenticatedCheckoutRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/devices': {
+      id: '/_authenticated/devices'
+      path: '/devices'
+      fullPath: '/devices'
+      preLoaderRoute: typeof AuthenticatedDevicesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/hold': {
@@ -601,6 +620,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBalanceRoute: typeof AuthenticatedBalanceRoute
   AuthenticatedCartRoute: typeof AuthenticatedCartRoute
   AuthenticatedCheckoutRoute: typeof AuthenticatedCheckoutRoute
+  AuthenticatedDevicesRoute: typeof AuthenticatedDevicesRoute
   AuthenticatedHoldRoute: typeof AuthenticatedHoldRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
@@ -621,6 +641,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBalanceRoute: AuthenticatedBalanceRoute,
   AuthenticatedCartRoute: AuthenticatedCartRoute,
   AuthenticatedCheckoutRoute: AuthenticatedCheckoutRoute,
+  AuthenticatedDevicesRoute: AuthenticatedDevicesRoute,
   AuthenticatedHoldRoute: AuthenticatedHoldRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,

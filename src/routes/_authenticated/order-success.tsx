@@ -251,6 +251,13 @@ function PayBlock({
         <>
           <PaymentStatusNote proof={proof} />
           <p className="mt-3 text-sm text-muted-foreground">{t("success.infoMissing")}</p>
+          <button
+            type="button"
+            onClick={onPay}
+            className="mt-2 flex min-h-12 w-full items-center justify-center rounded-xl border border-border bg-card text-sm font-semibold text-foreground transition active:scale-[0.98]"
+          >
+            {t("success.ivePaid")}
+          </button>
         </>
       );
     }
@@ -296,6 +303,13 @@ function PayBlock({
       <>
         <PaymentStatusNote proof={proof} />
         <p className="mt-3 text-sm text-muted-foreground">{t("success.infoMissing")}</p>
+        <button
+          type="button"
+          onClick={onPay}
+          className="mt-2 flex min-h-12 w-full items-center justify-center rounded-xl border border-border bg-card text-sm font-semibold text-foreground transition active:scale-[0.98]"
+        >
+          {t("success.ivePaid")}
+        </button>
       </>
     );
   }

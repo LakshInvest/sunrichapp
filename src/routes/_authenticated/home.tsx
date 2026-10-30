@@ -697,6 +697,20 @@ function Home() {
                 </button>
               </div>
             )}
+            <div className="relative z-30 -mt-7 px-5">
+              <SearchBox
+                value={search}
+                onChange={setSearch}
+                onSubmit={(v) => {
+                  addRecentSearch(v);
+                  setRecents(loadRecentSearches());
+                }}
+                recents={recents}
+                onPickRecent={(v) => setSearch(v)}
+              />
+            </div>
+
+            <div className="mt-4 empty:hidden">
             {settings?.feedbackEnabled !== false && rateOrder && (
               <div className="mx-5 mb-4">
                 <RateOrderCard allowSkip orderId={rateOrder.id} orderNo={rateOrder.orderNo} onDone={() => setRateOrder(null)} />
@@ -717,17 +731,6 @@ function Home() {
                 </span>
               </button>
             )}
-            <div className="relative z-30 -mt-7 px-5">
-              <SearchBox
-                value={search}
-                onChange={setSearch}
-                onSubmit={(v) => {
-                  addRecentSearch(v);
-                  setRecents(loadRecentSearches());
-                }}
-                recents={recents}
-                onPickRecent={(v) => setSearch(v)}
-              />
             </div>
 
             {showEmptyCatalog ? (

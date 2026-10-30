@@ -94,9 +94,9 @@ function Home() {
   const [openQuery, setOpenQuery] = useState<{ id: string; subject: string } | null>(null);
   const myReg = useServerFn(getMyRegistration);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (force = false) => {
     try {
-      const fresh = await fetchCatalogue();
+      const fresh = await fetchCatalogue({ force });
       setData(fresh);
       setLoadError(null);
     } catch (e) {
@@ -181,7 +181,7 @@ function Home() {
     };
   }, []);
 
-  const pull = usePullToRefresh(load);
+  const pull = usePullToRefresh(() => load(true));
 
   const products = data?.products ?? [];
   const deva = lang === "en" ? "" : "font-deva";
@@ -500,7 +500,7 @@ function Home() {
       )}
 
       {showError ? (
-        <ErrorState message={loadError} onRetry={() => void load().catch(() => undefined)} />
+        <ErrorState message={loadError} onRetry={() => void load(true).catch(() => undefined)} />
       ) : (
         <>
           {/* Hero */}

@@ -66,9 +66,9 @@ function Cart() {
     };
   }, [myReg]);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (force = false) => {
     try {
-      const fresh = await fetchCatalogue();
+      const fresh = await fetchCatalogue({ force });
       setData(fresh);
       setLoadError(null);
     } catch (e) {

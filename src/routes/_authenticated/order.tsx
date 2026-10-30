@@ -73,9 +73,9 @@ function Order() {
     if (category) setSelected(category);
   }, [category]);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (force = false) => {
     try {
-      const fresh = await fetchCatalogue();
+      const fresh = await fetchCatalogue({ force });
       setData(fresh);
       setLoadError(null);
     } catch (e) {
@@ -97,7 +97,7 @@ function Order() {
     };
   }, [load]);
 
-  const pull = usePullToRefresh(load);
+  const pull = usePullToRefresh(() => load(true));
 
   const products = data?.products ?? [];
   const deva = lang === "en" ? "" : "font-deva";
@@ -249,7 +249,7 @@ function Order() {
 
       <div className="px-5 pb-28 pt-4">
         {showError ? (
-          <ErrorState message={loadError} onRetry={() => void load().catch(() => undefined)} />
+          <ErrorState message={loadError} onRetry={() => void load(true).catch(() => undefined)} />
         ) : loading ? (
           <GridSkeleton count={6} />
         ) : products.length === 0 ? (

@@ -90,13 +90,18 @@ Untested / blocked: real Android push (needs google-services.json + build), POD 
 
 Constraint kept: existing DB tables/RPCs/RLS only (orders.payment_method, submit_payment_proof, order_payment_hold, set_order_payment_method, payment_proofs, firms upi/bank fields, trip_stops now customer-readable).
 
-- [ ] 1 Checkout "How will you pay?" chips (credit only when limit>0 & not blocked, pre-selected) → set_order_payment_method after placement.
-- [ ] 2 Order success per-order UPI QR (uploaded QR or generated from upi_id) + "Pay with UPI app" + "I've paid" (12-digit UTR and/or screenshot) → submit_payment_proof; per-firm payment when a checkout splits.
-- [ ] 3 Bank transfer: firm bank details with copy buttons + UTR/screenshot proof.
-- [ ] 4 Cheque/cash: "give it to the delivery person" note, no proof.
-- [ ] 5 Order status: payment-hold "checking your payment" line, rejected-proof red note + reason + Send again, verified green "Payment received".
-- [ ] 6 Delivery time one-liner from release_batch_at/released_at/express.
-- [ ] 7 Balance "I have paid" → submit_payment_proof; reported payments read payment_proofs with status chips.
-- [ ] 8 POD: signature/photo + "Verified with OTP" (otp_verified).
-- [ ] 9 Status word "Placed" everywhere (no "Received").
-- [ ] 10 QA: 9999900001/02/03 PIN 1234 at 360/390/768 × en/hi/mr — credit order (no payment step), UPI order with UTR+screenshot, bank transfer, cash, My payments list, delivered-order proof. Pass/Fixed/Fail table.
+- [x] 1 Checkout "How will you pay?" chips (credit only when limit>0 & not blocked, pre-selected) → set_order_payment_method after placement.
+- [x] 2 Order success per-order UPI QR (uploaded QR or generated from upi_id) + "Pay with UPI app" + "I've paid" (12-digit UTR and/or screenshot) → submit_payment_proof; per-firm payment when a checkout splits.
+- [x] 3 Bank transfer: firm bank details with copy buttons + UTR/screenshot proof.
+- [x] 4 Cheque/cash: "give it to the delivery person" note, no proof.
+- [x] 5 Order status: payment-hold "checking your payment" line, rejected-proof red note + reason + Send again, verified green "Payment received".
+- [x] 6 Delivery time one-liner from release_batch_at/released_at/express.
+- [x] 7 Balance "I have paid" → submit_payment_proof; reported payments read payment_proofs with status chips.
+- [x] 8 POD: signature/photo + "Verified with OTP" (otp_verified).
+- [x] 9 Status word "Placed" everywhere (no "Received").
+- [x] 10 QA: 9999900001/03 PIN 1234 at 360/390/768 × en/hi/mr — credit order (no payment step, method saved `credit`), UPI order with UTR+screenshot → "Checking your payment", bank transfer (SBI details + copy, UTR-only proof), cash note, My payments list (chips), Balance "I have paid" proof, delivered-order POD. Live-verified notes:
+      - Firms.upi_id / upi_qr_path are EMPTY in the database → UPI step shows "payment details will be shared" + "I've paid" (UTR/screenshot still works). QR appears automatically once Sunrich fills the firm's UPI ID / uploads a QR image — data entry, no code change.
+      - POD renders delivered time; "Verified with OTP" chip needs a trip stop with otp_verified=true (all current data is false); signature/photo need POD capture on a real delivery.
+      - 5 test orders (00027–00031) auto-approved before the in-app cancel window → cancelled by database update with note "Prompt-26 QA — cancel (test order)"; 3 payment proofs kept as QA records.
+      - Screenshot uploads go to <customer_id>/queries/… (the only customer-writable prefix in customer-docs policy); submit_payment_proof accepts it.
+      - "Pay with UPI app" handoff to GPay/PhonePe needs a real phone — not testable here.

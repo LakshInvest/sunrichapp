@@ -201,7 +201,7 @@
     "notFound": "This order is not on your account.",
     "liveTitle": "Active order",
     "trackBtn": "Track",
-    "deliveredBy": "Delivered by {{name}}",
+    "deliveredBy": "Delivery by {{name}}",
     "bySunrich": "Sunrich"
   },
   "account": {
@@ -467,7 +467,7 @@
     "expected": "Expected delivery: {{date}} · {{slot}}",
     "statusConfirmed": "Confirmed",
     "statusUnderReview": "Waiting for approval from Sunrich",
-    "deliveredBy": "Delivered by {{who}}",
+    "deliveredBy": "Delivery by {{who}}",
     "bySunrich": "Sunrich",
     "byDistributor": "your distributor",
     "trackOrder": "Track order",
@@ -916,7 +916,7 @@
     "empties": "Empty jars collected: {{count}}",
     "title": "Proof of delivery",
     "deliveredAt": "Delivered at",
-    "deliveredBy": "Delivered by",
+    "deliveredBy": "Delivery by",
     "photo": "Delivery photo",
     "signature": "Signature",
     "otpVerified": "Verified with OTP"

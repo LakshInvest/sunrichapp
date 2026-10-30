@@ -293,7 +293,10 @@ function Checkout() {
   };
 
   const onCredit = quote != null && quote.credit_limit > 0;
-  const exceedsCredit = quote != null && onCredit && quote.items_total + quote.deposit_total > quote.credit_available;
+  const exceedsCredit =
+    quote != null &&
+    onCredit &&
+    (quote.credit_exceeds ?? quote.items_total + quote.deposit_total > quote.credit_available);
 
   const inputCls =
     "min-h-12 w-full rounded-xl border border-input bg-card px-4 text-base text-foreground outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30";

@@ -50,6 +50,7 @@ const MapPreview = lazy(() => import("@/components/MapPreview"));
 
 function Checkout() {
   const { t } = useTranslation();
+  const isDemo = useIsDemo();
   const { lang } = useLang();
   const navigate = useNavigate();
   const offline = useOffline();

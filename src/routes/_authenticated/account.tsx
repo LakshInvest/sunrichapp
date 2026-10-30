@@ -17,7 +17,6 @@ import {
   LogOut,
   MapPin,
   MessagesSquare,
-  Package,
   ShieldCheck,
   Trash2,
   Wallet,

@@ -117,7 +117,7 @@ export function paymentMessage(r: PaymentReport): string {
   ].join("\n");
 }
 
-export function parsePaymentMessage(msg: string): Partial<PaymentReport> {
+export function parsePaymentMessage(msg: string): { amount?: number | undefined; mode?: PayMode | undefined; reference?: string | undefined; date?: string | undefined } {
   const get = (k: string) => msg.match(new RegExp(`^${k}: (.*)$`, "m"))?.[1]?.trim();
   const amt = get("Amount")?.replace(/[₹,]/g, "");
   return {
@@ -128,22 +128,22 @@ export function parsePaymentMessage(msg: string): Partial<PaymentReport> {
   };
 }
 
-export type ReportedPayment = { id: string; createdAt: string; status: string } & Partial<PaymentReport>;
+export type ReportedPayment = { id: string; createdAt: string; status: string } & ReturnType<typeof parsePaymentMessage>;
 
 /** Payment reports still waiting for accounts (not closed). */
 export async function fetchReportedPayments(): Promise<ReportedPayment[]> {
   const { data, error } = await supabase
     .from("customer_queries")
-    .select("id, created_at, status, customer_query_messages(message, created_at)")
+    .select("id, created_at, status, customer_query_messages(body, created_at)")
     .eq("context", "payment")
     .neq("status", "closed")
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
   return (data ?? []).map((q) => {
-    const msgs = ((q as { customer_query_messages?: { message: string; created_at: string }[] }).customer_query_messages ?? [])
+    const msgs = ((q as { customer_query_messages?: { body: string; created_at: string }[] }).customer_query_messages ?? [])
       .slice()
       .sort((a, b) => a.created_at.localeCompare(b.created_at));
-    return { id: q.id, createdAt: q.created_at, status: q.status, ...parsePaymentMessage(msgs[0]?.message ?? "") };
+    return { id: q.id, createdAt: q.created_at, status: q.status, ...parsePaymentMessage(msgs[0]?.body ?? "") };
   });
 }
 

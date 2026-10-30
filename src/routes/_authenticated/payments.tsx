@@ -6,6 +6,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight, ChevronRight as Go, Wallet } from
 import { z } from "zod";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { SheetDrawer } from "@/components/SheetDrawer";
 import { ErrorState, EmptyState, SlowNotice } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
 import { formatINR } from "@/lib/catalogue";

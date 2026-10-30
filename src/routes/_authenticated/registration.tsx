@@ -17,6 +17,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import en from "@/locales/en.json";
+import { scrollToFirstError, serverMessage } from "@/lib/form-errors";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
 import { LocationPicker } from "@/components/LocationPicker";
@@ -287,7 +288,11 @@ function Field({
     <label className="flex flex-col gap-1.5">
       <span className="text-sm font-medium text-foreground">{label}</span>
       {children}
-      {error ? <span className="text-xs font-medium text-destructive">{error}</span> : null}
+      {error ? (
+        <span data-field-error className="text-xs font-medium text-destructive">
+          {error}
+        </span>
+      ) : null}
     </label>
   );
 }
@@ -397,7 +402,10 @@ function DetailsStep({
       errs["email"] = t("registration.errInvalidEmail");
     if (requiresGps && !locationTouched) errs["location"] = t("registration.errLocation");
     setFieldErrors(errs);
-    if (Object.keys(errs).length > 0) return;
+    if (Object.keys(errs).length > 0) {
+      scrollToFirstError();
+      return;
+    }
 
     setBusy(true);
     setError(null);
@@ -524,7 +532,7 @@ function DetailsStep({
         </span>
         <LocationPicker value={location} onChange={setLocation} />
         {fieldErrors["location"] && (
-          <span className="text-xs font-medium text-destructive">{fieldErrors["location"]}</span>
+          <span data-field-error className="text-xs font-medium text-destructive">{fieldErrors["location"]}</span>
         )}
       </div>
 
@@ -635,7 +643,7 @@ function DocsStep({
         .from("customer-docs")
         .upload(path, prepared.blob, { contentType: prepared.mime });
       if (upErr) {
-        setError(t("registration.errUpload"));
+        setError(serverMessage(upErr, t("registration.errUpload")));
         return;
       }
       const docArgs = {

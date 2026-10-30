@@ -182,7 +182,7 @@ function LiveOrderCard({ order, lang, onTrack }: { order: OrderDto; lang: string
         <span className="truncate">
           {t("success.deliveredBy", { who: order.fulfillerCustomerId ? t("success.byDistributor") : t("success.bySunrich") })}
           {order.deliveryDate ? ` · ${dateLabel(order.deliveryDate, lang)}` : ""}
-          {order.deliverySlot ? ` · ${order.deliverySlot}` : ""}
+          {order.deliverySlot ? ` · ${localSlot(order.deliverySlot, slotSettings?.slots, i18n.language)}` : ""}
         </span>
       </p>
       <button

@@ -176,6 +176,16 @@ export function slotName(x: DeliverySlot, lang: string): string {
   return x.name;
 }
 
+/** Localise a stored order slot (code or any-language name) using the configured slots. */
+export function localSlot(stored: string | null | undefined, slots: DeliverySlot[] | undefined, lang: string): string {
+  if (!stored) return "";
+  const v = stored.trim().toLowerCase();
+  const x = (slots ?? []).find((y) =>
+    [y.code, y.name, y.name_hi, y.name_mr].some((n) => (n ?? "").trim().toLowerCase() === v),
+  );
+  return x ? slotName(x, lang) : stored;
+}
+
 /** Amount still needed to reach the minimum order, 0 when met. */
 export function minOrderShortfall(total: number, minOrderValue: number): number {
   return minOrderValue > 0 && total < minOrderValue ? Math.round((minOrderValue - total) * 100) / 100 : 0;

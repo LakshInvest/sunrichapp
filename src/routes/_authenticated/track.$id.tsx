@@ -319,7 +319,7 @@ function OrderDetail() {
               who: order.fulfillerCustomerId ? t("success.byDistributor") : t("success.bySunrich"),
             })}
             {order.deliveryDate ? ` · ${t("checkout.deliversOn", { date: dateLabel(order.deliveryDate, lang) })}` : ""}
-            {order.deliverySlot ? ` · ${order.deliverySlot}` : ""}
+            {order.deliverySlot ? ` · ${localSlot(order.deliverySlot, slotSettings?.slots, i18n.language)}` : ""}
           </p>
           <div className="mt-3">
             <Suspense fallback={<div className="h-36 w-full animate-pulse rounded-xl bg-muted" />}>

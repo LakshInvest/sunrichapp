@@ -231,7 +231,7 @@ function Inbox() {
                       {[o.deliveryLine2, o.deliveryLandmark, o.deliveryCity].filter(Boolean).join(", ")}
                     </p>
                   )}
-                  <p className="mt-0.5 text-xs text-muted-foreground">{dateLabel(o.deliveryDate ?? o.createdAt, lang)}{o.deliverySlot ? ` · ${o.deliverySlot}` : ""}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{dateLabel(o.deliveryDate ?? o.createdAt, lang)}{o.deliverySlot ? ` · ${localSlot(o.deliverySlot, slotSettings?.slots, i18n.language)}` : ""}</p>
                   <div className="mt-2 flex items-center justify-between gap-3">
                     <p className="min-w-0 flex-1 truncate text-sm text-foreground">
                       {s.first}

@@ -30,6 +30,7 @@ import {
   rangeFor,
   shareOrDownload,
   statementPdf,
+  type Balance,
   type PayMode,
   type RangeKey,
   type ReportedPayment,
@@ -347,12 +348,12 @@ function PaidSheet({ open, onOpenChange, onSent }: { open: boolean; onOpenChange
   const [ref, setRef] = useState("");
   const [date, setDate] = useState(today);
   const [file, setFile] = useState<File | null>(null);
-  const [errs, setErrs] = useState<Record<string, string>>({});
+  const [errs, setErrs] = useState<Partial<Record<"amount" | "ref" | "date", string>>>({});
   const [sending, setSending] = useState(false);
   const refLabel = useMemo(() => t(`balance.refLabel.${mode}`), [mode, t]);
 
   const submit = async () => {
-    const e: Record<string, string> = {};
+    const e: Partial<Record<"amount" | "ref" | "date", string>> = {};
     const amt = Number(amount);
     if (!(amt > 0)) e.amount = t("balance.errAmount");
     if (mode !== "cash" && !ref.trim()) e.ref = t("balance.errRef");

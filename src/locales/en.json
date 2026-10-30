@@ -339,7 +339,7 @@
     "draft": "Incomplete",
     "blocked": "On hold",
     "placed": "Received",
-    "credit_hold": "Under review",
+    "credit_hold": "Waiting for approval",
     "approved": "Confirmed",
     "processing": "Packed",
     "dispatched": "Out for delivery",

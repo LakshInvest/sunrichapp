@@ -238,7 +238,7 @@ function Cart() {
                       onClick={() => setQty(product.id, qty - 1)}
                       disabled={offline}
                       aria-label={t("home.decreaseQty")}
-                      className="flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90 disabled:opacity-40"
+                      className="relative flex h-9 w-9 items-center justify-center rounded-full transition after:absolute after:-inset-y-1.5 after:-inset-x-1 after:content-[''] active:scale-90 disabled:opacity-40"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
@@ -248,7 +248,7 @@ function Cart() {
                       onClick={() => setQty(product.id, qty + 1)}
                       disabled={offline || (product.maxOrderQty != null && qty >= product.maxOrderQty)}
                       aria-label={t("home.increaseQty")}
-                      className="flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90 disabled:opacity-40"
+                      className="relative flex h-9 w-9 items-center justify-center rounded-full transition after:absolute after:-inset-y-1.5 after:-inset-x-1 after:content-[''] active:scale-90 disabled:opacity-40"
                     >
                       <Plus className="h-4 w-4" />
                     </button>

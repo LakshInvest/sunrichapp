@@ -4246,7 +4246,8 @@ export type Database = {
           cash_received: number | null
           company_id: string
           created_at: string
-          driver_user_id: string
+          customer_vehicle_no: string | null
+          driver_user_id: string | null
           end_odometer: number | null
           end_odometer_photo_url: string | null
           ended_at: string | null
@@ -4271,9 +4272,10 @@ export type Database = {
           status: Database["public"]["Enums"]["trip_status"]
           trip_date: string
           trip_no: string
+          trip_type: string
           unit_id: string
           updated_at: string
-          vehicle_id: string
+          vehicle_id: string | null
         }
         Insert: {
           cancel_reason?: string | null
@@ -4281,7 +4283,8 @@ export type Database = {
           cash_received?: number | null
           company_id: string
           created_at?: string
-          driver_user_id: string
+          customer_vehicle_no?: string | null
+          driver_user_id?: string | null
           end_odometer?: number | null
           end_odometer_photo_url?: string | null
           ended_at?: string | null
@@ -4306,9 +4309,10 @@ export type Database = {
           status?: Database["public"]["Enums"]["trip_status"]
           trip_date?: string
           trip_no: string
+          trip_type?: string
           unit_id: string
           updated_at?: string
-          vehicle_id: string
+          vehicle_id?: string | null
         }
         Update: {
           cancel_reason?: string | null
@@ -4316,7 +4320,8 @@ export type Database = {
           cash_received?: number | null
           company_id?: string
           created_at?: string
-          driver_user_id?: string
+          customer_vehicle_no?: string | null
+          driver_user_id?: string | null
           end_odometer?: number | null
           end_odometer_photo_url?: string | null
           ended_at?: string | null
@@ -4341,9 +4346,10 @@ export type Database = {
           status?: Database["public"]["Enums"]["trip_status"]
           trip_date?: string
           trip_no?: string
+          trip_type?: string
           unit_id?: string
           updated_at?: string
-          vehicle_id?: string
+          vehicle_id?: string | null
         }
         Relationships: [
           {
@@ -5389,11 +5395,13 @@ export type Database = {
       plan_trip: {
         Args: {
           p_allow_short?: boolean
+          p_customer_vehicle_no?: string
           p_driver_user_id: string
           p_helper_ids?: string[]
           p_order_ids: string[]
           p_route_id?: string
           p_trip_date: string
+          p_trip_type?: string
           p_unit_id: string
           p_vehicle_id: string
         }

@@ -138,12 +138,13 @@ function RootComponent() {
     return () => subscription.unsubscribe();
   }, [router, queryClient]);
 
-  // Android shell: status bar, splash, hardware back (no-op on the web).
+  // Android shell: status bar, splash, hardware back, deep links (no-op on web).
   useEffect(() => {
     let cleanup: (() => void) | undefined;
     void initNative({
       isHome: () => router.state.location.pathname === "/home",
       onExitHint: () => toast(i18n.t("native.backToExit"), { duration: 2000 }),
+      openPath: (path) => void router.navigate({ to: path, replace: false }),
     }).then((c) => (cleanup = c));
     return () => cleanup?.();
   }, [router]);

@@ -30,7 +30,12 @@ export function openExternal(url: string): void {
  * Back closes an open sheet/dialog first (they own a history entry), then
  * goes back one screen; on Home a second press within 2 s exits.
  */
-export async function initNative(opts: { isHome: () => boolean; onExitHint: () => void }): Promise<() => void> {
+export async function initNative(opts: {
+  isHome: () => boolean;
+  onExitHint: () => void;
+  /** Deep-link navigation, e.g. sunrich://order/<id> → /track/<id>. */
+  openPath?: (path: string) => void;
+}): Promise<() => void> {
   if (!isNative()) return () => undefined;
   const [{ App }, { StatusBar, Style }, { SplashScreen }] = await Promise.all([
     import("@capacitor/app"),
@@ -40,6 +45,13 @@ export async function initNative(opts: { isHome: () => boolean; onExitHint: () =
   void StatusBar.setBackgroundColor({ color: "#0B2545" }).catch(() => undefined);
   void StatusBar.setStyle({ style: Style.Dark }).catch(() => undefined);
   void SplashScreen.hide().catch(() => undefined);
+
+  // sunrich://order/<id> and https://…/order/<id> open that order.
+  const urlOpen = await App.addListener("appUrlOpen", ({ url }) => {
+    const m = /^(?:sunrich:\/\/|https:\/\/[^/]+)\/order\/([A-Za-z0-9_-]+)/.exec(url);
+    if (m && opts.openPath) opts.openPath(`/track/${m[1]}`);
+  });
+
   let lastBack = 0;
   const handle = await App.addListener("backButton", () => {
     const sheetOpen = !!document.querySelector('[role="dialog"][data-state="open"], [vaul-drawer][data-state="open"]');
@@ -59,5 +71,8 @@ export async function initNative(opts: { isHome: () => boolean; onExitHint: () =
     }
     history.back();
   });
-  return () => void handle.remove();
+  return () => {
+    void urlOpen.remove();
+    void handle.remove();
+  };
 }

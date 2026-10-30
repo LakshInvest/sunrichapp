@@ -127,7 +127,7 @@ export function ProductCard({
               onClick={onAdd}
               disabled={disabled}
               title={blocked ? t("cart.orderingAfterApproval") : offline ? t("offline.hint") : undefined}
-              className="flex h-8 shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-primary pl-2 pr-3 text-xs font-bold text-primary-foreground shadow-sm transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+              className="relative flex h-8 shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-primary pl-2 pr-3 text-xs font-bold text-primary-foreground shadow-sm transition active:scale-95 after:absolute after:-inset-y-2 after:-inset-x-1 after:content-[''] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Plus className="h-3.5 w-3.5" aria-hidden />
               {t("home.addToCart")}
@@ -138,7 +138,7 @@ export function ProductCard({
                 type="button"
                 onClick={onDec}
                 aria-label={t("home.decreaseQty")}
-                className="flex h-8 w-7 items-center justify-center rounded-full transition active:scale-90"
+                className="relative flex h-8 w-7 items-center justify-center rounded-full transition active:scale-90 after:absolute after:-inset-y-2 after:-inset-x-1 after:content-['']"
               >
                 <Minus className="h-3.5 w-3.5" />
               </button>
@@ -148,7 +148,7 @@ export function ProductCard({
                 onClick={onInc}
                 disabled={product.maxOrderQty != null && qty >= product.maxOrderQty}
                 aria-label={t("home.increaseQty")}
-                className="flex h-8 w-7 items-center justify-center rounded-full transition active:scale-90 disabled:opacity-40"
+                className="relative flex h-8 w-7 items-center justify-center rounded-full transition after:absolute after:-inset-y-2 after:-inset-x-1 after:content-[''] active:scale-90 disabled:opacity-40"
               >
                 <Plus className="h-3.5 w-3.5" />
               </button>

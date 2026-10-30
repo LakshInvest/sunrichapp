@@ -33,7 +33,12 @@ import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
 import { useFavourites } from "@/hooks/use-favourites";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
-import { hasOrderUpdates } from "@/lib/orders";
+import { fetchMyOrders, hasOrderUpdates, type OrderDto } from "@/lib/orders";
+import { fetchMyFeedback, planReorder, skippedRatings } from "@/lib/feedback";
+import { RateOrderCard } from "@/components/RateOrderCard";
+import { useAppSettings } from "@/lib/app-settings";
+import { toast } from "sonner";
+import { Repeat2 } from "lucide-react";
 import { getMyRegistration, type RegistrationDto } from "@/lib/registration.functions";
 import {
   addRecentSearch,
@@ -179,6 +184,42 @@ function Home() {
       clearInterval(id);
     };
   }, []);
+
+  // Order again + rate last delivery (Tasks 5 & 6).
+  const settings = useAppSettings();
+  const [lastDelivered, setLastDelivered] = useState<OrderDto | null>(null);
+  const [rateOrder, setRateOrder] = useState<OrderDto | null>(null);
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      try {
+        const list = await fetchMyOrders();
+        const done = list.filter((o) => o.status === "delivered" || o.status === "closed");
+        if (!active) return;
+        setLastDelivered(done[0] ?? null);
+        const recent = done.slice(0, 5);
+        const fb = await fetchMyFeedback(recent.map((o) => o.id));
+        const skipped = skippedRatings();
+        if (active) setRateOrder(recent.find((o) => !fb[o.id] && !skipped.includes(o.id)) ?? null);
+      } catch {
+        /* offline — skip */
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+  const orderAgain = () => {
+    if (!lastDelivered) return;
+    const { add, skipped } = planReorder(lastDelivered.lines, data?.products ?? []);
+    if (add.length === 0) {
+      toast.error(t("reorder.noneAvailable"));
+      return;
+    }
+    for (const l of add) setQty(l.productId, l.qty);
+    if (skipped > 0) toast(t("reorder.someSkipped", { count: skipped }));
+    void navigate({ to: "/cart" });
+  };
 
   const pull = usePullToRefresh(() => load(true));
 
@@ -655,6 +696,26 @@ function Home() {
                   {t("home.open")}
                 </button>
               </div>
+            )}
+            {settings?.feedbackEnabled !== false && rateOrder && (
+              <div className="mx-5 mb-4">
+                <RateOrderCard allowSkip orderId={rateOrder.id} orderNo={rateOrder.orderNo} onDone={() => setRateOrder(null)} />
+              </div>
+            )}
+            {lastDelivered && count === 0 && (
+              <button
+                type="button"
+                onClick={orderAgain}
+                className="mx-5 mb-4 flex min-h-14 w-[calc(100%-2.5rem)] items-center gap-3 rounded-xl border border-secondary/30 bg-card px-4 text-left shadow-sm transition active:scale-[0.98]"
+              >
+                <Repeat2 className="h-5 w-5 shrink-0 text-secondary" aria-hidden />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-bold text-foreground">{t("reorder.title")}</span>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {t("reorder.sub", { no: lastDelivered.orderNo, count: lastDelivered.lines.length })}
+                  </span>
+                </span>
+              </button>
             )}
             <div className="relative z-30 -mt-7 px-5">
               <SearchBox

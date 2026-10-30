@@ -45,3 +45,11 @@ Fixes during this task: ORDER_SELECT now includes customer_id (own-order filter 
 - [x] 5. Inbox: waiting timer (amber ≥60 min), vibrate on new order, area + number. Not live-verified: no distributor account.
 - [ ] 6. Ask attachments — code fixed (upload failure no longer silently drops the file); live photo/PDF retest blocked: database connection expired.
 - [ ] 7. Signed-in screen QA at 360/390/768 — blocked for the same reason.
+
+## Prompt-22
+- [x] Catalogue by Command Center category order, sections on Shop
+- [x] Product card redesign (+ detail/cart price style)
+- [x] Demo account (code done) — blocked: no profile has is_demo set in the database yet
+- [ ] Live re-test of Ask attachments + 360/390/768 en/hi/mr — blocked: needs working demo login
+- [x] Speed: 5-min catalogue cache, lazy cropper (maps already lazy); Home timing not measured (no sign-in)
+- [x] Bottom nav Home · Shop · Orders · Account, live order card, Orders badge

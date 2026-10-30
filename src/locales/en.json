@@ -630,7 +630,10 @@
     "emptyTitle": "No saved addresses yet",
     "emptyBody": "Add your shop, home or godown to choose it at checkout.",
     "line1": "Address (house / shop no., street)",
-    "line2": "Area / colony (optional)"
+    "line2": "Area / colony (optional)",
+    "errLine1": "Enter the house / shop number and street",
+    "errMobile": "Enter a valid 10-digit mobile number",
+    "errPincode": "Enter a valid 6-digit pincode"
   },
   "feedback": {
     "title": "How was your delivery?",
@@ -649,7 +652,8 @@
       "late": "Late",
       "damaged": "Damaged",
       "wrong_items": "Wrong items"
-    }
+    },
+    "stars": "{{count}} stars"
   },
   "jars": {
     "withYou_one": "You have {{count}} jar with you",

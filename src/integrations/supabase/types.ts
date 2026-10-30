@@ -183,8 +183,13 @@ export type Database = {
           delivery_slots: Json
           feedback_enabled: boolean
           holidays: string[]
+          latest_app_version: string
+          maintenance_message: string | null
+          min_app_version: string
           min_order_value: number
           multiple_addresses: boolean
+          play_store_url: string | null
+          privacy_md: string | null
           privacy_url: string | null
           same_day_cutoff: string
           show_jar_balance: boolean
@@ -192,6 +197,7 @@ export type Database = {
           support_hours: string | null
           support_phone: string | null
           support_whatsapp: string | null
+          terms_md: string | null
           terms_url: string | null
           updated_at: string
           updated_by: string | null
@@ -208,8 +214,13 @@ export type Database = {
           delivery_slots?: Json
           feedback_enabled?: boolean
           holidays?: string[]
+          latest_app_version?: string
+          maintenance_message?: string | null
+          min_app_version?: string
           min_order_value?: number
           multiple_addresses?: boolean
+          play_store_url?: string | null
+          privacy_md?: string | null
           privacy_url?: string | null
           same_day_cutoff?: string
           show_jar_balance?: boolean
@@ -217,6 +228,7 @@ export type Database = {
           support_hours?: string | null
           support_phone?: string | null
           support_whatsapp?: string | null
+          terms_md?: string | null
           terms_url?: string | null
           updated_at?: string
           updated_by?: string | null
@@ -233,8 +245,13 @@ export type Database = {
           delivery_slots?: Json
           feedback_enabled?: boolean
           holidays?: string[]
+          latest_app_version?: string
+          maintenance_message?: string | null
+          min_app_version?: string
           min_order_value?: number
           multiple_addresses?: boolean
+          play_store_url?: string | null
+          privacy_md?: string | null
           privacy_url?: string | null
           same_day_cutoff?: string
           show_jar_balance?: boolean
@@ -242,6 +259,7 @@ export type Database = {
           support_hours?: string | null
           support_phone?: string | null
           support_whatsapp?: string | null
+          terms_md?: string | null
           terms_url?: string | null
           updated_at?: string
           updated_by?: string | null
@@ -3115,10 +3133,14 @@ export type Database = {
           company_id: string
           created_at: string
           created_by: string | null
+          default_deposit: number | null
+          default_gst_rate: number | null
+          default_hsn: string | null
           icon_key: string | null
           id: string
           image_url: string | null
           is_active: boolean
+          is_returnable: boolean
           name: string
           name_hi: string | null
           name_mr: string | null
@@ -3130,10 +3152,14 @@ export type Database = {
           company_id: string
           created_at?: string
           created_by?: string | null
+          default_deposit?: number | null
+          default_gst_rate?: number | null
+          default_hsn?: string | null
           icon_key?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_returnable?: boolean
           name: string
           name_hi?: string | null
           name_mr?: string | null
@@ -3145,10 +3171,14 @@ export type Database = {
           company_id?: string
           created_at?: string
           created_by?: string | null
+          default_deposit?: number | null
+          default_gst_rate?: number | null
+          default_hsn?: string | null
           icon_key?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_returnable?: boolean
           name?: string
           name_hi?: string | null
           name_mr?: string | null
@@ -3354,6 +3384,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      push_tokens: {
+        Row: {
+          app: string
+          device_id: string
+          id: string
+          language: string | null
+          platform: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app?: string
+          device_id: string
+          id?: string
+          language?: string | null
+          platform?: string
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app?: string
+          device_id?: string
+          id?: string
+          language?: string | null
+          platform?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       receipt_allocations: {
         Row: {
@@ -5273,6 +5336,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      my_devices: {
+        Args: never
+        Returns: {
+          device_id: string
+          device_label: string
+          last_used_at: string
+          trusted_at: string
+        }[]
+      }
       my_permissions: {
         Args: never
         Returns: {
@@ -5343,6 +5415,7 @@ export type Database = {
           product_id: string
         }[]
       }
+      public_app_info: { Args: never; Returns: Json }
       quote_my_order: { Args: { p_lines: Json }; Returns: Json }
       raise_trip_alert: {
         Args: {
@@ -5487,6 +5560,7 @@ export type Database = {
         Args: { p_approve: boolean; p_expense_id: string }
         Returns: undefined
       }
+      revoke_my_device: { Args: { p_device_id: string }; Returns: undefined }
       revoke_user_devices: { Args: { p_user_id: string }; Returns: number }
       save_my_address: {
         Args: {
@@ -5508,6 +5582,16 @@ export type Database = {
       }
       save_my_preferences: {
         Args: { p_dashboard?: Json; p_sidebar?: Json }
+        Returns: undefined
+      }
+      save_my_push_token: {
+        Args: {
+          p_app?: string
+          p_device_id: string
+          p_language?: string
+          p_platform?: string
+          p_token: string
+        }
         Returns: undefined
       }
       scope_ok: { Args: { p_id: string; p_type: string }; Returns: boolean }

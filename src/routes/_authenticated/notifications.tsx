@@ -13,10 +13,10 @@ import { markOrdersSeen } from "@/lib/orders";
 export const Route = createFileRoute("/_authenticated/notifications")({
   head: () => ({
     meta: [
-      { title: `${en.notices.title} — Sunrich` },
-      { name: "description", content: en.notices.metaDescription },
-      { property: "og:title", content: `${en.notices.title} — Sunrich` },
-      { property: "og:description", content: en.notices.metaDescription },
+      { title: `Notifications — Sunrich` },
+      { name: "description", content: "Updates on your orders, bills and questions." },
+      { property: "og:title", content: `Notifications — Sunrich` },
+      { property: "og:description", content: "Updates on your orders, bills and questions." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

@@ -39,10 +39,10 @@ import {
 export const Route = createFileRoute("/_authenticated/balance")({
   head: () => ({
     meta: [
-      { title: `${en.balance.title} — Sunrich` },
-      { name: "description", content: en.balance.metaDescription },
-      { property: "og:title", content: `${en.balance.title} — Sunrich` },
-      { property: "og:description", content: en.balance.metaDescription },
+      { title: `Balance & statement — Sunrich` },
+      { name: "description", content: "Your outstanding balance, credit and statement." },
+      { property: "og:title", content: `Balance & statement — Sunrich` },
+      { property: "og:description", content: "Your outstanding balance, credit and statement." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

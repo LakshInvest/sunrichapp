@@ -26,10 +26,10 @@ import {
 export const Route = createFileRoute("/_authenticated/devices")({
   head: () => ({
     meta: [
-      { title: `${en.devices.title} — Sunrich` },
-      { name: "description", content: en.devices.body },
-      { property: "og:title", content: `${en.devices.title} — Sunrich` },
-      { property: "og:description", content: en.devices.body },
+      { title: `Logged-in phones — Sunrich` },
+      { name: "description", content: "Phones where your account is signed in." },
+      { property: "og:title", content: `Logged-in phones — Sunrich` },
+      { property: "og:description", content: "Phones where your account is signed in." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

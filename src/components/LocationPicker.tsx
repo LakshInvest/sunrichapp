@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Crosshair, Loader2, MapPin } from "lucide-react";
 import { SheetDrawer } from "./SheetDrawer";
@@ -11,9 +11,12 @@ const LocationMap = lazy(() => import("./LocationMap"));
 export function LocationPicker({
   value,
   onChange,
+  autoLocate = false,
 }: {
   value: LocationValue;
   onChange: (v: LocationValue) => void;
+  /** Start locating on mount (explanation sheet first if not yet accepted). */
+  autoLocate?: boolean;
 }) {
   const { t } = useTranslation();
   const [locating, setLocating] = useState(false);
@@ -30,6 +33,10 @@ export function LocationPicker({
     }
     runLocate();
   };
+  useEffect(() => {
+    if (autoLocate) locate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoLocate]);
 
   const runLocate = () => {
     setDenied(false);

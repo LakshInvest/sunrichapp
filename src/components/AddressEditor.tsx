@@ -31,12 +31,14 @@ export function AddressEditor({
   address,
   isFirst,
   onSaved,
+  autoLocate = false,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   address: SavedAddress | null;
   isFirst: boolean;
   onSaved: (id: string) => void;
+  autoLocate?: boolean;
 }) {
   const { t } = useTranslation();
   const offline = useOffline();
@@ -155,7 +157,7 @@ export function AddressEditor({
           {field("contactName", t("addresses.contactName"))}
           {field("contactMobile", t("addresses.contactMobile"), { numeric: true, max: 10 })}
           <div className="pt-2">
-            <LocationPicker value={pin ?? DEFAULT_LOCATION} onChange={setPin} />
+            <LocationPicker value={pin ?? DEFAULT_LOCATION} onChange={setPin} autoLocate={autoLocate && !address} />
           </div>
           {!isFirst && !address?.isDefault && (
             <label className="flex min-h-12 items-center justify-between gap-3">

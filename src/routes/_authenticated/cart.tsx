@@ -191,7 +191,7 @@ function Cart() {
                   className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm"
                 >
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-secondary/10">
-                    <SmartImage
+                    <SmartImage width={64}
                       src={product.imageUrl ?? product.images[0] ?? null}
                       alt={loc(product.name, lang)}
                       className="h-16 w-16 object-cover"

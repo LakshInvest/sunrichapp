@@ -288,7 +288,7 @@ function ProductDetail() {
                     onClick={() => navigate({ to: "/product/$id", params: { id: s.id } })}
                     className="block w-full overflow-hidden rounded-2xl border border-border bg-card p-2.5 text-left shadow-sm transition active:scale-[0.98]"
                   >
-                    <SmartImage
+                    <SmartImage width={160}
                       src={s.imageUrl ?? s.images[0] ?? null}
                       alt={loc(s.name, lang)}
                       className="aspect-square w-full rounded-xl object-cover"

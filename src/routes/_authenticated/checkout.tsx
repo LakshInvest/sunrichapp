@@ -328,7 +328,7 @@ function Checkout() {
                   return (
                     <li key={product.id} className="flex items-center gap-3">
                       <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-secondary/10">
-                        <SmartImage
+                        <SmartImage width={48}
                           src={product.imageUrl ?? product.images[0] ?? null}
                           alt={loc(product.name, lang)}
                           className="h-12 w-12 object-cover"

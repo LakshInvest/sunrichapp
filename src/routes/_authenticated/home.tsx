@@ -187,7 +187,7 @@ function Home() {
   const pending = reg?.status === "pending_approval";
 
   const activeCategories = data?.categories ?? [];
-  const activeBanners = data?.banners ?? [];
+  const activeBanners = (data?.banners ?? []).filter((b) => b.imageUrl || b.title.en.trim() !== "");
   const sections = data?.sections ?? [];
 
   const isFav = (p: { id: string; isFavourite: boolean }) => fav.isFav(p);

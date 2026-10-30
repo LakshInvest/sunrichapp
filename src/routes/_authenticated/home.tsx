@@ -28,7 +28,6 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { SearchBox } from "@/components/catalog/SearchBox";
 import { NoResultsState, ChipsSkeleton, GridSkeleton, BannerSkeleton, HeroSkeleton, ErrorState } from "@/components/catalog/states";
-import { JAR_HERO_IMAGE } from "@/components/catalog/image-fallbacks";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
@@ -244,7 +243,7 @@ function Home() {
   };
 
   const hero = data?.hero ?? null;
-  const heroProductImage = hero?.productImageUrl ?? JAR_HERO_IMAGE;
+  const heroProductImage = hero?.productImageUrl ?? null;
   const heroGreeting = hero?.greeting ? loc(hero.greeting, lang) : t("home.greeting");
   const heroDelivery = hero?.deliveryLine ? loc(hero.deliveryLine, lang) : t("home.deliveryToday");
 
@@ -329,11 +328,6 @@ function Home() {
                   />
                 )}
                 {banner.imageUrl && <div className="absolute inset-0 bg-primary/60" aria-hidden />}
-                <SmartImage
-                  src={heroProductImage}
-                  alt=""
-                  className="absolute -right-2 bottom-0 h-28 w-24 rotate-6 object-contain opacity-90 drop-shadow-lg"
-                />
                 <div className="relative z-10 flex max-w-[75%] flex-col gap-1 p-4">
                   {banner.tag && (
                     <span className="w-fit rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-bold text-accent-foreground">
@@ -597,14 +591,18 @@ function Home() {
                   {heroDelivery}
                 </p>
 
+                {heroProductImage && (
                 <div aria-hidden className="absolute bottom-3 right-1 z-10 w-36">
                   <div className="absolute inset-2 -z-10 rounded-full bg-secondary/50 blur-2xl" />
                   <SmartImage
                     src={heroProductImage}
                     alt=""
+                    width={144}
+                    eager
                     className="w-full rotate-[9deg] rounded-2xl object-cover drop-shadow-[0_16px_24px_rgba(11,37,69,0.45)]"
                   />
                 </div>
+                )}
 
                 <svg
                   className="absolute inset-x-0 bottom-0 h-12 w-full text-white/10"

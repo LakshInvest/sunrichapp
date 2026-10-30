@@ -5,8 +5,10 @@ import { SlotText } from "@/components/SlotText";
 import { DeliveredLines, DeliveryOtpCard, PickupPass, ProofOfDelivery } from "@/components/OrderExtras";
 import { fetchDeliveryProof, showDeliveryOtp, type DeliveryProof } from "@/lib/delivery";
 import { toast } from "sonner";
-import { ArrowLeft, Ban, FileText, HelpCircle, Loader2, Repeat2 } from "lucide-react";
+import { ArrowLeft, Ban, FileText, HelpCircle, Loader2, Repeat2, Truck } from "lucide-react";
 import { fetchInvoiceIdForOrder } from "@/lib/billing";
+import { fetchMyPaymentProofs, fetchPaymentHold, latestProofFor, releaseLine, type PaymentProof } from "@/lib/payments";
+import { PaymentProofSheet, PaymentStatusNote, type ProofTarget } from "@/components/PaymentProofSheet";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SheetDrawer } from "@/components/SheetDrawer";
@@ -72,6 +74,9 @@ function OrderDetail() {
   const [invoiceId, setInvoiceId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<OrderFeedback | null | undefined>(undefined);
   const [proof, setProof] = useState<DeliveryProof | null>(null);
+  const [payProof, setPayProof] = useState<PaymentProof | null>(null);
+  const [payHold, setPayHold] = useState(false);
+  const [payTarget, setPayTarget] = useState<ProofTarget | null>(null);
   const settings = useAppSettings();
   const isDemo = useIsDemo();
 
@@ -85,6 +90,13 @@ function OrderDetail() {
         setInvoiceId(await fetchInvoiceIdForOrder(found.id).catch(() => null));
         if (["dispatched", "delivered", "closed"].includes(found.status))
           setProof(await fetchDeliveryProof(found.id).catch(() => null));
+        if (["placed", "credit_hold"].includes(found.status) && ["upi", "bank"].includes(found.paymentMethod ?? "")) {
+          setPayHold(await fetchPaymentHold(found.id));
+        } else {
+          setPayHold(false);
+        }
+        const proofs = await fetchMyPaymentProofs().catch(() => [] as PaymentProof[]);
+        setPayProof(latestProofFor(proofs, found.id));
         if (found.status === "delivered" || found.status === "closed")
           setFeedback((await fetchMyFeedback([found.id]).catch(() => ({}) as Record<string, OrderFeedback>))[found.id] ?? null);
       }
@@ -252,6 +264,44 @@ function OrderDetail() {
               {t("delivery.creditHold")}
             </p>
           )}
+          {(() => {
+            const rl = releaseLine(order);
+            if (!rl) return null;
+            return (
+              <p className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-secondary" data-testid="dispatch-line">
+                <Truck className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                {t(`dispatch.${rl.key}`, { time: rl.time, date: rl.date ? dateLabel(rl.date, lang) : undefined })}
+              </p>
+            );
+          })()}
+        </section>
+
+        {/* Payment method + proof status */}
+        <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-bold text-foreground">{t("trackDetail.payMethodLabel")}</p>
+            <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-bold text-foreground">
+              {t(
+                `trackDetail.payMethod.${order.paymentMethod ?? (order.paymentMode === "credit" ? "credit" : "cash")}`,
+                { defaultValue: order.paymentMethod ?? "" },
+              )}
+            </span>
+          </div>
+          <PaymentStatusNote
+            proof={payProof}
+            hold={payHold}
+            onSendAgain={
+              order.paymentMethod === "upi" || order.paymentMethod === "bank"
+                ? () =>
+                    setPayTarget({
+                      orderId: order.id,
+                      orderNo: order.orderNo,
+                      amount: order.grandTotal,
+                      method: order.paymentMethod === "bank" ? "bank" : "upi",
+                    })
+                : undefined
+            }
+          />
         </section>
 
         {showDeliveryOtp(order.status, order.deliveryOtp) && <DeliveryOtpCard otp={order.deliveryOtp!} />}
@@ -287,9 +337,6 @@ function OrderDetail() {
               <span>{t("cart.grandTotal")}</span>
               <span className="text-primary">{formatINR(order.grandTotal)}</span>
             </div>
-            <p className="pt-1 text-xs">
-              {order.paymentMode === "credit" ? t("trackDetail.paidOnCredit") : t("trackDetail.paidOnDelivery")}
-            </p>
           </div>
         </section>
 
@@ -461,6 +508,14 @@ function OrderDetail() {
           {offline && <p className="mt-2 text-center text-xs text-muted-foreground">{t("offline.hint")}</p>}
         </div>
       </SheetDrawer>
+      <PaymentProofSheet
+        open={payTarget != null}
+        onOpenChange={(o) => {
+          if (!o) setPayTarget(null);
+        }}
+        target={payTarget}
+        onDone={() => void load()}
+      />
     </main>
   );
 }

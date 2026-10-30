@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -61,9 +61,26 @@ function Inbox() {
   const [reason, setReason] = useState("");
   const [sending, setSending] = useState(false);
 
+  const seenNew = useRef<Set<string> | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+
   const load = useCallback(async () => {
     try {
       const list = await fetchInboxOrders();
+      const pending = list.filter((o) => o.distributorStatus === "pending").map((o) => o.id);
+      // Vibrate once when a new order arrives while the app is open (not on first load).
+      if (seenNew.current && pending.some((id) => !seenNew.current?.has(id))) {
+        try {
+          navigator.vibrate?.(200);
+        } catch {
+          /* unsupported */
+        }
+      }
+      seenNew.current = new Set([...(seenNew.current ?? []), ...pending]);
       setOrders(list);
       setError(null);
     } catch (e) {
@@ -192,7 +209,28 @@ function Inbox() {
                       {t(`status.${o.status}`)}
                     </span>
                   </div>
+                  {isNew && o.assignedAt && (() => {
+                    const mins = Math.max(0, Math.floor((now - new Date(o.assignedAt).getTime()) / 60_000));
+                    const late = mins >= 60;
+                    return (
+                      <p
+                        className={`mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                          late ? "bg-warning/15 text-warning" : "bg-secondary/10 text-secondary"
+                        }`}
+                      >
+                        <Clock className="h-3 w-3" aria-hidden />
+                        {mins >= 60
+                          ? t("inbox.waitingHours", { h: Math.floor(mins / 60), m: mins % 60 })
+                          : t("inbox.waiting", { n: mins })}
+                      </p>
+                    );
+                  })()}
                   <p className="mt-1 text-sm font-semibold text-foreground">{o.businessName || "—"}</p>
+                  {(o.deliveryLine2 || o.deliveryLandmark || o.deliveryCity) && (
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                      {[o.deliveryLine2, o.deliveryLandmark, o.deliveryCity].filter(Boolean).join(", ")}
+                    </p>
+                  )}
                   <p className="mt-0.5 text-xs text-muted-foreground">{dateLabel(o.deliveryDate ?? o.createdAt, lang)}{o.deliverySlot ? ` · ${o.deliverySlot}` : ""}</p>
                   <div className="mt-2 flex items-center justify-between gap-3">
                     <p className="min-w-0 flex-1 truncate text-sm text-foreground">
@@ -210,7 +248,7 @@ function Inbox() {
                           className="flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-border bg-background text-sm font-semibold text-foreground transition active:scale-95"
                         >
                           <Phone className="h-4 w-4 text-secondary" aria-hidden />
-                          {t("inbox.call")}
+                          <span className="truncate">{o.customerMobile.replace(/^\+91/, "")}</span>
                         </a>
                         <button
                           type="button"

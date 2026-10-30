@@ -43,6 +43,8 @@ export type OrderDto = {
   deliveryAddressLine1: string | null;
   deliveryAddressLine2: string | null;
   deliveryLandmark: string | null;
+  deliveryLine2: string | null;
+  assignedAt: string | null;
   deliveryCity: string | null;
   deliveryPincode: string | null;
   deliveryLatitude: number | null;
@@ -57,7 +59,7 @@ export type OrderDto = {
 };
 
 const ORDER_SELECT =
-  "id, customer_id, order_no, status, hold_reason, cancel_reason, items_total, deposit_total, grand_total, amount_paid, payment_status, payment_mode, created_at, due_date, delivery_date, delivery_slot, delivery_address_line1, delivery_address_line2, delivery_landmark, delivery_city, delivery_pincode, delivery_latitude, delivery_longitude, notes, fulfiller_customer_id, distributor_status, business_name, customer_mobile, order_lines(id, product_id, product_code, product_name, pack_label, qty, unit_price, mrp, line_total, deposit_total, new_containers, sort_order), order_status_history(to_status, changed_at, note)";
+  "id, customer_id, order_no, status, hold_reason, cancel_reason, items_total, deposit_total, grand_total, amount_paid, payment_status, payment_mode, created_at, due_date, delivery_date, delivery_slot, delivery_address_line1, delivery_address_line2, delivery_landmark, delivery_city, delivery_pincode, delivery_latitude, delivery_longitude, notes, fulfiller_customer_id, distributor_status, distributor_assigned_at, business_name, customer_mobile, order_lines(id, product_id, product_code, product_name, pack_label, qty, unit_price, mrp, line_total, deposit_total, new_containers, sort_order), order_status_history(to_status, changed_at, note)";
 
 function n(v: unknown): number {
   const num = Number(v);
@@ -85,6 +87,8 @@ function mapOrder(r: any): OrderDto {
     deliveryAddressLine1: (r["delivery_address_line1"] as string) ?? null,
     deliveryAddressLine2: (r["delivery_address_line2"] as string) ?? null,
     deliveryLandmark: (r["delivery_landmark"] as string) ?? null,
+    deliveryLine2: (r["delivery_address_line2"] as string) ?? null,
+    assignedAt: (r["distributor_assigned_at"] as string) ?? null,
     deliveryCity: (r["delivery_city"] as string) ?? null,
     deliveryPincode: (r["delivery_pincode"] as string) ?? null,
     deliveryLatitude: r["delivery_latitude"] != null ? n(r["delivery_latitude"]) : null,

@@ -1,3 +1,4 @@
+import { serverMessage } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
@@ -262,8 +263,8 @@ function Thread() {
       setText("");
       setFile(null);
       await load();
-    } catch {
-      toast.error(t("queries.errSend"));
+    } catch (e) {
+      toast.error(serverMessage(e, t("queries.errSend")));
     }
     setSending(false);
   };

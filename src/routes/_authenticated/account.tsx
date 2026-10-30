@@ -1,3 +1,4 @@
+import { serverMessage } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
@@ -260,12 +261,13 @@ function Account() {
     if (!name || saving) return;
     setSaving(true);
     try {
-      await supabase.rpc("update_my_profile", { p_full_name: name });
+      const { error: upErr } = await supabase.rpc("update_my_profile", { p_full_name: name });
+      if (upErr) throw upErr;
       setProfile((p) => (p ? { ...p, name } : p));
       setEditOpen(false);
       toast.success(t("account.nameUpdated"));
-    } catch {
-      toast.error(t("registration.errGeneric"));
+    } catch (e) {
+      toast.error(serverMessage(e, t("registration.errGeneric")));
     } finally {
       setSaving(false);
     }
@@ -294,8 +296,8 @@ function Account() {
       });
       if (error) throw error;
       setDeleteDone(true);
-    } catch {
-      toast.error(t("queries.errSend"));
+    } catch (e) {
+      toast.error(serverMessage(e, t("queries.errSend")));
     } finally {
       setDeleting(false);
     }

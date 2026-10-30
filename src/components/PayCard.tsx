@@ -20,8 +20,8 @@ export function PayCard({
   info: FirmPayInfo | null;
   amount: number;
   orderNo: string;
-  hold?: boolean;
-  title?: string;
+  hold?: boolean | undefined;
+  title?: string | undefined;
   onPaid: () => void;
 }) {
   const { t } = useTranslation();

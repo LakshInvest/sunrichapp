@@ -62,7 +62,7 @@ export const Route = createFileRoute("/_authenticated/track/$id")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>): { pay?: 1 } => (s.pay ? { pay: 1 } : {}),
+  validateSearch: (s: Record<string, unknown>): { pay?: 1 } => (s["pay"] ? { pay: 1 } : {}),
   component: OrderDetail,
 });
 

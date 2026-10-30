@@ -161,8 +161,7 @@ function OrderSuccess() {
                       ? t("pay.deliveryByDistributor")
                       : t("pay.deliveryBySunrich")}
                 </p>
-                {proof && proof.status !== "rejected" && <PaymentStatusNote proof={proof} />}
-                {proof?.status === "rejected" && <PaymentStatusNote proof={proof} />}
+                {proof && <PaymentStatusNote proof={proof} />}
                 {payMethod === "cash" && <p className="mt-3 text-sm text-muted-foreground">{t("success.payCash")}</p>}
                 {payMethod === "cheque" && <p className="mt-3 text-sm text-muted-foreground">{t("success.payCheque")}</p>}
               </div>

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { ChevronRight, RefreshCw } from "lucide-react";
+import { ChevronRight, RefreshCw, Truck } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { ErrorState, EmptyState } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
@@ -14,6 +14,7 @@ import {
   itemsSummary,
   markOrdersSeen,
   statusGroup,
+  buildTimeline,
   type OrderDto,
   type OrderGroup,
 } from "@/lib/orders";
@@ -61,25 +62,13 @@ function MyOrders() {
 
   const visible = useMemo(() => (orders ?? []).filter((o) => statusGroup(o.status) === filter), [orders, filter]);
 
-  const switchCls = (active: boolean) =>
-    `min-h-10 flex-1 rounded-full px-4 text-sm font-semibold transition ${active ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"}`;
+  // Newest active order gets the live card on top.
+  const live = useMemo(() => (orders ?? []).find((o) => statusGroup(o.status) === "active") ?? null, [orders]);
 
   return (
     <main className="mx-auto min-h-screen max-w-md">
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-5 pb-3 pt-6 backdrop-blur-md">
         <h1 className="text-2xl font-bold text-primary">{t("track.title")}</h1>
-        <div className="mt-3 flex items-center gap-1 rounded-full border border-border bg-card p-1">
-          <button
-            type="button"
-            onClick={() => navigate({ to: "/order", search: { category: undefined } })}
-            className={switchCls(false)}
-          >
-            {t("track.tabShop")}
-          </button>
-          <button type="button" aria-current="page" className={switchCls(true)}>
-            {t("track.tabMyOrders")}
-          </button>
-        </div>
         <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto" role="group" aria-label={t("track.filters")}>
           {(
             [
@@ -125,7 +114,10 @@ function MyOrders() {
               <div key={i} className="h-28 animate-pulse rounded-2xl bg-muted" />
             ))}
           </div>
-        ) : visible.length === 0 ? (
+        ) : (
+          <>
+            {live && <LiveOrderCard order={live} lang={lang} onTrack={() => navigate({ to: "/track/$id", params: { id: live.id } })} />}
+            {visible.length === 0 ? (
           <EmptyState title={t("track.emptyTitle")} body={t("track.emptyBody")} />
         ) : (
           <ul className="space-y-3">
@@ -158,11 +150,49 @@ function MyOrders() {
               );
             })}
           </ul>
+            )}
+          </>
         )}
         {offline && orders != null && <p className="mt-3 text-center text-xs text-muted-foreground">{t("offline.hint")}</p>}
       </div>
 
       <BottomNav />
     </main>
+  );
+}
+
+function LiveOrderCard({ order, lang, onTrack }: { order: OrderDto; lang: string; onTrack: () => void }) {
+  const { t } = useTranslation();
+  const { steps, reached } = buildTimeline(order.status, order.history);
+  const current = steps[reached];
+  return (
+    <section className="mb-5 rounded-2xl bg-primary p-4 text-primary-foreground shadow-md" aria-label={t("track.liveTitle")}>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary-foreground/70">{t("track.liveTitle")}</p>
+        <p className="text-xs font-semibold text-primary-foreground/80">{order.orderNo}</p>
+      </div>
+      <p className="mt-1 text-lg font-bold">{current ? t(`trackDetail.step.${current.key}`) : t(`status.${order.status}`)}</p>
+      <ol className="mt-3 flex gap-1" aria-hidden>
+        {steps.map((s, i) => (
+          <li key={s.key} className={`h-1.5 flex-1 rounded-full ${i <= reached ? "bg-secondary" : "bg-primary-foreground/20"}`} />
+        ))}
+      </ol>
+      <p className="mt-3 flex items-center gap-1.5 text-xs text-primary-foreground/80">
+        <Truck className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        <span className="truncate">
+          {t("success.deliveredBy", { who: order.fulfillerCustomerId ? t("success.byDistributor") : t("success.bySunrich") })}
+          {order.deliveryDate ? ` · ${dateLabel(order.deliveryDate, lang)}` : ""}
+          {order.deliverySlot ? ` · ${order.deliverySlot}` : ""}
+        </span>
+      </p>
+      <button
+        type="button"
+        onClick={onTrack}
+        className="mt-3 flex min-h-11 w-full items-center justify-center gap-1 rounded-xl bg-primary-foreground text-sm font-bold text-primary transition active:scale-[0.99]"
+      >
+        {t("track.trackBtn")}
+        <ChevronRight className="h-4 w-4" aria-hidden />
+      </button>
+    </section>
   );
 }

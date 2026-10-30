@@ -50,7 +50,7 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   glass: CupSoda,
 };
 
-type Sort = "popular" | "price_asc" | "price_desc";
+type Sort = "arranged" | "popular" | "price_asc" | "price_desc";
 
 function Order() {
   const { t } = useTranslation();
@@ -66,7 +66,7 @@ function Order() {
   const [loading, setLoading] = useState(!readCatalogueCache());
   const [search, setSearch] = useState("");
   const [recents, setRecents] = useState<string[]>(() => loadRecentSearches());
-  const [sort, setSort] = useState<Sort>("popular");
+  const [sort, setSort] = useState<Sort>("arranged");
   const [selected, setSelected] = useState<string>(category ?? "all");
 
   useEffect(() => {
@@ -114,7 +114,9 @@ function Order() {
 
   const visible = useMemo(() => {
     let list = products.filter((p) => selected === "all" || p.categoryCode === selected).filter((p) => matchesSearch(p, search));
-    if (sort === "popular") {
+    if (sort === "arranged") {
+      // Catalogue already arrives in Command Center order.
+    } else if (sort === "popular") {
       list = [...list].sort((a, b) => Number(b.isPopular) - Number(a.isPopular) || a.sortOrder - b.sortOrder);
     } else if (sort === "price_asc") {
       list = [...list].sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
@@ -123,6 +125,18 @@ function Order() {
     }
     return list;
   }, [products, selected, search, sort]);
+
+  // "All" + arranged + no search: one section per category, as set in Command Center.
+  const sections = useMemo(() => {
+    if (selected !== "all" || sort !== "arranged" || search.trim() !== "") return [{ key: "all", cat: null, items: visible }];
+    const out = categories
+      .map((cat) => ({ key: cat.code, cat, items: visible.filter((p) => p.categoryCode === cat.code) }))
+      .filter((s) => s.items.length > 0);
+    const known = new Set(categories.map((c) => c.code));
+    const rest = visible.filter((p) => !known.has(p.categoryCode ?? ""));
+    if (rest.length) out.push({ key: "other", cat: null, items: rest } as never);
+    return out as { key: string; cat: (typeof categories)[number] | null; items: typeof visible }[];
+  }, [selected, sort, search, categories, visible]);
 
   const showError = !loading && !data;
 
@@ -137,19 +151,7 @@ function Order() {
       <OfflineBanner />
 
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-5 pb-3 pt-7 backdrop-blur-md">
-        <div className="flex items-center gap-1 rounded-full border border-border bg-card p-1" role="group" aria-label={t("order.tabSwitch")}>
-          <button type="button" aria-current="page" className="min-h-10 flex-1 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm">
-            {t("track.tabShop")}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate({ to: "/track" })}
-            className="min-h-10 flex-1 rounded-full px-4 text-sm font-semibold text-muted-foreground transition"
-          >
-            {t("track.tabMyOrders")}
-          </button>
-        </div>
-        <h1 className="mt-3 text-2xl font-bold text-primary">{t("order.title")}</h1>
+        <h1 className="text-2xl font-bold text-primary">{t("order.title")}</h1>
         <div className="mt-3">
           <SearchBox
             value={search}
@@ -212,6 +214,7 @@ function Order() {
             <ArrowDownWideNarrow className="ml-1.5 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
             {(
               [
+                ["arranged", "catalog.sortArranged"],
                 ["popular", "catalog.sortPopular"],
                 ["price_asc", "catalog.sortPriceAsc"],
                 ["price_desc", "catalog.sortPriceDesc"],
@@ -257,29 +260,46 @@ function Order() {
         ) : visible.length === 0 ? (
           <NoResultsState />
         ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {visible.map((product) => {
-              const p = { ...product, isFavourite: fav.isFav(product) };
+          <div className="space-y-6">
+            {sections.map((sec) => {
+              const SecIcon = sec.cat ? (CATEGORY_ICONS[sec.cat.iconKey] ?? LayoutGrid) : null;
               return (
-                <ProductCard
-                  key={p.id}
-                  product={p}
-                  qty={quantities[p.id] ?? 0}
-                  lang={lang}
-                  canOrder={p.canOrder}
-                  offline={offline}
-                  onOpen={() => void navigate({ to: "/product/$id", params: { id: p.id } })}
-                  onAdd={() => {
-                    setQty(p.id, p.minOrderQty || 1);
-                    if (p.price != null) saveCartPrice(p.id, p.price);
-                  }}
-                  onInc={() => {
-                    const max = p.maxOrderQty ?? Infinity;
-                    setQty(p.id, Math.min((quantities[p.id] ?? 0) + 1, max));
-                  }}
-                  onDec={() => setQty(p.id, (quantities[p.id] ?? 0) - 1)}
-                  onToggleFavourite={() => void fav.toggle(p)}
-                />
+                <section key={sec.key} aria-label={sec.cat ? loc(sec.cat.name, lang) : undefined}>
+                  {sec.cat && SecIcon && (
+                    <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/15">
+                        <SecIcon className="h-4 w-4 text-secondary" aria-hidden />
+                      </span>
+                      {loc(sec.cat.name, lang)}
+                    </h2>
+                  )}
+          <div className="grid grid-cols-2 gap-3">
+                    {sec.items.map((product) => {
+                      const p = { ...product, isFavourite: fav.isFav(product) };
+                      return (
+                        <ProductCard
+                          key={p.id}
+                          product={p}
+                          qty={quantities[p.id] ?? 0}
+                          lang={lang}
+                          canOrder={p.canOrder}
+                          offline={offline}
+                          onOpen={() => void navigate({ to: "/product/$id", params: { id: p.id } })}
+                          onAdd={() => {
+                            setQty(p.id, p.minOrderQty || 1);
+                            if (p.price != null) saveCartPrice(p.id, p.price);
+                          }}
+                          onInc={() => {
+                            const max = p.maxOrderQty ?? Infinity;
+                            setQty(p.id, Math.min((quantities[p.id] ?? 0) + 1, max));
+                          }}
+                          onDec={() => setQty(p.id, (quantities[p.id] ?? 0) - 1)}
+                          onToggleFavourite={() => void fav.toggle(p)}
+                        />
+                      );
+                    })}
+                  </div>
+                </section>
               );
             })}
           </div>

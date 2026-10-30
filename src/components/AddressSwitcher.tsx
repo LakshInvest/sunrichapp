@@ -53,7 +53,8 @@ export function AddressSwitcher({
     setEditing(a);
     setLocate(withGps);
     onOpenChange(false);
-    setEditorOpen(true);
+    // Let the closing sheet finish its back-history step before opening the next.
+    setTimeout(() => setEditorOpen(true), 350);
   };
 
   const makeDefault = async (a: SavedAddress) => {

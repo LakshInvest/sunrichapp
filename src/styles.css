@@ -251,5 +251,16 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ≥16px stops mobile browsers zooming on focus. */
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
   }
 }

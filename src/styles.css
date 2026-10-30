@@ -277,3 +277,11 @@
 .legal-md li { margin-bottom: 0.4rem; }
 .legal-md a { color: var(--secondary); text-decoration: underline; }
 .legal-md strong { font-weight: 700; }
+
+@media print {
+  header,
+  nav,
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+}

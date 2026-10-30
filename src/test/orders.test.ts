@@ -126,9 +126,9 @@ describe("buildTimeline", () => {
 
 describe("itemsSummary", () => {
   it("shows the first item with quantity and counts the rest", () => {
-    expect(itemsSummary([line("20 L Water Jar", 2)])).toEqual({ first: "20 L Water Jar ×2", more: 0 });
+    expect(itemsSummary([line("20 L Water Jar", 2)])).toEqual({ first: "20 L Water Jar · ×2", more: 0 });
     expect(itemsSummary([line("20 L Water Jar", 1), line("5 L Can", 1), line("Jar", 1)])).toEqual({
-      first: "20 L Water Jar ×1",
+      first: "20 L Water Jar · ×1",
       more: 2,
     });
     expect(itemsSummary([])).toEqual({ first: "—", more: 0 });

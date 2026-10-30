@@ -1,5 +1,6 @@
 /** Proof of delivery and per-line delivered quantities. Reads only what RLS lets the customer see. */
 import { supabase } from "@/integrations/supabase/client";
+import { getPodUrls } from "@/lib/pod.functions";
 
 export type DeliveredLine = {
   orderLineId: string;

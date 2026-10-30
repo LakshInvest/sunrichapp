@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   Trash2,
   Wallet,
+  Smartphone,
   type LucideIcon,
 } from "lucide-react";
 import en from "@/locales/en.json";
@@ -92,6 +93,8 @@ export const Route = createFileRoute("/_authenticated/account")({
 });
 
 import { APP_VERSION } from "@/lib/version";
+import { BalanceCard } from "@/components/BalanceCard";
+import { fetchBalance, type Balance } from "@/lib/ledger";
 
 function MenuItem({
   icon: Icon,
@@ -128,6 +131,10 @@ function Account() {
   const { t } = useTranslation();
   const { lang, choose } = useLang();
   const navigate = useNavigate();
+  const [balance, setBalance] = useState<Balance | null>(null);
+  useEffect(() => {
+    fetchBalance().then(setBalance, () => setBalance(null));
+  }, []);
   const { queryClient } = Route.useRouteContext();
   const myReg = useServerFn(getMyRegistration);
   const clearPhoto = useServerFn(clearMyPhoto);
@@ -426,6 +433,11 @@ function Account() {
         </section>
       )}
 
+      {/* My account balance (tap → full screen) */}
+      <button type="button" onClick={() => navigate({ to: "/balance" })} className="mt-4 block w-full text-left" aria-label={t("balance.title")}>
+        <BalanceCard bal={balance} compact />
+      </button>
+
       {/* Menu groups */}
       <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">
         <MenuItem icon={Wallet} label={t("account.payments")} onClick={() => navigate({ to: "/payments" })} />
@@ -437,6 +449,8 @@ function Account() {
         ) : (
           <MenuItem icon={MapPin} label={t("addresses.title")} onClick={() => navigate({ to: "/addresses" })} />
         )}
+        <Separator />
+        <MenuItem icon={Smartphone} label={t("devices.title")} onClick={() => navigate({ to: "/devices" })} />
         <Separator />
         <MenuItem icon={LifeBuoy} label={t("support.title")} onClick={() => navigate({ to: "/support" })} />
         <Separator />

@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Loader2, Share2 } from "lucide-react";
+import { ArrowLeft, Download, Loader2, MessageCircle, Share2 } from "lucide-react";
+import { openExternal } from "@/lib/native";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import en from "@/locales/en.json";
@@ -128,6 +129,20 @@ function InvoiceScreen() {
         )}
       </header>
 
+      {inv && (
+        <div className="grid grid-cols-2 gap-2 px-4 pt-3 print:hidden">
+          <button type="button" onClick={() => window.print()} className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border bg-card text-sm font-semibold">
+            <Download className="h-4 w-4 text-secondary" aria-hidden /> {t("invoice.downloadPdf")}
+          </button>
+          <button
+            type="button"
+            onClick={() => openExternal(`https://wa.me/?text=${encodeURIComponent(shareText(inv, firm))}`)}
+            className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border bg-card text-sm font-semibold"
+          >
+            <MessageCircle className="h-4 w-4 text-secondary" aria-hidden /> {t("invoice.whatsapp")}
+          </button>
+        </div>
+      )}
       <div className="px-4 pt-4">
         {error ? (
           <ErrorState message={error} onRetry={() => void load()} />

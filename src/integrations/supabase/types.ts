@@ -4321,6 +4321,7 @@ export type Database = {
           photo_url: string | null
           seq: number
           signature_url: string | null
+          signed_copy_received: boolean
           status: string
           trip_id: string
         }
@@ -4337,6 +4338,7 @@ export type Database = {
           photo_url?: string | null
           seq?: number
           signature_url?: string | null
+          signed_copy_received?: boolean
           status?: string
           trip_id: string
         }
@@ -4353,6 +4355,7 @@ export type Database = {
           photo_url?: string | null
           seq?: number
           signature_url?: string | null
+          signed_copy_received?: boolean
           status?: string
           trip_id?: string
         }
@@ -4430,6 +4433,8 @@ export type Database = {
           gate_out_at: string | null
           gate_out_by: string | null
           helper_user_ids: string[]
+          hired_driver_mobile: string | null
+          hired_driver_name: string | null
           id: string
           loaded_at: string | null
           loaded_by: string | null
@@ -4467,6 +4472,8 @@ export type Database = {
           gate_out_at?: string | null
           gate_out_by?: string | null
           helper_user_ids?: string[]
+          hired_driver_mobile?: string | null
+          hired_driver_name?: string | null
           id?: string
           loaded_at?: string | null
           loaded_by?: string | null
@@ -4504,6 +4511,8 @@ export type Database = {
           gate_out_at?: string | null
           gate_out_by?: string | null
           helper_user_ids?: string[]
+          hired_driver_mobile?: string | null
+          hired_driver_name?: string | null
           id?: string
           loaded_at?: string | null
           loaded_by?: string | null
@@ -4944,6 +4953,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           fitness_expiry: string | null
+          hired_driver_mobile: string | null
+          hired_driver_name: string | null
           id: string
           insurance_expiry: string | null
           insurance_url: string | null
@@ -4968,6 +4979,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           fitness_expiry?: string | null
+          hired_driver_mobile?: string | null
+          hired_driver_name?: string | null
           id?: string
           insurance_expiry?: string | null
           insurance_url?: string | null
@@ -4992,6 +5005,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           fitness_expiry?: string | null
+          hired_driver_mobile?: string | null
+          hired_driver_name?: string | null
           id?: string
           insurance_expiry?: string | null
           insurance_url?: string | null
@@ -5578,21 +5593,39 @@ export type Database = {
         }
         Returns: number
       }
-      plan_trip: {
-        Args: {
-          p_allow_short?: boolean
-          p_customer_vehicle_no?: string
-          p_driver_user_id: string
-          p_helper_ids?: string[]
-          p_order_ids: string[]
-          p_route_id?: string
-          p_trip_date: string
-          p_trip_type?: string
-          p_unit_id: string
-          p_vehicle_id: string
-        }
-        Returns: string
-      }
+      plan_trip:
+        | {
+            Args: {
+              p_allow_short?: boolean
+              p_customer_vehicle_no?: string
+              p_driver_user_id: string
+              p_helper_ids?: string[]
+              p_order_ids: string[]
+              p_route_id?: string
+              p_trip_date: string
+              p_trip_type?: string
+              p_unit_id: string
+              p_vehicle_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_allow_short?: boolean
+              p_customer_vehicle_no?: string
+              p_driver_user_id: string
+              p_helper_ids?: string[]
+              p_hired_driver_mobile?: string
+              p_hired_driver_name?: string
+              p_order_ids: string[]
+              p_route_id?: string
+              p_trip_date: string
+              p_trip_type?: string
+              p_unit_id: string
+              p_vehicle_id: string
+            }
+            Returns: string
+          }
       price_plan_for_customer: {
         Args: { p_customer_id: string }
         Returns: string

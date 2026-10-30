@@ -70,7 +70,8 @@
       "confirmRow": "PIN की पुष्टि करें",
       "deviceNotRecognised": "यह डिवाइस पहचाना नहीं गया — एक बार OTP से सत्यापित करें।",
       "success": "फिर से स्वागत है!",
-      "checking": "PIN जाँचा जा रहा है…"
+      "checking": "PIN जाँचा जा रहा है…",
+      "notSaved": "PIN सहेजा नहीं गया। कृपया फिर से कोशिश करें।"
     },
     "otpSentToast": "OTP व्हाट्सऐप {{mobile}} पर भेजा गया"
   },

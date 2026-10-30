@@ -667,6 +667,7 @@ function Checkout() {
                   type="button"
                   onClick={() => {
                     setSavedId(a.id);
+                    setSelectedAddressId(a.id);
                     setPickerOpen(false);
                   }}
                   className={`flex min-h-14 w-full items-start gap-3 rounded-xl border p-3 text-left ${a.id === savedId ? "border-primary bg-primary/5" : "border-border bg-card"}`}

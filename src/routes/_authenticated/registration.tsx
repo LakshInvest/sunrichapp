@@ -314,6 +314,9 @@ function DetailsStep({
   const [meta, setMeta] = useState<CustomerTypeDto | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (error) scrollToFirstError();
+  }, [error]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [location, setLocation] = useState<LocationValue>(
     reg.latitude != null && reg.longitude != null
@@ -536,7 +539,7 @@ function DetailsStep({
         )}
       </div>
 
-      {error && <p role="alert" className="text-sm font-medium text-destructive">{error}</p>}
+      {error && <p data-field-error role="alert" className="text-sm font-medium text-destructive">{error}</p>}
 
       <button
         type="button"
@@ -590,6 +593,9 @@ function DocsStep({
   const [docNumbers, setDocNumbers] = useState<Record<string, string>>({});
   const [uploadingCode, setUploadingCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (error) scrollToFirstError();
+  }, [error]);
   const [submitting, setSubmitting] = useState(false);
 
   const load = async () => {
@@ -811,7 +817,7 @@ function DocsStep({
         ),
       )}
 
-      {error && <p role="alert" className="text-sm font-medium text-destructive">{error}</p>}
+      {error && <p data-field-error role="alert" className="text-sm font-medium text-destructive">{error}</p>}
 
       <button
         type="button"

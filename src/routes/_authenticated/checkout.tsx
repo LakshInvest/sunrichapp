@@ -1,3 +1,4 @@
+import { scrollToFirstError } from "@/lib/form-errors";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -69,6 +70,9 @@ function Checkout() {
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (error) scrollToFirstError();
+  }, [error]);
   const placingRef = useRef(false);
 
   useEffect(() => {
@@ -447,7 +451,7 @@ function Checkout() {
         </label>
 
         {error && (
-          <p role="alert" className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+          <p data-field-error role="alert" className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
             {error}
           </p>
         )}

@@ -1,3 +1,4 @@
+import { scrollToFirstError } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
@@ -51,6 +52,9 @@ function AskQuery() {
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (error) scrollToFirstError();
+  }, [error]);
   const cameraInput = useRef<HTMLInputElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -223,7 +227,7 @@ function AskQuery() {
         <p className="mt-2 text-xs text-muted-foreground">{t("queries.ask.attachHint")}</p>
 
         {error && (
-          <p role="alert" className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+          <p data-field-error role="alert" className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
             {error}
           </p>
         )}

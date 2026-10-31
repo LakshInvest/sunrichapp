@@ -52,7 +52,7 @@
     "metaDescription": "Log in to your Sunrich account to order packaged drinking water.",
     "pin": {
       "group": "PIN",
-      "welcomeTitle": "Welcome back",
+      "welcomeTitle": "Welcome back, {{name}} 👋",
       "welcomeSubtitle": "Enter your 4-digit PIN",
       "wrongTries": "Wrong PIN. {{n}} tries left.",
       "useOtp": "Please verify with WhatsApp OTP.",
@@ -73,7 +73,9 @@
       "success": "Welcome back!",
       "checking": "Checking PIN…"
     },
-    "otpSentToast": "OTP sent to WhatsApp {{mobile}}"
+    "otpSentToast": "OTP sent to WhatsApp {{mobile}}",
+    "secureNote": "Secure login",
+    "clipboardFill": "Use code {{code}} from clipboard"
   },
   "nav": {
     "home": "Home",

@@ -17,8 +17,9 @@ declare global {
   }
 }
 
-/** Sunrich operates around Latur, Maharashtra — bias search there. */
-export const SEARCH_BIAS = { lat: 18.402252, lng: 76.584212, radius: 120_000 };
+/** Sunrich operates around Latur, Maharashtra — bias search there. The Places
+ * JS library caps circle radius at 50,000 m, so clamp to that. */
+export const SEARCH_BIAS = { lat: 18.402252, lng: 76.584212, radius: 50_000 };
 
 let keyPromise: Promise<string> | null = null;
 /** The website-restricted browser key, cached for the session. */

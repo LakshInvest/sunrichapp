@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MapPin } from "lucide-react";
 import { loadGoogleMaps } from "@/lib/gmaps";
-import { sameSpot, type PlaceDetails } from "@/lib/maps";
+import { sameSpot } from "@/lib/maps";
 import type { LocationValue } from "./locationShared";
 
 /**

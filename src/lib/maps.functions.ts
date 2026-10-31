@@ -30,7 +30,7 @@ function apiKey(): string {
 
 /** Maps a Google error body to a message the user can act on. */
 function googleError(status: number, body: string): Error {
-  console.error("[google-maps]", status, body.slice(0, 300));
+  console.error("[google-maps]", status, body.slice(0, 1200));
   if (status === 403) {
     let reason = "";
     try {

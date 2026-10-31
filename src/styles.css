@@ -291,10 +291,16 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
   }
 
   /* ≥16px stops mobile browsers zooming on focus. */

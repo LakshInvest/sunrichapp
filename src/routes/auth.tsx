@@ -180,7 +180,7 @@ function WaterBox({
   registerRef: (el: HTMLInputElement | null) => void;
   autoFocus?: boolean;
   label: string;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
 }) {
   const filled = value.length > 0;
   const dims = size === "lg" ? "h-14 w-14 text-3xl" : "h-14 w-11 text-2xl";

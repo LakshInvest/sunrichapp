@@ -79,11 +79,9 @@ export async function autocompletePlaces(
     input,
     sessionToken: token,
     locationBias: {
-      circle: {
-        center: { lat: SEARCH_BIAS.lat, lng: SEARCH_BIAS.lng },
-        radius: SEARCH_BIAS.radius,
-      } as google.maps.CircleLiteral,
-    },
+      center: { lat: SEARCH_BIAS.lat, lng: SEARCH_BIAS.lng },
+      radius: SEARCH_BIAS.radius,
+    } as google.maps.CircleLiteral,
     language: i18n.language,
     region: "in",
   });

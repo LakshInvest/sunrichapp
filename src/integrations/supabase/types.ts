@@ -5158,6 +5158,7 @@ export type Database = {
         Args: { p_customer_id: string; p_except_order?: string }
         Returns: boolean
       }
+      _is_trip_order: { Args: { p_order_id: string }; Returns: boolean }
       _next_order_no: { Args: { p_firm_id: string }; Returns: string }
       _price_lines: {
         Args: { p_customer_id: string; p_lines: Json; p_office: boolean }
@@ -5419,6 +5420,10 @@ export type Database = {
       }
       gate_out: {
         Args: { p_odometer?: number; p_qr_token: string }
+        Returns: string
+      }
+      gate_pickup_handover: {
+        Args: { p_order_no: string; p_otp: string }
         Returns: string
       }
       has_perm: {

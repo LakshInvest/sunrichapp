@@ -27,6 +27,10 @@ export function PinMap({
 
   useEffect(() => {
     let alive = true;
+    // Google calls this global when the key/referrer is rejected — show our fallback.
+    window.gm_authFailure = () => {
+      if (alive) setFailed(true);
+    };
     loadGoogleMaps()
       .then((maps) => {
         if (!alive || !divRef.current) return;

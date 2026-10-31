@@ -71,7 +71,8 @@
       "confirmRow": "Confirm PIN",
       "deviceNotRecognised": "This device is not recognised — verify once with OTP.",
       "success": "Welcome back!",
-      "checking": "Checking PIN…"
+      "checking": "Checking PIN…",
+      "welcomeTitlePlain": "Welcome back 👋"
     },
     "otpSentToast": "OTP sent to WhatsApp {{mobile}}",
     "secureNote": "Secure login",

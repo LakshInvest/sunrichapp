@@ -751,7 +751,9 @@ function Login() {
             <div className="flex flex-col gap-6 py-4">
               <div>
                 <h1 className="text-center text-2xl font-bold text-primary">
-                  {firstName ? t("auth.pin.welcomeTitle", { name: firstName }) : t("auth.pin.welcomeTitle")}
+                  {firstName
+                    ? t("auth.pin.welcomeTitle", { name: firstName })
+                    : t("auth.pin.welcomeTitlePlain")}
                 </h1>
                 <p className="mt-2 text-center text-sm text-muted-foreground">{maskMobile(lastMobile)}</p>
               </div>

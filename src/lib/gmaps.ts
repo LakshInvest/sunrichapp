@@ -13,6 +13,7 @@ import { staticMapParams, type PlaceDetails } from "@/lib/maps";
 declare global {
   interface Window {
     __sunrichMapsReady?: () => void;
+    gm_authFailure?: () => void;
   }
 }
 

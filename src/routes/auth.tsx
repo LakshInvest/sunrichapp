@@ -174,11 +174,11 @@ function WaterBox({
   onFill: (start: number, raw: string) => void;
   onKey: (i: number, e: KeyboardEvent<HTMLInputElement>) => void;
   onPaste: (i: number, e: ClipboardEvent<HTMLInputElement>) => void;
-  disabled?: boolean;
-  success?: boolean;
-  checking?: boolean;
+  disabled?: boolean | undefined;
+  success?: boolean | undefined;
+  checking?: boolean | undefined;
   registerRef: (el: HTMLInputElement | null) => void;
-  autoFocus?: boolean;
+  autoFocus?: boolean | undefined;
   label: string;
   size?: "sm" | "md" | "lg";
 }) {

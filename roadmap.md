@@ -116,3 +116,11 @@ Constraint kept: existing DB tables/RPCs/RLS only (orders.payment_method, submit
 - [x] Part 0 audit: signed in as QA Retailer (9999900001 PIN 1234) and screenshotted home/product/cart/checkout/track/account/payments/balance/notifications/queries/devices/addresses/inbox — all consistent, no page errors.
 - [ ] Google Maps/Places: BLOCKED — needs `GOOGLE_MAPS_API_KEY` secret (server-side only). Add via the key field when asked; plumbing designed but not wired.
 - [ ] Remaining Part 3 polish: registration screen review; final en/hi/mr 360/390/768 pass on changed screens.
+
+## Prompt-4419 — PART 4 Google Maps + PART 3 redesign
+- [x] `maps.functions.ts`: server-side Google calls (Places autocomplete, place details, geocode, reverse geocode, static map as data URI) — GOOGLE_MAPS_API_KEY never reaches the browser.
+- [x] `MapPreview` rewritten to a server-fetched static map (no Leaflet); used in checkout, AddressSheet, track detail, inbox. Leaflet + @types/leaflet removed.
+- [x] `PlaceSearch` app-owned autocomplete dropdown (debounce 350 ms, session tokens, stale-response guard) in LocationPicker (checkout new address, addresses, registration).
+- [x] track.$id "Open in Google Maps" deep link (key-free). 5 new tests in maps.test.ts (68 total).
+- [!] BLOCKED on key config (verified live): Places API (New) → 403 API_KEY_HTTP_REFERRER_BLOCKED ("Requests from referer <empty> are blocked") — key has HTTP-referrer restrictions; server calls send no referer. Also "This API is not activated on your API project" (403) — Geocoding / Maps Static (and possibly Places New) not enabled on project 182813562907. User fix in Google Cloud Console: set the key's Application restrictions to None (or IP addresses) and enable Places API (New), Geocoding API, Maps Static API.
+- [x] PART 3 per-screen pass: notifications list cardified, inbox empty state cardified, useLang now syncs across instances (tagline follows language pill), welcome-title name fallback.

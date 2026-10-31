@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Crosshair, Loader2, MapPin } from "lucide-react";
 import { SheetDrawer } from "./SheetDrawer";
-import MapPreview from "./MapPreview";
+import { PinMap } from "./PinMap";
 import { PlaceSearch } from "./PlaceSearch";
+import { reverseGeocode } from "@/lib/gmaps";
 import { DEFAULT_LOCATION, type LocationValue } from "./locationShared";
 
-/** GPS button + accuracy readout + draggable-pin map. */
+/** GPS button + accuracy readout + draggable-pin map with reverse-geocoded address. */
 export function LocationPicker({
   value,
   onChange,
@@ -20,6 +21,7 @@ export function LocationPicker({
   const { t } = useTranslation();
   const [locating, setLocating] = useState(false);
   const [denied, setDenied] = useState(false);
+  const [pinAddress, setPinAddress] = useState("");
 
   const [disclose, setDisclose] = useState(false);
 
@@ -59,6 +61,23 @@ export function LocationPicker({
       { enableHighAccuracy: true, timeout: 15_000, maximumAge: 30_000 },
     );
   };
+
+  // Pin → address: debounce while the pin moves, then reverse geocode (browser Geocoder).
+  useEffect(() => {
+    const lat = (value ?? DEFAULT_LOCATION).lat;
+    const lng = (value ?? DEFAULT_LOCATION).lng;
+    let alive = true;
+    setPinAddress("");
+    const id = setTimeout(() => {
+      reverseGeocode(lat, lng).then((a) => {
+        if (alive && a) setPinAddress(a);
+      });
+    }, 700);
+    return () => {
+      alive = false;
+      clearTimeout(id);
+    };
+  }, [value]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -117,11 +136,17 @@ export function LocationPicker({
         }}
       />
       <p className="text-center text-xs text-muted-foreground">{t("registration.adjustHint")}</p>
-      <MapPreview
-        lat={(value ?? DEFAULT_LOCATION).lat}
-        lng={(value ?? DEFAULT_LOCATION).lng}
+      <PinMap
+        value={value ?? DEFAULT_LOCATION}
+        onChange={onChange}
         className="h-44 w-full overflow-hidden rounded-xl border border-border"
       />
+      {pinAddress && (
+        <p className="flex items-start justify-center gap-1.5 text-center text-xs leading-relaxed text-muted-foreground">
+          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-secondary" aria-hidden />
+          <span className="min-w-0">{pinAddress}</span>
+        </p>
+      )}
     </div>
   );
 }

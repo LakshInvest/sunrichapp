@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clampStaticParams, googleMapsLink, parseSuggestions } from "@/lib/maps.functions";
+import { clampStaticParams, googleMapsLink, sameSpot, staticMapParams } from "@/lib/maps";
 
 describe("clampStaticParams (static map bounds)", () => {
   it("rounds coordinates to 6 decimals and clamps zoom", () => {
@@ -20,27 +20,21 @@ describe("clampStaticParams (static map bounds)", () => {
   });
 });
 
-describe("parseSuggestions (Places API New)", () => {
-  it("maps structured format and skips entries without a place id", () => {
-    const out = parseSuggestions({
-      suggestions: [
-        {
-          placePrediction: {
-            placeId: "abc123",
-            structuredFormat: { mainText: { text: "Main Road" }, secondaryText: { text: "Latur, Maharashtra" } },
-          },
-        },
-        { placePrediction: { structuredFormat: { mainText: { text: "no id" } } } },
-      ],
-    });
-    expect(out).toEqual([{ placeId: "abc123", main: "Main Road", secondary: "Latur, Maharashtra" }]);
+describe("staticMapParams (browser Static Maps)", () => {
+  it("carries center, marker and India locale; never a key", () => {
+    const p = staticMapParams(18.402252, 76.584212, 16, "hi");
+    expect(p.get("center")).toBe("18.402252,76.584212");
+    expect(p.get("markers")).toBe("color:0x0AAAED|18.402252,76.584212");
+    expect(p.get("language")).toBe("hi");
+    expect(p.get("region")).toBe("in");
+    expect(p.has("key")).toBe(false); // key is appended by the browser caller only
   });
+});
 
-  it("falls back to text.text when structured format is missing", () => {
-    const out = parseSuggestions({
-      suggestions: [{ placePrediction: { placeId: "x", text: { text: "Plain label" } } }],
-    });
-    expect(out[0]?.main).toBe("Plain label");
+describe("sameSpot", () => {
+  it("treats sub-microdegree drift as the same spot", () => {
+    expect(sameSpot({ lat: 18.402252, lng: 76.584212 }, { lat: 18.4022525, lng: 76.5842129 })).toBe(true);
+    expect(sameSpot({ lat: 18.402252, lng: 76.584212 }, { lat: 18.403252, lng: 76.584212 })).toBe(false);
   });
 });
 

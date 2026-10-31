@@ -71,7 +71,9 @@ export async function initNative(opts: {
     }
     history.back();
   });
+  const localTaps = opts.openPath ? await listenLocalNotificationTaps(opts.openPath) : () => undefined;
   return () => {
+    localTaps();
     void urlOpen.remove();
     void handle.remove();
   };

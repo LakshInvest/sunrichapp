@@ -108,3 +108,11 @@ Constraint kept: existing DB tables/RPCs/RLS only (orders.payment_method, submit
 
 ## Prompt-27 — checkout / order-placed redesign
 - [x] Payment list rows, order-placed screen, UPI & bank cards, friendly dates, pay-later from order, Pay now in My Orders, Home reminder
+
+## Prompt-28 — brand adoption, login redesign, Maps (in progress)
+- [x] Brand: uploaded navy/white logos + app icon + splash (Lovable Assets); favicon/192/512 icons + web manifest; navy/aqua retheme, Plus Jakarta Sans headings, brand Logo component, BottleLoader.
+- [x] Login redesign: water-wave navy backdrop, language pill, bottom-sheet OTP/PIN, water-fill OTP/PIN boxes, clipboard OTP offer, resend timer, localized tagline (per-language from public_app_info), welcome-by-name for trusted devices, secure-note.
+- [x] Fixed: welcome title showed literal `{{name}}` when the device is not trusted (added welcomeTitlePlain fallback); tagline now follows the language pill live (useLang subscribes to languageChanged).
+- [x] Part 0 audit: signed in as QA Retailer (9999900001 PIN 1234) and screenshotted home/product/cart/checkout/track/account/payments/balance/notifications/queries/devices/addresses/inbox — all consistent, no page errors.
+- [ ] Google Maps/Places: BLOCKED — needs `GOOGLE_MAPS_API_KEY` secret (server-side only). Add via the key field when asked; plumbing designed but not wired.
+- [ ] Remaining Part 3 polish: registration screen review; final en/hi/mr 360/390/768 pass on changed screens.

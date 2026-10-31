@@ -1,14 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader2, MapPin, Search } from "lucide-react";
-import { getPlaceDetails, placesAutocomplete } from "@/lib/maps.functions";
-import { newSessionToken, type PlaceDetails } from "@/lib/maps";
+import {
+  autocompletePlaces,
+  newSessionToken,
+  placeDetails,
+} from "@/lib/gmaps";
+import type { PlaceDetails } from "@/lib/maps";
 
-type Suggestion = { placeId: string; main: string; secondary: string };
+type Pred = google.maps.places.PlacePrediction;
 
 /**
- * Address search backed by server-side Google Places autocomplete, rendered as
- * an app-owned dropdown (no Google UI). Debounced; ignores stale responses.
+ * Address search backed by the browser's new Places autocomplete (no Google
+ * UI), rendered as an app-owned dropdown. Debounced; ignores stale responses.
  */
 export function PlaceSearch({
   onPick,
@@ -19,12 +23,15 @@ export function PlaceSearch({
 }) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
-  const [items, setItems] = useState<Suggestion[]>([]);
+  const [items, setItems] = useState<Pred[]>([]);
   const [open, setOpen] = useState(false);
   const [searching, setSearching] = useState(false);
   const [picking, setPicking] = useState(false);
-  const tokenRef = useRef(newSessionToken());
+  const [error, setError] = useState(false);
+  const tokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
   const seqRef = useRef(0);
+
+  const ensureToken = async () => (tokenRef.current ??= await newSessionToken());
 
   useEffect(() => {
     if (query.trim().length < 3) {
@@ -34,40 +41,42 @@ export function PlaceSearch({
       return;
     }
     setSearching(true);
-    const id = setTimeout(() => {
+    const id = setTimeout(async () => {
       const seq = ++seqRef.current;
-      placesAutocomplete({ data: { input: query.trim(), sessionToken: tokenRef.current } })
-        .then((s) => {
-          if (seq !== seqRef.current) return;
-          setItems(s);
-          setOpen(s.length > 0);
-          setSearching(false);
-          if (s.length === 0) tokenRef.current = newSessionToken();
-        })
-        .catch(() => {
-          if (seq !== seqRef.current) return;
-          setItems([]);
-          setOpen(false);
-          setSearching(false);
-          tokenRef.current = newSessionToken();
-        });
+      try {
+        const token = await ensureToken();
+        const preds = await autocompletePlaces(query.trim(), token);
+        if (seq !== seqRef.current) return;
+        setError(false);
+        setItems(preds);
+        setOpen(preds.length > 0);
+        setSearching(false);
+        if (preds.length === 0) tokenRef.current = await newSessionToken();
+      } catch {
+        if (seq !== seqRef.current) return;
+        setItems([]);
+        setOpen(false);
+        setSearching(false);
+        setError(true);
+        tokenRef.current = null;
+      }
     }, 350);
     return () => clearTimeout(id);
   }, [query]);
 
-  const pick = async (s: Suggestion) => {
+  const pick = async (p: Pred) => {
     setPicking(true);
     setOpen(false);
-    const token = tokenRef.current;
-    tokenRef.current = newSessionToken();
     try {
-      const d = await getPlaceDetails({ data: { placeId: s.placeId, sessionToken: token } });
+      const d = await placeDetails(p);
+      tokenRef.current = await newSessionToken();
       if (d) {
-        setQuery(s.main);
-        onPick({ ...d, address: d.address || `${s.main}, ${s.secondary}` });
+        setQuery(span(p) || d.address);
+        onPick(d);
       }
     } catch {
-      /* keep the previous pin */
+      tokenRef.current = null;
+      setError(true);
     } finally {
       setPicking(false);
     }
@@ -93,21 +102,19 @@ export function PlaceSearch({
           aria-label={t("location.search")}
           className="absolute inset-x-0 top-full z-20 mt-1 max-h-64 overflow-y-auto rounded-xl border border-border bg-card shadow-lg"
         >
-          {items.map((s) => (
-            <li key={s.placeId}>
+          {items.map((p) => (
+            <li key={p.placeId}>
               <button
                 type="button"
                 role="option"
                 aria-selected="false"
-                onClick={() => void pick(s)}
+                onClick={() => void pick(p)}
                 className="flex w-full items-start gap-2.5 px-3 py-3 text-left transition hover:bg-muted"
               >
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-secondary" aria-hidden />
                 <span className="min-w-0">
-                  <span className="block truncate text-sm font-semibold text-foreground">{s.main}</span>
-                  {s.secondary && (
-                    <span className="block truncate text-xs text-muted-foreground">{s.secondary}</span>
-                  )}
+                  <span className="block truncate text-sm font-semibold text-foreground">{span(p)}</span>
+                  {sec(p) && <span className="block truncate text-xs text-muted-foreground">{sec(p)}</span>}
                 </span>
               </button>
             </li>
@@ -120,6 +127,18 @@ export function PlaceSearch({
           {t("location.looking")}
         </div>
       )}
+      {error && !open && (
+        <p role="status" className="mt-1 rounded-xl bg-muted px-3 py-2 text-xs text-muted-foreground">
+          {t("location.error")}
+        </p>
+      )}
     </div>
   );
+}
+
+function span(p: Pred): string {
+  return (p.mainText && String(p.mainText)) || (p.text && String(p.text)) || "";
+}
+function sec(p: Pred): string {
+  return p.secondaryText ? String(p.secondaryText) : "";
 }

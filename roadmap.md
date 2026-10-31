@@ -130,3 +130,11 @@ Constraint kept: existing DB tables/RPCs/RLS only (orders.payment_method, submit
 - `src/lib/gmaps.ts` (new): Maps JS loader (`loading=async`, callback, channel, language), new Places autocomplete + `toPlace()`/`fetchFields`, Maps JS Geocoder reverse geocode, browser Static Maps URL builder.
 - `PlaceSearch` (Places library dropdown), `PinMap` (new, draggable pin + tap-to-move, `gm_authFailure` fallback), `MapPreview` (browser `<img>` static map, cached), `LocationPicker` (PinMap + reverse-geocoded pin address). Locale key `location.error` added (en/hi/mr). Tests rewritten (clamp/params/sameSpot/link).
 - Localhost test: key rejected by referrer restriction as expected; app degrades gracefully (localized error + coordinate fallback), no page errors. Live-domain test pending publish.
+
+## Live test results (published sunrichapp.lovable.app, after radius fix + republish)
+- Pass: interactive Maps JS map with draggable/tappable pin (checkout address editor).
+- Pass: new Places autocomplete dropdown — 5 suggestions for "Latur", picking moves the pin to the POI.
+- Pass: Maps JS Geocoder pin → address ("CH2J+62P, Gandhi Market Rd…").
+- Pass: "Open in Google Maps" deep link on order detail.
+- Fail → user action: Static Maps previews (checkout/addresses/order detail/inbox) — Maps Static API is not enabled on the key's Google Cloud project; enable "Maps Static API" in Google Cloud Console, no code change needed.
+- Pass: graceful degradation — localized "Couldn't load maps" message and coordinate chip when Google refuses (localhost / disabled API).

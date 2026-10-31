@@ -1,11 +1,10 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Crosshair, Loader2, MapPin } from "lucide-react";
 import { SheetDrawer } from "./SheetDrawer";
+import MapPreview from "./MapPreview";
+import { PlaceSearch } from "./PlaceSearch";
 import { DEFAULT_LOCATION, type LocationValue } from "./locationShared";
-
-// Leaflet touches browser APIs at import time — keep it out of the SSR graph.
-const LocationMap = lazy(() => import("./LocationMap"));
 
 /** GPS button + accuracy readout + draggable-pin map. */
 export function LocationPicker({
@@ -112,12 +111,15 @@ export function LocationPicker({
         </p>
       )}
 
+      <PlaceSearch
+        onPick={(d) => onChange({ lat: d.lat, lng: d.lng, accuracy: null })}
+      />
       <p className="text-center text-xs text-muted-foreground">{t("registration.adjustHint")}</p>
-      <Suspense
-        fallback={<div className="h-56 w-full animate-pulse rounded-xl border border-border bg-muted" />}
-      >
-        <LocationMap value={value ?? DEFAULT_LOCATION} onChange={onChange} />
-      </Suspense>
+      <MapPreview
+        lat={(value ?? DEFAULT_LOCATION).lat}
+        lng={(value ?? DEFAULT_LOCATION).lng}
+        className="h-44 w-full overflow-hidden rounded-xl border border-border"
+      />
     </div>
   );
 }

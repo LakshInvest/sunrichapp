@@ -1,5 +1,4 @@
 /** Browser-safe Google Maps helpers; server calls live in maps.functions.ts. */
-import { randomUUID } from "@/lib/uuid";
 
 export type { PlaceSuggestion } from "@/lib/maps.functions";
 
@@ -7,7 +6,7 @@ export type { PlaceDetails } from "@/lib/maps.functions";
 
 /** One token per autocomplete interaction (typing → selecting a place). */
 export function newSessionToken(): string {
-  return randomUUID();
+  return crypto.randomUUID();
 }
 
 export { googleMapsLink } from "@/lib/maps.functions";

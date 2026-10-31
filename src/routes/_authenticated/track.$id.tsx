@@ -67,7 +67,7 @@ export const Route = createFileRoute("/_authenticated/track/$id")({
   component: OrderDetail,
 });
 
-const MapPreview = lazy(() => import("@/components/MapPreview"));
+import MapPreview from "@/components/MapPreview";
 
 function OrderDetail() {
   const { id } = Route.useParams();

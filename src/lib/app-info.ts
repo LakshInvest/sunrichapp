@@ -14,6 +14,11 @@ export type AppInfo = {
   latestVersion: string | null;
   playStoreUrl: string | null;
   maintenance: string | null;
+  brandPrimary: string | null;
+  brandAccent: string | null;
+  logoOnLightUrl: string | null;
+  logoOnDarkUrl: string | null;
+  loginTagline: { en: string | null; hi: string | null; mr: string | null };
 };
 
 const s = (v: unknown) => (typeof v === "string" && v.trim() !== "" ? v.trim() : null);
@@ -31,6 +36,15 @@ export function mapAppInfo(r: Record<string, unknown>): AppInfo {
     latestVersion: s(r["latest_app_version"]),
     playStoreUrl: s(r["play_store_url"]),
     maintenance: s(r["maintenance_message"]),
+    brandPrimary: s(r["brand_primary"]),
+    brandAccent: s(r["brand_accent"]),
+    logoOnLightUrl: s(r["logo_on_light_url"]),
+    logoOnDarkUrl: s(r["logo_on_dark_url"]),
+    loginTagline: {
+      en: s(r["login_tagline"]),
+      hi: s(r["login_tagline_hi"]),
+      mr: s(r["login_tagline_mr"]),
+    },
   };
 }
 

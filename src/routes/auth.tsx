@@ -112,7 +112,7 @@ function WaveBackdrop() {
           className="absolute animate-bubble rounded-full bg-white/20"
           style={{
             left: b.left,
-            bottom: -18,
+            bottom: "34%",
             width: b.size,
             height: b.size,
             animationDelay: b.delay,

@@ -51,7 +51,7 @@ function googleError(status: number, body: string): Error {
 // ---- Pure helpers (unit-tested) -------------------------------------------
 
 /** Clamps/bounds static-map query parameters to sane, cheap values. */
-export function clampStaticParams(p: { lat: number; lng: number; zoom?: number }): {
+export function clampStaticParams(p: { lat: number; lng: number; zoom?: number | undefined }): {
   lat: number;
   lng: number;
   zoom: number;
@@ -67,18 +67,23 @@ export function googleMapsLink(lat: number, lng: number): string {
   return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 }
 
+type Prediction = {
+  placeId?: string;
+  text?: { text?: string };
+  structuredFormat?: { mainText?: { text?: string }; secondaryText?: { text?: string } };
+};
+
 export function parseSuggestions(body: unknown): PlaceSuggestion[] {
   const out: PlaceSuggestion[] = [];
-  const suggestions = (body as { suggestions?: unknown[] })?.suggestions ?? [];
+  const suggestions = (body as { suggestions?: Array<{ placePrediction?: Prediction }> })?.suggestions ?? [];
   for (const s of suggestions) {
-    const p = (s as { placePrediction?: Record<string, unknown> })?.placePrediction;
-    const placeId = typeof p?.placeId === "string" ? p.placeId : "";
+    const p = s?.placePrediction;
+    const placeId = p?.placeId ?? "";
     if (!placeId) continue;
-    const fmt = (p?.structuredFormat ?? {}) as { mainText?: { text?: string }; secondaryText?: { text?: string } };
     out.push({
       placeId,
-      main: fmt.mainText?.text ?? (p?.text as { text?: string })?.text ?? "",
-      secondary: fmt.secondaryText?.text ?? "",
+      main: p?.structuredFormat?.mainText?.text ?? p?.text?.text ?? "",
+      secondary: p?.structuredFormat?.secondaryText?.text ?? "",
     });
   }
   return out;

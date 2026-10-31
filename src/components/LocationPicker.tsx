@@ -112,7 +112,9 @@ export function LocationPicker({
       )}
 
       <PlaceSearch
-        onPick={(d) => onChange({ lat: d.lat, lng: d.lng, accuracy: null })}
+        onPick={(d) => {
+          if (d) onChange({ lat: d.lat, lng: d.lng, accuracy: null });
+        }}
       />
       <p className="text-center text-xs text-muted-foreground">{t("registration.adjustHint")}</p>
       <MapPreview

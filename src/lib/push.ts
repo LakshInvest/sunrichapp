@@ -47,17 +47,56 @@ async function saveToken(token: string) {
 }
 
 let listening = false;
+// Set just before the native register call and cleared once it answers. If
+// the app died mid-register (no google-services.json → Firebase missing), the
+// flag survives and we skip push from then on so the app always opens.
+const REG_KEY = "sunrich.pushRegistering";
+function regFlag(v: boolean | null): boolean {
+  try {
+    if (v === null) return localStorage.getItem(REG_KEY) === "1";
+    if (v) localStorage.setItem(REG_KEY, "1");
+    else localStorage.removeItem(REG_KEY);
+  } catch {
+    /* ignore */
+  }
+  return false;
+}
+
 async function register() {
+  if (regFlag(null)) {
+    console.warn("[push] skipped: last registration crashed (google-services.json missing?)");
+    return;
+  }
   const { PushNotifications } = await import("@capacitor/push-notifications");
+  await PushNotifications.createChannel({
+    id: "orders",
+    name: "Orders",
+    description: "Order, delivery and payment updates",
+    importance: 4,
+    visibility: 1,
+  }).catch(() => undefined);
   if (!listening) {
     listening = true;
-    await PushNotifications.addListener("registration", (t) => void saveToken(t.value));
+    await PushNotifications.addListener("registration", (t) => {
+      regFlag(false);
+      void saveToken(t.value);
+    });
+    await PushNotifications.addListener("registrationError", (e) => {
+      regFlag(false);
+      console.warn("[push] registration failed, continuing without push", e);
+    });
     await PushNotifications.addListener("pushNotificationActionPerformed", (a) => {
       const url = (a.notification.data as Record<string, string> | undefined)?.["url"];
       if (url && url.startsWith("/")) window.location.assign(url);
     });
   }
-  await PushNotifications.register();
+  regFlag(true);
+  try {
+    await PushNotifications.register();
+  } catch (e) {
+    regFlag(false);
+    console.warn("[push] register threw, continuing without push", e);
+  }
 }
 
 /** User said yes on our sheet → system permission (Android 13+) → token. */
@@ -65,10 +104,15 @@ export async function acceptPush(): Promise<boolean> {
   setAsk("yes");
   if (!isNative()) return false;
   const { PushNotifications } = await import("@capacitor/push-notifications");
-  const perm = await PushNotifications.requestPermissions();
-  if (perm.receive !== "granted") return false;
-  await register();
-  return true;
+  try {
+    const perm = await PushNotifications.requestPermissions();
+    if (perm.receive !== "granted") return false;
+    await register();
+    return true;
+  } catch (e) {
+    console.warn("[push] unavailable in this build", e);
+    return false;
+  }
 }
 
 /** Re-save the token on login / language change — only if already granted. */

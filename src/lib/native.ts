@@ -76,3 +76,127 @@ export async function initNative(opts: {
     void handle.remove();
   };
 }
+
+/* ---------- Device features, each with a browser fallback ---------- */
+
+/** Current position (native GPS or browser geolocation). */
+export async function getPosition(): Promise<{ lat: number; lng: number }> {
+  if (isNative()) {
+    const { Geolocation } = await import("@capacitor/geolocation");
+    await Geolocation.requestPermissions().catch(() => undefined);
+    const p = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });
+    return { lat: p.coords.latitude, lng: p.coords.longitude };
+  }
+  return new Promise((resolve, reject) =>
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      reject,
+      { enableHighAccuracy: true, timeout: 15000 },
+    ),
+  );
+}
+
+/** Take or pick a photo. Returns a File, or null when cancelled / on web (use <input type=file>). */
+export async function pickPhoto(source: "camera" | "photos" = "camera"): Promise<File | null> {
+  if (!isNative()) return null;
+  const { Camera, CameraResultType, CameraSource } = await import("@capacitor/camera");
+  try {
+    const photo = await Camera.getPhoto({
+      quality: 80,
+      resultType: CameraResultType.Uri,
+      source: source === "camera" ? CameraSource.Camera : CameraSource.Photos,
+    });
+    if (!photo.webPath) return null;
+    const blob = await (await fetch(photo.webPath)).blob();
+    return new File([blob], `photo.${photo.format || "jpg"}`, { type: blob.type || "image/jpeg" });
+  } catch {
+    return null;
+  }
+}
+
+/** Native share sheet, Web Share API, or copy to clipboard. */
+export async function shareLink(opts: { title?: string; text?: string; url?: string }): Promise<void> {
+  if (isNative()) {
+    const { Share } = await import("@capacitor/share");
+    await Share.share(opts).catch(() => undefined);
+    return;
+  }
+  if (navigator.share) {
+    await navigator.share(opts).catch(() => undefined);
+    return;
+  }
+  await navigator.clipboard?.writeText([opts.text, opts.url].filter(Boolean).join(" ")).catch(() => undefined);
+}
+
+/** Short vibration on taps (native only). */
+export async function haptic(style: "light" | "medium" | "heavy" = "light"): Promise<void> {
+  if (!isNative()) return;
+  const { Haptics, ImpactStyle } = await import("@capacitor/haptics");
+  const map = { light: ImpactStyle.Light, medium: ImpactStyle.Medium, heavy: ImpactStyle.Heavy };
+  await Haptics.impact({ style: map[style] }).catch(() => undefined);
+}
+
+/** Online/offline listener (native Network plugin or browser events). */
+export async function onNetworkChange(cb: (online: boolean) => void): Promise<() => void> {
+  if (isNative()) {
+    const { Network } = await import("@capacitor/network");
+    const h = await Network.addListener("networkStatusChange", (s) => cb(s.connected));
+    return () => void h.remove();
+  }
+  const on = () => cb(true);
+  const off = () => cb(false);
+  window.addEventListener("online", on);
+  window.addEventListener("offline", off);
+  return () => {
+    window.removeEventListener("online", on);
+    window.removeEventListener("offline", off);
+  };
+}
+
+/** Durable key/value storage (survives WebView storage clears on native). */
+export async function prefGet(key: string): Promise<string | null> {
+  if (isNative()) {
+    const { Preferences } = await import("@capacitor/preferences");
+    return (await Preferences.get({ key })).value;
+  }
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+export async function prefSet(key: string, value: string): Promise<void> {
+  if (isNative()) {
+    const { Preferences } = await import("@capacitor/preferences");
+    await Preferences.set({ key, value });
+    return;
+  }
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Show a local notification on the "Orders" channel (native only). */
+export async function notifyLocal(title: string, body: string, url?: string): Promise<void> {
+  if (!isNative()) return;
+  const { LocalNotifications } = await import("@capacitor/local-notifications");
+  const perm = await LocalNotifications.checkPermissions();
+  if (perm.display !== "granted") return;
+  await LocalNotifications.createChannel({ id: "orders", name: "Orders", importance: 4 }).catch(() => undefined);
+  await LocalNotifications.schedule({
+    notifications: [{ id: Date.now() % 2147483647, title, body, channelId: "orders", extra: { url } }],
+  });
+}
+
+/** Tapping a local notification opens its screen. */
+export async function listenLocalNotificationTaps(openPath: (p: string) => void): Promise<() => void> {
+  if (!isNative()) return () => undefined;
+  const { LocalNotifications } = await import("@capacitor/local-notifications");
+  const h = await LocalNotifications.addListener("localNotificationActionPerformed", (a) => {
+    const url = (a.notification.extra as { url?: string } | undefined)?.url;
+    if (url && url.startsWith("/")) openPath(url);
+  });
+  return () => void h.remove();
+}

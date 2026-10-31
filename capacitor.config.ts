@@ -8,6 +8,17 @@ const config: CapacitorConfig = {
   server: {
     url: "https://sunrichapp.lovable.app",
     cleartext: false,
+    androidScheme: "https",
+    allowNavigation: [
+      "sunrichapp.lovable.app",
+      "*.lovable.app",
+      "nxlmiovntfdsunqydrqd.supabase.co",
+      "*.supabase.co",
+      "maps.google.com",
+      "*.google.com",
+      "*.googleapis.com",
+      "*.gstatic.com",
+    ],
   },
   android: {
     backgroundColor: "#FFFFFF",
@@ -24,6 +35,13 @@ const config: CapacitorConfig = {
       backgroundColor: "#0B2545",
       style: "DARK",
       overlaysWebView: false,
+    },
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"],
+    },
+    LocalNotifications: {
+      smallIcon: "ic_stat_sunrich",
+      iconColor: "#2EA3C7",
     },
     Keyboard: {
       resize: "native",

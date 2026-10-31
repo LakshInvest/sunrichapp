@@ -47,7 +47,7 @@ export function loadGoogleMaps(): Promise<typeof google.maps> {
       const s = document.createElement("script");
       s.src = src;
       s.async = true;
-      s.dataset.sunrichGmaps = "1";
+      s.dataset["sunrichGmaps"] = "1";
       s.onerror = () => {
         window.clearTimeout(timer);
         reject(new Error("Google Maps failed to load"));

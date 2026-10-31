@@ -3,11 +3,10 @@ import { useTranslation } from "react-i18next";
 import { Loader2, MapPin, Search } from "lucide-react";
 import {
   autocompletePlaces,
-  loadGoogleMaps,
   newSessionToken,
   placeDetails,
-  type PlaceDetails,
 } from "@/lib/gmaps";
+import type { PlaceDetails } from "@/lib/maps";
 
 type Pred = google.maps.places.PlacePrediction;
 

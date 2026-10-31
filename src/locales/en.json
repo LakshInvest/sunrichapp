@@ -740,7 +740,8 @@
     "search": "Search your area, landmark or shop…",
     "noResults": "No matches",
     "looking": "Finding that place…",
-    "openInMaps": "Open in Google Maps"
+    "openInMaps": "Open in Google Maps",
+    "error": "Couldn't load maps right now — check your connection and try again."
   },
   "native": {
     "backToExit": "Press back again to exit"

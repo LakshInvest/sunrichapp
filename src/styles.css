@@ -157,19 +157,49 @@
   }
 }
 
+/* Sunrich card look: white, soft navy shadow */
+@utility shadow-card {
+  box-shadow: 0 6px 20px -8px rgb(13 50 120 / 0.14), 0 2px 6px -2px rgb(13 50 120 / 0.06);
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Login screen: slow water waves + rising bubbles on brand navy */
+@keyframes wave-drift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@utility animate-wave {
+  animation: wave-drift 12s linear infinite;
+}
+
+@utility animate-wave-slow {
+  animation: wave-drift 22s linear infinite reverse;
+}
+
 @keyframes bubble-rise {
   0% {
-    transform: translateY(0);
-    opacity: 0.25;
+    transform: translateY(0) scale(0.8);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.35;
   }
   100% {
-    transform: translateY(-28px) scale(1.2);
-    opacity: 0.05;
+    transform: translateY(-70vh) scale(1.25);
+    opacity: 0;
   }
 }
 
 @utility animate-bubble {
-  animation: bubble-rise 5s ease-in-out infinite;
+  animation: bubble-rise 7s ease-in infinite;
 }
 
 /* Order success: soft ring + check draw-in */

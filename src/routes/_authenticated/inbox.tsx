@@ -191,7 +191,12 @@ function Inbox() {
             ))}
           </div>
         ) : visible.length === 0 ? (
-          <p className="mt-10 text-center text-sm text-muted-foreground">{t("inbox.empty")}</p>
+          <div className="mt-10 flex flex-col items-center gap-3 text-center">
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary/15">
+              <Inbox className="h-7 w-7 text-secondary" aria-hidden />
+            </span>
+            <p className="text-sm font-medium text-muted-foreground">{t("inbox.empty")}</p>
+          </div>
         ) : (
           <ul className="space-y-3">
             {visible.map((o) => {

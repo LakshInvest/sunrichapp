@@ -124,3 +124,9 @@ Constraint kept: existing DB tables/RPCs/RLS only (orders.payment_method, submit
 - [x] track.$id "Open in Google Maps" deep link (key-free). 5 new tests in maps.test.ts (68 total).
 - [!] BLOCKED on key config (verified live): Places API (New) → 403 API_KEY_HTTP_REFERRER_BLOCKED ("Requests from referer <empty> are blocked") — key has HTTP-referrer restrictions; server calls send no referer. Also "This API is not activated on your API project" (403) — Geocoding / Maps Static (and possibly Places New) not enabled on project 182813562907. User fix in Google Cloud Console: set the key's Application restrictions to None (or IP addresses) and enable Places API (New), Geocoding API, Maps Static API.
 - [x] PART 3 per-screen pass: notifications list cardified, inbox empty state cardified, useLang now syncs across instances (tagline follows language pill), welcome-title name fallback.
+
+## request3353 — Maps moved fully to the browser
+- Server-side Google calls removed; `maps.functions.ts` now only hands the website-restricted key to signed-in browsers (`getMapsBrowserKey`).
+- `src/lib/gmaps.ts` (new): Maps JS loader (`loading=async`, callback, channel, language), new Places autocomplete + `toPlace()`/`fetchFields`, Maps JS Geocoder reverse geocode, browser Static Maps URL builder.
+- `PlaceSearch` (Places library dropdown), `PinMap` (new, draggable pin + tap-to-move, `gm_authFailure` fallback), `MapPreview` (browser `<img>` static map, cached), `LocationPicker` (PinMap + reverse-geocoded pin address). Locale key `location.error` added (en/hi/mr). Tests rewritten (clamp/params/sameSpot/link).
+- Localhost test: key rejected by referrer restriction as expected; app degrades gracefully (localized error + coordinate fallback), no page errors. Live-domain test pending publish.

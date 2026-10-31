@@ -736,7 +736,11 @@
     "title": "Use your location?",
     "body": "Sunrich uses your location only to place your delivery pin on the map. It's not tracked in the background.",
     "continue": "Continue",
-    "notNow": "Not now"
+    "notNow": "Not now",
+    "search": "Search your area, landmark or shop…",
+    "noResults": "No matches",
+    "looking": "Finding that place…",
+    "openInMaps": "Open in Google Maps"
   },
   "native": {
     "backToExit": "Press back again to exit"

@@ -83,13 +83,13 @@ function Notifications() {
       ) : list.length === 0 ? (
         <EmptyState title={t("notices.empty")} body={t("notices.emptyBody")} icon={Bell} />
       ) : (
-        <ul className="divide-y divide-border">
+        <ul className="mx-4 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
           {list.map((n) => {
             const Icon = ICON[n.kind];
             const unread = isUnread(n, seen);
             return (
               <li key={n.id}>
-                <button type="button" onClick={() => open(n)} className={`flex w-full items-start gap-3 px-5 py-3.5 text-left ${unread ? "bg-secondary/5" : ""}`}>
+                <button type="button" onClick={() => open(n)} className={`flex w-full items-start gap-3 px-4 py-3.5 text-left transition ${unread ? "bg-secondary/5" : "hover:bg-muted/60"}`}>
                   <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${n.kind === "credit_hold" || n.kind === "cancelled" ? "bg-destructive/10 text-destructive" : "bg-secondary/15 text-secondary"}`}>
                     <Icon className="h-4 w-4" aria-hidden />
                   </span>

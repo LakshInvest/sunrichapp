@@ -38,6 +38,7 @@ import { formatINR, readCatalogueCache, fetchCatalogue } from "@/lib/catalogue";
 import { canCustomerCancel, useAppSettings, waLink } from "@/lib/app-settings";
 import { canChangeDeliveryMode, setOrderDeliveryMode } from "@/lib/orders";
 import { fetchMyFeedback, planReorder, type OrderFeedback } from "@/lib/feedback";
+import { googleMapsLink } from "@/lib/maps";
 import { RateOrderCard } from "@/components/RateOrderCard";
 import { useIsDemo } from "@/hooks/use-demo";
 import { openExternal } from "@/lib/native";
@@ -66,7 +67,7 @@ export const Route = createFileRoute("/_authenticated/track/$id")({
   component: OrderDetail,
 });
 
-const MapPreview = lazy(() => import("@/components/MapPreview"));
+import MapPreview from "@/components/MapPreview";
 
 function OrderDetail() {
   const { id } = Route.useParams();
@@ -445,10 +446,17 @@ function OrderDetail() {
             <SlotText value={order.deliverySlot} />
           </p>
           <div className="mt-3">
-            <Suspense fallback={<div className="h-36 w-full animate-pulse rounded-xl bg-muted" />}>
-              <MapPreview lat={mapLat} lng={mapLng} />
-            </Suspense>
+            <MapPreview lat={mapLat} lng={mapLng} className="h-36 w-full overflow-hidden rounded-xl border border-border" />
           </div>
+          <a
+            href={googleMapsLink(mapLat, mapLng)}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-2 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border px-3 text-xs font-semibold text-secondary"
+          >
+            <MapPin className="h-3.5 w-3.5" aria-hidden />
+            {t("location.openInMaps")}
+          </a>
           {order.notes && <p className="mt-3 text-xs text-muted-foreground">{t("checkout.notesLabel")}: {order.notes}</p>}
         </section>
         )}

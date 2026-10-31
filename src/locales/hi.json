@@ -52,7 +52,7 @@
     "metaDescription": "सनरिच पानी ऑर्डर करने के लिए अपने अकाउंट में लॉग इन करें।",
     "pin": {
       "group": "PIN",
-      "welcomeTitle": "वापसी पर स्वागत है",
+      "welcomeTitle": "वापसी पर स्वागत है, {{name}} 👋",
       "welcomeSubtitle": "अपना 4 अंकों का PIN दर्ज करें",
       "wrongTries": "गलत PIN। {{n}} प्रयास बाकी हैं।",
       "useOtp": "कृपया WhatsApp OTP से सत्यापित करें।",
@@ -71,9 +71,12 @@
       "deviceNotRecognised": "यह डिवाइस पहचाना नहीं गया — एक बार OTP से सत्यापित करें।",
       "success": "फिर से स्वागत है!",
       "checking": "PIN जाँचा जा रहा है…",
-      "notSaved": "PIN सहेजा नहीं गया। कृपया फिर से कोशिश करें।"
+      "notSaved": "PIN सहेजा नहीं गया। कृपया फिर से कोशिश करें।",
+      "welcomeTitlePlain": "वापसी पर स्वागत है 👋"
     },
-    "otpSentToast": "OTP व्हाट्सऐप {{mobile}} पर भेजा गया"
+    "otpSentToast": "OTP व्हाट्सऐप {{mobile}} पर भेजा गया",
+    "secureNote": "सुरक्षित लॉगिन",
+    "clipboardFill": "क्लिपबोर्ड से कोड {{code}} भरें"
   },
   "nav": {
     "home": "होम",

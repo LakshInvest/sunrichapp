@@ -334,3 +334,31 @@ export const getMyDevice = createServerFn({ method: "POST" })
       .maybeSingle();
     return { trusted: !!dev };
   });
+
+/**
+ * First name for the "Welcome back" PIN step. Only returned when the device
+ * is already trusted for that account, so a stranger cannot probe names.
+ */
+export const welcomeName = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ mobile: z.string(), deviceId: z.string().min(16) }).parse(d))
+  .handler(async ({ data }) => {
+    const m10 = data.mobile.replace(/\D/g, "").slice(-10);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: profile } = await supabaseAdmin
+      .from("user_profiles")
+      .select("id, full_name")
+      .in("mobile", variants(m10))
+      .limit(1)
+      .maybeSingle();
+    if (!profile) return { name: null };
+    const { data: dev } = await supabaseAdmin
+      .from("user_devices")
+      .select("id")
+      .eq("user_id", profile.id)
+      .eq("device_id", data.deviceId)
+      .is("revoked_at", null)
+      .limit(1);
+    const trusted = (dev ?? []).length > 0;
+    const name = trusted ? (profile.full_name ?? "").trim() : "";
+    return { name: name || null };
+  });

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import i18n from "@/lib/i18n";
 import { applyLang, LANG_KEY, LANGUAGES, type Lang } from "@/lib/i18n";
 
 /**
@@ -14,6 +15,12 @@ export function useLang() {
     const value = saved && LANGUAGES.includes(saved as Lang) ? (saved as Lang) : "en";
     applyLang(value);
     setLang(value);
+    // Keep every hook instance in sync when any component switches language.
+    const onChange = (l: string) => {
+      if (LANGUAGES.includes(l as Lang)) setLang(l as Lang);
+    };
+    i18n.on("languageChanged", onChange);
+    return () => i18n.off("languageChanged", onChange);
   }, []);
 
   const choose = useCallback((l: Lang) => {

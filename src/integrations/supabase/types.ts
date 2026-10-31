@@ -184,6 +184,9 @@ export type Database = {
           feedback_enabled: boolean
           holidays: string[]
           latest_app_version: string
+          login_tagline: string | null
+          login_tagline_hi: string | null
+          login_tagline_mr: string | null
           maintenance_message: string | null
           min_app_version: string
           min_order_value: number
@@ -217,6 +220,9 @@ export type Database = {
           feedback_enabled?: boolean
           holidays?: string[]
           latest_app_version?: string
+          login_tagline?: string | null
+          login_tagline_hi?: string | null
+          login_tagline_mr?: string | null
           maintenance_message?: string | null
           min_app_version?: string
           min_order_value?: number
@@ -250,6 +256,9 @@ export type Database = {
           feedback_enabled?: boolean
           holidays?: string[]
           latest_app_version?: string
+          login_tagline?: string | null
+          login_tagline_hi?: string | null
+          login_tagline_mr?: string | null
           maintenance_message?: string | null
           min_app_version?: string
           min_order_value?: number
@@ -475,11 +484,16 @@ export type Database = {
       }
       companies: {
         Row: {
+          brand_accent: string
+          brand_primary: string
           code: string
           created_at: string
           created_by: string | null
           id: string
           is_active: boolean
+          logo_mark_url: string | null
+          logo_on_dark_url: string | null
+          logo_on_light_url: string | null
           logo_url: string | null
           name: string
           name_hi: string | null
@@ -487,11 +501,16 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          brand_accent?: string
+          brand_primary?: string
           code: string
           created_at?: string
           created_by?: string | null
           id?: string
           is_active?: boolean
+          logo_mark_url?: string | null
+          logo_on_dark_url?: string | null
+          logo_on_light_url?: string | null
           logo_url?: string | null
           name: string
           name_hi?: string | null
@@ -499,11 +518,16 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          brand_accent?: string
+          brand_primary?: string
           code?: string
           created_at?: string
           created_by?: string | null
           id?: string
           is_active?: boolean
+          logo_mark_url?: string | null
+          logo_on_dark_url?: string | null
+          logo_on_light_url?: string | null
           logo_url?: string | null
           name?: string
           name_hi?: string | null
@@ -2081,11 +2105,15 @@ export type Database = {
       geo_areas: {
         Row: {
           backup_distributor_id: string | null
+          boundary: Json | null
+          centre_lat: number | null
+          centre_lng: number | null
           code: string
           company_id: string
           created_at: string
           id: string
           is_active: boolean
+          map_colour: string | null
           name: string
           name_hi: string | null
           name_mr: string | null
@@ -2097,11 +2125,15 @@ export type Database = {
         }
         Insert: {
           backup_distributor_id?: string | null
+          boundary?: Json | null
+          centre_lat?: number | null
+          centre_lng?: number | null
           code: string
           company_id: string
           created_at?: string
           id?: string
           is_active?: boolean
+          map_colour?: string | null
           name: string
           name_hi?: string | null
           name_mr?: string | null
@@ -2113,11 +2145,15 @@ export type Database = {
         }
         Update: {
           backup_distributor_id?: string | null
+          boundary?: Json | null
+          centre_lat?: number | null
+          centre_lng?: number | null
           code?: string
           company_id?: string
           created_at?: string
           id?: string
           is_active?: boolean
+          map_colour?: string | null
           name?: string
           name_hi?: string | null
           name_mr?: string | null
@@ -2352,6 +2388,9 @@ export type Database = {
       }
       geo_zones: {
         Row: {
+          boundary: Json | null
+          centre_lat: number | null
+          centre_lng: number | null
           city_id: string
           code: string
           company_id: string
@@ -2359,12 +2398,16 @@ export type Database = {
           id: string
           is_active: boolean
           manager_user_id: string | null
+          map_colour: string | null
           name: string
           name_hi: string | null
           name_mr: string | null
           updated_at: string
         }
         Insert: {
+          boundary?: Json | null
+          centre_lat?: number | null
+          centre_lng?: number | null
           city_id: string
           code: string
           company_id: string
@@ -2372,12 +2415,16 @@ export type Database = {
           id?: string
           is_active?: boolean
           manager_user_id?: string | null
+          map_colour?: string | null
           name: string
           name_hi?: string | null
           name_mr?: string | null
           updated_at?: string
         }
         Update: {
+          boundary?: Json | null
+          centre_lat?: number | null
+          centre_lng?: number | null
           city_id?: string
           code?: string
           company_id?: string
@@ -2385,6 +2432,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           manager_user_id?: string | null
+          map_colour?: string | null
           name?: string
           name_hi?: string | null
           name_mr?: string | null

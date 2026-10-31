@@ -1,17 +1,26 @@
-import { useTranslation } from "react-i18next";
+import { useBrand } from "@/lib/brand";
+import { useLang } from "@/hooks/use-lang";
+import { cn } from "@/lib/utils";
 
-export function Logo({ size = "lg" }: { size?: "md" | "lg" }) {
-  const { t } = useTranslation();
+/** Real Sunrich logo from public_app_info (bundled asset as fallback). */
+export function Logo({
+  size = "lg",
+  variant = "navy",
+  className,
+}: {
+  size?: "md" | "lg";
+  variant?: "navy" | "white";
+  className?: string;
+}) {
+  const { lang } = useLang();
+  const brand = useBrand(lang);
   const big = size === "lg";
   return (
-    <div className="flex items-center gap-2">
-      <svg viewBox="0 0 24 32" className={big ? "h-10 w-8" : "h-7 w-5"} aria-hidden>
-        <path d="M12 1C12 1 2 13 2 20a10 10 0 0 0 20 0C22 13 12 1 12 1Z" className="fill-secondary" />
-        <path d="M7 20a5 5 0 0 0 5 5" className="stroke-background" strokeWidth="2" fill="none" strokeLinecap="round" />
-      </svg>
-      <span className={`font-bold tracking-tight text-primary ${big ? "text-4xl" : "text-2xl"}`}>
-        {t("brand")}
-      </span>
-    </div>
+    <img
+      src={variant === "white" ? brand.logoDark : brand.logoLight}
+      alt="Sunrich"
+      className={cn(big ? "h-11 w-auto" : "h-8 w-auto", className)}
+      draggable={false}
+    />
   );
 }

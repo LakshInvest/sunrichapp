@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { MapPin } from "lucide-react";
-import { getStaticMap } from "@/lib/maps.functions";
+import { staticMapUrl } from "@/lib/gmaps";
 
 /**
- * Read-only Google map image with a fixed pin. Rendered from a static map
- * fetched server-side, so the Maps key never reaches the browser.
+ * Read-only Google Static Maps preview loaded directly by the browser — the
+ * key is website-restricted, so the browser's own referrer authorizes it.
+ * URLs are cached per coordinate set to limit billable requests.
  */
+const cache = new Map<string, string>();
+
 export default function MapPreview({
   lat,
   lng,
@@ -15,16 +18,20 @@ export default function MapPreview({
   lng: number;
   className?: string;
 }) {
-  const [uri, setUri] = useState<string | null>(null);
+  const key = `${lat},${lng}`;
+  const [src, setSrc] = useState<string | null>(() => cache.get(key) ?? null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let alive = true;
-    setUri(null);
+    const cached = cache.get(key);
+    setSrc(cached ?? null);
     setFailed(false);
-    getStaticMap({ data: { lat, lng, zoom: 16 } })
-      .then((r) => {
-        if (alive) setUri(r.uri);
+    if (cached) return;
+    staticMapUrl(lat, lng)
+      .then((url) => {
+        cache.set(key, url);
+        if (alive) setSrc(url);
       })
       .catch(() => {
         if (alive) setFailed(true);
@@ -32,7 +39,8 @@ export default function MapPreview({
     return () => {
       alive = false;
     };
-  }, [lat, lng]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
 
   if (failed) {
     return (
@@ -45,8 +53,15 @@ export default function MapPreview({
 
   return (
     <div className={className}>
-      {uri ? (
-        <img src={uri} alt="" className="h-full w-full object-cover" loading="lazy" />
+      {src ? (
+        <img
+          src={src}
+          alt=""
+          className="h-full w-full object-cover"
+          loading="lazy"
+          referrerPolicy="strict-origin-when-cross-origin"
+          onError={() => setFailed(true)}
+        />
       ) : (
         <div className="h-full w-full animate-pulse bg-muted" />
       )}

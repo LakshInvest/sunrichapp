@@ -89,10 +89,8 @@ export function PinMap({
 
   return (
     <div className={`relative ${className}`}>
-      <div ref={divRef} className="h-full w-full" data-testid="pinmap" aria-label={String(PlaceDetails_legend)} />
+      <div ref={divRef} className="h-full w-full" data-testid="pinmap" />
       {!ready && <div className="absolute inset-0 animate-pulse bg-muted" />}
     </div>
   );
 }
-
-const PlaceDetails_legend = undefined as unknown as never; // placeholder to satisfy legacy lint import below

@@ -89,14 +89,23 @@ export function filterEntries(rows: KhataEntry[], f: "all" | "bills" | "payments
   return rows;
 }
 
-/** Totals for statement / passbook checks. */
+/** Totals for statement / passbook. customer_statement always starts with a
+ *  synthetic "Opening balance" row dated p_from; the rest are movements. */
 export function statementTotals(rows: KhataEntry[]): { opening: number; debit: number; credit: number; closing: number } {
-  const body = rows.filter((r) => !(r.kind === "opening" && r.rawType === "opening" && r.refNo === "" && r === rows[0]));
   const first = rows[0];
-  const opening = first ? (first.kind === "opening" && first.refNo === "" ? first.balance : round2(first.balance - first.debit + first.credit)) : 0;
+  const synthetic = !!first && first.kind === "opening" && first.refNo === "";
+  const opening = !first ? 0 : synthetic ? round2(first.debit - first.credit) : round2(first.balance - first.debit + first.credit);
+  const body = synthetic ? rows.slice(1) : rows;
   const debit = round2(body.reduce((s, r) => s + r.debit, 0));
   const credit = round2(body.reduce((s, r) => s + r.credit, 0));
   return { opening, debit, credit, closing: round2(rows.at(-1)?.balance ?? opening) };
+}
+
+/** Passbook rows: movements only (synthetic opening dropped), newest first. */
+export function passbookRows(rows: KhataEntry[]): KhataEntry[] {
+  const first = rows[0];
+  const body = first && first.kind === "opening" && first.refNo === "" ? rows.slice(1) : rows;
+  return [...body].reverse();
 }
 
 /** UPI deep link for a payment amount. */

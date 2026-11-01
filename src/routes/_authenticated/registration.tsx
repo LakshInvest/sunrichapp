@@ -34,7 +34,7 @@ import {
   type RequirementDto,
   type UploadedDocDto,
 } from "@/lib/registration.functions";
-import { isValidGstin, isValidPincode } from "@/lib/registration-validation";
+import { isValidGstin, isValidPincode, locationArgs } from "@/lib/registration-validation";
 import { prepareUpload } from "@/lib/image-compress";
 import { useOffline } from "@/hooks/use-offline";
 

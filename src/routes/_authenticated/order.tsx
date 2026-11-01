@@ -10,6 +10,7 @@ import { CartBar } from "@/components/CartBar";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ProductCard } from "@/components/catalog/ProductCard";
+import { openPriceRequestChat } from "@/lib/price-request";
 import { SearchBox } from "@/components/catalog/SearchBox";
 import { EmptyState, ErrorState, GridSkeleton, NoResultsState } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";

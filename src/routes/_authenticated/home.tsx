@@ -29,6 +29,7 @@ import { listMyAddresses, labelKey, type SavedAddress } from "@/lib/addresses";
 import { pickSelected, shortArea, useSelectedAddressId } from "@/lib/selected-address";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { ProductCard } from "@/components/catalog/ProductCard";
+import { openPriceRequestChat } from "@/lib/price-request";
 import { SearchBox } from "@/components/catalog/SearchBox";
 import { NoResultsState, ChipsSkeleton, GridSkeleton, BannerSkeleton, HeroSkeleton, ErrorState } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";

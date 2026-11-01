@@ -91,6 +91,20 @@ function Cart() {
     };
   }, [load]);
 
+  // Empty cart (clear cart / last item removed) → automatically go back to Home.
+  const redirected = useRef(false);
+  useEffect(() => {
+    if (loading || !data) return;
+    if (Object.keys(quantities).length > 0) {
+      redirected.current = false;
+      return;
+    }
+    if (!redirected.current) {
+      redirected.current = true;
+      void navigate({ to: "/home", replace: true });
+    }
+  }, [data, loading, quantities, navigate]);
+
   const products = data?.products ?? [];
 
   // Remove products that left the catalogue, with a notice.

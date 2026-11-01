@@ -320,7 +320,15 @@ function ProductDetail() {
               {product.price === null ? t("catalog.priceOnRequest") : formatINR(product.price * Math.max(qty, 0))}
             </p>
           </div>
-          {qty > 0 ? (
+          {product.price === null ? (
+            <button
+              type="button"
+              onClick={() => void openPriceRequestChat(product, lang, navigate)}
+              className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-secondary/50 bg-secondary/10 text-base font-semibold text-secondary-foreground transition active:scale-[0.98]"
+            >
+              {t("catalog.priceOnRequest")}
+            </button>
+          ) : qty > 0 ? (
             <button
               type="button"
               onClick={() => navigate({ to: "/cart" })}

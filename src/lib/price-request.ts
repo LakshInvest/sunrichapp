@@ -24,6 +24,11 @@ export function parsePriceRequestSubject(subject: string): { label: string } | n
   return label ? { label } : null;
 }
 
+/** True when a query subject marks a price request (used for tags in lists). */
+export function isPriceRequestSubject(subject: string): boolean {
+  return parsePriceRequestSubject(subject) !== null;
+}
+
 /** Encoded product ref passed to the ask form (id, name, pack). */
 export function encodeProductChip(p: CatalogProduct): string {
   return encodeURIComponent(

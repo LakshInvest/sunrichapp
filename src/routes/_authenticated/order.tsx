@@ -10,7 +10,7 @@ import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { SearchBox } from "@/components/catalog/SearchBox";
-import { ChipsSkeleton, EmptyState, ErrorState, GridSkeleton, NoResultsState } from "@/components/catalog/states";
+import { EmptyState, ErrorState, GridSkeleton, NoResultsState } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";

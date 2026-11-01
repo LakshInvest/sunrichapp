@@ -23,6 +23,9 @@ export const Route = createFileRoute("/_authenticated")({
       if (here !== "/hold") throw redirect({ to: "/hold" });
       return;
     }
+    if (reg.status === "pending_approval" && here !== "/under-review") {
+      throw redirect({ to: "/under-review" });
+    }
     if ((!reg.customerId || reg.status === "draft" || reg.status === "rejected") && here !== "/registration") {
       throw redirect({ to: "/registration" });
     }

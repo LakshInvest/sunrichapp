@@ -415,7 +415,7 @@ function DetailsStep({
     if (fields.gstin.trim() && !isValidGstin(fields.gstin)) errs["gstin"] = t("registration.errInvalidGstin");
     if (fields.email.trim() && !/^\S+@\S+\.\S+$/.test(fields.email.trim()))
       errs["email"] = t("registration.errInvalidEmail");
-    if (requiresGps && !locationTouched) errs["location"] = t("registration.errLocation");
+    if (requiresGps && !locationKnown) errs["location"] = t("registration.errLocation");
     setFieldErrors(errs);
     if (Object.keys(errs).length > 0) {
       scrollToFirstError();
@@ -437,7 +437,7 @@ function DetailsStep({
         ...(fields.landmark.trim() ? { p_landmark: fields.landmark.trim() } : {}),
         ...(fields.gstin.trim() ? { p_gstin: fields.gstin.trim() } : {}),
         ...(fields.email.trim() ? { p_email: fields.email.trim() } : {}),
-        ...(requiresGps
+        ...(locationKnown
           ? {
               p_latitude: location.lat,
               p_longitude: location.lng,
@@ -545,7 +545,23 @@ function DetailsStep({
           {t("registration.location")}
           {requiresGps && <span className="text-destructive"> *</span>}
         </span>
-        <LocationPicker value={location} onChange={setLocation} />
+        {!locationKnown || changing ? (
+          <LocationPicker value={location} onChange={pickLocation} />
+        ) : (
+          <div className="flex items-start gap-2 rounded-xl border border-border bg-card px-4 py-3">
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-secondary" aria-hidden />
+            <p className="min-w-0 flex-1 text-sm leading-snug text-foreground">
+              {pinnedAddress || `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}`}
+            </p>
+            <button
+              type="button"
+              onClick={() => setChanging(true)}
+              className="min-h-11 shrink-0 text-sm font-semibold text-secondary"
+            >
+              {t("registration.changeLocation")}
+            </button>
+          </div>
+        )}
         {fieldErrors["location"] && (
           <span data-field-error className="text-xs font-medium text-destructive">{fieldErrors["location"]}</span>
         )}

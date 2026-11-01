@@ -265,7 +265,8 @@ function ProductDetail() {
             </button>
           </div>
         </div>
-        {(product.minOrderQty > 1 || product.maxOrderQty != null) && (
+        )}
+        {(product.minOrderQty > 1 || product.maxOrderQty != null) && product.price !== null && (
           <p className="mt-2 text-center text-xs text-muted-foreground">
             {t("product.qtyLimits", {
               min: product.minOrderQty,
@@ -273,7 +274,7 @@ function ProductDetail() {
             })}
           </p>
         )}
-        {product.bulkThresholdQty != null && qty >= product.bulkThresholdQty && (
+        {product.bulkThresholdQty != null && qty >= product.bulkThresholdQty && product.price !== null && (
           <p className="mt-3 rounded-xl bg-accent/15 px-3 py-2 text-center text-xs font-medium text-accent-foreground">
             {t("cart.bulkNote")}
           </p>

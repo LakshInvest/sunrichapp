@@ -7,6 +7,27 @@ import { PlaceSearch } from "./PlaceSearch";
 import { reverseGeocode } from "@/lib/gmaps";
 import { DEFAULT_LOCATION, type LocationValue } from "./locationShared";
 
+/** Debounced reverse geocode of the pin position. Shared by the picker and the form summary. */
+export function useReverseAddress(value: LocationValue): string {
+  const [address, setAddress] = useState("");
+  useEffect(() => {
+    const lat = (value ?? DEFAULT_LOCATION).lat;
+    const lng = (value ?? DEFAULT_LOCATION).lng;
+    let alive = true;
+    setAddress("");
+    const id = setTimeout(() => {
+      reverseGeocode(lat, lng).then((a) => {
+        if (alive && a) setAddress(a);
+      });
+    }, 700);
+    return () => {
+      alive = false;
+      clearTimeout(id);
+    };
+  }, [value]);
+  return address;
+}
+
 /** GPS button + accuracy readout + draggable-pin map with reverse-geocoded address. */
 export function LocationPicker({
   value,

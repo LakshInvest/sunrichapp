@@ -503,12 +503,7 @@ function Home() {
       ) : (
         <>
           {/* Hero */}
-          <div
-            className="relative px-5 pb-20 pt-6"
-            style={{
-              background: "linear-gradient(175deg, #0B2545 0%, #103A66 55%, #2EA3C7 140%)",
-            }}
-          >
+          <div className="bg-hero relative px-5 pb-20 pt-6">
             {hero?.backgroundImageUrl && (
               <>
                 <img
@@ -569,7 +564,7 @@ function Home() {
                       {orderUpdates && (
                         <span
                           aria-hidden
-                          className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-[#103A66] bg-accent"
+                          className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent"
                         />
                       )}
                     </button>
@@ -696,36 +691,13 @@ function Home() {
             )}
           </div>
 
-          {/* Zomato-style floating cart bar */}
-          {count > 0 && (
-            <div className="fixed inset-x-0 bottom-[4.75rem] z-40 px-4">
-              <div className="relative mx-auto flex max-w-md items-center justify-between gap-3 rounded-2xl bg-primary px-4 py-3 text-primary-foreground shadow-xl shadow-primary/30 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                <button
-                  type="button"
-                  aria-label={t("cart.clear")}
-                  onClick={() => setConfirmClear(true)}
-                  className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-md transition active:scale-90"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-                <p className="text-sm font-semibold">{t("cart.itemsSummary", { count, total: formatINR(total) })}</p>
-                {pending ? (
-                  <span className="flex min-h-11 items-center rounded-xl bg-primary-foreground/15 px-4 text-sm font-bold text-primary-foreground">
-                    {t("cart.orderingAfterApproval")}
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => navigate({ to: "/cart" })}
-                    className="flex min-h-11 items-center gap-1.5 rounded-xl bg-primary-foreground/15 px-4 text-sm font-bold text-primary-foreground transition active:scale-95"
-                  >
-                    {t("cart.viewCart")}
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
+          <CartBar
+            count={count}
+            total={formatINR(total)}
+            pending={pending}
+            onOpen={() => void navigate({ to: "/cart" })}
+            onClear={() => setConfirmClear(true)}
+          />
 
           <ClearCartDialog
             open={confirmClear}

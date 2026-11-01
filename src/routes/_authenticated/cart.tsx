@@ -150,12 +150,15 @@ function Cart() {
   }, [products, quantities]);
 
   const itemTotal = rows.reduce((sum, r) => sum + (r.product.price ?? 0) * r.qty, 0);
+  const hasUnpriced = rows.some((r) => r.product.price === null);
   const settings = useAppSettings();
   const minValue = settings?.minOrderValue ?? 0;
   const shortfall = minOrderShortfall(itemTotal, minValue);
   const jarDeposit = rows.reduce(
     (sum, r) =>
-      r.product.isReturnable && r.product.depositAmount != null ? sum + r.product.depositAmount * r.qty : sum,
+      r.product.price !== null && r.product.isReturnable && r.product.depositAmount != null
+        ? sum + r.product.depositAmount * r.qty
+        : sum,
     0,
   );
   const grandTotal = itemTotal + jarDeposit;
@@ -228,8 +231,8 @@ function Cart() {
                       </p>
                     )}
                     <p className="mt-0.5 flex items-baseline gap-1.5 whitespace-nowrap">
-                      <span className="text-base font-bold text-primary">
-                        {product.price === null ? t("catalog.priceOnRequest") : formatINR(product.price * qty)}
+                      <span className={product.price === null ? "text-sm font-semibold text-destructive" : "text-base font-bold text-primary"}>
+                        {product.price === null ? t("cart.priceNotAvailable") : formatINR(product.price * qty)}
                       </span>
                       {product.price !== null && product.mrp !== null && product.mrp > product.price && (
                         <span className="text-xs text-muted-foreground line-through">{formatINR(product.mrp * qty)}</span>
@@ -246,27 +249,42 @@ function Cart() {
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center rounded-full bg-primary text-primary-foreground">
+                  {product.price === null ? (
                     <button
                       type="button"
-                      onClick={() => setQty(product.id, qty - 1)}
+                      onClick={() => {
+                        forgetCartPrice(product.id);
+                        setQty(product.id, 0);
+                      }}
                       disabled={offline}
-                      aria-label={t("home.decreaseQty")}
-                      className="relative flex h-9 w-9 items-center justify-center rounded-full transition after:absolute after:-inset-y-1.5 after:-inset-x-1 after:content-[''] active:scale-90 disabled:opacity-40"
+                      title={offline ? t("offline.hint") : undefined}
+                      className="flex min-h-9 shrink-0 items-center rounded-full border border-destructive/40 px-4 text-xs font-bold text-destructive transition active:scale-95 disabled:opacity-50"
                     >
-                      <Minus className="h-4 w-4" />
+                      {t("cart.remove")}
                     </button>
-                    <span className="min-w-4 text-center text-sm font-bold">{qty}</span>
-                    <button
-                      type="button"
-                      onClick={() => setQty(product.id, qty + 1)}
-                      disabled={offline || (product.maxOrderQty != null && qty >= product.maxOrderQty)}
-                      aria-label={t("home.increaseQty")}
-                      className="relative flex h-9 w-9 items-center justify-center rounded-full transition after:absolute after:-inset-y-1.5 after:-inset-x-1 after:content-[''] active:scale-90 disabled:opacity-40"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
+                  ) : (
+                    <div className="flex items-center rounded-full bg-primary text-primary-foreground">
+                      <button
+                        type="button"
+                        onClick={() => setQty(product.id, qty - 1)}
+                        disabled={offline}
+                        aria-label={t("home.decreaseQty")}
+                        className="relative flex h-9 w-9 items-center justify-center rounded-full transition after:absolute after:-inset-y-1.5 after:-inset-x-1 after:content-[''] active:scale-90 disabled:opacity-40"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <span className="min-w-4 text-center text-sm font-bold">{qty}</span>
+                      <button
+                        type="button"
+                        onClick={() => setQty(product.id, qty + 1)}
+                        disabled={offline || (product.maxOrderQty != null && qty >= product.maxOrderQty)}
+                        aria-label={t("home.increaseQty")}
+                        className="relative flex h-9 w-9 items-center justify-center rounded-full transition after:absolute after:-inset-y-1.5 after:-inset-x-1 after:content-[''] active:scale-90 disabled:opacity-40"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
@@ -311,6 +329,12 @@ function Cart() {
               </div>
             )}
 
+            {hasUnpriced && (
+              <div role="status" className="mt-5 rounded-xl bg-destructive/10 px-4 py-3">
+                <p className="text-sm font-medium text-destructive">{t("errors.noPrice")}</p>
+              </div>
+            )}
+
             {pending ? (
               <button
                 type="button"
@@ -323,8 +347,8 @@ function Cart() {
               <button
                 type="button"
                 onClick={() => navigate({ to: "/checkout" })}
-                disabled={offline || shortfall > 0}
-                title={offline ? t("offline.hint") : undefined}
+                disabled={offline || shortfall > 0 || hasUnpriced}
+                title={hasUnpriced ? t("errors.noPrice") : offline ? t("offline.hint") : undefined}
                 className="mt-5 flex min-h-14 w-full items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {t("cart.proceed")}

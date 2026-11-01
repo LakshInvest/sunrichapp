@@ -17,7 +17,8 @@
     "title": "Something went wrong",
     "retry": "Retry",
     "network": "Please check your internet connection and try again.",
-    "generic": "Something went wrong, please try again."
+    "generic": "Something went wrong, please try again.",
+    "noPrice": "Some items don't have a price yet. Please remove them and try again."
   },
   "auth": {
     "title": "Login with WhatsApp",
@@ -180,7 +181,9 @@
     "removedFromCatalogue": "Some items are no longer available and were removed from your cart.",
     "proceed": "Proceed",
     "addMore": "Add {{amount}} more to place your order",
-    "minOrder": "Minimum order {{amount}}"
+    "minOrder": "Minimum order {{amount}}",
+    "priceNotAvailable": "Price not available",
+    "remove": "Remove"
   },
   "order": {
     "title": "Shop",
@@ -400,7 +403,9 @@
       "sent": "Question sent — the Sunrich team will reply soon.",
       "errSubject": "Please add a subject",
       "errMessage": "Please write your question"
-    }
+    },
+    "priceRequestTag": "Price request",
+    "priceRequestMessage": "Please share the price for {{name}}{{pack}}."
   },
   "checkout": {
     "title": "Checkout",

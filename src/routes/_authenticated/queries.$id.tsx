@@ -5,8 +5,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { ArrowLeft, Camera, FileText, Paperclip, Send, TriangleAlert, X } from "lucide-react";
+import { ArrowLeft, Camera, FileText, Package, Paperclip, Send, TriangleAlert, X } from "lucide-react";
 import en from "@/locales/en.json";
+import { parsePriceRequestSubject } from "@/lib/price-request";
 import { supabase } from "@/integrations/supabase/client";
 import { QueryChip } from "@/components/QueryChip";
 import { useLang } from "@/hooks/use-lang";
@@ -288,6 +289,19 @@ function Thread() {
 
       <div className="flex-1 px-4 py-4">
         {missing && <p className="mt-10 text-center text-sm text-muted-foreground">{t("queries.notFound")}</p>}
+        {query && parsePriceRequestSubject(query.subject) && (
+          <div className="mb-3 flex items-center gap-2.5 rounded-2xl border border-secondary/30 bg-secondary/10 px-3 py-2">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-card">
+              <Package className="h-4.5 w-4.5 text-secondary" aria-hidden />
+            </span>
+            <p className="min-w-0 truncate text-sm font-semibold text-foreground">
+              {parsePriceRequestSubject(query.subject)?.label}
+            </p>
+            <span className="ml-auto shrink-0 rounded-full bg-secondary/15 px-2 py-0.5 text-[11px] font-bold text-secondary">
+              {t("queries.priceRequestTag")}
+            </span>
+          </div>
+        )}
         <div className="flex flex-col gap-3">
           {messages.map((m) => (
             <Message

@@ -9,6 +9,7 @@ import { SmartImage } from "@/components/SmartImage";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ErrorState, EmptyState, GridSkeleton } from "@/components/catalog/states";
 import { PriceBlock } from "@/components/catalog/ProductCard";
+import { openPriceRequestChat } from "@/lib/price-request";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
@@ -238,7 +239,8 @@ function ProductDetail() {
           </p>
         )}
 
-        {/* Quantity */}
+        {/* Quantity (priced products only) */}
+        {product.price !== null && (
         <div className="mt-5 flex items-center justify-between rounded-2xl border border-border bg-card p-4">
           <span className="text-sm font-semibold text-foreground">{t("product.quantity")}</span>
           <div className="flex items-center gap-3">
@@ -263,7 +265,8 @@ function ProductDetail() {
             </button>
           </div>
         </div>
-        {(product.minOrderQty > 1 || product.maxOrderQty != null) && (
+        )}
+        {(product.minOrderQty > 1 || product.maxOrderQty != null) && product.price !== null && (
           <p className="mt-2 text-center text-xs text-muted-foreground">
             {t("product.qtyLimits", {
               min: product.minOrderQty,
@@ -271,7 +274,7 @@ function ProductDetail() {
             })}
           </p>
         )}
-        {product.bulkThresholdQty != null && qty >= product.bulkThresholdQty && (
+        {product.bulkThresholdQty != null && qty >= product.bulkThresholdQty && product.price !== null && (
           <p className="mt-3 rounded-xl bg-accent/15 px-3 py-2 text-center text-xs font-medium text-accent-foreground">
             {t("cart.bulkNote")}
           </p>
@@ -317,7 +320,15 @@ function ProductDetail() {
               {product.price === null ? t("catalog.priceOnRequest") : formatINR(product.price * Math.max(qty, 0))}
             </p>
           </div>
-          {qty > 0 ? (
+          {product.price === null ? (
+            <button
+              type="button"
+              onClick={() => void openPriceRequestChat(product, lang, navigate)}
+              className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-secondary/50 bg-secondary/10 text-base font-semibold text-secondary-foreground transition active:scale-[0.98]"
+            >
+              {t("catalog.priceOnRequest")}
+            </button>
+          ) : qty > 0 ? (
             <button
               type="button"
               onClick={() => navigate({ to: "/cart" })}

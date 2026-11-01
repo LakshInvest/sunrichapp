@@ -21,12 +21,15 @@ export function scrollToFirstError(): void {
  */
 const NETWORK_RE = /failed to fetch|load failed|networkerror|network request failed|fetch failed|internet|offline|timed?\s?out|econn|enotfound|dns/i;
 const TECHNICAL_RE = /pgrst|pgcode|42501|permission denied|row-level|violates|jwt|api key|schema cache|relation|column|duplicate key|stack|traceback|\bnull\b|\bundefined\b|\bhttp \d|\b50[0-9]\b|\b40[0-9]\b|postgres|sqlstate|supabase/i;
+/** The pricing engine rejects unpriced lines ("No price set for <name>") — always show the friendly price message. */
+const NO_PRICE_RE = /^no price set for /i;
 
 export function serverMessage(e: unknown, fallback: string): string {
   const raw = e && typeof e === "object" && "message" in e ? String((e as { message: unknown }).message ?? "").trim() : "";
   if (raw) console.error("[sunrich] server error:", raw, e);
   if (!raw) return fallback;
   if (NETWORK_RE.test(raw)) return i18n.t("errors.network");
+  if (NO_PRICE_RE.test(raw)) return i18n.t("errors.noPrice");
   if (TECHNICAL_RE.test(raw)) return fallback; // localized, friendly fallback wins over raw text
   if (raw.length > 120) return fallback; // long diagnostics are not user text
   return raw;

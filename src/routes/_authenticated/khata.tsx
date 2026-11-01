@@ -195,7 +195,7 @@ function KhataPage() {
                           {plus ? "+" : "−"}
                           {formatINR(amt)}
                         </span>
-                        <span className="block text-[11px] text-muted-foreground">{t("khata.runningBal", { amount: formatINR(r.balance) })}</span>
+                        <span className="block text-[11px] text-muted-foreground">{r.balance < 0 ? t("khata.runningAdv", { amount: formatINR(-r.balance) }) : t("khata.runningBal", { amount: formatINR(r.balance) })}</span>
                       </span>
                     </button>
                   </li>

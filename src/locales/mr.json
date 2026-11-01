@@ -1104,6 +1104,7 @@
     "notice": {
       "verified": "{{amount}} चे पेमेंट तपासले. नवीन बॅलन्स {{balance}}",
       "rejected": "{{amount}} चे पेमेंट स्वीकारले नाही: {{reason}}"
-    }
+    },
+    "runningAdv": "अ‍ॅडव्हान्स {{amount}}"
   }
 }

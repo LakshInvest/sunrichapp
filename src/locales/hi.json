@@ -1104,6 +1104,7 @@
     "notice": {
       "verified": "{{amount}} का भुगतान जाँचा गया। नया बैलेंस {{balance}}",
       "rejected": "{{amount}} का भुगतान स्वीकार नहीं: {{reason}}"
-    }
+    },
+    "runningAdv": "एडवांस {{amount}}"
   }
 }

@@ -1104,6 +1104,7 @@
     "notice": {
       "verified": "Payment of {{amount}} verified. New balance {{balance}}",
       "rejected": "Payment of {{amount}} not accepted: {{reason}}"
-    }
+    },
+    "runningAdv": "Adv {{amount}}"
   }
 }

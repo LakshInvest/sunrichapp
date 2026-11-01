@@ -150,12 +150,15 @@ function Cart() {
   }, [products, quantities]);
 
   const itemTotal = rows.reduce((sum, r) => sum + (r.product.price ?? 0) * r.qty, 0);
+  const hasUnpriced = rows.some((r) => r.product.price === null);
   const settings = useAppSettings();
   const minValue = settings?.minOrderValue ?? 0;
   const shortfall = minOrderShortfall(itemTotal, minValue);
   const jarDeposit = rows.reduce(
     (sum, r) =>
-      r.product.isReturnable && r.product.depositAmount != null ? sum + r.product.depositAmount * r.qty : sum,
+      r.product.price !== null && r.product.isReturnable && r.product.depositAmount != null
+        ? sum + r.product.depositAmount * r.qty
+        : sum,
     0,
   );
   const grandTotal = itemTotal + jarDeposit;
@@ -228,8 +231,8 @@ function Cart() {
                       </p>
                     )}
                     <p className="mt-0.5 flex items-baseline gap-1.5 whitespace-nowrap">
-                      <span className="text-base font-bold text-primary">
-                        {product.price === null ? t("catalog.priceOnRequest") : formatINR(product.price * qty)}
+                      <span className={product.price === null ? "text-sm font-semibold text-destructive" : "text-base font-bold text-primary"}>
+                        {product.price === null ? t("cart.priceNotAvailable") : formatINR(product.price * qty)}
                       </span>
                       {product.price !== null && product.mrp !== null && product.mrp > product.price && (
                         <span className="text-xs text-muted-foreground line-through">{formatINR(product.mrp * qty)}</span>

@@ -662,7 +662,7 @@ function DocsStep({
       };
       const { error: rpcErr } = await supabase.rpc("add_customer_document", docArgs);
       if (rpcErr) {
-        setError(rpcErr.message);
+        setError(serverMessage(rpcErr, t("registration.errUpload")));
         return;
       }
       await load();
@@ -693,7 +693,7 @@ function DocsStep({
     try {
       const { error: rpcErr } = await supabase.rpc("submit_registration");
       if (rpcErr) {
-        setError(rpcErr.message);
+        setError(serverMessage(rpcErr, t("registration.errGeneric")));
         return;
       }
       await onSubmitted();

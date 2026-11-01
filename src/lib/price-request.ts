@@ -88,9 +88,10 @@ export async function openPriceRequestChat(
     void navigate({ to: "/queries/$id", params: { id: existing } });
     return;
   }
+  const packLabel = loc(product.packLabel, lang);
   const message = i18n.t("queries.priceRequestMessage", {
     name: loc(product.name, lang),
-    pack: loc(product.packLabel, lang),
+    pack: packLabel ? ` (${packLabel})` : "",
   });
   void navigate({
     to: "/queries/ask",

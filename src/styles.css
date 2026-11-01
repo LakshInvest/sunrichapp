@@ -313,7 +313,6 @@
     font-family: var(--font-sans);
     font-variant-numeric: tabular-nums;
     padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }

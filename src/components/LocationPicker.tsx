@@ -63,21 +63,7 @@ export function LocationPicker({
   };
 
   // Pin → address: debounce while the pin moves, then reverse geocode (browser Geocoder).
-  useEffect(() => {
-    const lat = (value ?? DEFAULT_LOCATION).lat;
-    const lng = (value ?? DEFAULT_LOCATION).lng;
-    let alive = true;
-    setPinAddress("");
-    const id = setTimeout(() => {
-      reverseGeocode(lat, lng).then((a) => {
-        if (alive && a) setPinAddress(a);
-      });
-    }, 700);
-    return () => {
-      alive = false;
-      clearTimeout(id);
-    };
-  }, [value]);
+  const pinAddress = useReverseAddress(value);
 
   return (
     <div className="flex flex-col gap-3">

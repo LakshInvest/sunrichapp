@@ -236,7 +236,7 @@ function Checkout() {
       setQuote(q);
       setQuoteError(null);
     } catch (e) {
-      setQuoteError((e as Error).message);
+      setQuoteError(serverMessage(e, t("checkout.errPlace")));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [offline, JSON.stringify(linesPayload)]);

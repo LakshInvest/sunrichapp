@@ -24,6 +24,7 @@ import { Route as AuthenticatedDevicesRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedHoldRouteImport } from './routes/_authenticated/hold'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
+import { Route as AuthenticatedKhataRouteImport } from './routes/_authenticated/khata'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedOrderRouteImport } from './routes/_authenticated/order'
 import { Route as AuthenticatedOrderSuccessRouteImport } from './routes/_authenticated/order-success'
@@ -114,6 +115,11 @@ const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
 const AuthenticatedInboxRoute = AuthenticatedInboxRouteImport.update({
   id: '/inbox',
   path: '/inbox',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedKhataRoute = AuthenticatedKhataRouteImport.update({
+  id: '/khata',
+  path: '/khata',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedNotificationsRoute =
@@ -222,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/hold': typeof AuthenticatedHoldRoute
   '/home': typeof AuthenticatedHomeRoute
   '/inbox': typeof AuthenticatedInboxRoute
+  '/khata': typeof AuthenticatedKhataRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/order': typeof AuthenticatedOrderRoute
   '/order-success': typeof AuthenticatedOrderSuccessRoute
@@ -255,6 +262,7 @@ export interface FileRoutesByTo {
   '/hold': typeof AuthenticatedHoldRoute
   '/home': typeof AuthenticatedHomeRoute
   '/inbox': typeof AuthenticatedInboxRoute
+  '/khata': typeof AuthenticatedKhataRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/order': typeof AuthenticatedOrderRoute
   '/order-success': typeof AuthenticatedOrderSuccessRoute
@@ -288,6 +296,7 @@ export interface FileRoutesById {
   '/_authenticated/hold': typeof AuthenticatedHoldRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
+  '/_authenticated/khata': typeof AuthenticatedKhataRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/order': typeof AuthenticatedOrderRoute
   '/_authenticated/order-success': typeof AuthenticatedOrderSuccessRoute
@@ -323,6 +332,7 @@ export interface FileRouteTypes {
     | '/hold'
     | '/home'
     | '/inbox'
+    | '/khata'
     | '/notifications'
     | '/order'
     | '/order-success'
@@ -356,6 +366,7 @@ export interface FileRouteTypes {
     | '/hold'
     | '/home'
     | '/inbox'
+    | '/khata'
     | '/notifications'
     | '/order'
     | '/order-success'
@@ -388,6 +399,7 @@ export interface FileRouteTypes {
     | '/_authenticated/hold'
     | '/_authenticated/home'
     | '/_authenticated/inbox'
+    | '/_authenticated/khata'
     | '/_authenticated/notifications'
     | '/_authenticated/order'
     | '/_authenticated/order-success'
@@ -522,6 +534,13 @@ declare module '@tanstack/react-router' {
       path: '/inbox'
       fullPath: '/inbox'
       preLoaderRoute: typeof AuthenticatedInboxRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/khata': {
+      id: '/_authenticated/khata'
+      path: '/khata'
+      fullPath: '/khata'
+      preLoaderRoute: typeof AuthenticatedKhataRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/notifications': {
@@ -684,6 +703,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHoldRoute: typeof AuthenticatedHoldRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
+  AuthenticatedKhataRoute: typeof AuthenticatedKhataRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedOrderRoute: typeof AuthenticatedOrderRoute
   AuthenticatedOrderSuccessRoute: typeof AuthenticatedOrderSuccessRoute
@@ -707,6 +727,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHoldRoute: AuthenticatedHoldRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
+  AuthenticatedKhataRoute: AuthenticatedKhataRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedOrderRoute: AuthenticatedOrderRoute,
   AuthenticatedOrderSuccessRoute: AuthenticatedOrderSuccessRoute,

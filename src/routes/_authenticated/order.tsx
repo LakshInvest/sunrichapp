@@ -246,6 +246,7 @@ function Order() {
                     setQty(p.id, p.minOrderQty || 1);
                     if (p.price != null) saveCartPrice(p.id, p.price);
                   }}
+                  onPriceRequest={() => void openPriceRequestChat(p, lang, navigate)}
                   onInc={() => {
                     const max = p.maxOrderQty ?? Infinity;
                     setQty(p.id, Math.min((quantities[p.id] ?? 0) + 1, max));

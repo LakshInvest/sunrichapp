@@ -91,7 +91,6 @@ function Home() {
   const [search, setSearch] = useState("");
   const [recents, setRecents] = useState<string[]>(() => loadRecentSearches());
   const [category, setCategory] = useState("all");
-  const [showAll, setShowAll] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
   const [reg, setReg] = useState<RegistrationDto | null>(null);
@@ -110,7 +109,6 @@ function Home() {
   useEffect(() => {
     void loadAddresses();
   }, [loadAddresses]);
-  const [openQuery, setOpenQuery] = useState<{ id: string; subject: string } | null>(null);
   const myReg = useServerFn(getMyRegistration);
 
   const load = useCallback(async (force = false) => {
@@ -164,22 +162,6 @@ function Home() {
       active = false;
     };
   }, []);
-
-  const loadOpenQuery = useCallback(async () => {
-    const { data } = await supabase
-      .from("customer_queries")
-      .select("id, subject")
-      .eq("status", "open")
-      .order("created_at", { ascending: false })
-      .limit(1);
-    setOpenQuery(data?.[0] ? { id: data[0].id, subject: data[0].subject } : null);
-  }, []);
-
-  useEffect(() => {
-    void loadOpenQuery();
-    const id = setInterval(() => void loadOpenQuery(), 60_000);
-    return () => clearInterval(id);
-  }, [loadOpenQuery]);
 
   // In-app update bell (Task 7): dot when an order changed since My orders was last opened.
   useEffect(() => {
@@ -250,17 +232,14 @@ function Home() {
   const withFav = (p: typeof products[number]) => ({ ...p, isFavourite: isFav(p) });
 
   const favourites = useMemo(() => products.filter((p) => fav.isFav(p)), [products, fav]);
-  const popular = useMemo(() => products.filter((p) => p.isPopular), [products]);
-
-  const hasQuery = search.trim() !== "";
-  const defaultPopularView = category === "all" && !hasQuery;
-
-  const visibleProducts = useMemo(() => {
-    const filtered = products
-      .filter((p) => category === "all" || p.categoryCode === category)
-      .filter((p) => matchesSearch(p, search));
-    return defaultPopularView ? filtered.filter((p) => p.isPopular) : filtered;
-  }, [products, category, search, defaultPopularView]);
+  // "All" shows every active product; a category chip filters to its own.
+  const visibleProducts = useMemo(
+    () =>
+      products
+        .filter((p) => category === "all" || p.categoryCode === category)
+        .filter((p) => matchesSearch(p, search)),
+    [products, category, search],
+  );
 
   const total = useMemo(
     () =>

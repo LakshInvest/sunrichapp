@@ -298,10 +298,7 @@ function Home() {
         <div key="categories" className="no-scrollbar mt-5 flex gap-2 overflow-x-auto px-5">
           <button
             type="button"
-            onClick={() => {
-              setCategory("all");
-              setShowAll(false);
-            }}
+            onClick={() => setCategory("all")}
             aria-pressed={category === "all"}
             className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition active:scale-95 ${
               category === "all"
@@ -319,10 +316,7 @@ function Home() {
               <button
                 key={cat.id}
                 type="button"
-                onClick={() => {
-                  setCategory(cat.code);
-                  setShowAll(true);
-                }}
+                onClick={() => setCategory(cat.code)}
                 aria-pressed={selected}
                 className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition active:scale-95 ${
                   selected
@@ -351,12 +345,7 @@ function Home() {
                 type="button"
                 key={banner.id}
                 onClick={() => openBanner(banner.linkType, banner.linkValue)}
-                className="relative min-h-32 w-[82%] shrink-0 snap-center overflow-hidden rounded-2xl text-left shadow-md shadow-primary/10 transition active:scale-[0.99]"
-                style={
-                  banner.imageUrl
-                    ? undefined
-                    : { background: "linear-gradient(120deg, #2EA3C7 0%, #103A66 75%)" }
-                }
+                className={`relative min-h-32 w-[82%] shrink-0 snap-center overflow-hidden rounded-2xl text-left shadow-md shadow-primary/10 transition active:scale-[0.99] ${banner.imageUrl ? "" : "bg-banner"}`}
               >
                 {banner.imageUrl && (
                   <img
@@ -439,31 +428,8 @@ function Home() {
     if (key === "popular") {
       return (
         <div key="popular" className="mt-6 px-5">
-          <div className="flex items-center justify-between">
-            <h2 className={`text-lg font-bold text-foreground ${deva}`}>
-              {t(defaultPopularView ? "home.popularTitle" : "home.allProducts")}
-            </h2>
-            {defaultPopularView ? (
-              <button
-                type="button"
-                onClick={() => setShowAll(true)}
-                className="min-h-9 text-sm font-semibold text-secondary"
-              >
-                {t("home.seeAll")}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAll(false);
-                  setCategory("all");
-                }}
-                className="min-h-9 text-sm font-semibold text-secondary"
-              >
-                {t("home.showLess")}
-              </button>
-            )}
-          </div>
+          <h2 className={`text-lg font-bold text-foreground ${deva}`}>{t("home.allProducts")}</h2>
+
 
           <div className="mt-3 grid grid-cols-2 gap-3">
             {visibleProducts.map((product) => {

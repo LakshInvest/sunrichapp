@@ -9,6 +9,7 @@ import {
   FileText,
   Home,
   Loader2,
+  MapPin,
   Package,
   Store,
   Truck,
@@ -20,7 +21,7 @@ import en from "@/locales/en.json";
 import { scrollToFirstError, serverMessage } from "@/lib/form-errors";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
-import { LocationPicker } from "@/components/LocationPicker";
+import { LocationPicker, useReverseAddress } from "@/components/LocationPicker";
 import { DEFAULT_LOCATION, type LocationValue } from "@/components/locationShared";
 import { useLang } from "@/hooks/use-lang";
 import {
@@ -323,6 +324,16 @@ function DetailsStep({
       ? { lat: reg.latitude, lng: reg.longitude, accuracy: reg.locationAccuracyM }
       : { ...DEFAULT_LOCATION },
   );
+  // The user explicitly picked a spot (GPS, search, map tap or pin drag).
+  const [locationPicked, setLocationPicked] = useState(false);
+  const [changing, setChanging] = useState(false);
+  const pickLocation = (v: LocationValue) => {
+    setLocation(v);
+    setLocationPicked(true);
+    setFieldErrors((fe) => ({ ...fe, location: "" }));
+    setError(null);
+  };
+  const pinnedAddress = useReverseAddress(location);
   const [fields, setFields] = useState<DetailsState>({
     businessName: reg.businessName ?? "",
     contactName: reg.contactName ?? "",
@@ -359,6 +370,7 @@ function DetailsStep({
 
   const locationTouched =
     location.accuracy != null || location.lat !== DEFAULT_LOCATION.lat || location.lng !== DEFAULT_LOCATION.lng;
+  const locationKnown = locationTouched || locationPicked;
 
   const offline = useOffline();
   const [pinLookup, setPinLookup] = useState(false);

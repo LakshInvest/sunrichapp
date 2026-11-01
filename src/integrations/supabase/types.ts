@@ -3113,6 +3113,7 @@ export type Database = {
           expires_at: string
           id: string
           ip_address: string | null
+          locked_until: string | null
           max_attempts: number
           purpose: Database["public"]["Enums"]["otp_purpose"]
           session_id: string | null
@@ -3129,6 +3130,7 @@ export type Database = {
           expires_at?: string
           id?: string
           ip_address?: string | null
+          locked_until?: string | null
           max_attempts?: number
           purpose: Database["public"]["Enums"]["otp_purpose"]
           session_id?: string | null
@@ -3145,6 +3147,7 @@ export type Database = {
           expires_at?: string
           id?: string
           ip_address?: string | null
+          locked_until?: string | null
           max_attempts?: number
           purpose?: Database["public"]["Enums"]["otp_purpose"]
           session_id?: string | null

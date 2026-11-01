@@ -13,10 +13,12 @@ export default function MapPreview({
   lat,
   lng,
   className = "h-36 w-full overflow-hidden rounded-xl border border-border",
+  address,
 }: {
   lat: number;
   lng: number;
   className?: string;
+  address?: string | null;
 }) {
   const key = `${lat},${lng}`;
   const [src, setSrc] = useState<string | null>(() => cache.get(key) ?? null);
@@ -44,9 +46,9 @@ export default function MapPreview({
 
   if (failed) {
     return (
-      <div className={`${className} flex items-center justify-center gap-2 bg-muted text-muted-foreground`}>
-        <MapPin className="h-4 w-4 text-secondary" aria-hidden />
-        <span className="text-xs font-medium">📍 {lat.toFixed(4)}, {lng.toFixed(4)}</span>
+      <div className={`${className} flex flex-col items-center justify-center gap-1 bg-muted px-3 text-center text-muted-foreground`}>
+        <MapPin className="h-6 w-6 text-secondary" aria-hidden />
+        {address && <span className="line-clamp-2 text-xs font-medium text-foreground">{address}</span>}
       </div>
     );
   }

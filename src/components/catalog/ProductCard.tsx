@@ -15,10 +15,8 @@ export function PriceLine({ product, size = "card" }: { product: CatalogProduct;
         {formatINR(product.price)}
         {size === "card" && <span className="text-[10px] font-medium text-muted-foreground">{t("catalog.perPack")}</span>}
       </span>
-      {product.mrp !== null && product.mrp > product.price && (
-        <span className={`truncate text-muted-foreground line-through ${size === "detail" ? "text-sm" : "text-[11px]"}`}>
-          {formatINR(product.mrp)}
-        </span>
+      {size === "detail" && product.mrp !== null && product.mrp > product.price && (
+        <span className="truncate text-sm text-muted-foreground line-through">{formatINR(product.mrp)}</span>
       )}
     </span>
   );

@@ -347,16 +347,17 @@ function Home() {
                 type="button"
                 key={banner.id}
                 onClick={() => openBanner(banner.linkType, banner.linkValue)}
-                className={`relative min-h-32 w-[82%] shrink-0 snap-center overflow-hidden rounded-2xl text-left shadow-md shadow-primary/10 transition active:scale-[0.99] ${banner.imageUrl ? "" : "bg-banner"}`}
+                className="relative min-h-32 w-[82%] shrink-0 snap-center overflow-hidden rounded-2xl bg-primary text-left shadow-md shadow-primary/10 transition active:scale-[0.99]"
               >
                 {banner.imageUrl && (
                   <img
                     src={banner.imageUrl}
-                    alt={loc(banner.title, lang)}
+                    alt=""
+                    onError={(e) => (e.currentTarget.style.display = "none")}
                     className="absolute inset-0 h-full w-full object-cover"
                   />
                 )}
-                {banner.imageUrl && <div className="absolute inset-0 bg-primary/60" aria-hidden />}
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/60 to-primary/10" aria-hidden />
                 <div className="relative z-10 flex max-w-[75%] flex-col gap-1 p-4">
                   {banner.tag && (
                     <span className="w-fit rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-bold text-accent-foreground">

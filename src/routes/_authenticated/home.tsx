@@ -14,9 +14,9 @@ import {
   MapPin,
   Milk,
   Package,
-  X,
   type LucideIcon,
 } from "lucide-react";
+import { CartBar } from "@/components/CartBar";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
@@ -629,21 +629,7 @@ function Home() {
                 {t("banner.underReview")}
               </div>
             )}
-            {openQuery && (
-              <div className="mx-5 mb-4 flex items-center gap-3 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-foreground">{t("home.needsAction")}</p>
-                  <p className="truncate text-xs text-muted-foreground">{openQuery.subject}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigate({ to: "/queries/$id", params: { id: openQuery.id } })}
-                  className="min-h-10 shrink-0 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground transition active:scale-95"
-                >
-                  {t("home.open")}
-                </button>
-              </div>
-            )}
+
             <div className="relative z-30 -mt-7 px-5">
               <SearchBox
                 value={search}

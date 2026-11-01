@@ -94,8 +94,8 @@ export const Route = createFileRoute("/_authenticated/account")({
 });
 
 import { APP_VERSION } from "@/lib/version";
-import { BalanceCard } from "@/components/BalanceCard";
-import { fetchBalance, type Balance } from "@/lib/ledger";
+import { KhataBalanceCard } from "@/components/KhataBalanceCard";
+import { fetchKhataSummary, type KhataSummary } from "@/lib/khata";
 
 function MenuItem({
   icon: Icon,
@@ -132,10 +132,10 @@ function Account() {
   const { t } = useTranslation();
   const { lang, choose } = useLang();
   const navigate = useNavigate();
-  const [balance, setBalance] = useState<Balance | null>(null);
+  const [balance, setBalance] = useState<KhataSummary | null>(null);
   const [balanceFailed, setBalanceFailed] = useState(false);
   useEffect(() => {
-    fetchBalance().then(setBalance, () => setBalanceFailed(true));
+    fetchKhataSummary().then(setBalance, () => setBalanceFailed(true));
   }, []);
   const { queryClient } = Route.useRouteContext();
   const myReg = useServerFn(getMyRegistration);
@@ -406,6 +406,13 @@ function Account() {
         )}
       </section>
 
+      {/* Khata (top of Account; tap → passbook) */}
+      {!balanceFailed && (
+        <button type="button" onClick={() => navigate({ to: "/khata" })} className="mt-4 block w-full text-left" aria-label={t("khata.title")} data-testid="account-khata">
+          <KhataBalanceCard sum={balance} compact />
+        </button>
+      )}
+
       {settings?.showJarBalance && jars.length > 0 && (
         <section className="mt-4 flex items-start gap-3 rounded-2xl border border-secondary/30 bg-secondary/5 p-4">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary/15">
@@ -435,10 +442,6 @@ function Account() {
         </section>
       )}
 
-      {/* My account balance (tap → full screen) */}
-      {!balanceFailed && <button type="button" onClick={() => navigate({ to: "/balance" })} className="mt-4 block w-full text-left" aria-label={t("balance.title")}>
-        <BalanceCard bal={balance} compact />
-      </button>}
 
       {/* Menu groups */}
       <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">

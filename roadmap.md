@@ -164,3 +164,12 @@ Constraint: existing DB tables/RPCs/policies/buckets only (user-managed backend)
 - [x] Server layer already rejects unpriced lines (_price_lines raises "No price set for <name>" before any order line is written; verified live: place_my_order → 400 "No price set for 1 Litre"); serverMessage maps it to "Some items don't have a price yet…", also used for checkout quote errors.
 - [x] CC side: we don't own the Command Center app; staff can find price requests by the "Price request: …" subject prefix (context = general). CC-side tag/product chip needs the CC project.
 - [x] Live QA (9999900001): price removed via price_plan_items.valid_from → Home/Shop show the button with no Add; ask page prefilled; send → chat; second tap opens the same chat; simulated staff reply → notification → opens the chat; cart unpriced line blocked checkout; unpriced API order rejected. Price row restored, test query deleted (id 503e02a5).
+
+## Prompt-32 — UI fixes + Khata
+- [x] A1 instant Login/PIN (local session read; routes split)
+- [x] A2 auth fit at 320×640; safe-area on all sticky headers
+- [x] A3 per-route status bar / theme-color
+- [x] A4 offer cards readable (solid primary + gradient)
+- [x] A5 no struck MRP on cards
+- [x] A6 map preview via Maps JS (Maps Static API not enabled on key)
+- [ ] Part B Khata — waiting: user runs database/20261101_khata.sql, then build screens + QA

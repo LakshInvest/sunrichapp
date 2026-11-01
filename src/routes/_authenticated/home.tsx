@@ -25,6 +25,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { SmartImage } from "@/components/SmartImage";
 import { AddressSwitcher } from "@/components/AddressSwitcher";
 import { PayReminder } from "@/components/PayReminder";
+import { KhataPayShortcut } from "@/components/KhataPayShortcut";
 import { listMyAddresses, labelKey, type SavedAddress } from "@/lib/addresses";
 import { pickSelected, shortArea, useSelectedAddressId } from "@/lib/selected-address";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
@@ -482,6 +483,7 @@ function Home() {
       onTouchCancel={pull.handlers.onTouchCancel}
     >
       <PayReminder />
+      <KhataPayShortcut />
 
       {pull.indicator && (
         <div

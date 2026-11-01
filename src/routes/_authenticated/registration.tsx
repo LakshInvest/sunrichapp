@@ -857,7 +857,7 @@ function DocsStep({
       <button
         type="button"
         onClick={onEditDetails}
-        className="min-h-11 text-sm font-medium text-muted-foreground underline underline-offset-4"
+        className="min-h-11 w-full text-sm font-medium text-muted-foreground underline underline-offset-4"
       >
         {t("registration.editDetails")}
       </button>

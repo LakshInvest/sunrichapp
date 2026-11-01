@@ -1,18 +1,23 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { PageShell } from "@/components/PageShell";
+import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ArrowDownWideNarrow, CupSoda, GlassWater, LayoutGrid, Milk, Package, type LucideIcon } from "lucide-react";
 import en from "@/locales/en.json";
 import { BottomNav } from "@/components/BottomNav";
+import { CartBar } from "@/components/CartBar";
+import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { SearchBox } from "@/components/catalog/SearchBox";
-import { ChipsSkeleton, EmptyState, ErrorState, GridSkeleton, NoResultsState } from "@/components/catalog/states";
+import { EmptyState, ErrorState, GridSkeleton, NoResultsState } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
 import { useFavourites } from "@/hooks/use-favourites";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
+import { getMyRegistration, type RegistrationDto } from "@/lib/registration.functions";
 import {
   addRecentSearch,
   fetchCatalogue,
@@ -24,6 +29,7 @@ import {
   saveCartPrice,
   type CatalogData,
 } from "@/lib/catalogue";
+import { serverMessage as friendlyError } from "@/lib/form-errors";
 
 export const Route = createFileRoute("/_authenticated/order")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -50,14 +56,13 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   glass: CupSoda,
 };
 
-type Sort = "arranged" | "popular" | "price_asc" | "price_desc";
-
+/** Shop: search bar + category chips ("All" first) + product grid. Nothing else. */
 function Order() {
   const { t } = useTranslation();
   const { lang } = useLang();
   const { category } = Route.useSearch();
   const navigate = useNavigate();
-  const { quantities, setQty } = useCart();
+  const { quantities, setQty, count, clear } = useCart();
   const offline = useOffline();
   const fav = useFavourites();
 
@@ -66,8 +71,20 @@ function Order() {
   const [loading, setLoading] = useState(!readCatalogueCache());
   const [search, setSearch] = useState("");
   const [recents, setRecents] = useState<string[]>(() => loadRecentSearches());
-  const [sort, setSort] = useState<Sort>("arranged");
   const [selected, setSelected] = useState<string>(category ?? "all");
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [pending, setPending] = useState(false);
+
+  const reg = useServerFn(getMyRegistration);
+  useEffect(() => {
+    let active = true;
+    void reg().then((r: RegistrationDto) => {
+      if (active) setPending(r.status === "pending_approval");
+    });
+    return () => {
+      active = false;
+    };
+  }, [reg]);
 
   useEffect(() => {
     if (category) setSelected(category);
@@ -79,10 +96,10 @@ function Order() {
       setData(fresh);
       setLoadError(null);
     } catch (e) {
-      setLoadError((e as Error).message);
+      setLoadError(friendlyError(e, t("errors.generic")));
       throw e;
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let active = true;
@@ -112,45 +129,32 @@ function Order() {
     return map;
   }, [products]);
 
-  const visible = useMemo(() => {
-    let list = products.filter((p) => selected === "all" || p.categoryCode === selected).filter((p) => matchesSearch(p, search));
-    if (sort === "arranged") {
-      // Catalogue already arrives in Command Center order.
-    } else if (sort === "popular") {
-      list = [...list].sort((a, b) => Number(b.isPopular) - Number(a.isPopular) || a.sortOrder - b.sortOrder);
-    } else if (sort === "price_asc") {
-      list = [...list].sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
-    } else {
-      list = [...list].sort((a, b) => (b.price ?? -1) - (a.price ?? -1));
-    }
-    return list;
-  }, [products, selected, search, sort]);
+  const total = useMemo(
+    () =>
+      Object.entries(quantities).reduce((sum, [id, qty]) => {
+        const product = products.find((p) => p.id === id);
+        return product?.price != null ? sum + product.price * qty : sum;
+      }, 0),
+    [quantities, products],
+  );
 
-  // "All" + arranged + no search: one section per category, as set in Command Center.
-  const sections = useMemo(() => {
-    if (selected !== "all" || sort !== "arranged" || search.trim() !== "") return [{ key: "all", cat: null, items: visible }];
-    const out = categories
-      .map((cat) => ({ key: cat.code, cat, items: visible.filter((p) => p.categoryCode === cat.code) }))
-      .filter((s) => s.items.length > 0);
-    const known = new Set(categories.map((c) => c.code));
-    const rest = visible.filter((p) => !known.has(p.categoryCode ?? ""));
-    if (rest.length) out.push({ key: "other", cat: null, items: rest } as never);
-    return out as { key: string; cat: (typeof categories)[number] | null; items: typeof visible }[];
-  }, [selected, sort, search, categories, visible]);
+  const visible = useMemo(
+    () =>
+      products
+        .filter((p) => selected === "all" || p.categoryCode === selected)
+        .filter((p) => matchesSearch(p, search)),
+    [products, selected, search],
+  );
 
   const showError = !loading && !data;
 
   return (
-    <main
-      className={`mx-auto min-h-screen max-w-md bg-background ${deva}`}
-      onTouchStart={pull.handlers.onTouchStart}
-      onTouchMove={pull.handlers.onTouchMove}
-      onTouchEnd={pull.handlers.onTouchEnd}
-      onTouchCancel={pull.handlers.onTouchCancel}
+    <PageShell
+      className={`${deva}`}
+      {...pull.handlers}
     >
-      <OfflineBanner />
 
-      <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-5 pb-3 pt-7 backdrop-blur-md">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-5 pb-3 pt-[max(1.75rem,env(safe-area-inset-top))] backdrop-blur-md">
         <h1 className="text-2xl font-bold text-primary">{t("order.title")}</h1>
         <div className="mt-3">
           <SearchBox
@@ -186,10 +190,7 @@ function Order() {
               <button
                 key={cat.id}
                 type="button"
-                onClick={() => {
-                  setSelected(cat.code);
-                  void navigate({ to: "/order", search: { category: cat.code } });
-                }}
+                onClick={() => setSelected(cat.code)}
                 aria-pressed={isActive}
                 className={`flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition active:scale-95 ${
                   isActive ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground"
@@ -201,38 +202,6 @@ function Order() {
               </button>
             );
           })}
-        </div>
-        <div className="mt-3 flex items-center justify-between gap-2">
-          <p className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
-            {t("catalog.resultsCount", { count: visible.length })}
-          </p>
-          <div
-            role="group"
-            aria-label={t("catalog.sortLabel")}
-            className="no-scrollbar flex min-w-0 items-center gap-1 overflow-x-auto rounded-full border border-border bg-card p-0.5"
-          >
-            <ArrowDownWideNarrow className="ml-1.5 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
-            {(
-              [
-                ["arranged", "catalog.sortArranged"],
-                ["popular", "catalog.sortPopular"],
-                ["price_asc", "catalog.sortPriceAsc"],
-                ["price_desc", "catalog.sortPriceDesc"],
-              ] as const
-            ).map(([key, label]) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setSort(key)}
-                aria-pressed={sort === key}
-                className={`min-h-8 shrink-0 whitespace-nowrap rounded-full px-2.5 text-xs font-semibold transition ${
-                  sort === key ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-                }`}
-              >
-                {t(label)}
-              </button>
-            ))}
-          </div>
         </div>
       </header>
 
@@ -250,7 +219,7 @@ function Order() {
         </div>
       )}
 
-      <div className="px-5 pb-28 pt-4">
+      <div className="px-5 pb-32 pt-4">
         {showError ? (
           <ErrorState message={loadError} onRetry={() => void load(true).catch(() => undefined)} />
         ) : loading ? (
@@ -260,54 +229,53 @@ function Order() {
         ) : visible.length === 0 ? (
           <NoResultsState />
         ) : (
-          <div className="space-y-6">
-            {sections.map((sec) => {
-              const SecIcon = sec.cat ? (CATEGORY_ICONS[sec.cat.iconKey] ?? LayoutGrid) : null;
-              return (
-                <section key={sec.key} aria-label={sec.cat ? loc(sec.cat.name, lang) : undefined}>
-                  {sec.cat && SecIcon && (
-                    <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-foreground">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/15">
-                        <SecIcon className="h-4 w-4 text-secondary" aria-hidden />
-                      </span>
-                      {loc(sec.cat.name, lang)}
-                    </h2>
-                  )}
           <div className="grid grid-cols-2 gap-3">
-                    {sec.items.map((product) => {
-                      const p = { ...product, isFavourite: fav.isFav(product) };
-                      return (
-                        <ProductCard
-                          key={p.id}
-                          product={p}
-                          qty={quantities[p.id] ?? 0}
-                          lang={lang}
-                          canOrder={p.canOrder}
-                          offline={offline}
-                          onOpen={() => void navigate({ to: "/product/$id", params: { id: p.id } })}
-                          onAdd={() => {
-                            setQty(p.id, p.minOrderQty || 1);
-                            if (p.price != null) saveCartPrice(p.id, p.price);
-                          }}
-                          onInc={() => {
-                            const max = p.maxOrderQty ?? Infinity;
-                            setQty(p.id, Math.min((quantities[p.id] ?? 0) + 1, max));
-                          }}
-                          onDec={() => setQty(p.id, (quantities[p.id] ?? 0) - 1)}
-                          onToggleFavourite={() => void fav.toggle(p)}
-                        />
-                      );
-                    })}
-                  </div>
-                </section>
+            {visible.map((product) => {
+              const p = { ...product, isFavourite: fav.isFav(product) };
+              return (
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  qty={quantities[p.id] ?? 0}
+                  lang={lang}
+                  canOrder={p.canOrder}
+                  offline={offline}
+                  onOpen={() => void navigate({ to: "/product/$id", params: { id: p.id } })}
+                  onAdd={() => {
+                    setQty(p.id, p.minOrderQty || 1);
+                    if (p.price != null) saveCartPrice(p.id, p.price);
+                  }}
+                  onInc={() => {
+                    const max = p.maxOrderQty ?? Infinity;
+                    setQty(p.id, Math.min((quantities[p.id] ?? 0) + 1, max));
+                  }}
+                  onDec={() => setQty(p.id, (quantities[p.id] ?? 0) - 1)}
+                  onToggleFavourite={() => void fav.toggle(p)}
+                />
               );
             })}
           </div>
         )}
       </div>
 
+      <CartBar
+        count={count}
+        total={formatINR(total)}
+        pending={pending}
+        onOpen={() => void navigate({ to: "/cart" })}
+        onClear={() => setConfirmClear(true)}
+      />
+
+      <ClearCartDialog
+        open={confirmClear}
+        onOpenChange={setConfirmClear}
+        onConfirm={() => {
+          clear();
+          setConfirmClear(false);
+        }}
+      />
+
       <BottomNav />
-    </main>
+    </PageShell>
   );
 }
-

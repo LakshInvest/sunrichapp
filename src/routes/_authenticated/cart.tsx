@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { PageShell } from "@/components/PageShell";
 import { useServerFn } from "@tanstack/react-start";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { CircleAlert, Droplets, Minus, Plus } from "lucide-react";
@@ -8,13 +9,13 @@ import en from "@/locales/en.json";
 import { BottomNav } from "@/components/BottomNav";
 import { SmartImage } from "@/components/SmartImage";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
-import { OfflineBanner } from "@/components/OfflineBanner";
 import { ErrorState, GridSkeleton } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
 import { minOrderShortfall, useAppSettings } from "@/lib/app-settings";
 import { getMyRegistration } from "@/lib/registration.functions";
+import { serverMessage } from "@/lib/form-errors";
 import {
   clampQty,
   fetchCatalogue,
@@ -72,10 +73,10 @@ function Cart() {
       setData(fresh);
       setLoadError(null);
     } catch (e) {
-      setLoadError((e as Error).message);
+      setLoadError(serverMessage(e, t("errors.generic")));
       throw e;
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     let active = true;
@@ -89,6 +90,20 @@ function Cart() {
       active = false;
     };
   }, [load]);
+
+  // Empty cart (clear cart / last item removed) → automatically go back to Home.
+  const redirected = useRef(false);
+  useEffect(() => {
+    if (loading || !data) return;
+    if (Object.keys(quantities).length > 0) {
+      redirected.current = false;
+      return;
+    }
+    if (!redirected.current) {
+      redirected.current = true;
+      void navigate({ to: "/home", replace: true });
+    }
+  }, [data, loading, quantities, navigate]);
 
   const products = data?.products ?? [];
 
@@ -149,8 +164,7 @@ function Cart() {
   );
 
   return (
-    <main className={`mx-auto min-h-screen max-w-md bg-background ${deva}`}>
-      <OfflineBanner />
+    <PageShell className={`${deva}`}>
       <div className="px-5 pb-44 pt-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-primary">{t("cart.title")}</h1>
@@ -330,6 +344,6 @@ function Cart() {
       />
 
       <BottomNav />
-    </main>
+    </PageShell>
   );
 }

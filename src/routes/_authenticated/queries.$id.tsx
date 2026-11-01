@@ -1,4 +1,5 @@
 import { serverMessage } from "@/lib/form-errors";
+import { PageShell } from "@/components/PageShell";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
@@ -7,7 +8,6 @@ import { toast } from "sonner";
 import { ArrowLeft, Camera, FileText, Paperclip, Send, TriangleAlert, X } from "lucide-react";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
-import { OfflineBanner } from "@/components/OfflineBanner";
 import { QueryChip } from "@/components/QueryChip";
 import { useLang } from "@/hooks/use-lang";
 import { useOffline } from "@/hooks/use-offline";
@@ -270,7 +270,7 @@ function Thread() {
   };
 
   return (
-    <main className={`mx-auto flex min-h-screen max-w-md flex-col bg-background ${lang === "en" ? "" : "font-deva"}`}>
+    <PageShell className={`flex flex-col ${lang === "en" ? "" : "font-deva"}`}>
       <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 py-2.5 backdrop-blur-md">
         <button
           type="button"
@@ -285,7 +285,6 @@ function Thread() {
         </p>
         {query && <QueryChip status={query.status} className="mr-2" />}
       </header>
-      <OfflineBanner />
 
       <div className="flex-1 px-4 py-4">
         {missing && <p className="mt-10 text-center text-sm text-muted-foreground">{t("queries.notFound")}</p>}
@@ -386,6 +385,6 @@ function Thread() {
           </button>
         </div>
       )}
-    </main>
+    </PageShell>
   );
 }

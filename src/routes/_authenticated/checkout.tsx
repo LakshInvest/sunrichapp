@@ -1,4 +1,5 @@
 import { useIsDemo } from "@/hooks/use-demo";
+import { serverMessage } from "@/lib/form-errors";
 import { scrollToFirstError } from "@/lib/form-errors";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -300,7 +301,7 @@ function Checkout() {
       clear();
       await navigate({ to: "/order-success" });
     } catch (e) {
-      setError((e as Error).message || t("checkout.errPlace"));
+      setError(serverMessage(e, t("checkout.errPlace")));
     } finally {
       placingRef.current = false;
       setPlacing(false);

@@ -1,4 +1,5 @@
 import { serverMessage } from "@/lib/form-errors";
+import { PageShell } from "@/components/PageShell";
 import { useIsDemo } from "@/hooks/use-demo";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -340,7 +341,7 @@ function Account() {
   const notActive = customer?.status && customer.status !== "active";
 
   return (
-    <main className={`mx-auto min-h-screen max-w-md bg-background px-5 pb-28 pt-8 ${deva}`}>
+    <PageShell className={`px-5 pb-28 pt-8 ${deva}`}>
       <h1 className="text-3xl font-bold text-primary">{t("account.title")}</h1>
 
       {/* Profile header card */}
@@ -712,6 +713,6 @@ function Account() {
 
       <input ref={cameraInput} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPick} />
       <input ref={galleryInput} type="file" accept="image/*" className="hidden" onChange={onPick} />
-    </main>
+    </PageShell>
   );
 }

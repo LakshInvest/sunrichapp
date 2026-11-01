@@ -138,3 +138,20 @@ Constraint kept: existing DB tables/RPCs/RLS only (orders.payment_method, submit
 - Pass: "Open in Google Maps" deep link on order detail.
 - Fail → user action: Static Maps previews (checkout/addresses/order detail/inbox) — Maps Static API is not enabled on the key's Google Cloud project; enable "Maps Static API" in Google Cloud Console, no code change needed.
 - Pass: graceful degradation — localized "Couldn't load maps" message and coordinate chip when Google refuses (localhost / disabled API).
+
+# Prompt-30 roadmap — fix & polish release
+
+Constraint: existing DB tables/RPCs/policies/buckets only (user-managed backend). No schema changes.
+
+- [ ] 1. App start → direct login (remove intro/welcome screens; `/` routes to PIN-or-login)
+- [ ] 2. Registration map location: keep lat/lng+address in form state, save with registration; map centred Ganj Golai (18.402252, 76.584212) + "Use my current location"; location required for business types; show picked address with Change link
+- [ ] 3. Screen fit: 100dvh, safe-area, no horizontal/extra scroll, shared page layout, keyboard-visible inputs
+- [ ] 4. Add button works on Shop + Home (price-null → still addable, "Price on request"); one shared ProductCard
+- [ ] 5. Cart emptied → hide cart bar; cart page auto-redirects Home
+- [ ] 6. "All" category = all products on Home & Shop (default)
+- [ ] 7. Queries off Home; reply → in-app notification deep-linking to the query; Account-menu unread badge
+- [ ] 8+9. Shop simplify: search + category chips + grid only (remove sort/sections)
+- [ ] 10. One theme: tokens only, no hardcoded colors, shared button style
+- [ ] 11. Extra: pending-approval full screen, skeletons/empty states, offline banner, pull-to-refresh, i18n en/hi/mr
+- [ ] 12. Central friendly error handler; never raw Supabase/JS errors to users
+- [ ] QA: login 9999900001 (PIN 1234), cart/checkout/shop, query reply notification via CC, viewports 320/360/390/412

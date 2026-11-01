@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type UIEvent } from "react";
+import { PageShell } from "@/components/PageShell";
+import { serverMessage } from "@/lib/form-errors";
 import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -14,9 +16,9 @@ import {
   MapPin,
   Milk,
   Package,
-  X,
   type LucideIcon,
 } from "lucide-react";
+import { CartBar } from "@/components/CartBar";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
@@ -26,7 +28,6 @@ import { PayReminder } from "@/components/PayReminder";
 import { listMyAddresses, labelKey, type SavedAddress } from "@/lib/addresses";
 import { pickSelected, shortArea, useSelectedAddressId } from "@/lib/selected-address";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
-import { OfflineBanner } from "@/components/OfflineBanner";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { SearchBox } from "@/components/catalog/SearchBox";
 import { NoResultsState, ChipsSkeleton, GridSkeleton, BannerSkeleton, HeroSkeleton, ErrorState } from "@/components/catalog/states";
@@ -91,7 +92,6 @@ function Home() {
   const [search, setSearch] = useState("");
   const [recents, setRecents] = useState<string[]>(() => loadRecentSearches());
   const [category, setCategory] = useState("all");
-  const [showAll, setShowAll] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
   const [reg, setReg] = useState<RegistrationDto | null>(null);
@@ -110,7 +110,6 @@ function Home() {
   useEffect(() => {
     void loadAddresses();
   }, [loadAddresses]);
-  const [openQuery, setOpenQuery] = useState<{ id: string; subject: string } | null>(null);
   const myReg = useServerFn(getMyRegistration);
 
   const load = useCallback(async (force = false) => {
@@ -119,7 +118,7 @@ function Home() {
       setData(fresh);
       setLoadError(null);
     } catch (e) {
-      setLoadError((e as Error).message);
+      setLoadError(serverMessage(e, t("errors.generic")));
       throw e;
     }
   }, []);
@@ -164,22 +163,6 @@ function Home() {
       active = false;
     };
   }, []);
-
-  const loadOpenQuery = useCallback(async () => {
-    const { data } = await supabase
-      .from("customer_queries")
-      .select("id, subject")
-      .eq("status", "open")
-      .order("created_at", { ascending: false })
-      .limit(1);
-    setOpenQuery(data?.[0] ? { id: data[0].id, subject: data[0].subject } : null);
-  }, []);
-
-  useEffect(() => {
-    void loadOpenQuery();
-    const id = setInterval(() => void loadOpenQuery(), 60_000);
-    return () => clearInterval(id);
-  }, [loadOpenQuery]);
 
   // In-app update bell (Task 7): dot when an order changed since My orders was last opened.
   useEffect(() => {
@@ -250,17 +233,14 @@ function Home() {
   const withFav = (p: typeof products[number]) => ({ ...p, isFavourite: isFav(p) });
 
   const favourites = useMemo(() => products.filter((p) => fav.isFav(p)), [products, fav]);
-  const popular = useMemo(() => products.filter((p) => p.isPopular), [products]);
-
-  const hasQuery = search.trim() !== "";
-  const defaultPopularView = category === "all" && !hasQuery;
-
-  const visibleProducts = useMemo(() => {
-    const filtered = products
-      .filter((p) => category === "all" || p.categoryCode === category)
-      .filter((p) => matchesSearch(p, search));
-    return defaultPopularView ? filtered.filter((p) => p.isPopular) : filtered;
-  }, [products, category, search, defaultPopularView]);
+  // "All" shows every active product; a category chip filters to its own.
+  const visibleProducts = useMemo(
+    () =>
+      products
+        .filter((p) => category === "all" || p.categoryCode === category)
+        .filter((p) => matchesSearch(p, search)),
+    [products, category, search],
+  );
 
   const total = useMemo(
     () =>
@@ -319,10 +299,7 @@ function Home() {
         <div key="categories" className="no-scrollbar mt-5 flex gap-2 overflow-x-auto px-5">
           <button
             type="button"
-            onClick={() => {
-              setCategory("all");
-              setShowAll(false);
-            }}
+            onClick={() => setCategory("all")}
             aria-pressed={category === "all"}
             className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition active:scale-95 ${
               category === "all"
@@ -340,10 +317,7 @@ function Home() {
               <button
                 key={cat.id}
                 type="button"
-                onClick={() => {
-                  setCategory(cat.code);
-                  setShowAll(true);
-                }}
+                onClick={() => setCategory(cat.code)}
                 aria-pressed={selected}
                 className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition active:scale-95 ${
                   selected
@@ -372,12 +346,7 @@ function Home() {
                 type="button"
                 key={banner.id}
                 onClick={() => openBanner(banner.linkType, banner.linkValue)}
-                className="relative min-h-32 w-[82%] shrink-0 snap-center overflow-hidden rounded-2xl text-left shadow-md shadow-primary/10 transition active:scale-[0.99]"
-                style={
-                  banner.imageUrl
-                    ? undefined
-                    : { background: "linear-gradient(120deg, #2EA3C7 0%, #103A66 75%)" }
-                }
+                className={`relative min-h-32 w-[82%] shrink-0 snap-center overflow-hidden rounded-2xl text-left shadow-md shadow-primary/10 transition active:scale-[0.99] ${banner.imageUrl ? "" : "bg-banner"}`}
               >
                 {banner.imageUrl && (
                   <img
@@ -460,31 +429,8 @@ function Home() {
     if (key === "popular") {
       return (
         <div key="popular" className="mt-6 px-5">
-          <div className="flex items-center justify-between">
-            <h2 className={`text-lg font-bold text-foreground ${deva}`}>
-              {t(defaultPopularView ? "home.popularTitle" : "home.allProducts")}
-            </h2>
-            {defaultPopularView ? (
-              <button
-                type="button"
-                onClick={() => setShowAll(true)}
-                className="min-h-9 text-sm font-semibold text-secondary"
-              >
-                {t("home.seeAll")}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAll(false);
-                  setCategory("all");
-                }}
-                className="min-h-9 text-sm font-semibold text-secondary"
-              >
-                {t("home.showLess")}
-              </button>
-            )}
-          </div>
+          <h2 className={`text-lg font-bold text-foreground ${deva}`}>{t("home.allProducts")}</h2>
+
 
           <div className="mt-3 grid grid-cols-2 gap-3">
             {visibleProducts.map((product) => {
@@ -513,11 +459,6 @@ function Home() {
             })}
           </div>
           {!loading && visibleProducts.length === 0 && <NoResultsState />}
-          {hasQuery && visibleProducts.length > 0 && (
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              {t("catalog.resultsCount", { count: visibleProducts.length })}
-            </p>
-          )}
         </div>
       );
     }
@@ -529,14 +470,13 @@ function Home() {
   const showEmptyCatalog = !loading && data !== null && data.products.length === 0;
 
   return (
-    <main
-      className={`mx-auto min-h-screen max-w-md bg-background ${deva}`}
+    <PageShell
+      className={` ${deva}`}
       onTouchStart={pull.handlers.onTouchStart}
       onTouchMove={pull.handlers.onTouchMove}
       onTouchEnd={pull.handlers.onTouchEnd}
       onTouchCancel={pull.handlers.onTouchCancel}
     >
-      <OfflineBanner />
       <PayReminder />
 
       {pull.indicator && (
@@ -558,12 +498,7 @@ function Home() {
       ) : (
         <>
           {/* Hero */}
-          <div
-            className="relative px-5 pb-20 pt-6"
-            style={{
-              background: "linear-gradient(175deg, #0B2545 0%, #103A66 55%, #2EA3C7 140%)",
-            }}
-          >
+          <div className="bg-hero relative px-5 pb-20 pt-6">
             {hero?.backgroundImageUrl && (
               <>
                 <img
@@ -624,7 +559,7 @@ function Home() {
                       {orderUpdates && (
                         <span
                           aria-hidden
-                          className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-[#103A66] bg-accent"
+                          className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent"
                         />
                       )}
                     </button>
@@ -689,21 +624,7 @@ function Home() {
                 {t("banner.underReview")}
               </div>
             )}
-            {openQuery && (
-              <div className="mx-5 mb-4 flex items-center gap-3 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-foreground">{t("home.needsAction")}</p>
-                  <p className="truncate text-xs text-muted-foreground">{openQuery.subject}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigate({ to: "/queries/$id", params: { id: openQuery.id } })}
-                  className="min-h-10 shrink-0 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground transition active:scale-95"
-                >
-                  {t("home.open")}
-                </button>
-              </div>
-            )}
+
             <div className="relative z-30 -mt-7 px-5">
               <SearchBox
                 value={search}
@@ -751,36 +672,13 @@ function Home() {
             )}
           </div>
 
-          {/* Zomato-style floating cart bar */}
-          {count > 0 && (
-            <div className="fixed inset-x-0 bottom-[4.75rem] z-40 px-4">
-              <div className="relative mx-auto flex max-w-md items-center justify-between gap-3 rounded-2xl bg-primary px-4 py-3 text-primary-foreground shadow-xl shadow-primary/30 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                <button
-                  type="button"
-                  aria-label={t("cart.clear")}
-                  onClick={() => setConfirmClear(true)}
-                  className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-md transition active:scale-90"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-                <p className="text-sm font-semibold">{t("cart.itemsSummary", { count, total: formatINR(total) })}</p>
-                {pending ? (
-                  <span className="flex min-h-11 items-center rounded-xl bg-primary-foreground/15 px-4 text-sm font-bold text-primary-foreground">
-                    {t("cart.orderingAfterApproval")}
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => navigate({ to: "/cart" })}
-                    className="flex min-h-11 items-center gap-1.5 rounded-xl bg-primary-foreground/15 px-4 text-sm font-bold text-primary-foreground transition active:scale-95"
-                  >
-                    {t("cart.viewCart")}
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
+          <CartBar
+            count={count}
+            total={formatINR(total)}
+            pending={pending}
+            onOpen={() => void navigate({ to: "/cart" })}
+            onClear={() => setConfirmClear(true)}
+          />
 
           <ClearCartDialog
             open={confirmClear}
@@ -802,6 +700,6 @@ function Home() {
       )}
 
       <BottomNav />
-    </main>
+    </PageShell>
   );
 }

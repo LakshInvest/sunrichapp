@@ -9,6 +9,7 @@ import {
   FileText,
   Home,
   Loader2,
+  MapPin,
   Package,
   Store,
   Truck,
@@ -20,7 +21,7 @@ import en from "@/locales/en.json";
 import { scrollToFirstError, serverMessage } from "@/lib/form-errors";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
-import { LocationPicker } from "@/components/LocationPicker";
+import { LocationPicker, useReverseAddress } from "@/components/LocationPicker";
 import { DEFAULT_LOCATION, type LocationValue } from "@/components/locationShared";
 import { useLang } from "@/hooks/use-lang";
 import {
@@ -33,7 +34,7 @@ import {
   type RequirementDto,
   type UploadedDocDto,
 } from "@/lib/registration.functions";
-import { isValidGstin, isValidPincode } from "@/lib/registration-validation";
+import { isValidGstin, isValidPincode, locationArgs } from "@/lib/registration-validation";
 import { prepareUpload } from "@/lib/image-compress";
 import { useOffline } from "@/hooks/use-offline";
 
@@ -323,6 +324,16 @@ function DetailsStep({
       ? { lat: reg.latitude, lng: reg.longitude, accuracy: reg.locationAccuracyM }
       : { ...DEFAULT_LOCATION },
   );
+  // The user explicitly picked a spot (GPS, search, map tap or pin drag).
+  const [locationPicked, setLocationPicked] = useState(false);
+  const [changing, setChanging] = useState(false);
+  const pickLocation = (v: LocationValue) => {
+    setLocation(v);
+    setLocationPicked(true);
+    setFieldErrors((fe) => ({ ...fe, location: "" }));
+    setError(null);
+  };
+  const pinnedAddress = useReverseAddress(location);
   const [fields, setFields] = useState<DetailsState>({
     businessName: reg.businessName ?? "",
     contactName: reg.contactName ?? "",
@@ -359,6 +370,7 @@ function DetailsStep({
 
   const locationTouched =
     location.accuracy != null || location.lat !== DEFAULT_LOCATION.lat || location.lng !== DEFAULT_LOCATION.lng;
+  const locationKnown = locationTouched || locationPicked;
 
   const offline = useOffline();
   const [pinLookup, setPinLookup] = useState(false);
@@ -403,7 +415,7 @@ function DetailsStep({
     if (fields.gstin.trim() && !isValidGstin(fields.gstin)) errs["gstin"] = t("registration.errInvalidGstin");
     if (fields.email.trim() && !/^\S+@\S+\.\S+$/.test(fields.email.trim()))
       errs["email"] = t("registration.errInvalidEmail");
-    if (requiresGps && !locationTouched) errs["location"] = t("registration.errLocation");
+    if (requiresGps && !locationKnown) errs["location"] = t("registration.errLocation");
     setFieldErrors(errs);
     if (Object.keys(errs).length > 0) {
       scrollToFirstError();
@@ -425,23 +437,17 @@ function DetailsStep({
         ...(fields.landmark.trim() ? { p_landmark: fields.landmark.trim() } : {}),
         ...(fields.gstin.trim() ? { p_gstin: fields.gstin.trim() } : {}),
         ...(fields.email.trim() ? { p_email: fields.email.trim() } : {}),
-        ...(requiresGps
-          ? {
-              p_latitude: location.lat,
-              p_longitude: location.lng,
-              ...(location.accuracy != null ? { p_location_accuracy_m: location.accuracy } : {}),
-            }
-          : {}),
+        ...locationArgs(location, locationKnown),
       };
       const { error: rpcErr } = await supabase.rpc("start_registration", args);
       if (rpcErr) {
-        setError(rpcErr.message);
+        setError(serverMessage(rpcErr, t("registration.errGeneric")));
         return;
       }
       const fresh = await reload();
       await onSaved(fresh);
     } catch (e) {
-      setError((e as Error).message || t("registration.errGeneric"));
+      setError(serverMessage(e, t("registration.errGeneric")));
     } finally {
       setBusy(false);
     }
@@ -533,7 +539,23 @@ function DetailsStep({
           {t("registration.location")}
           {requiresGps && <span className="text-destructive"> *</span>}
         </span>
-        <LocationPicker value={location} onChange={setLocation} />
+        {!locationKnown || changing ? (
+          <LocationPicker value={location} onChange={pickLocation} />
+        ) : (
+          <div className="flex items-start gap-2 rounded-xl border border-border bg-card px-4 py-3">
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-secondary" aria-hidden />
+            <p className="min-w-0 flex-1 text-sm leading-snug text-foreground">
+              {pinnedAddress || `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}`}
+            </p>
+            <button
+              type="button"
+              onClick={() => setChanging(true)}
+              className="min-h-11 shrink-0 text-sm font-semibold text-secondary"
+            >
+              {t("registration.changeLocation")}
+            </button>
+          </div>
+        )}
         {fieldErrors["location"] && (
           <span data-field-error className="text-xs font-medium text-destructive">{fieldErrors["location"]}</span>
         )}
@@ -662,12 +684,12 @@ function DocsStep({
       };
       const { error: rpcErr } = await supabase.rpc("add_customer_document", docArgs);
       if (rpcErr) {
-        setError(rpcErr.message);
+        setError(serverMessage(rpcErr, t("registration.errUpload")));
         return;
       }
       await load();
     } catch (e) {
-      setError((e as Error).message || t("registration.errUpload"));
+      setError(serverMessage(e, t("registration.errUpload")));
     } finally {
       setUploadingCode(null);
     }
@@ -693,12 +715,12 @@ function DocsStep({
     try {
       const { error: rpcErr } = await supabase.rpc("submit_registration");
       if (rpcErr) {
-        setError(rpcErr.message);
+        setError(serverMessage(rpcErr, t("registration.errGeneric")));
         return;
       }
       await onSubmitted();
     } catch (e) {
-      setError((e as Error).message || t("registration.errGeneric"));
+      setError(serverMessage(e, t("registration.errGeneric")));
     } finally {
       setSubmitting(false);
     }

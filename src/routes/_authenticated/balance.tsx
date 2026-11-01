@@ -17,7 +17,7 @@ import { getMyCustomerId } from "@/lib/orders";
 import type { StatementRow } from "@/lib/billing";
 import { fetchAppInfo } from "@/lib/app-info";
 import { prepareUpload } from "@/lib/image-compress";
-import { scrollToFirstError } from "@/lib/form-errors";
+import { scrollToFirstError, serverMessage } from "@/lib/form-errors";
 import {
   PAY_MODES,
   fetchBalance,
@@ -77,7 +77,7 @@ function BalancePage() {
   const loadLedger = useCallback(() => {
     setRows(null);
     setErr(null);
-    fetchLedger(period.from, period.to).then(setRows, (e: Error) => setErr(e.message));
+    fetchLedger(period.from, period.to).then(setRows, (e: Error) => setErr(serverMessage(e, t("errors.generic"))));
   }, [period.from, period.to]);
   useEffect(loadLedger, [loadLedger]);
 
@@ -306,7 +306,7 @@ function StatementSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
         await shareOrDownload(blob, name, t("balance.shareText"));
       }
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(serverMessage(e, t("errors.generic")));
     } finally {
       setBusy(null);
     }
@@ -394,7 +394,7 @@ function PaidSheet({ open, onOpenChange, onSent }: { open: boolean; onOpenChange
       onOpenChange(false);
       onSent();
     } catch (err) {
-      toast.error((err as Error).message);
+      toast.error(serverMessage(err, t("errors.generic")));
     } finally {
       setSending(false);
     }

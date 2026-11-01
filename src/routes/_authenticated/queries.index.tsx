@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { PageShell } from "@/components/PageShell";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronRight, MessageCircleQuestion, Plus } from "lucide-react";
@@ -6,7 +7,6 @@ import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { QueryChip } from "@/components/QueryChip";
-import { OfflineBanner } from "@/components/OfflineBanner";
 import { useLang } from "@/hooks/use-lang";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 
@@ -89,14 +89,13 @@ function QueriesList() {
   }, [load]);
 
   return (
-    <main
-      className={`mx-auto min-h-screen max-w-md bg-background px-5 pb-28 pt-8 ${lang === "en" ? "" : "font-deva"}`}
+    <PageShell
+      className={` px-5 pb-28 pt-8 ${lang === "en" ? "" : "font-deva"}`}
       onTouchStart={pull.handlers.onTouchStart}
       onTouchMove={pull.handlers.onTouchMove}
       onTouchEnd={pull.handlers.onTouchEnd}
       onTouchCancel={pull.handlers.onTouchCancel}
     >
-      <OfflineBanner />
       {pull.indicator && (
         <div
           aria-hidden
@@ -157,6 +156,6 @@ function QueriesList() {
       </button>
 
       <BottomNav />
-    </main>
+    </PageShell>
   );
 }

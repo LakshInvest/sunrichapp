@@ -1,4 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PageShell } from "@/components/PageShell";
+import { serverMessage } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { SlotText } from "@/components/SlotText";
@@ -6,7 +8,6 @@ import { toast } from "sonner";
 import { Check, CheckCheck, Clock, Copy, Inbox as InboxIcon, MapPin, Phone, X } from "lucide-react";
 import en from "@/locales/en.json";
 import { BottomNav } from "@/components/BottomNav";
-import { OfflineBanner } from "@/components/OfflineBanner";
 import { SheetDrawer } from "@/components/SheetDrawer";
 import {
   DrawerDescription,
@@ -111,7 +112,7 @@ function Inbox() {
       toast.success(t(accept ? "inbox.accepted" : "inbox.rejected"));
       await load();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(serverMessage(e, t("errors.generic")));
     } finally {
       setBusyId(null);
     }
@@ -125,7 +126,7 @@ function Inbox() {
       toast.success(t(delivered ? "inbox.markedDelivered" : "inbox.markedNotDelivered"));
       await load();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(serverMessage(e, t("errors.generic")));
     } finally {
       setBusyId(null);
     }
@@ -143,7 +144,7 @@ function Inbox() {
       setReason("");
       await load();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(serverMessage(e, t("errors.generic")));
     } finally {
       setSending(false);
     }
@@ -164,8 +165,7 @@ function Inbox() {
     }`;
 
   return (
-    <main className={`mx-auto min-h-screen max-w-md bg-background pb-28 ${deva}`}>
-      <OfflineBanner />
+    <PageShell className={`pb-28 ${deva}`}>
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-5 pb-3 pt-6 backdrop-blur-md">
         <h1 className="text-2xl font-bold text-primary">{t("inbox.title")}</h1>
         <div className="mt-3 flex items-center gap-1 rounded-full border border-border bg-card p-1" role="group" aria-label={t("inbox.title")}>
@@ -378,6 +378,6 @@ function Inbox() {
       </SheetDrawer>
 
       <BottomNav />
-    </main>
+    </PageShell>
   );
 }

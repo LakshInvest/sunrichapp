@@ -121,7 +121,7 @@ export function ProductCard({
       <div className="mt-auto px-0.5 pt-2">
         <div className="flex items-center justify-between gap-1">
           <PriceLine product={product} />
-          {product.price === null ? null : qty === 0 ? (
+          {qty === 0 ? (
             <button
               type="button"
               onClick={onAdd}

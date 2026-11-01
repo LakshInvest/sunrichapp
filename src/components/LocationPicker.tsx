@@ -7,6 +7,27 @@ import { PlaceSearch } from "./PlaceSearch";
 import { reverseGeocode } from "@/lib/gmaps";
 import { DEFAULT_LOCATION, type LocationValue } from "./locationShared";
 
+/** Debounced reverse geocode of the pin position. Shared by the picker and the form summary. */
+export function useReverseAddress(value: LocationValue): string {
+  const [address, setAddress] = useState("");
+  useEffect(() => {
+    const lat = (value ?? DEFAULT_LOCATION).lat;
+    const lng = (value ?? DEFAULT_LOCATION).lng;
+    let alive = true;
+    setAddress("");
+    const id = setTimeout(() => {
+      reverseGeocode(lat, lng).then((a) => {
+        if (alive && a) setAddress(a);
+      });
+    }, 700);
+    return () => {
+      alive = false;
+      clearTimeout(id);
+    };
+  }, [value]);
+  return address;
+}
+
 /** GPS button + accuracy readout + draggable-pin map with reverse-geocoded address. */
 export function LocationPicker({
   value,
@@ -21,8 +42,6 @@ export function LocationPicker({
   const { t } = useTranslation();
   const [locating, setLocating] = useState(false);
   const [denied, setDenied] = useState(false);
-  const [pinAddress, setPinAddress] = useState("");
-
   const [disclose, setDisclose] = useState(false);
 
   // Play policy: our own prominent disclosure before the system prompt.
@@ -63,21 +82,7 @@ export function LocationPicker({
   };
 
   // Pin → address: debounce while the pin moves, then reverse geocode (browser Geocoder).
-  useEffect(() => {
-    const lat = (value ?? DEFAULT_LOCATION).lat;
-    const lng = (value ?? DEFAULT_LOCATION).lng;
-    let alive = true;
-    setPinAddress("");
-    const id = setTimeout(() => {
-      reverseGeocode(lat, lng).then((a) => {
-        if (alive && a) setPinAddress(a);
-      });
-    }, 700);
-    return () => {
-      alive = false;
-      clearTimeout(id);
-    };
-  }, [value]);
+  const pinAddress = useReverseAddress(value);
 
   return (
     <div className="flex flex-col gap-3">

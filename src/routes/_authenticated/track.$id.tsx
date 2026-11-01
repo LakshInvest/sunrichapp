@@ -1,4 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { PageShell } from "@/components/PageShell";
+import { serverMessage } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { SlotText } from "@/components/SlotText";
@@ -22,7 +24,6 @@ import { PayCard } from "@/components/PayCard";
 import { getFirmPaymentInfo, type FirmPayInfo } from "@/lib/payments.functions";
 import { PaymentProofSheet, PaymentStatusNote, type ProofTarget } from "@/components/PaymentProofSheet";
 import en from "@/locales/en.json";
-import { OfflineBanner } from "@/components/OfflineBanner";
 import { SheetDrawer } from "@/components/SheetDrawer";
 import { MapPin } from "lucide-react";
 import {
@@ -145,7 +146,7 @@ function OrderDetail() {
       setMethodOpen(false);
       await load();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(serverMessage(e, t("errors.generic")));
     } finally {
       setSavingMethod(false);
     }
@@ -153,25 +154,23 @@ function OrderDetail() {
 
   if (error === "not-found") {
     return (
-      <main className={`mx-auto min-h-screen max-w-md bg-background ${deva}`}>
-        <OfflineBanner />
-        <div className="px-5 pt-6">
+      <PageShell className={`${deva}`}>
+          <div className="px-5 pt-6">
           <ErrorState message={t("track.notFound")} onRetry={() => void load()} />
         </div>
-      </main>
+      </PageShell>
     );
   }
 
   if (!order) {
     return (
-      <main className={`mx-auto min-h-screen max-w-md bg-background ${deva}`}>
-        <OfflineBanner />
-        <div className="mt-6 space-y-3 px-5">
+      <PageShell className={`${deva}`}>
+          <div className="mt-6 space-y-3 px-5">
           {[0, 1, 2].map((i) => (
             <div key={i} className="h-24 animate-pulse rounded-2xl bg-muted" />
           ))}
         </div>
-      </main>
+      </PageShell>
     );
   }
 
@@ -204,7 +203,7 @@ function OrderDetail() {
       setReason("");
       await load();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(serverMessage(e, t("errors.generic")));
     } finally {
       setCancelling(false);
     }
@@ -218,7 +217,7 @@ function OrderDetail() {
       toast.success(t("delivery.changed"));
       await load();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(serverMessage(e, t("errors.generic")));
     } finally {
       setSwitching(false);
     }
@@ -243,8 +242,7 @@ function OrderDetail() {
   };
 
   return (
-    <main className={`mx-auto min-h-screen max-w-md bg-background pb-16 ${deva}`}>
-      <OfflineBanner />
+    <PageShell className={`pb-16 ${deva}`}>
       <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 py-2.5 backdrop-blur-md">
         <button
           type="button"
@@ -615,6 +613,6 @@ function OrderDetail() {
         target={payTarget}
         onDone={() => void load()}
       />
-    </main>
+    </PageShell>
   );
 }

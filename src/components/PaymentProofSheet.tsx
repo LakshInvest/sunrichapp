@@ -5,7 +5,7 @@ import { CheckCircle2, Clock, Copy, Loader2, Paperclip, Send, XCircle } from "lu
 import { SheetDrawer } from "@/components/SheetDrawer";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { prepareUpload } from "@/lib/image-compress";
-import { scrollToFirstError } from "@/lib/form-errors";
+import { scrollToFirstError, serverMessage } from "@/lib/form-errors";
 import { getMyCustomerId } from "@/lib/orders";
 import { submitPaymentProof, validUtr } from "@/lib/payments";
 
@@ -84,7 +84,7 @@ export function PaymentProofSheet({
       onOpenChange(false);
       onDone?.();
     } catch (err) {
-      toast.error((err as Error).message);
+      toast.error(serverMessage(err, t("errors.generic")));
     } finally {
       setSending(false);
     }

@@ -15,7 +15,9 @@
   },
   "errors": {
     "title": "Something went wrong",
-    "retry": "Retry"
+    "retry": "Retry",
+    "network": "Please check your internet connection and try again.",
+    "generic": "Something went wrong, please try again."
   },
   "auth": {
     "title": "Login with WhatsApp",
@@ -333,7 +335,8 @@
     "rejectedTitle": "Registration needs changes",
     "rejectedBody": "Reason: {{reason}}",
     "editAndResubmit": "Edit and resubmit",
-    "yourName": "Your name"
+    "yourName": "Your name",
+    "changeLocation": "Change"
   },
   "status": {
     "active": "Active",
@@ -744,7 +747,11 @@
     "error": "Couldn't load maps right now — check your connection and try again."
   },
   "native": {
-    "backToExit": "Press back again to exit"
+    "backToExit": "Press back again to exit",
+    "exitTitle": "Exit app?",
+    "exitBody": "Are you sure you want to close Sunrich?",
+    "exitYes": "Exit",
+    "exitNo": "Cancel"
   },
   "reorder": {
     "title": "Order again",
@@ -974,5 +981,9 @@
       "onDelivery": "Pay on delivery",
       "onCredit": "On credit"
     }
+  },
+  "underReview": {
+    "title": "Your account is under review",
+    "body": "Our team is verifying your details. This usually takes a short time — we will notify you as soon as your account is approved. You can reach us any time if you have questions."
   }
 }

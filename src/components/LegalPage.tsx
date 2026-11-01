@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { serverMessage } from "@/lib/form-errors";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "@tanstack/react-router";
 import ReactMarkdown from "react-markdown";
@@ -29,7 +30,7 @@ export function LegalPage({
   const [err, setErr] = useState<string | null>(null);
   const load = () => {
     setErr(null);
-    fetchAppInfo(true).then(setInfo, (e: Error) => setErr(e.message));
+    fetchAppInfo(true).then(setInfo, (e: Error) => setErr(serverMessage(e, t("errors.generic"))));
   };
   useEffect(load, []);
 

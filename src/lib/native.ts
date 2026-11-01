@@ -48,7 +48,7 @@ export async function initNative(opts: {
 
   // sunrich://order/<id> and https://…/order/<id> open that order.
   const urlOpen = await App.addListener("appUrlOpen", ({ url }) => {
-    const m = /^(?:sunrich:\/\/|https:\/\/[^/]+)\/order\/([A-Za-z0-9_-]+)/.exec(url);
+    const m = /^(?:sunrich:\/\/order\/|https:\/\/[^/]+\/order\/)([A-Za-z0-9_-]+)/.exec(url);
     if (m && opts.openPath) opts.openPath(`/track/${m[1]}`);
   });
 
@@ -136,6 +136,13 @@ export async function haptic(style: "light" | "medium" | "heavy" = "light"): Pro
   const { Haptics, ImpactStyle } = await import("@capacitor/haptics");
   const map = { light: ImpactStyle.Light, medium: ImpactStyle.Medium, heavy: ImpactStyle.Heavy };
   await Haptics.impact({ style: map[style] }).catch(() => undefined);
+}
+
+/** Exits the Android app (no-op on web). Used by the "Exit app?" dialog. */
+export async function exitApp(): Promise<void> {
+  if (!isNative()) return;
+  const { App } = await import("@capacitor/app");
+  App.exitApp();
 }
 
 /** Online/offline listener (native Network plugin or browser events). */

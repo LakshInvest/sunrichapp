@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { serverMessage } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -54,7 +55,7 @@ function Devices() {
   const load = useCallback(async () => {
     setErr(null);
     const { data, error } = await supabase.rpc("my_devices");
-    if (error) setErr(error.message);
+    if (error) setErr(serverMessage(error, t("errors.generic")));
     else
       setList(
         ((data ?? []) as Device[]).slice().sort((a, b) => (b.last_used_at ?? "").localeCompare(a.last_used_at ?? "")),
@@ -68,7 +69,7 @@ function Devices() {
     const { error } = await supabase.rpc("revoke_my_device", { p_device_id: confirm.device_id });
     setBusy(false);
     setConfirm(null);
-    if (error) toast.error(error.message);
+    if (error) toast.error(serverMessage(error, t("errors.generic")));
     else {
       toast.success(t("devices.removed"));
       void load();

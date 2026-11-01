@@ -8,15 +8,14 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
-import { toast } from "sonner";
 import i18n from "../lib/i18n";
-import { initNative } from "@/lib/native";
+import { exitApp, initNative } from "@/lib/native";
 import { AppGate } from "@/components/AppGate";
 import { refreshPushToken } from "@/lib/push";
 
@@ -128,6 +127,7 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const [askExit, setAskExit] = useState(false);
 
   // Keep the router and query cache in sync with auth identity changes.
   useEffect(() => {
@@ -145,7 +145,7 @@ function RootComponent() {
     let cleanup: (() => void) | undefined;
     void initNative({
       isHome: () => router.state.location.pathname === "/home",
-      onExitHint: () => toast(i18n.t("native.backToExit"), { duration: 2000 }),
+      onExitHint: () => setAskExit(true),
       openPath: (path) => void router.navigate({ to: path, replace: false }),
     }).then((c) => (cleanup = c));
     return () => cleanup?.();
@@ -174,6 +174,30 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <AppGate />
+      {askExit && (
+        <div role="alertdialog" aria-modal className="fixed inset-0 z-[80] flex items-center justify-center bg-primary/60 px-6 backdrop-blur-sm">
+          <div className="w-full max-w-xs rounded-2xl bg-card p-5 text-center shadow-xl">
+            <h2 className="text-lg font-bold text-foreground">{i18n.t("native.exitTitle")}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{i18n.t("native.exitBody")}</p>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setAskExit(false)}
+                className="min-h-12 flex-1 rounded-xl border border-border bg-card text-base font-semibold text-foreground"
+              >
+                {i18n.t("native.exitNo")}
+              </button>
+              <button
+                type="button"
+                onClick={() => void exitApp()}
+                className="min-h-12 flex-1 rounded-xl bg-primary text-base font-semibold text-primary-foreground"
+              >
+                {i18n.t("native.exitYes")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <Toaster position="top-center" />
     </QueryClientProvider>
   );

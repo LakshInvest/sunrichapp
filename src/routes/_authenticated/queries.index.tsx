@@ -7,7 +7,6 @@ import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { QueryChip } from "@/components/QueryChip";
-import { OfflineBanner } from "@/components/OfflineBanner";
 import { useLang } from "@/hooks/use-lang";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 

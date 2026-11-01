@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { ArrowLeft, Camera, FileText, Paperclip, Send, TriangleAlert, X } from "lucide-react";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
-import { OfflineBanner } from "@/components/OfflineBanner";
 import { QueryChip } from "@/components/QueryChip";
 import { useLang } from "@/hooks/use-lang";
 import { useOffline } from "@/hooks/use-offline";

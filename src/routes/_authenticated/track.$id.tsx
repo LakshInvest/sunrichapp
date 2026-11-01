@@ -24,7 +24,6 @@ import { PayCard } from "@/components/PayCard";
 import { getFirmPaymentInfo, type FirmPayInfo } from "@/lib/payments.functions";
 import { PaymentProofSheet, PaymentStatusNote, type ProofTarget } from "@/components/PaymentProofSheet";
 import en from "@/locales/en.json";
-import { OfflineBanner } from "@/components/OfflineBanner";
 import { SheetDrawer } from "@/components/SheetDrawer";
 import { MapPin } from "lucide-react";
 import {

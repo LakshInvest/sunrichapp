@@ -149,12 +149,9 @@ function Order() {
   const showError = !loading && !data;
 
   return (
-    <main
-      className={`mx-auto min-h-dvh max-w-md bg-background ${deva}`}
-      onTouchStart={pull.handlers.onTouchStart}
-      onTouchMove={pull.handlers.onTouchMove}
-      onTouchEnd={pull.handlers.onTouchEnd}
-      onTouchCancel={pull.handlers.onTouchCancel}
+    <PageShell
+      className={`${deva}`}
+      touchHandlers={pull.handlers}
     >
 
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-5 pb-3 pt-[max(1.75rem,env(safe-area-inset-top))] backdrop-blur-md">

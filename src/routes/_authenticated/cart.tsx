@@ -9,7 +9,6 @@ import en from "@/locales/en.json";
 import { BottomNav } from "@/components/BottomNav";
 import { SmartImage } from "@/components/SmartImage";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
-import { OfflineBanner } from "@/components/OfflineBanner";
 import { ErrorState, GridSkeleton } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";

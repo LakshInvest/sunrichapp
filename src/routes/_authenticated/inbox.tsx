@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { Check, CheckCheck, Clock, Copy, Inbox as InboxIcon, MapPin, Phone, X } from "lucide-react";
 import en from "@/locales/en.json";
 import { BottomNav } from "@/components/BottomNav";
-import { OfflineBanner } from "@/components/OfflineBanner";
 import { SheetDrawer } from "@/components/SheetDrawer";
 import {
   DrawerDescription,

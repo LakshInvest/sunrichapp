@@ -5,7 +5,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Bell, CheckCircle2, FileText, MessageCircle, PauseCircle, Truck, XCircle, type LucideIcon } from "lucide-react";
 import en from "@/locales/en.json";
-import { OfflineBanner } from "@/components/OfflineBanner";
 import { EmptyState, ErrorState } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
 import { dateLabel } from "@/lib/order-format";

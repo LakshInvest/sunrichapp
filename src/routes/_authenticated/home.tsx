@@ -28,7 +28,6 @@ import { PayReminder } from "@/components/PayReminder";
 import { listMyAddresses, labelKey, type SavedAddress } from "@/lib/addresses";
 import { pickSelected, shortArea, useSelectedAddressId } from "@/lib/selected-address";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
-import { OfflineBanner } from "@/components/OfflineBanner";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { SearchBox } from "@/components/catalog/SearchBox";
 import { NoResultsState, ChipsSkeleton, GridSkeleton, BannerSkeleton, HeroSkeleton, ErrorState } from "@/components/catalog/states";

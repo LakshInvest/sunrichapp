@@ -129,3 +129,36 @@ begin
   return new;
 end $$;
 revoke execute on function public._invoice_use_advance() from public, anon, authenticated;
+
+-- ---------------------------------------------------------------------
+-- 3. _apply_advance: skip money paid for an order whose bill isn't issued
+--    yet (unless that order is cancelled/rejected) — it stays reserved
+--    for that order. Copied from the live database (run by Sunrich).
+-- ---------------------------------------------------------------------
+create or replace function public._apply_advance(p_customer_id uuid, p_firm_id uuid)
+returns numeric language plpgsql security definer set search_path = public as $$
+declare v_r record; v_used numeric := 0; v_before numeric;
+begin
+  if p_firm_id is null then return 0; end if;
+  for v_r in
+    select r.id, r.amount - coalesce((select sum(a.amount) from public.receipt_allocations a where a.receipt_id = r.id), 0) as unalloc
+      from public.receipts r
+     where r.customer_id = p_customer_id and r.firm_id = p_firm_id
+       and r.status = 'posted' and coalesce(r.cheque_status, '') <> 'bounced'
+       and not exists (                                   -- reserved for an order not yet billed
+         select 1 from public.payment_proofs pp
+           join public.orders o on o.id = pp.order_id
+          where pp.receipt_id = r.id
+            and o.status::text not in ('cancelled', 'rejected')
+            and not exists (select 1 from public.invoices i
+                             where i.order_id = pp.order_id and i.status = 'issued' and i.grand_total > 0))
+     order by r.receipt_date, r.created_at
+  loop
+    continue when v_r.unalloc <= 0;
+    exit when not exists (select 1 from public._open_bills(p_customer_id, p_firm_id));
+    v_before := v_r.unalloc;
+    v_used := v_used + (v_before - public._fifo_allocate(v_r.id));
+  end loop;
+  return v_used;
+end $$;
+revoke execute on function public._apply_advance(uuid, uuid) from public, anon, authenticated;

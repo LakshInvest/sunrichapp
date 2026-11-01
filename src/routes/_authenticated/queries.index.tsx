@@ -154,7 +154,7 @@ function QueriesList() {
 
       <button
         type="button"
-        onClick={() => navigate({ to: "/queries/ask", search: { topic: undefined, order: undefined } })}
+        onClick={() => navigate({ to: "/queries/ask", search: { topic: undefined, order: undefined, subject: undefined, message: undefined, product: undefined } })}
         className="fixed bottom-20 right-5 z-40 flex min-h-14 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground shadow-xl shadow-primary/30 transition active:scale-95"
       >
         <Plus className="h-5 w-5" aria-hidden />

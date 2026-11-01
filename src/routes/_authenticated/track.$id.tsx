@@ -538,7 +538,7 @@ function OrderDetail() {
           )}
           <button
             type="button"
-            onClick={() => navigate({ to: "/queries/ask", search: { topic: "order", order: order.orderNo } })}
+            onClick={() => navigate({ to: "/queries/ask", search: { topic: "order", order: order.orderNo, subject: undefined, message: undefined, product: undefined } })}
             className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-card text-base font-semibold text-foreground transition active:scale-[0.98]"
           >
             <HelpCircle className="h-5 w-5 text-secondary" aria-hidden />

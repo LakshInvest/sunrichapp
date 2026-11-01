@@ -217,3 +217,130 @@ export async function uploadPaymentFile(file: Blob, name: string, mime: string):
   if (error) throw new Error(error.message);
   return path;
 }
+
+/* ---------- Date ranges ---------- */
+
+export type KhataRange = "thisMonth" | "lastMonth" | "last3" | "custom";
+const isoDay = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+/** This month / last month / last 3 months (incl. this one), ending today at most. */
+export function khataRange(key: Exclude<KhataRange, "custom">, now = new Date()): { from: string; to: string } {
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  if (key === "thisMonth") return { from: isoDay(new Date(y, m, 1)), to: isoDay(now) };
+  if (key === "lastMonth") return { from: isoDay(new Date(y, m - 1, 1)), to: isoDay(new Date(y, m, 0)) };
+  return { from: isoDay(new Date(y, m - 2, 1)), to: isoDay(now) };
+}
+
+/* ---------- Statement PDF ---------- */
+
+export type UnpaidBill = { refNo: string; billDate: string; dueDate: string | null; balance: number };
+
+export async function khataStatementPdf(opts: {
+  company: string;
+  address: string;
+  customer: string;
+  from: string;
+  to: string;
+  rows: KhataEntry[];
+  unpaid: UnpaidBill[];
+  labels: Record<
+    "pdfTitle" | "period" | "opening" | "closing" | "date" | "ref" | "details" | "debit" | "credit" | "balance" | "unpaid" | "billNo" | "dueOn" | "amountDue" | "customer",
+    string
+  >;
+}): Promise<Blob> {
+  const { jsPDF } = await import("jspdf");
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const L = opts.labels;
+  const money = (v: number) => v.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const tot = statementTotals(opts.rows);
+  let y = 48;
+  doc.setFont("helvetica", "bold").setFontSize(16).setTextColor(11, 37, 69).text(opts.company, 40, y);
+  y += 15;
+  doc.setFont("helvetica", "normal").setFontSize(9).setTextColor(90).text(opts.address.slice(0, 110), 40, y);
+  y += 26;
+  doc.setFont("helvetica", "bold").setFontSize(12).setTextColor(30).text(L.pdfTitle, 40, y);
+  doc.setFont("helvetica", "normal").setFontSize(9).text(`${L.period}: ${opts.from} to ${opts.to}`, W - 40, y, { align: "right" });
+  y += 14;
+  doc.text(`${L.customer}: ${opts.customer}`, 40, y);
+  y += 22;
+
+  const cols = [40, 100, 190, 395, 465, W - 40];
+  const header = () => {
+    doc.setFillColor(11, 37, 69).rect(36, y - 11, W - 72, 16, "F");
+    doc.setTextColor(255).setFont("helvetica", "bold");
+    doc.text(L.date, cols[0]!, y);
+    doc.text(L.ref, cols[1]!, y);
+    doc.text(L.details, cols[2]!, y);
+    doc.text(L.debit, cols[3]! + 50, y, { align: "right" });
+    doc.text(L.credit, cols[4]! + 50, y, { align: "right" });
+    doc.text(L.balance, cols[5]!, y, { align: "right" });
+    doc.setTextColor(30).setFont("helvetica", "normal");
+    y += 18;
+  };
+  const page = () => {
+    if (y > H - 70) {
+      doc.addPage();
+      y = 48;
+      header();
+    }
+  };
+  header();
+  doc.setFont("helvetica", "bold").text(L.opening, cols[2]!, y);
+  doc.text(money(tot.opening), cols[5]!, y, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  y += 16;
+  const body = opts.rows.length && opts.rows[0]!.kind === "opening" && opts.rows[0]!.refNo === "" ? opts.rows.slice(1) : opts.rows;
+  for (const r of body) {
+    page();
+    doc.text(r.date, cols[0]!, y);
+    doc.text(r.refNo.slice(0, 16), cols[1]!, y);
+    doc.text((r.details || r.rawType).slice(0, 38), cols[2]!, y);
+    doc.text(r.debit ? money(r.debit) : "", cols[3]! + 50, y, { align: "right" });
+    doc.text(r.credit ? money(r.credit) : "", cols[4]! + 50, y, { align: "right" });
+    doc.text(money(r.balance), cols[5]!, y, { align: "right" });
+    y += 15;
+  }
+  page();
+  doc.setDrawColor(200).line(36, y - 9, W - 36, y - 9);
+  y += 4;
+  doc.setFont("helvetica", "bold");
+  doc.text(money(tot.debit), cols[3]! + 50, y, { align: "right" });
+  doc.text(money(tot.credit), cols[4]! + 50, y, { align: "right" });
+  y += 16;
+  doc.text(L.closing, cols[2]!, y);
+  doc.text(money(tot.closing), cols[5]!, y, { align: "right" });
+  doc.setFont("helvetica", "normal");
+
+  if (opts.unpaid.length) {
+    y += 32;
+    if (y > H - 100) {
+      doc.addPage();
+      y = 48;
+    }
+    doc.setFont("helvetica", "bold").setFontSize(11).text(L.unpaid, 40, y);
+    y += 18;
+    doc.setFontSize(9);
+    doc.text(L.billNo, 40, y);
+    doc.text(L.date, 190, y);
+    doc.text(L.dueOn, 290, y);
+    doc.text(L.amountDue, W - 40, y, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    y += 14;
+    for (const b of opts.unpaid) {
+      if (y > H - 50) {
+        doc.addPage();
+        y = 48;
+      }
+      doc.text(b.refNo.slice(0, 24), 40, y);
+      doc.text(b.billDate, 190, y);
+      doc.text(b.dueDate ?? "", 290, y);
+      doc.text(money(b.balance), W - 40, y, { align: "right" });
+      y += 14;
+    }
+  }
+  return doc.output("blob");
+}

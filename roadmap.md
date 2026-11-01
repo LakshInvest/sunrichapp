@@ -143,15 +143,15 @@ Constraint kept: existing DB tables/RPCs/RLS only (orders.payment_method, submit
 
 Constraint: existing DB tables/RPCs/policies/buckets only (user-managed backend). No schema changes.
 
-- [ ] 1. App start → direct login (remove intro/welcome screens; `/` routes to PIN-or-login)
-- [ ] 2. Registration map location: keep lat/lng+address in form state, save with registration; map centred Ganj Golai (18.402252, 76.584212) + "Use my current location"; location required for business types; show picked address with Change link
-- [ ] 3. Screen fit: 100dvh, safe-area, no horizontal/extra scroll, shared page layout, keyboard-visible inputs
-- [ ] 4. Add button works on Shop + Home (price-null → still addable, "Price on request"); one shared ProductCard
-- [ ] 5. Cart emptied → hide cart bar; cart page auto-redirects Home
-- [ ] 6. "All" category = all products on Home & Shop (default)
-- [ ] 7. Queries off Home; reply → in-app notification deep-linking to the query; Account-menu unread badge
-- [ ] 8+9. Shop simplify: search + category chips + grid only (remove sort/sections)
-- [ ] 10. One theme: tokens only, no hardcoded colors, shared button style
-- [ ] 11. Extra: pending-approval full screen, skeletons/empty states, offline banner, pull-to-refresh, i18n en/hi/mr
-- [ ] 12. Central friendly error handler; never raw Supabase/JS errors to users
-- [ ] QA: login 9999900001 (PIN 1234), cart/checkout/shop, query reply notification via CC, viewports 320/360/390/412
+- [x] 1. App start → direct login: `/` beforeLoad-redirects to `/auth`; intro screens gone. Live: visiting / lands on login.
+- [x] 2. Registration map location: lat/lng+address kept in state and saved for every customer type (locationArgs in registration-validation.ts); map centred Ganj Golai + "Use my current location"; picked-address summary card with Change; required for business types. End-to-end new-registration run still unverified (needs a fresh OTP).
+- [x] 3. Screen fit: PageShell (min-h-dvh, max-w-md, overflow-x-clip), safe-area on nav + cart bar, html/body overflow-x clip. No horizontal scroll live at 320/360/390/412 on home/shop/cart/account/orders.
+- [x] 4. Add works on Shop + Home; price-null still addable; one shared ProductCard + shared CartBar. Live: Add → stepper −1+ and "1 pack · ₹110 · View cart" bar on Shop.
+- [x] 5. Cart emptied → cart bar hides; cart page auto-redirects Home (ref-guarded). Live: Clear → Confirm → lands on /home.
+- [x] 6. "All" shows every product on Home & Shop; popular-section heading always All products (no see-all toggles).
+- [x] 7. Queries off Home (raised-query card removed); notifications list open queries with kind q-reply and deep-link to /queries/$id; Account tab badge. Live: raised a test query, simulated staff reply, notification appeared, tap opened the exact thread, badge read "Account · Sunrich replied" (test data cleaned up).
+- [x] 8+9. Shop = sticky search + category chips (All first with counts) + flat 2-col grid; sort row/sections removed. No horizontal scroll at 320.
+- [x] 10. Theme: gradients tokenized (bg-hero/bg-banner classes in styles.css); remaining text-white/bg-white are overlays on solid color/image (auth waves, banner, destructive buttons, crop overlay) — no palette drift.
+- [x] 11. Extra: pending-approval full-screen route (/under-review) wired in the auth gate; skeletons/empty states, offline banner, pull-to-refresh, i18n keys verified present for all t() keys (plural forms incl.).
+- [x] 12. Central friendly errors: serverMessage() maps network → errors.network, technical/RLS/HTTP → generic fallback, long raw text → fallback; wired into 16 screens. Unit-tested; wrong PIN shows "Wrong PIN. 5 tries left." live.
+- [x] QA: login 9999900001 (PIN 1234) live; Add/stepper/cart bar; clear-cart redirect; query raise → notification deep-link (staff reply simulated via DB, then deleted); viewports 320/360/390/412 zero horizontal scroll; Hindi home renders in Devanagari end to end. Not live-verified: full new-number registration (needs WhatsApp OTP), pending-approval screen (no pending QA account), ask attachments photo/PDF upload, checkout payment steps (covered in Prompt-27 QA).

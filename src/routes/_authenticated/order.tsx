@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { PageShell } from "@/components/PageShell";
 import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -155,7 +156,6 @@ function Order() {
       onTouchEnd={pull.handlers.onTouchEnd}
       onTouchCancel={pull.handlers.onTouchCancel}
     >
-      <OfflineBanner />
 
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-5 pb-3 pt-[max(1.75rem,env(safe-area-inset-top))] backdrop-blur-md">
         <h1 className="text-2xl font-bold text-primary">{t("order.title")}</h1>
@@ -279,6 +279,6 @@ function Order() {
       />
 
       <BottomNav />
-    </main>
+    </PageShell>
   );
 }

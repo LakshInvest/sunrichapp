@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type UIEvent } from "react";
+import { PageShell } from "@/components/PageShell";
 import { serverMessage } from "@/lib/form-errors";
 import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -470,14 +471,13 @@ function Home() {
   const showEmptyCatalog = !loading && data !== null && data.products.length === 0;
 
   return (
-    <main
-      className={`mx-auto min-h-screen max-w-md bg-background ${deva}`}
+    <PageShell
+      className={` ${deva}`}
       onTouchStart={pull.handlers.onTouchStart}
       onTouchMove={pull.handlers.onTouchMove}
       onTouchEnd={pull.handlers.onTouchEnd}
       onTouchCancel={pull.handlers.onTouchCancel}
     >
-      <OfflineBanner />
       <PayReminder />
 
       {pull.indicator && (
@@ -701,6 +701,6 @@ function Home() {
       )}
 
       <BottomNav />
-    </main>
+    </PageShell>
   );
 }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { PageShell } from "@/components/PageShell";
 import { serverMessage } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -65,8 +66,7 @@ function Notifications() {
   };
 
   return (
-    <main className={`mx-auto min-h-screen max-w-md bg-background pb-10 ${lang === "en" ? "" : "font-deva"}`}>
-      <OfflineBanner />
+    <PageShell className={`pb-10 ${lang === "en" ? "" : "font-deva"}`}>
       <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 py-2.5 backdrop-blur-md">
         <button type="button" onClick={() => navigate({ to: "/home" })} aria-label={t("registration.back")} className="flex h-11 w-11 items-center justify-center rounded-xl">
           <ArrowLeft className="h-5 w-5" aria-hidden />
@@ -109,6 +109,6 @@ function Notifications() {
           })}
         </ul>
       )}
-    </main>
+    </PageShell>
   );
 }

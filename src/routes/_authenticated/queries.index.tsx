@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { PageShell } from "@/components/PageShell";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronRight, MessageCircleQuestion, Plus } from "lucide-react";
@@ -89,14 +90,13 @@ function QueriesList() {
   }, [load]);
 
   return (
-    <main
-      className={`mx-auto min-h-screen max-w-md bg-background px-5 pb-28 pt-8 ${lang === "en" ? "" : "font-deva"}`}
+    <PageShell
+      className={` px-5 pb-28 pt-8 ${lang === "en" ? "" : "font-deva"}`}
       onTouchStart={pull.handlers.onTouchStart}
       onTouchMove={pull.handlers.onTouchMove}
       onTouchEnd={pull.handlers.onTouchEnd}
       onTouchCancel={pull.handlers.onTouchCancel}
     >
-      <OfflineBanner />
       {pull.indicator && (
         <div
           aria-hidden
@@ -157,6 +157,6 @@ function QueriesList() {
       </button>
 
       <BottomNav />
-    </main>
+    </PageShell>
   );
 }

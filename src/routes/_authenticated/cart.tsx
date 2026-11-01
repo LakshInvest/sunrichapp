@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { PageShell } from "@/components/PageShell";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -164,8 +165,7 @@ function Cart() {
   );
 
   return (
-    <main className={`mx-auto min-h-screen max-w-md bg-background ${deva}`}>
-      <OfflineBanner />
+    <PageShell className={`${deva}`}>
       <div className="px-5 pb-44 pt-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-primary">{t("cart.title")}</h1>
@@ -345,6 +345,6 @@ function Cart() {
       />
 
       <BottomNav />
-    </main>
+    </PageShell>
   );
 }

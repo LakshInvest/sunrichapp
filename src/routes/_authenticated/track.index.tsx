@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { PageShell } from "@/components/PageShell";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { SlotText } from "@/components/SlotText";
@@ -70,7 +71,7 @@ function MyOrders() {
   const live = useMemo(() => (orders ?? []).find((o) => statusGroup(o.status) === "active") ?? null, [orders]);
 
   return (
-    <main className="mx-auto min-h-screen max-w-md">
+    <PageShell>
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-5 pb-3 pt-6 backdrop-blur-md">
         <h1 className="text-2xl font-bold text-primary">{t("track.title")}</h1>
         <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto" role="group" aria-label={t("track.filters")}>
@@ -171,7 +172,7 @@ function MyOrders() {
       </div>
 
       <BottomNav />
-    </main>
+    </PageShell>
   );
 }
 

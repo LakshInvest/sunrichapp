@@ -329,6 +329,12 @@ function Cart() {
               </div>
             )}
 
+            {hasUnpriced && (
+              <div role="status" className="mt-5 rounded-xl bg-destructive/10 px-4 py-3">
+                <p className="text-sm font-medium text-destructive">{t("errors.noPrice")}</p>
+              </div>
+            )}
+
             {pending ? (
               <button
                 type="button"
@@ -341,8 +347,8 @@ function Cart() {
               <button
                 type="button"
                 onClick={() => navigate({ to: "/checkout" })}
-                disabled={offline || shortfall > 0}
-                title={offline ? t("offline.hint") : undefined}
+                disabled={offline || shortfall > 0 || hasUnpriced}
+                title={hasUnpriced ? t("errors.noPrice") : offline ? t("offline.hint") : undefined}
                 className="mt-5 flex min-h-14 w-full items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {t("cart.proceed")}

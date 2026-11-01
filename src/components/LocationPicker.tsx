@@ -42,8 +42,6 @@ export function LocationPicker({
   const { t } = useTranslation();
   const [locating, setLocating] = useState(false);
   const [denied, setDenied] = useState(false);
-  const [pinAddress, setPinAddress] = useState("");
-
   const [disclose, setDisclose] = useState(false);
 
   // Play policy: our own prominent disclosure before the system prompt.

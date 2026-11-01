@@ -731,7 +731,7 @@ function Login() {
       </div>
 
       {/* Brand block */}
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-4 px-6 pb-10">
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-6 pb-10 [@media(max-height:700px)]:gap-2 [@media(max-height:700px)]:pb-4">
         <div className="animate-in fade-in duration-500">
           <Logo variant="white" />
         </div>

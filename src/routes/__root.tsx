@@ -151,6 +151,12 @@ function RootComponent() {
     return () => cleanup?.();
   }, [router]);
 
+  // Status-bar icon colour per page (dark icons on light pages).
+  useEffect(() => {
+    void applyStatusBar(router.state.location.pathname);
+    return router.subscribe("onResolved", ({ toLocation }) => void applyStatusBar(toLocation.pathname));
+  }, [router]);
+
   // Push token carries the language: refresh it when the language changes.
   useEffect(() => {
     const on = () => void refreshPushToken();

@@ -1,6 +1,7 @@
 import { useIsDemo } from "@/hooks/use-demo";
 import { serverMessage } from "@/lib/form-errors";
 import { scrollToFirstError } from "@/lib/form-errors";
+import { advanceAtCheckout, fetchMyAdvance } from "@/lib/khata";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -96,6 +97,11 @@ function Checkout() {
   const [newc, setNewc] = useState<Record<string, number>>({});
   const [notes, setNotes] = useState("");
   const [quote, setQuote] = useState<QuoteResult | null>(null);
+  // Khata advance: shown as "Advance used" and spent on the bill when it is issued.
+  const [advance, setAdvance] = useState(0);
+  useEffect(() => {
+    fetchMyAdvance().then(setAdvance, () => setAdvance(0));
+  }, []);
   const [pay, setPay] = useState<PayMethod>("cash");
   const payTouched = useRef(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
@@ -593,6 +599,22 @@ function Checkout() {
                 <span>{t("cart.grandTotal")}</span>
                 <span className="text-primary">{formatINR(quote.items_total + quote.deposit_total)}</span>
               </div>
+              {(() => {
+                const adv = advanceAtCheckout(quote.items_total + quote.deposit_total, advance);
+                if (adv.used <= 0) return null;
+                return (
+                  <>
+                    <div className="mt-2 flex items-center justify-between text-sm font-semibold text-success" data-testid="advance-used">
+                      <span>{t("khata.checkout.advanceUsed")}</span>
+                      <span>−{formatINR(adv.used)}</span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between border-t border-border pt-2 text-base font-bold text-foreground">
+                      <span>{t("khata.checkout.payable")}</span>
+                      <span className="text-primary">{formatINR(adv.payable)}</span>
+                    </div>
+                  </>
+                );
+              })()}
             </>
           ) : (
             <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">

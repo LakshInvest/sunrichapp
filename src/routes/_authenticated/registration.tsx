@@ -128,7 +128,7 @@ function Wizard() {
   const font = lang === "en" ? "" : "font-deva";
 
   return (
-    <main className={`mx-auto min-h-screen max-w-md bg-background px-5 pb-16 pt-8 ${font}`}>
+    <main className={`mx-auto min-h-dvh max-w-md overflow-x-clip bg-background px-5 pb-16 pt-[max(2rem,env(safe-area-inset-top))] ${font}`}>
       {(step === "type" || step === "details" || step === "docs") && (
         <StepIndicator current={step === "type" ? 1 : step === "details" ? 2 : 3} />
       )}

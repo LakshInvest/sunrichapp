@@ -52,8 +52,10 @@ export const Route = createFileRoute("/auth")({
     // While an OTP/PIN login is mid-flight (Set PIN screen pending) the session
     // already exists — don't bounce the user out of the flow they're in.
     if (sessionStorage.getItem(AUTH_FLOW_KEY)) return;
-    const { data } = await supabase.auth.getUser();
-    if (data.user) {
+    // Local-only session read (no network) so Login/PIN renders instantly;
+    // only a returning signed-in user pays for the registration lookup.
+    const { data } = await supabase.auth.getSession();
+    if (data.session?.user) {
       const reg = await getMyRegistration();
       if (!reg.customerId || reg.status === "draft" || reg.status === "rejected") {
         throw redirect({ to: "/registration" });

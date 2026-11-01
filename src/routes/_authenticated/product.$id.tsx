@@ -9,6 +9,7 @@ import { SmartImage } from "@/components/SmartImage";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ErrorState, EmptyState, GridSkeleton } from "@/components/catalog/states";
 import { PriceBlock } from "@/components/catalog/ProductCard";
+import { openPriceRequestChat } from "@/lib/price-request";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
@@ -238,7 +239,8 @@ function ProductDetail() {
           </p>
         )}
 
-        {/* Quantity */}
+        {/* Quantity (priced products only) */}
+        {product.price !== null && (
         <div className="mt-5 flex items-center justify-between rounded-2xl border border-border bg-card p-4">
           <span className="text-sm font-semibold text-foreground">{t("product.quantity")}</span>
           <div className="flex items-center gap-3">

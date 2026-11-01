@@ -5,8 +5,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { ArrowLeft, Camera, FileText, Loader2, Paperclip, Send, X } from "lucide-react";
+import { ArrowLeft, Camera, FileText, Loader2, Package, Paperclip, Send, X } from "lucide-react";
 import en from "@/locales/en.json";
+import { decodeProductChip } from "@/lib/price-request";
 import { supabase } from "@/integrations/supabase/client";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { useLang } from "@/hooks/use-lang";
@@ -158,6 +159,20 @@ function AskQuery() {
       </header>
 
       <div className="flex-1 px-5 pb-10 pt-5">
+        {productChip && (
+          <div className="mb-4 flex items-center gap-3 rounded-2xl border border-secondary/30 bg-secondary/10 px-3 py-2.5">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-card">
+              <Package className="h-5 w-5 text-secondary" aria-hidden />
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold text-foreground">{productChip.name}</p>
+              {productChip.pack && <p className="truncate text-xs text-muted-foreground">{productChip.pack}</p>}
+            </div>
+          </div>
+        )}
+
+        {!productChip && (
+        <>
         <p className="text-sm font-medium text-foreground">{t("queries.ask.topicLabel")}</p>
         <div className="mt-2 flex gap-2" role="group" aria-label={t("queries.ask.topicLabel")}>
           {TOPICS.map((topic) => (
@@ -176,6 +191,8 @@ function AskQuery() {
             </button>
           ))}
         </div>
+        </>
+        )}
 
         <label className="mt-5 flex flex-col gap-1.5">
           <span className="text-sm font-medium text-foreground">{t("queries.ask.subjectLabel")}</span>

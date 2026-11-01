@@ -3,7 +3,7 @@ import { PageShell } from "@/components/PageShell";
 import { serverMessage } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Bell, CheckCircle2, FileText, MessageCircle, PauseCircle, Truck, XCircle, type LucideIcon } from "lucide-react";
+import { ArrowLeft, Bell, CheckCircle2, FileText, MessageCircle, PauseCircle, Truck, Wallet, XCircle, type LucideIcon } from "lucide-react";
 import en from "@/locales/en.json";
 import { EmptyState, ErrorState } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
@@ -34,6 +34,9 @@ const ICON: Record<NoticeKind, LucideIcon> = {
   cancelled: XCircle,
   invoice: FileText,
   reply: MessageCircle,
+  pay_verified: Wallet,
+  pay_verified_adv: Wallet,
+  pay_rejected: XCircle,
 };
 
 function Notifications() {
@@ -61,6 +64,7 @@ function Notifications() {
   const open = (n: Notice) => {
     if (n.target.to === "/track/$id") void navigate({ to: "/track/$id", params: { id: n.target.id } });
     else if (n.target.to === "/invoice/$id") void navigate({ to: "/invoice/$id", params: { id: n.target.id } });
+    else if (n.target.to === "/khata") void navigate({ to: "/khata" });
     else void navigate({ to: "/queries/$id", params: { id: n.target.id } });
   };
 
@@ -90,15 +94,15 @@ function Notifications() {
             return (
               <li key={n.id}>
                 <button type="button" onClick={() => open(n)} className={`flex w-full items-start gap-3 px-4 py-3.5 text-left transition ${unread ? "bg-secondary/5" : "hover:bg-muted/60"}`}>
-                  <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${n.kind === "credit_hold" || n.kind === "cancelled" ? "bg-destructive/10 text-destructive" : "bg-secondary/15 text-secondary"}`}>
+                  <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${n.kind === "credit_hold" || n.kind === "cancelled" || n.kind === "pay_rejected" ? "bg-destructive/10 text-destructive" : "bg-secondary/15 text-secondary"}`}>
                     <Icon className="h-4 w-4" aria-hidden />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-semibold">
-                      {t(`notices.kind.${n.kind}`, { status: n.status ? t(`status.${n.status}`, { defaultValue: n.status }) : "" })}
+                      {t(`notices.kind.${n.kind}`, { status: n.status ? t(`status.${n.status}`, { defaultValue: n.status }) : "", ...n.params })}
                     </span>
                     <span className="block truncate text-xs text-muted-foreground">
-                      {n.ref} · {dateLabel(n.at, lang)}
+                      {n.ref ? `${n.ref} · ` : ""}{dateLabel(n.at, lang)}
                     </span>
                   </span>
                   {unread && <span className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-accent" aria-label={t("notices.unread")} />}

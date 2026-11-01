@@ -24,6 +24,7 @@ import { Route as AuthenticatedDevicesRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedHoldRouteImport } from './routes/_authenticated/hold'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
+import { Route as AuthenticatedKhataRouteImport } from './routes/_authenticated/khata'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedOrderRouteImport } from './routes/_authenticated/order'
 import { Route as AuthenticatedOrderSuccessRouteImport } from './routes/_authenticated/order-success'
@@ -35,6 +36,7 @@ import { Route as AuthenticatedTrackRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedUnderReviewRouteImport } from './routes/_authenticated/under-review'
 import { Route as OrderIdRouteImport } from './routes/order.$id'
 import { Route as AuthenticatedInvoiceIdRouteImport } from './routes/_authenticated/invoice.$id'
+import { Route as AuthenticatedKhataPayRouteImport } from './routes/_authenticated/khata_.pay'
 import { Route as AuthenticatedProductIdRouteImport } from './routes/_authenticated/product.$id'
 import { Route as AuthenticatedQueriesIndexRouteImport } from './routes/_authenticated/queries.index'
 import { Route as AuthenticatedQueriesIdRouteImport } from './routes/_authenticated/queries.$id'
@@ -116,6 +118,11 @@ const AuthenticatedInboxRoute = AuthenticatedInboxRouteImport.update({
   path: '/inbox',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedKhataRoute = AuthenticatedKhataRouteImport.update({
+  id: '/khata',
+  path: '/khata',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedNotificationsRoute =
   AuthenticatedNotificationsRouteImport.update({
     id: '/notifications',
@@ -175,6 +182,11 @@ const AuthenticatedInvoiceIdRoute = AuthenticatedInvoiceIdRouteImport.update({
   path: '/invoice/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedKhataPayRoute = AuthenticatedKhataPayRouteImport.update({
+  id: '/khata_/pay',
+  path: '/khata/pay',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProductIdRoute = AuthenticatedProductIdRouteImport.update({
   id: '/product/$id',
   path: '/product/$id',
@@ -222,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/hold': typeof AuthenticatedHoldRoute
   '/home': typeof AuthenticatedHomeRoute
   '/inbox': typeof AuthenticatedInboxRoute
+  '/khata': typeof AuthenticatedKhataRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/order': typeof AuthenticatedOrderRoute
   '/order-success': typeof AuthenticatedOrderSuccessRoute
@@ -233,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/under-review': typeof AuthenticatedUnderReviewRoute
   '/order/$id': typeof OrderIdRoute
   '/invoice/$id': typeof AuthenticatedInvoiceIdRoute
+  '/khata/pay': typeof AuthenticatedKhataPayRoute
   '/product/$id': typeof AuthenticatedProductIdRoute
   '/queries/$id': typeof AuthenticatedQueriesIdRoute
   '/queries/ask': typeof AuthenticatedQueriesAskRoute
@@ -255,6 +269,7 @@ export interface FileRoutesByTo {
   '/hold': typeof AuthenticatedHoldRoute
   '/home': typeof AuthenticatedHomeRoute
   '/inbox': typeof AuthenticatedInboxRoute
+  '/khata': typeof AuthenticatedKhataRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/order': typeof AuthenticatedOrderRoute
   '/order-success': typeof AuthenticatedOrderSuccessRoute
@@ -264,6 +279,7 @@ export interface FileRoutesByTo {
   '/under-review': typeof AuthenticatedUnderReviewRoute
   '/order/$id': typeof OrderIdRoute
   '/invoice/$id': typeof AuthenticatedInvoiceIdRoute
+  '/khata/pay': typeof AuthenticatedKhataPayRoute
   '/product/$id': typeof AuthenticatedProductIdRoute
   '/queries/$id': typeof AuthenticatedQueriesIdRoute
   '/queries/ask': typeof AuthenticatedQueriesAskRoute
@@ -288,6 +304,7 @@ export interface FileRoutesById {
   '/_authenticated/hold': typeof AuthenticatedHoldRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
+  '/_authenticated/khata': typeof AuthenticatedKhataRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/order': typeof AuthenticatedOrderRoute
   '/_authenticated/order-success': typeof AuthenticatedOrderSuccessRoute
@@ -299,6 +316,7 @@ export interface FileRoutesById {
   '/_authenticated/under-review': typeof AuthenticatedUnderReviewRoute
   '/order/$id': typeof OrderIdRoute
   '/_authenticated/invoice/$id': typeof AuthenticatedInvoiceIdRoute
+  '/_authenticated/khata_/pay': typeof AuthenticatedKhataPayRoute
   '/_authenticated/product/$id': typeof AuthenticatedProductIdRoute
   '/_authenticated/queries/$id': typeof AuthenticatedQueriesIdRoute
   '/_authenticated/queries/ask': typeof AuthenticatedQueriesAskRoute
@@ -323,6 +341,7 @@ export interface FileRouteTypes {
     | '/hold'
     | '/home'
     | '/inbox'
+    | '/khata'
     | '/notifications'
     | '/order'
     | '/order-success'
@@ -334,6 +353,7 @@ export interface FileRouteTypes {
     | '/under-review'
     | '/order/$id'
     | '/invoice/$id'
+    | '/khata/pay'
     | '/product/$id'
     | '/queries/$id'
     | '/queries/ask'
@@ -356,6 +376,7 @@ export interface FileRouteTypes {
     | '/hold'
     | '/home'
     | '/inbox'
+    | '/khata'
     | '/notifications'
     | '/order'
     | '/order-success'
@@ -365,6 +386,7 @@ export interface FileRouteTypes {
     | '/under-review'
     | '/order/$id'
     | '/invoice/$id'
+    | '/khata/pay'
     | '/product/$id'
     | '/queries/$id'
     | '/queries/ask'
@@ -388,6 +410,7 @@ export interface FileRouteTypes {
     | '/_authenticated/hold'
     | '/_authenticated/home'
     | '/_authenticated/inbox'
+    | '/_authenticated/khata'
     | '/_authenticated/notifications'
     | '/_authenticated/order'
     | '/_authenticated/order-success'
@@ -399,6 +422,7 @@ export interface FileRouteTypes {
     | '/_authenticated/under-review'
     | '/order/$id'
     | '/_authenticated/invoice/$id'
+    | '/_authenticated/khata_/pay'
     | '/_authenticated/product/$id'
     | '/_authenticated/queries/$id'
     | '/_authenticated/queries/ask'
@@ -524,6 +548,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInboxRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/khata': {
+      id: '/_authenticated/khata'
+      path: '/khata'
+      fullPath: '/khata'
+      preLoaderRoute: typeof AuthenticatedKhataRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/notifications': {
       id: '/_authenticated/notifications'
       path: '/notifications'
@@ -599,6 +630,13 @@ declare module '@tanstack/react-router' {
       path: '/invoice/$id'
       fullPath: '/invoice/$id'
       preLoaderRoute: typeof AuthenticatedInvoiceIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/khata_/pay': {
+      id: '/_authenticated/khata_/pay'
+      path: '/khata/pay'
+      fullPath: '/khata/pay'
+      preLoaderRoute: typeof AuthenticatedKhataPayRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/product/$id': {
@@ -684,6 +722,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHoldRoute: typeof AuthenticatedHoldRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
+  AuthenticatedKhataRoute: typeof AuthenticatedKhataRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedOrderRoute: typeof AuthenticatedOrderRoute
   AuthenticatedOrderSuccessRoute: typeof AuthenticatedOrderSuccessRoute
@@ -694,6 +733,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTrackRoute: typeof AuthenticatedTrackRouteWithChildren
   AuthenticatedUnderReviewRoute: typeof AuthenticatedUnderReviewRoute
   AuthenticatedInvoiceIdRoute: typeof AuthenticatedInvoiceIdRoute
+  AuthenticatedKhataPayRoute: typeof AuthenticatedKhataPayRoute
   AuthenticatedProductIdRoute: typeof AuthenticatedProductIdRoute
 }
 
@@ -707,6 +747,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHoldRoute: AuthenticatedHoldRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
+  AuthenticatedKhataRoute: AuthenticatedKhataRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedOrderRoute: AuthenticatedOrderRoute,
   AuthenticatedOrderSuccessRoute: AuthenticatedOrderSuccessRoute,
@@ -717,6 +758,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTrackRoute: AuthenticatedTrackRouteWithChildren,
   AuthenticatedUnderReviewRoute: AuthenticatedUnderReviewRoute,
   AuthenticatedInvoiceIdRoute: AuthenticatedInvoiceIdRoute,
+  AuthenticatedKhataPayRoute: AuthenticatedKhataPayRoute,
   AuthenticatedProductIdRoute: AuthenticatedProductIdRoute,
 }
 

@@ -128,7 +128,7 @@ function Wizard() {
   const font = lang === "en" ? "" : "font-deva";
 
   return (
-    <main className={`mx-auto min-h-dvh max-w-md overflow-x-clip bg-background px-5 pb-16 pt-[max(2rem,env(safe-area-inset-top))] ${font}`}>
+    <main className={`mx-auto min-h-dvh max-w-md overflow-x-clip bg-background px-5 pb-36 pt-[max(2rem,env(safe-area-inset-top))] ${font}`}>
       {(step === "type" || step === "details" || step === "docs") && (
         <StepIndicator current={step === "type" ? 1 : step === "details" ? 2 : 3} />
       )}
@@ -563,6 +563,7 @@ function DetailsStep({
 
       {error && <p data-field-error role="alert" className="text-sm font-medium text-destructive">{error}</p>}
 
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur" data-testid="reg-action-bar"><div className="mx-auto max-w-md space-y-1">
       <button
         type="button"
         onClick={() => void save()}
@@ -574,6 +575,7 @@ function DetailsStep({
         {busy ? t("registration.saving") : t("registration.saveDetails")}
       </button>
       {offline && <p className="text-center text-xs text-muted-foreground">{t("offline.hint")}</p>}
+      </div></div>
     </div>
   );
 }
@@ -841,6 +843,7 @@ function DocsStep({
 
       {error && <p data-field-error role="alert" className="text-sm font-medium text-destructive">{error}</p>}
 
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur" data-testid="reg-action-bar"><div className="mx-auto max-w-md space-y-1">
       <button
         type="button"
         onClick={() => void submit()}
@@ -854,10 +857,11 @@ function DocsStep({
       <button
         type="button"
         onClick={onEditDetails}
-        className="min-h-11 text-sm font-medium text-muted-foreground underline underline-offset-4"
+        className="min-h-11 w-full text-sm font-medium text-muted-foreground underline underline-offset-4"
       >
         {t("registration.editDetails")}
       </button>
+      </div></div>
     </div>
   );
 }

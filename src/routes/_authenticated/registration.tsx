@@ -435,13 +435,13 @@ function DetailsStep({
       };
       const { error: rpcErr } = await supabase.rpc("start_registration", args);
       if (rpcErr) {
-        setError(rpcErr.message);
+        setError(serverMessage(rpcErr, t("registration.errGeneric")));
         return;
       }
       const fresh = await reload();
       await onSaved(fresh);
     } catch (e) {
-      setError((e as Error).message || t("registration.errGeneric"));
+      setError(serverMessage(e, t("registration.errGeneric")));
     } finally {
       setBusy(false);
     }
@@ -667,7 +667,7 @@ function DocsStep({
       }
       await load();
     } catch (e) {
-      setError((e as Error).message || t("registration.errUpload"));
+      setError(serverMessage(e, t("registration.errUpload")));
     } finally {
       setUploadingCode(null);
     }
@@ -698,7 +698,7 @@ function DocsStep({
       }
       await onSubmitted();
     } catch (e) {
-      setError((e as Error).message || t("registration.errGeneric"));
+      setError(serverMessage(e, t("registration.errGeneric")));
     } finally {
       setSubmitting(false);
     }

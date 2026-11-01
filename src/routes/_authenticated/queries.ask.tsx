@@ -1,4 +1,5 @@
 import { scrollToFirstError } from "@/lib/form-errors";
+import { serverMessage } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
@@ -106,7 +107,7 @@ function AskQuery() {
           .upload(attachmentPath, prepared.blob, { contentType: prepared.mime });
         if (upErr) {
           // Keep the form so the customer can retry or remove the file.
-          setError(upErr.message);
+          setError(serverMessage(upErr, t("registration.errUpload")));
           return;
         }
         attachmentName = file.name;
@@ -129,7 +130,7 @@ function AskQuery() {
       toast.success(t("queries.ask.sent"));
       await navigate({ to: "/queries/$id", params: { id: String(queryId) } });
     } catch (e) {
-      setError((e as Error).message || t("queries.errSend"));
+      setError(serverMessage(e, t("queries.errSend")));
     } finally {
       setSending(false);
     }

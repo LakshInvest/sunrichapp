@@ -192,6 +192,7 @@ export type Database = {
           min_order_value: number
           multiple_addresses: boolean
           play_store_url: string | null
+          prices_include_gst: boolean
           privacy_md: string | null
           privacy_url: string | null
           same_day_cutoff: string
@@ -228,6 +229,7 @@ export type Database = {
           min_order_value?: number
           multiple_addresses?: boolean
           play_store_url?: string | null
+          prices_include_gst?: boolean
           privacy_md?: string | null
           privacy_url?: string | null
           same_day_cutoff?: string
@@ -264,6 +266,7 @@ export type Database = {
           min_order_value?: number
           multiple_addresses?: boolean
           play_store_url?: string | null
+          prices_include_gst?: boolean
           privacy_md?: string | null
           privacy_url?: string | null
           same_day_cutoff?: string
@@ -3480,6 +3483,7 @@ export type Database = {
           pack_label_hi: string | null
           pack_label_mr: string | null
           sell_unit: Database["public"]["Enums"]["sell_unit"]
+          sell_unit_id: string | null
           shelf_life_days: number | null
           show_in_app: boolean
           sort_order: number
@@ -3522,6 +3526,7 @@ export type Database = {
           pack_label_hi?: string | null
           pack_label_mr?: string | null
           sell_unit?: Database["public"]["Enums"]["sell_unit"]
+          sell_unit_id?: string | null
           shelf_life_days?: number | null
           show_in_app?: boolean
           sort_order?: number
@@ -3564,6 +3569,7 @@ export type Database = {
           pack_label_hi?: string | null
           pack_label_mr?: string | null
           sell_unit?: Database["public"]["Enums"]["sell_unit"]
+          sell_unit_id?: string | null
           shelf_life_days?: number | null
           show_in_app?: boolean
           sort_order?: number
@@ -3601,6 +3607,13 @@ export type Database = {
             columns: ["firm_id"]
             isOneToOne: false
             referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_sell_unit_id_fkey"
+            columns: ["sell_unit_id"]
+            isOneToOne: false
+            referencedRelation: "sell_units"
             referencedColumns: ["id"]
           },
         ]
@@ -3873,6 +3886,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sell_units: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          name_hi: string | null
+          name_mr: string | null
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_hi?: string | null
+          name_mr?: string | null
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_hi?: string | null
+          name_mr?: string | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sell_units_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
@@ -5440,6 +5497,15 @@ export type Database = {
         Args: { p_accept: boolean; p_order_id: string; p_reason?: string }
         Returns: undefined
       }
+      edit_order: {
+        Args: {
+          p_changes?: Json
+          p_lines: Json
+          p_note?: string
+          p_order_id: string
+        }
+        Returns: Json
+      }
       end_trip: {
         Args: {
           p_odometer: number
@@ -5646,39 +5712,23 @@ export type Database = {
         }
         Returns: number
       }
-      plan_trip:
-        | {
-            Args: {
-              p_allow_short?: boolean
-              p_customer_vehicle_no?: string
-              p_driver_user_id: string
-              p_helper_ids?: string[]
-              p_order_ids: string[]
-              p_route_id?: string
-              p_trip_date: string
-              p_trip_type?: string
-              p_unit_id: string
-              p_vehicle_id: string
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              p_allow_short?: boolean
-              p_customer_vehicle_no?: string
-              p_driver_user_id: string
-              p_helper_ids?: string[]
-              p_hired_driver_mobile?: string
-              p_hired_driver_name?: string
-              p_order_ids: string[]
-              p_route_id?: string
-              p_trip_date: string
-              p_trip_type?: string
-              p_unit_id: string
-              p_vehicle_id: string
-            }
-            Returns: string
-          }
+      plan_trip: {
+        Args: {
+          p_allow_short?: boolean
+          p_customer_vehicle_no?: string
+          p_driver_user_id: string
+          p_helper_ids?: string[]
+          p_hired_driver_mobile?: string
+          p_hired_driver_name?: string
+          p_order_ids: string[]
+          p_route_id?: string
+          p_trip_date: string
+          p_trip_type?: string
+          p_unit_id: string
+          p_vehicle_id: string
+        }
+        Returns: string
+      }
       price_plan_for_customer: {
         Args: { p_customer_id: string }
         Returns: string

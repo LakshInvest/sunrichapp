@@ -18,6 +18,9 @@ export const Route = createFileRoute("/_authenticated/queries/ask")({
   validateSearch: (search: Record<string, unknown>) => ({
     topic: typeof search["topic"] === "string" ? search["topic"] : undefined,
     order: typeof search["order"] === "string" ? search["order"] : undefined,
+    subject: typeof search["subject"] === "string" ? search["subject"] : undefined,
+    message: typeof search["message"] === "string" ? search["message"] : undefined,
+    product: typeof search["product"] === "string" ? search["product"] : undefined,
   }),
   head: () => ({
     meta: [
@@ -39,16 +42,17 @@ const TOPICS = [
 ] as const;
 
 function AskQuery() {
-  const { topic = "general", order } = Route.useSearch();
+  const { topic = "general", order, subject: preSubject, message: preMessage, product: productParam } = Route.useSearch();
+  const productChip = decodeProductChip(productParam);
   const { t } = useTranslation();
   const { lang } = useLang();
   const navigate = useNavigate();
   const offline = useOffline();
   const myReg = useServerFn(getMyRegistration);
 
-  const [context, setContext] = useState<string>(topic === "order" ? "order" : "general");
-  const [subject, setSubject] = useState<string>(order ? `Order ${order}` : "");
-  const [message, setMessage] = useState("");
+  const [context, setContext] = useState<string>(productChip ? "general" : topic === "order" ? "order" : "general");
+  const [subject, setSubject] = useState<string>(order ? `Order ${order}` : preSubject ?? "");
+  const [message, setMessage] = useState<string>(preMessage ?? "");
   const [file, setFile] = useState<File | null>(null);
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [sending, setSending] = useState(false);

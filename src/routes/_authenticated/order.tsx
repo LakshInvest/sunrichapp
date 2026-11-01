@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ArrowDownWideNarrow, CupSoda, GlassWater, LayoutGrid, Milk, Package, type LucideIcon } from "lucide-react";
@@ -25,7 +26,6 @@ import {
   matchesSearch,
   readCatalogueCache,
   saveCartPrice,
-  serverMessage,
   type CatalogData,
 } from "@/lib/catalogue";
 import { serverMessage as friendlyError } from "@/lib/form-errors";
@@ -95,7 +95,7 @@ function Order() {
       setData(fresh);
       setLoadError(null);
     } catch (e) {
-      setLoadError(friendlyError(e, t("catalog.loadError")));
+      setLoadError(friendlyError(e, t("errors.generic")));
       throw e;
     }
   }, [t]);

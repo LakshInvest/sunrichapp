@@ -77,7 +77,7 @@ function BalancePage() {
   const loadLedger = useCallback(() => {
     setRows(null);
     setErr(null);
-    fetchLedger(period.from, period.to).then(setRows, (e: Error) => setErr(e.message));
+    fetchLedger(period.from, period.to).then(setRows, (e: Error) => setErr(serverMessage(e, t("errors.generic"))));
   }, [period.from, period.to]);
   useEffect(loadLedger, [loadLedger]);
 

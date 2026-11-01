@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { serverMessage } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Bell, CheckCircle2, FileText, MessageCircle, PauseCircle, Truck, XCircle, type LucideIcon } from "lucide-react";
@@ -52,7 +53,7 @@ function Notifications() {
         markNoticesSeen();
         markOrdersSeen();
       },
-      (e: Error) => setErr(e.message),
+      (e: Error) => setErr(serverMessage(e, t("errors.generic"))),
     );
   }, []);
   useEffect(load, [load]);

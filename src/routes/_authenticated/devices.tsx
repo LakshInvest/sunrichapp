@@ -55,7 +55,7 @@ function Devices() {
   const load = useCallback(async () => {
     setErr(null);
     const { data, error } = await supabase.rpc("my_devices");
-    if (error) setErr(error.message);
+    if (error) setErr(serverMessage(error, t("errors.generic")));
     else
       setList(
         ((data ?? []) as Device[]).slice().sort((a, b) => (b.last_used_at ?? "").localeCompare(a.last_used_at ?? "")),

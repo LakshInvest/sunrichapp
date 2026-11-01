@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { serverMessage } from "@/lib/form-errors";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
@@ -58,7 +59,7 @@ function ProductDetail() {
       setData(fresh);
       setLoadError(null);
     } catch (e) {
-      setLoadError((e as Error).message);
+      setLoadError(serverMessage(e, t("errors.generic")));
       throw e;
     }
   }, []);

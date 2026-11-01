@@ -306,7 +306,7 @@ function StatementSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
         await shareOrDownload(blob, name, t("balance.shareText"));
       }
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(serverMessage(e, t("errors.generic")));
     } finally {
       setBusy(null);
     }
@@ -394,7 +394,7 @@ function PaidSheet({ open, onOpenChange, onSent }: { open: boolean; onOpenChange
       onOpenChange(false);
       onSent();
     } catch (err) {
-      toast.error((err as Error).message);
+      toast.error(serverMessage(err, t("errors.generic")));
     } finally {
       setSending(false);
     }

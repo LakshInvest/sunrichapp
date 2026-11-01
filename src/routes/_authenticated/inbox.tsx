@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { serverMessage } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { SlotText } from "@/components/SlotText";
@@ -111,7 +112,7 @@ function Inbox() {
       toast.success(t(accept ? "inbox.accepted" : "inbox.rejected"));
       await load();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(serverMessage(e, t("errors.generic")));
     } finally {
       setBusyId(null);
     }
@@ -125,7 +126,7 @@ function Inbox() {
       toast.success(t(delivered ? "inbox.markedDelivered" : "inbox.markedNotDelivered"));
       await load();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(serverMessage(e, t("errors.generic")));
     } finally {
       setBusyId(null);
     }
@@ -143,7 +144,7 @@ function Inbox() {
       setReason("");
       await load();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(serverMessage(e, t("errors.generic")));
     } finally {
       setSending(false);
     }

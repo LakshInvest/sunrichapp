@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { serverMessage } from "@/lib/form-errors";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
@@ -136,7 +137,7 @@ export function PickupPass({ order, lang, onChanged, offline }: { order: OrderDt
       toast.success(t("pickupPass.saved"));
       onChanged();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(serverMessage(e, t("errors.generic")));
     } finally {
       setSaving(false);
     }

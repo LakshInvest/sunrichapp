@@ -84,7 +84,7 @@ export function PaymentProofSheet({
       onOpenChange(false);
       onDone?.();
     } catch (err) {
-      toast.error((err as Error).message);
+      toast.error(serverMessage(err, t("errors.generic")));
     } finally {
       setSending(false);
     }

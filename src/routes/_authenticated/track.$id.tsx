@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { serverMessage } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { SlotText } from "@/components/SlotText";
@@ -145,7 +146,7 @@ function OrderDetail() {
       setMethodOpen(false);
       await load();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(serverMessage(e, t("errors.generic")));
     } finally {
       setSavingMethod(false);
     }
@@ -204,7 +205,7 @@ function OrderDetail() {
       setReason("");
       await load();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(serverMessage(e, t("errors.generic")));
     } finally {
       setCancelling(false);
     }
@@ -218,7 +219,7 @@ function OrderDetail() {
       toast.success(t("delivery.changed"));
       await load();
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(serverMessage(e, t("errors.generic")));
     } finally {
       setSwitching(false);
     }

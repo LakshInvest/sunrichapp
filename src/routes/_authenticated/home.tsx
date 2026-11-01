@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type UIEvent } from "react";
+import { serverMessage } from "@/lib/form-errors";
 import { useServerFn } from "@tanstack/react-start";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -117,7 +118,7 @@ function Home() {
       setData(fresh);
       setLoadError(null);
     } catch (e) {
-      setLoadError((e as Error).message);
+      setLoadError(serverMessage(e, t("errors.generic")));
       throw e;
     }
   }, []);

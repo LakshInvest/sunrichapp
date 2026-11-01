@@ -2206,11 +2206,15 @@ export type Database = {
       }
       geo_cities: {
         Row: {
+          boundary: Json | null
+          centre_lat: number | null
+          centre_lng: number | null
           code: string
           company_id: string
           created_at: string
           id: string
           is_active: boolean
+          map_colour: string | null
           name: string
           name_hi: string | null
           name_mr: string | null
@@ -2218,11 +2222,15 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          boundary?: Json | null
+          centre_lat?: number | null
+          centre_lng?: number | null
           code: string
           company_id: string
           created_at?: string
           id?: string
           is_active?: boolean
+          map_colour?: string | null
           name: string
           name_hi?: string | null
           name_mr?: string | null
@@ -2230,11 +2238,15 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          boundary?: Json | null
+          centre_lat?: number | null
+          centre_lng?: number | null
           code?: string
           company_id?: string
           created_at?: string
           id?: string
           is_active?: boolean
+          map_colour?: string | null
           name?: string
           name_hi?: string | null
           name_mr?: string | null
@@ -2342,38 +2354,83 @@ export type Database = {
           },
         ]
       }
+      geo_shape_library: {
+        Row: {
+          aliases: string[]
+          boundary: Json
+          centre_lat: number | null
+          centre_lng: number | null
+          id: number
+          kind: string
+          name: string
+          state_name: string | null
+        }
+        Insert: {
+          aliases?: string[]
+          boundary: Json
+          centre_lat?: number | null
+          centre_lng?: number | null
+          id?: never
+          kind: string
+          name: string
+          state_name?: string | null
+        }
+        Update: {
+          aliases?: string[]
+          boundary?: Json
+          centre_lat?: number | null
+          centre_lng?: number | null
+          id?: never
+          kind?: string
+          name?: string
+          state_name?: string | null
+        }
+        Relationships: []
+      }
       geo_states: {
         Row: {
+          boundary: Json | null
+          centre_lat: number | null
+          centre_lng: number | null
           code: string
           company_id: string
           created_at: string
           gst_state_code: string | null
           id: string
           is_active: boolean
+          map_colour: string | null
           name: string
           name_hi: string | null
           name_mr: string | null
           updated_at: string
         }
         Insert: {
+          boundary?: Json | null
+          centre_lat?: number | null
+          centre_lng?: number | null
           code: string
           company_id: string
           created_at?: string
           gst_state_code?: string | null
           id?: string
           is_active?: boolean
+          map_colour?: string | null
           name: string
           name_hi?: string | null
           name_mr?: string | null
           updated_at?: string
         }
         Update: {
+          boundary?: Json | null
+          centre_lat?: number | null
+          centre_lng?: number | null
           code?: string
           company_id?: string
           created_at?: string
           gst_state_code?: string | null
           id?: string
           is_active?: boolean
+          map_colour?: string | null
           name?: string
           name_hi?: string | null
           name_mr?: string | null
@@ -5542,6 +5599,25 @@ export type Database = {
       gate_pickup_handover: {
         Args: { p_order_no: string; p_otp: string }
         Returns: string
+      }
+      geo_find_shape: {
+        Args: { p_kind: string; p_name: string; p_state?: string }
+        Returns: {
+          aliases: string[]
+          boundary: Json
+          centre_lat: number | null
+          centre_lng: number | null
+          id: number
+          kind: string
+          name: string
+          state_name: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "geo_shape_library"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       has_perm: {
         Args: { p_action: string; p_module: string }

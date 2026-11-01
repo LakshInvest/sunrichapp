@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { ChevronRight, MessageCircleQuestion, Plus } from "lucide-react";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
+import { isPriceRequestSubject } from "@/lib/price-request";
 import { BottomNav } from "@/components/BottomNav";
 import { QueryChip } from "@/components/QueryChip";
 import { useLang } from "@/hooks/use-lang";
@@ -134,6 +135,11 @@ function QueriesList() {
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <p className="truncate text-[15px] font-bold text-foreground">{q.subject}</p>
+                {isPriceRequestSubject(q.subject) && (
+                  <span className="shrink-0 rounded-full bg-secondary/15 px-2 py-0.5 text-[11px] font-bold text-secondary">
+                    {t("queries.priceRequestTag")}
+                  </span>
+                )}
                 <QueryChip status={q.status} />
               </div>
               <p className="mt-0.5 truncate text-sm text-muted-foreground">

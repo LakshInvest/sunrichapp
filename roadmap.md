@@ -155,3 +155,12 @@ Constraint: existing DB tables/RPCs/policies/buckets only (user-managed backend)
 - [x] 11. Extra: pending-approval full-screen route (/under-review) wired in the auth gate; skeletons/empty states, offline banner, pull-to-refresh, i18n keys verified present for all t() keys (plural forms incl.).
 - [x] 12. Central friendly errors: serverMessage() maps network → errors.network, technical/RLS/HTTP → generic fallback, long raw text → fallback; wired into 16 screens. Unit-tested; wrong PIN shows "Wrong PIN. 5 tries left." live.
 - [x] QA: login 9999900001 (PIN 1234) live; Add/stepper/cart bar; clear-cart redirect; query raise → notification deep-link (staff reply simulated via DB, then deleted); viewports 320/360/390/412 zero horizontal scroll; Hindi home renders in Devanagari end to end. Not live-verified: full new-number registration (needs WhatsApp OTP), pending-approval screen (no pending QA account), ask attachments photo/PDF upload, checkout payment steps (covered in Prompt-27 QA).
+
+## Prompt-31 — no ordering without price
+- [x] ProductCard (Home, Shop): price null → Add/stepper hidden, "Price on request" outline button opens the queries chat (subject "Price request: <name> (<pack>)", product chip, prefilled message, never auto-sent). Product detail shows the same button in the sticky bar.
+- [x] Existing open price-request chat for the same product is reopened, not duplicated (canonical English subject match on answered/open queries).
+- [x] Chat shows the product chip + "Price request" tag; queries list tags price-request subjects.
+- [x] Cart: unpriced line shows "Price not available", excluded from item total/deposit, one-tap Remove, Checkout disabled until removed.
+- [x] Server layer already rejects unpriced lines (_price_lines raises "No price set for <name>" before any order line is written; verified live: place_my_order → 400 "No price set for 1 Litre"); serverMessage maps it to "Some items don't have a price yet…", also used for checkout quote errors.
+- [x] CC side: we don't own the Command Center app; staff can find price requests by the "Price request: …" subject prefix (context = general). CC-side tag/product chip needs the CC project.
+- [x] Live QA (9999900001): price removed via price_plan_items.valid_from → Home/Shop show the button with no Add; ask page prefilled; send → chat; second tap opens the same chat; simulated staff reply → notification → opens the chat; cart unpriced line blocked checkout; unpriced API order rejected. Price row restored, test query deleted (id 503e02a5).

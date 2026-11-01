@@ -37,13 +37,11 @@ export async function initNative(opts: {
   openPath?: (path: string) => void;
 }): Promise<() => void> {
   if (!isNative()) return () => undefined;
-  const [{ App }, { StatusBar, Style }, { SplashScreen }] = await Promise.all([
+  // Status-bar colours are set per route by applyStatusBar (src/lib/status-bar.ts).
+  const [{ App }, { SplashScreen }] = await Promise.all([
     import("@capacitor/app"),
-    import("@capacitor/status-bar"),
     import("@capacitor/splash-screen"),
   ]);
-  void StatusBar.setBackgroundColor({ color: "#0B2545" }).catch(() => undefined);
-  void StatusBar.setStyle({ style: Style.Dark }).catch(() => undefined);
   void SplashScreen.hide().catch(() => undefined);
 
   // sunrich://order/<id> and https://…/order/<id> open that order.

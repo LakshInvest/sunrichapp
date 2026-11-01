@@ -272,7 +272,7 @@ function Thread() {
 
   return (
     <PageShell className={`flex flex-col ${lang === "en" ? "" : "font-deva"}`}>
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 py-2.5 backdrop-blur-md">
+      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <button
           type="button"
           onClick={() => navigate({ to: "/queries" })}

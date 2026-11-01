@@ -52,8 +52,10 @@ export const Route = createFileRoute("/auth")({
     // While an OTP/PIN login is mid-flight (Set PIN screen pending) the session
     // already exists — don't bounce the user out of the flow they're in.
     if (sessionStorage.getItem(AUTH_FLOW_KEY)) return;
-    const { data } = await supabase.auth.getUser();
-    if (data.user) {
+    // Local-only session read (no network) so Login/PIN renders instantly;
+    // only a returning signed-in user pays for the registration lookup.
+    const { data } = await supabase.auth.getSession();
+    if (data.session?.user) {
       const reg = await getMyRegistration();
       if (!reg.customerId || reg.status === "draft" || reg.status === "rejected") {
         throw redirect({ to: "/registration" });
@@ -731,7 +733,7 @@ function Login() {
       </div>
 
       {/* Brand block */}
-      <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-4 px-6 pb-10">
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-6 pb-10 [@media(max-height:700px)]:gap-2 [@media(max-height:700px)]:pb-4">
         <div className="animate-in fade-in duration-500">
           <Logo variant="white" />
         </div>

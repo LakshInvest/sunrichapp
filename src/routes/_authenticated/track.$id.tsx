@@ -243,7 +243,7 @@ function OrderDetail() {
 
   return (
     <PageShell className={`pb-16 ${deva}`}>
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 py-2.5 backdrop-blur-md">
+      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <button
           type="button"
           onClick={() => navigate({ to: "/track" })}
@@ -444,7 +444,7 @@ function OrderDetail() {
             <SlotText value={order.deliverySlot} />
           </p>
           <div className="mt-3">
-            <MapPreview lat={mapLat} lng={mapLng} className="h-36 w-full overflow-hidden rounded-xl border border-border" />
+            <MapPreview lat={mapLat} lng={mapLng} address={addrLines.join(", ")} className="h-36 w-full overflow-hidden rounded-xl border border-border" />
           </div>
           <a
             href={googleMapsLink(mapLat, mapLng)}
@@ -452,7 +452,6 @@ function OrderDetail() {
             rel="noreferrer"
             className="mt-2 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border px-3 text-xs font-semibold text-secondary"
           >
-            <MapPin className="h-3.5 w-3.5" aria-hidden />
             {t("location.openInMaps")}
           </a>
           {order.notes && <p className="mt-3 text-xs text-muted-foreground">{t("checkout.notesLabel")}: {order.notes}</p>}

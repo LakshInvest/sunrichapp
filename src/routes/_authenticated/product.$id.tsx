@@ -157,7 +157,7 @@ function ProductDetail() {
     <main className={`mx-auto min-h-screen max-w-md bg-background pb-40 ${deva}`}>
       <OfflineBanner />
 
-      <header className="sticky top-0 z-30 flex items-center gap-2 bg-background/95 px-3 py-2.5 backdrop-blur-md">
+      <header className="sticky top-0 z-30 flex items-center gap-2 bg-background/95 px-3 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <button
           type="button"
           onClick={() => navigate({ to: "/home" })}

@@ -1,3 +1,4 @@
+import { applyStatusBar } from "@/lib/status-bar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -149,6 +150,12 @@ function RootComponent() {
       openPath: (path) => void router.navigate({ to: path, replace: false }),
     }).then((c) => (cleanup = c));
     return () => cleanup?.();
+  }, [router]);
+
+  // Status-bar icon colour per page (dark icons on light pages).
+  useEffect(() => {
+    void applyStatusBar(router.state.location.pathname);
+    return router.subscribe("onResolved", ({ toLocation }) => void applyStatusBar(toLocation.pathname));
   }, [router]);
 
   // Push token carries the language: refresh it when the language changes.

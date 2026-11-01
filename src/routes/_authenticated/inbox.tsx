@@ -166,7 +166,7 @@ function Inbox() {
 
   return (
     <PageShell className={`pb-28 ${deva}`}>
-      <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-5 pb-3 pt-6 backdrop-blur-md">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-5 pb-3 pt-[max(1.5rem,env(safe-area-inset-top))] backdrop-blur-md">
         <h1 className="text-2xl font-bold text-primary">{t("inbox.title")}</h1>
         <div className="mt-3 flex items-center gap-1 rounded-full border border-border bg-card p-1" role="group" aria-label={t("inbox.title")}>
           <button type="button" onClick={() => setTab("new")} aria-pressed={tab === "new"} className={tabCls("new")}>

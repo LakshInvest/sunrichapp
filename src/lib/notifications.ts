@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getMyCustomerId } from "@/lib/orders";
 import { formatINR } from "@/lib/catalogue";
 
-export type NoticeKind = "status" | "approved" | "credit_hold" | "delivered" | "invoice" | "reply" | "cancelled" | "dispatched" | "pay_verified" | "pay_rejected";
+export type NoticeKind = "status" | "approved" | "credit_hold" | "delivered" | "invoice" | "reply" | "cancelled" | "dispatched" | "pay_verified" | "pay_verified_adv" | "pay_rejected";
 export type Notice = {
   id: string;
   kind: NoticeKind;
@@ -107,14 +107,15 @@ export function paymentNotice(p: {
   reviewed_at: string | null;
 }): Notice {
   const verified = p.status === "verified";
+  const adv = verified && Number(p.balance_after ?? 0) < 0;
   return {
     id: `p-${p.id}`,
-    kind: verified ? "pay_verified" : "pay_rejected",
+    kind: verified ? (adv ? "pay_verified_adv" : "pay_verified") : "pay_rejected",
     at: p.reviewed_at ?? "",
     ref: p.reference ?? "",
     target: { to: "/khata", id: p.id },
     params: verified
-      ? { amount: formatINR(Number(p.amount ?? 0)), balance: formatINR(Number(p.balance_after ?? 0)) }
+      ? { amount: formatINR(Number(p.amount ?? 0)), balance: formatINR(Math.abs(Number(p.balance_after ?? 0))) }
       : { amount: formatINR(Number(p.amount ?? 0)), reason: p.reject_reason ?? "" },
   };
 }

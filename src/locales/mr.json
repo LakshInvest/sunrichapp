@@ -915,7 +915,8 @@
       "invoice": "नवीन बिल तयार",
       "reply": "Sunrich ने तुमच्या प्रश्नाला उत्तर दिले",
       "pay_verified": "{{amount}} चे पेमेंट तपासले. नवीन बॅलन्स {{balance}}",
-      "pay_rejected": "{{amount}} चे पेमेंट स्वीकारले नाही: {{reason}}"
+      "pay_rejected": "{{amount}} चे पेमेंट स्वीकारले नाही: {{reason}}",
+      "pay_verified_adv": "{{amount}} चे पेमेंट तपासले. अ‍ॅडव्हान्स {{balance}}"
     }
   },
   "push": {

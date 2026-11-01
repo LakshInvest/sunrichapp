@@ -35,6 +35,7 @@ const ICON: Record<NoticeKind, LucideIcon> = {
   invoice: FileText,
   reply: MessageCircle,
   pay_verified: Wallet,
+  pay_verified_adv: Wallet,
   pay_rejected: XCircle,
 };
 

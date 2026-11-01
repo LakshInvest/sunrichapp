@@ -53,6 +53,11 @@ describe("Payment notices", () => {
     expect(n.kind).toBe("pay_verified");
     expect(n.params?.["balance"]).toContain("1,200");
   });
+  it("verified overpayment shows the advance, not a negative balance", () => {
+    const n = paymentNotice({ id: "3", amount: 300, reference: null, status: "verified", reject_reason: null, balance_after: -140, reviewed_at: "2026-11-01" });
+    expect(n.kind).toBe("pay_verified_adv");
+    expect(n.params?.["balance"]).toBe("₹140");
+  });
   it("rejected shows the reason", () => {
     const n = paymentNotice({ id: "2", amount: 500, reference: null, status: "rejected", reject_reason: "Wrong UTR", balance_after: null, reviewed_at: "2026-11-01" });
     expect(n.kind).toBe("pay_rejected");

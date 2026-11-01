@@ -17,7 +17,7 @@ import { getMyCustomerId } from "@/lib/orders";
 import type { StatementRow } from "@/lib/billing";
 import { fetchAppInfo } from "@/lib/app-info";
 import { prepareUpload } from "@/lib/image-compress";
-import { scrollToFirstError } from "@/lib/form-errors";
+import { scrollToFirstError, serverMessage } from "@/lib/form-errors";
 import {
   PAY_MODES,
   fetchBalance,

@@ -459,7 +459,6 @@ function Home() {
             })}
           </div>
           {!loading && visibleProducts.length === 0 && <NoResultsState />}
-          {hasQuery && visibleProducts.length > 0 && (
             <p className="mt-3 text-center text-xs text-muted-foreground">
               {t("catalog.resultsCount", { count: visibleProducts.length })}
             </p>

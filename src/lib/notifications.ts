@@ -1,15 +1,18 @@
 /** In-app notification feed built from existing customer-readable rows (orders, invoices, queries). */
 import { supabase } from "@/integrations/supabase/client";
 import { getMyCustomerId } from "@/lib/orders";
+import { formatINR } from "@/lib/catalogue";
 
-export type NoticeKind = "status" | "approved" | "credit_hold" | "delivered" | "invoice" | "reply" | "cancelled" | "dispatched";
+export type NoticeKind = "status" | "approved" | "credit_hold" | "delivered" | "invoice" | "reply" | "cancelled" | "dispatched" | "pay_verified" | "pay_rejected";
 export type Notice = {
   id: string;
   kind: NoticeKind;
   at: string;
   ref: string;
-  target: { to: "/track/$id"; id: string } | { to: "/invoice/$id"; id: string } | { to: "/queries/$id"; id: string };
+  target: { to: "/track/$id"; id: string } | { to: "/invoice/$id"; id: string } | { to: "/queries/$id"; id: string } | { to: "/khata"; id: string };
   status?: string;
+  /** Interpolation values for the notice title (payments). */
+  params?: Record<string, string>;
 };
 
 const SEEN_KEY = "sunrich.noticesSeenAt"; // per device (localStorage)
@@ -45,7 +48,7 @@ export function isUnread(n: Pick<Notice, "at">, seen: string | null): boolean {
 export async function fetchNotices(): Promise<Notice[]> {
   const cid = await getMyCustomerId();
   if (!cid) return [];
-  const [orders, invoices, queries] = await Promise.all([
+  const [orders, invoices, queries, proofs] = await Promise.all([
     supabase
       .from("orders")
       .select("id, order_no, order_status_history(to_status, changed_at)")
@@ -54,6 +57,13 @@ export async function fetchNotices(): Promise<Notice[]> {
       .limit(60),
     supabase.from("invoices").select("id, invoice_no, invoice_date, created_at").eq("customer_id", cid).order("created_at", { ascending: false }).limit(30),
     supabase.from("customer_queries").select("id, subject, status, updated_at").eq("status", "open").limit(30),
+    supabase
+      .from("payment_proofs")
+      .select("id, amount, reference, status, reject_reason, balance_after, reviewed_at")
+      .in("status", ["verified", "rejected"])
+      .not("reviewed_at", "is", null)
+      .order("reviewed_at", { ascending: false })
+      .limit(30),
   ]);
   const out: Notice[] = [];
   for (const o of orders.data ?? []) {
@@ -74,6 +84,9 @@ export async function fetchNotices(): Promise<Notice[]> {
   for (const q of queries.data ?? []) {
     out.push({ id: `q-${q.id}`, kind: "reply", at: q.updated_at, ref: q.subject ?? "", target: { to: "/queries/$id", id: q.id } });
   }
+  for (const p of proofs.data ?? []) {
+    out.push(paymentNotice(p));
+  }
   return out.sort((a, b) => b.at.localeCompare(a.at)).slice(0, 100);
 }
 
@@ -81,4 +94,27 @@ export async function hasUnreadNotices(): Promise<boolean> {
   const seen = readNoticesSeen();
   const list = await fetchNotices();
   return list.some((n) => isUnread(n, seen));
+}
+
+/** Verified / rejected payment → notice (amount, new balance or the reason). */
+export function paymentNotice(p: {
+  id: string;
+  amount: number | null;
+  reference: string | null;
+  status: string;
+  reject_reason: string | null;
+  balance_after: number | null;
+  reviewed_at: string | null;
+}): Notice {
+  const verified = p.status === "verified";
+  return {
+    id: `p-${p.id}`,
+    kind: verified ? "pay_verified" : "pay_rejected",
+    at: p.reviewed_at ?? "",
+    ref: p.reference ?? "",
+    target: { to: "/khata", id: p.id },
+    params: verified
+      ? { amount: formatINR(Number(p.amount ?? 0)), balance: formatINR(Number(p.balance_after ?? 0)) }
+      : { amount: formatINR(Number(p.amount ?? 0)), reason: p.reject_reason ?? "" },
+  };
 }

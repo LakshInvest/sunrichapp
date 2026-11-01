@@ -913,7 +913,9 @@
       "dispatched": "ऑर्डर वाटेवर आहे",
       "cancelled": "ऑर्डर {{status}}",
       "invoice": "नवीन बिल तयार",
-      "reply": "Sunrich ने तुमच्या प्रश्नाला उत्तर दिले"
+      "reply": "Sunrich ने तुमच्या प्रश्नाला उत्तर दिले",
+      "pay_verified": "{{amount}} चे पेमेंट तपासले. नवीन बॅलन्स {{balance}}",
+      "pay_rejected": "{{amount}} चे पेमेंट स्वीकारले नाही: {{reason}}"
     }
   },
   "push": {

@@ -913,7 +913,9 @@
       "dispatched": "Order is on the way",
       "cancelled": "Order {{status}}",
       "invoice": "New bill ready",
-      "reply": "Sunrich replied to your question"
+      "reply": "Sunrich replied to your question",
+      "pay_verified": "Payment of {{amount}} verified. New balance {{balance}}",
+      "pay_rejected": "Payment of {{amount}} not accepted: {{reason}}"
     }
   },
   "push": {

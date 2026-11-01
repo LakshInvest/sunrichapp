@@ -32,6 +32,7 @@ import { Route as AuthenticatedQueriesRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedRegistrationRouteImport } from './routes/_authenticated/registration'
 import { Route as AuthenticatedSupportRouteImport } from './routes/_authenticated/support'
 import { Route as AuthenticatedTrackRouteImport } from './routes/_authenticated/track'
+import { Route as AuthenticatedUnderReviewRouteImport } from './routes/_authenticated/under-review'
 import { Route as OrderIdRouteImport } from './routes/order.$id'
 import { Route as AuthenticatedInvoiceIdRouteImport } from './routes/_authenticated/invoice.$id'
 import { Route as AuthenticatedProductIdRouteImport } from './routes/_authenticated/product.$id'
@@ -158,6 +159,12 @@ const AuthenticatedTrackRoute = AuthenticatedTrackRouteImport.update({
   path: '/track',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedUnderReviewRoute =
+  AuthenticatedUnderReviewRouteImport.update({
+    id: '/under-review',
+    path: '/under-review',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const OrderIdRoute = OrderIdRouteImport.update({
   id: '/order/$id',
   path: '/order/$id',
@@ -223,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/registration': typeof AuthenticatedRegistrationRoute
   '/support': typeof AuthenticatedSupportRoute
   '/track': typeof AuthenticatedTrackRouteWithChildren
+  '/under-review': typeof AuthenticatedUnderReviewRoute
   '/order/$id': typeof OrderIdRoute
   '/invoice/$id': typeof AuthenticatedInvoiceIdRoute
   '/product/$id': typeof AuthenticatedProductIdRoute
@@ -253,6 +261,7 @@ export interface FileRoutesByTo {
   '/payments': typeof AuthenticatedPaymentsRoute
   '/registration': typeof AuthenticatedRegistrationRoute
   '/support': typeof AuthenticatedSupportRoute
+  '/under-review': typeof AuthenticatedUnderReviewRoute
   '/order/$id': typeof OrderIdRoute
   '/invoice/$id': typeof AuthenticatedInvoiceIdRoute
   '/product/$id': typeof AuthenticatedProductIdRoute
@@ -287,6 +296,7 @@ export interface FileRoutesById {
   '/_authenticated/registration': typeof AuthenticatedRegistrationRoute
   '/_authenticated/support': typeof AuthenticatedSupportRoute
   '/_authenticated/track': typeof AuthenticatedTrackRouteWithChildren
+  '/_authenticated/under-review': typeof AuthenticatedUnderReviewRoute
   '/order/$id': typeof OrderIdRoute
   '/_authenticated/invoice/$id': typeof AuthenticatedInvoiceIdRoute
   '/_authenticated/product/$id': typeof AuthenticatedProductIdRoute
@@ -321,6 +331,7 @@ export interface FileRouteTypes {
     | '/registration'
     | '/support'
     | '/track'
+    | '/under-review'
     | '/order/$id'
     | '/invoice/$id'
     | '/product/$id'
@@ -351,6 +362,7 @@ export interface FileRouteTypes {
     | '/payments'
     | '/registration'
     | '/support'
+    | '/under-review'
     | '/order/$id'
     | '/invoice/$id'
     | '/product/$id'
@@ -384,6 +396,7 @@ export interface FileRouteTypes {
     | '/_authenticated/registration'
     | '/_authenticated/support'
     | '/_authenticated/track'
+    | '/_authenticated/under-review'
     | '/order/$id'
     | '/_authenticated/invoice/$id'
     | '/_authenticated/product/$id'
@@ -567,6 +580,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTrackRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/under-review': {
+      id: '/_authenticated/under-review'
+      path: '/under-review'
+      fullPath: '/under-review'
+      preLoaderRoute: typeof AuthenticatedUnderReviewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/order/$id': {
       id: '/order/$id'
       path: '/order/$id'
@@ -672,6 +692,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRegistrationRoute: typeof AuthenticatedRegistrationRoute
   AuthenticatedSupportRoute: typeof AuthenticatedSupportRoute
   AuthenticatedTrackRoute: typeof AuthenticatedTrackRouteWithChildren
+  AuthenticatedUnderReviewRoute: typeof AuthenticatedUnderReviewRoute
   AuthenticatedInvoiceIdRoute: typeof AuthenticatedInvoiceIdRoute
   AuthenticatedProductIdRoute: typeof AuthenticatedProductIdRoute
 }
@@ -694,6 +715,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRegistrationRoute: AuthenticatedRegistrationRoute,
   AuthenticatedSupportRoute: AuthenticatedSupportRoute,
   AuthenticatedTrackRoute: AuthenticatedTrackRouteWithChildren,
+  AuthenticatedUnderReviewRoute: AuthenticatedUnderReviewRoute,
   AuthenticatedInvoiceIdRoute: AuthenticatedInvoiceIdRoute,
   AuthenticatedProductIdRoute: AuthenticatedProductIdRoute,
 }

@@ -437,13 +437,7 @@ function DetailsStep({
         ...(fields.landmark.trim() ? { p_landmark: fields.landmark.trim() } : {}),
         ...(fields.gstin.trim() ? { p_gstin: fields.gstin.trim() } : {}),
         ...(fields.email.trim() ? { p_email: fields.email.trim() } : {}),
-        ...(locationKnown
-          ? {
-              p_latitude: location.lat,
-              p_longitude: location.lng,
-              ...(location.accuracy != null ? { p_location_accuracy_m: location.accuracy } : {}),
-            }
-          : {}),
+        ...locationArgs(location, locationKnown),
       };
       const { error: rpcErr } = await supabase.rpc("start_registration", args);
       if (rpcErr) {

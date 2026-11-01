@@ -249,27 +249,42 @@ function Cart() {
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center rounded-full bg-primary text-primary-foreground">
+                  {product.price === null ? (
                     <button
                       type="button"
-                      onClick={() => setQty(product.id, qty - 1)}
+                      onClick={() => {
+                        forgetCartPrice(product.id);
+                        setQty(product.id, 0);
+                      }}
                       disabled={offline}
-                      aria-label={t("home.decreaseQty")}
-                      className="relative flex h-9 w-9 items-center justify-center rounded-full transition after:absolute after:-inset-y-1.5 after:-inset-x-1 after:content-[''] active:scale-90 disabled:opacity-40"
+                      title={offline ? t("offline.hint") : undefined}
+                      className="flex min-h-9 shrink-0 items-center rounded-full border border-destructive/40 px-4 text-xs font-bold text-destructive transition active:scale-95 disabled:opacity-50"
                     >
-                      <Minus className="h-4 w-4" />
+                      {t("cart.remove")}
                     </button>
-                    <span className="min-w-4 text-center text-sm font-bold">{qty}</span>
-                    <button
-                      type="button"
-                      onClick={() => setQty(product.id, qty + 1)}
-                      disabled={offline || (product.maxOrderQty != null && qty >= product.maxOrderQty)}
-                      aria-label={t("home.increaseQty")}
-                      className="relative flex h-9 w-9 items-center justify-center rounded-full transition after:absolute after:-inset-y-1.5 after:-inset-x-1 after:content-[''] active:scale-90 disabled:opacity-40"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
+                  ) : (
+                    <div className="flex items-center rounded-full bg-primary text-primary-foreground">
+                      <button
+                        type="button"
+                        onClick={() => setQty(product.id, qty - 1)}
+                        disabled={offline}
+                        aria-label={t("home.decreaseQty")}
+                        className="relative flex h-9 w-9 items-center justify-center rounded-full transition after:absolute after:-inset-y-1.5 after:-inset-x-1 after:content-[''] active:scale-90 disabled:opacity-40"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <span className="min-w-4 text-center text-sm font-bold">{qty}</span>
+                      <button
+                        type="button"
+                        onClick={() => setQty(product.id, qty + 1)}
+                        disabled={offline || (product.maxOrderQty != null && qty >= product.maxOrderQty)}
+                        aria-label={t("home.increaseQty")}
+                        className="relative flex h-9 w-9 items-center justify-center rounded-full transition after:absolute after:-inset-y-1.5 after:-inset-x-1 after:content-[''] active:scale-90 disabled:opacity-40"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

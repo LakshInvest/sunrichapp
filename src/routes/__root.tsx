@@ -1,3 +1,4 @@
+import { applyStatusBar } from "@/lib/status-bar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,

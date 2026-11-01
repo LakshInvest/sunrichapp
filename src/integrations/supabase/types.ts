@@ -5861,7 +5861,7 @@ export type Database = {
         Returns: undefined
       }
       remove_order_from_trip: {
-        Args: { p_order_id: string; p_trip_id: string }
+        Args: { p_order_id: string; p_reason?: string; p_trip_id: string }
         Returns: undefined
       }
       reply_query: {

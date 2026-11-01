@@ -84,3 +84,65 @@ export const getFirmPaymentInfo = createServerFn({ method: "POST" })
     }
     return out;
   });
+
+export type KhataPayInfo = {
+  firmName: string;
+  upiId: string | null;
+  payeeName: string | null;
+  qrUrl: string | null;
+  bank: FirmPayInfo["bank"];
+};
+
+/**
+ * Firm payment details for Khata "Pay now" (no specific order). The firm is
+ * the one with the customer's oldest open bill, else their latest order's
+ * firm — both read through RLS as the caller. Firm rows are then read with
+ * the service role because customers cannot select them.
+ */
+export const getKhataPayInfo = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<KhataPayInfo | null> => {
+    const sb = context.supabase;
+    const { data: inv } = await sb
+      .from("invoices")
+      .select("firm_id, invoice_date, grand_total, amount_paid")
+      .eq("status", "issued")
+      .order("invoice_date", { ascending: true })
+      .limit(50);
+    let firmId = (inv ?? []).find((i) => Number(i.grand_total ?? 0) > Number(i.amount_paid ?? 0))?.firm_id ?? null;
+    if (!firmId) {
+      const { data: o } = await sb.from("orders").select("firm_id").not("firm_id", "is", null).order("created_at", { ascending: false }).limit(1);
+      firmId = o?.[0]?.firm_id ?? null;
+    }
+    if (!firmId) return null;
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [{ data: firm }, { data: banks }] = await Promise.all([
+      supabaseAdmin.from("firms").select("legal_name, short_name, upi_id, upi_payee_name, upi_qr_path").eq("id", firmId).maybeSingle(),
+      supabaseAdmin
+        .from("firm_bank_accounts")
+        .select("bank_name, account_number, ifsc, account_name, branch, is_default")
+        .eq("firm_id", firmId)
+        .eq("is_active", true),
+    ]);
+    const bank = (banks ?? []).sort((a, b) => Number(b.is_default) - Number(a.is_default))[0] ?? null;
+    let qrUrl: string | null = null;
+    const path = firm?.upi_qr_path ?? null;
+    if (path && /^https?:/.test(path)) qrUrl = path;
+    else if (path) {
+      const [bucket, ...rest] = path.split("/");
+      if (bucket && rest.length) {
+        const { data: u } = await supabaseAdmin.storage.from(bucket).createSignedUrl(rest.join("/"), 3600);
+        qrUrl = u?.signedUrl ?? null;
+      }
+    }
+    return {
+      firmName: firm?.short_name || firm?.legal_name || "",
+      upiId: firm?.upi_id ?? null,
+      payeeName: firm?.upi_payee_name ?? bank?.account_name ?? firm?.legal_name ?? null,
+      qrUrl,
+      bank: bank
+        ? { bankName: bank.bank_name, accountNumber: bank.account_number, ifsc: bank.ifsc, accountName: bank.account_name, branch: bank.branch }
+        : null,
+    };
+  });

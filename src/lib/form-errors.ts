@@ -1,3 +1,5 @@
+import i18n from "@/lib/i18n";
+
 /** Scrolls to and focuses the first visible field error (elements marked data-field-error). Browser-only. */
 export function scrollToFirstError(): void {
   requestAnimationFrame(() => {
@@ -24,12 +26,8 @@ export function serverMessage(e: unknown, fallback: string): string {
   const raw = e && typeof e === "object" && "message" in e ? String((e as { message: unknown }).message ?? "").trim() : "";
   if (raw) console.error("[sunrich] server error:", raw, e);
   if (!raw) return fallback;
-  if (NETWORK_RE.test(raw)) {
-    // Dynamic import-free: i18n is a plain module usable anywhere client-side.
-    const { i18n } = require("@/lib/i18n") as { i18n: { t: (k: string) => string } };
-    return i18n.t("errors.network");
-  }
-  if (TECHNICAL_RE.test(raw)) return fallback || raw; // localized, friendly fallback wins
+  if (NETWORK_RE.test(raw)) return i18n.t("errors.network");
+  if (TECHNICAL_RE.test(raw)) return fallback; // localized, friendly fallback wins over raw text
   if (raw.length > 120) return fallback; // long diagnostics are not user text
   return raw;
 }

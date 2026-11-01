@@ -75,6 +75,7 @@ export function ProductCard({
   onInc,
   onDec,
   onToggleFavourite,
+  onPriceRequest,
 }: {
   product: CatalogProduct;
   qty: number;
@@ -86,6 +87,7 @@ export function ProductCard({
   onInc: () => void;
   onDec: () => void;
   onToggleFavourite: () => void;
+  onPriceRequest?: () => void;
 }) {
   const { t } = useTranslation();
   const blocked = !canOrder;
@@ -121,7 +123,17 @@ export function ProductCard({
       <div className="mt-auto px-0.5 pt-2">
         <div className="flex items-center justify-between gap-1">
           <PriceLine product={product} />
-          {qty === 0 ? (
+          {product.price === null ? (
+            onPriceRequest ? (
+              <button
+                type="button"
+                onClick={onPriceRequest}
+                className="relative flex h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-secondary/50 bg-secondary/10 px-3 text-xs font-bold text-secondary-foreground transition active:scale-95 after:absolute after:-inset-y-2 after:-inset-x-1 after:content-['']"
+              >
+                {t("catalog.priceOnRequest")}
+              </button>
+            ) : null
+          ) : qty === 0 ? (
             <button
               type="button"
               onClick={onAdd}

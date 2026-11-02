@@ -28,7 +28,8 @@ import { SmartImage } from "@/components/SmartImage";
 import { AddressSwitcher } from "@/components/AddressSwitcher";
 import { PayReminder } from "@/components/PayReminder";
 import { KhataPayShortcut } from "@/components/KhataPayShortcut";
-import { listMyAddresses, labelKey, type SavedAddress } from "@/lib/addresses";
+import { listMyAddresses, labelKey, mapAddressRow, type SavedAddress } from "@/lib/addresses";
+import { getHomeExtras, onHomeExtras, type HomeExtras } from "@/lib/catalogue";
 import { pickSelected, shortArea, useSelectedAddressId } from "@/lib/selected-address";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { ProductCard } from "@/components/catalog/ProductCard";
@@ -121,16 +122,39 @@ function Home() {
   const [addressOpen, setAddressOpen] = useState(false);
   const [addrList, setAddrList] = useState<SavedAddress[]>([]);
   const selectedId = useSelectedAddressId();
+  const [addrFull, setAddrFull] = useState(false);
   const loadAddresses = useCallback(async () => {
     try {
       setAddrList(await listMyAddresses());
+      setAddrFull(true);
     } catch {
       /* header falls back to the registered address */
     }
   }, []);
+  // The header only needs the default address, which get_home() returns.
+  // The full list loads when the switcher opens or another address is picked.
   useEffect(() => {
-    void loadAddresses();
-  }, [loadAddresses]);
+    const useDefault = (x: HomeExtras) => {
+      if (addrFull) return;
+      if (selectedId && (x.defaultAddress?.["id"] as string | undefined) !== selectedId) {
+        void loadAddresses();
+        return;
+      }
+      setAddrList(x.defaultAddress ? [mapAddressRow(x.defaultAddress)] : []);
+    };
+    const x = getHomeExtras();
+    if (x) useDefault(x);
+    // Home served from cache (no get_home call): load the list directly.
+    const id = x ? undefined : setTimeout(() => !getHomeExtras() && void loadAddresses(), 2500);
+    const off = onHomeExtras(useDefault);
+    return () => {
+      if (id) clearTimeout(id);
+      off();
+    };
+  }, [loadAddresses, selectedId, addrFull]);
+  useEffect(() => {
+    if (addressOpen && !addrFull) void loadAddresses();
+  }, [addressOpen, addrFull, loadAddresses]);
   const myReg = useServerFn(getMyRegistration);
 
   const load = useCallback(async (force = false) => {

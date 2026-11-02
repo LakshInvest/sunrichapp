@@ -33,7 +33,13 @@ export async function listMyAddresses(): Promise<SavedAddress[]> {
     .order("is_default", { ascending: false })
     .order("created_at");
   if (error) throw new Error(error.message);
-  return (data ?? []).map((r) => ({
+  return (data ?? []).map((r) => mapAddressRow(r));
+}
+
+/** Maps a customer_addresses row (also get_home's default_address) to a SavedAddress. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function mapAddressRow(r: any): SavedAddress {
+  return {
     id: r.id,
     label: r.label,
     line1: r.address_line1,
@@ -47,7 +53,7 @@ export async function listMyAddresses(): Promise<SavedAddress[]> {
     contactName: r.contact_name,
     contactMobile: r.contact_mobile,
     isDefault: r.is_default,
-  }));
+  };
 }
 
 export type AddressInput = Omit<SavedAddress, "id"> & { id: string | null };

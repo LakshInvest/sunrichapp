@@ -451,6 +451,7 @@ function DetailsStep({
         return;
       }
       const fresh = await reload();
+      clearGate();
       await onSaved(fresh);
     } catch (e) {
       setError(serverMessage(e, t("registration.errGeneric")));

@@ -14,6 +14,7 @@ import { useLang } from "@/hooks/use-lang";
 import { formatINR } from "@/lib/catalogue";
 import { fetchInvoice, upiLink, type Invoice } from "@/lib/billing";
 import { getInvoiceFirm, type InvoiceFirm } from "@/lib/invoice.functions";
+import { IST_TZ } from "@/lib/ist";
 import { amountInWords } from "@/lib/amount-words";
 
 export const Route = createFileRoute("/_authenticated/invoice/$id")({

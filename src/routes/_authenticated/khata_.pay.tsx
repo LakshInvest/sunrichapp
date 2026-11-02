@@ -158,13 +158,13 @@ function PayPage() {
 
   const field = (bad?: string) =>
     `mt-1 min-h-12 w-full rounded-xl border bg-card px-3 text-base text-foreground ${bad ? "border-destructive" : "border-border"}`;
-  const Err = ({ k }: { k: string }) =>
+  const err_ = (k: string) =>
     errs[k] ? (
       <span data-field-error className="mt-1 block text-xs font-medium text-destructive">
         {errs[k]}
       </span>
     ) : null;
-  const FilePick = ({ label }: { label: string }) =>
+  const filePick = (label: string) =>
     file ? (
       <div className="mt-2 flex min-h-11 items-center gap-2 rounded-xl bg-muted px-3 text-sm">
         <Paperclip className="h-4 w-4 shrink-0" aria-hidden />
@@ -197,7 +197,7 @@ function PayPage() {
   }
 
   return (
-    <PageShell className={`pb-32 ${deva}`}>
+    <PageShell className={`pb-[calc(8rem+env(safe-area-inset-bottom))] ${deva}`}>
       <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <button
           type="button"
@@ -246,7 +246,7 @@ function PayPage() {
               <span className="mt-1 block text-xs font-normal text-muted-foreground">{t("khata.pay.otherHint")}</span>
             </label>
           )}
-          <Err k="amount" />
+          {err_("amount")}
           {extra > 0 && (
             <p className="rounded-xl bg-success/10 px-3 py-2 text-sm font-medium text-success">{t("khata.pay.advanceNote", { amount: formatINR(extra) })}</p>
           )}
@@ -302,7 +302,7 @@ function PayPage() {
               )}
               <div>
                 <p className="text-sm font-semibold">{t("khata.pay.screenshot")}</p>
-                <FilePick label={t("khata.pay.addScreenshot")} />
+                {filePick(t("khata.pay.addScreenshot"))}
               </div>
               <label className="block text-sm font-semibold">
                 {t("khata.pay.utr")}
@@ -315,7 +315,7 @@ function PayPage() {
                   data-testid="pay-utr"
                 />
               </label>
-              <Err k="ref" />
+              {err_("ref")}
             </section>
           )}
 
@@ -338,12 +338,12 @@ function PayPage() {
                   </button>
                 ))}
               </div>
-              <Err k="cashTo" />
+              {err_("cashTo")}
               <label className="block text-sm font-semibold">
                 {t("khata.pay.cashName")}
                 <input value={cashName} onChange={(e) => setCashName(e.target.value)} className={field(errs["cashName"])} />
               </label>
-              <Err k="cashName" />
+              {err_("cashName")}
             </section>
           )}
 
@@ -363,9 +363,9 @@ function PayPage() {
               </label>
               <div>
                 <p className="text-sm font-semibold">{t("khata.pay.bankProof")}</p>
-                <FilePick label={t("khata.pay.addScreenshot")} />
+                {filePick(t("khata.pay.addScreenshot"))}
               </div>
-              <Err k="ref" />
+              {err_("ref")}
             </section>
           )}
 
@@ -375,7 +375,7 @@ function PayPage() {
                 {t("khata.pay.chequeNo")}
                 <input inputMode="numeric" value={chequeNo} onChange={(e) => setChequeNo(e.target.value.slice(0, 12))} className={field(errs["chequeNo"])} />
               </label>
-              <Err k="chequeNo" />
+              {err_("chequeNo")}
               <label className="block text-sm font-semibold">
                 {t("khata.pay.chequeBank")}
                 <input value={chequeBank} onChange={(e) => setChequeBank(e.target.value)} className={field()} />
@@ -386,7 +386,7 @@ function PayPage() {
               </label>
               <div>
                 <p className="text-sm font-semibold">{t("khata.pay.chequePhoto")}</p>
-                <FilePick label={t("khata.pay.chequePhoto")} />
+                {filePick(t("khata.pay.chequePhoto"))}
               </div>
             </section>
           )}
@@ -395,7 +395,7 @@ function PayPage() {
             {t("khata.pay.paidOn")}
             <input type="date" value={paidOn} max={today()} onChange={(e) => setPaidOn(e.target.value)} className={field(errs["paidOn"])} />
           </label>
-          <Err k="paidOn" />
+          {err_("paidOn")}
           {errs["submit"] && (
             <p role="alert" data-field-error className="rounded-xl bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
               {errs["submit"]}
@@ -405,7 +405,7 @@ function PayPage() {
       )}
 
       {sum && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" data-kb-bar>
           <Button
             type="button"
             disabled={sending || offline}

@@ -2,10 +2,11 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { serverMessage } from "@/lib/form-errors";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { ArrowLeft, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
 import en from "@/locales/en.json";
-import { BottomNav } from "@/components/BottomNav";
 import { SmartImage } from "@/components/SmartImage";
+import { ImageViewer } from "@/components/ImageViewer";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ErrorState, EmptyState, GridSkeleton } from "@/components/catalog/states";
 import { PriceBlock } from "@/components/catalog/ProductCard";
@@ -52,6 +53,7 @@ function ProductDetail() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(!readCatalogueCache());
   const [slide, setSlide] = useState(0);
+  const [viewer, setViewer] = useState<string | null>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async (force = false) => {
@@ -144,7 +146,6 @@ function ProductDetail() {
             {t("cart.browse")}
           </button>
         </div>
-        <BottomNav />
       </main>
     );
   }
@@ -154,13 +155,13 @@ function ProductDetail() {
   const blocked = !canOrder;
 
   return (
-    <main className={`mx-auto min-h-screen max-w-md bg-background pb-40 ${deva}`}>
+    <main className={`mx-auto min-h-dvh max-w-md overflow-x-clip bg-background pb-[calc(6.5rem+env(safe-area-inset-bottom))] ${deva}`}>
       <OfflineBanner />
 
       <header className="sticky top-0 z-30 flex items-center gap-2 bg-background/95 px-3 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <button
           type="button"
-          onClick={() => navigate({ to: "/home" })}
+          onClick={() => (window.history.length > 1 ? window.history.back() : void navigate({ to: "/home" }))}
           aria-label={t("registration.back")}
           className="flex h-11 w-11 items-center justify-center rounded-xl text-foreground transition active:scale-95"
         >
@@ -190,9 +191,15 @@ function ProductDetail() {
       >
         {gallery.length > 0 ? (
           gallery.map((url, i) => (
-            <div key={url} className="w-full shrink-0 snap-center">
+            <button
+              type="button"
+              key={url}
+              onClick={() => setViewer(url)}
+              aria-label={t("product.viewImage")}
+              className="block w-full shrink-0 snap-center"
+            >
               <SmartImage src={url} alt={`${loc(product.name, lang)} ${i + 1}`} className="aspect-square w-full object-cover" />
-            </div>
+            </button>
           ))
         ) : (
           <div className="w-full shrink-0 snap-center">
@@ -219,16 +226,7 @@ function ProductDetail() {
       <div className="px-5">
         <h1 className="mt-4 text-xl font-bold leading-snug text-foreground">{loc(product.name, lang)}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {[
-            product.brandName,
-            loc(product.packLabel, lang),
-            volume,
-            product.sellUnit && product.unitsPerSellUnit
-              ? t("product.sellUnitInfo", { unit: product.sellUnit, units: product.unitsPerSellUnit })
-              : null,
-          ]
-            .filter(Boolean)
-            .join(" · ")}
+          {packLine(product, volume, lang, t)}
         </p>
 
         <PriceBlock product={product} size="detail" className="mt-4" />
@@ -311,15 +309,15 @@ function ProductDetail() {
         )}
       </div>
 
-      {/* Sticky add-to-cart, sitting above the bottom navigation */}
-      <div className="fixed inset-x-0 bottom-16 z-40 border-t border-border bg-card/95 px-5 py-3 backdrop-blur-md">
+      {/* Sticky add-to-cart at the very bottom (no tab bar on this screen) */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
         <div className="mx-auto flex max-w-md items-center gap-3">
-          <div className="min-w-0">
-            <p className="text-xs text-muted-foreground">{t("product.total")}</p>
-            <p className="text-lg font-bold text-primary">
-              {product.price === null ? t("catalog.priceOnRequest") : formatINR(product.price * Math.max(qty, 0))}
-            </p>
-          </div>
+          {product.price !== null && qty > 0 && (
+            <div className="min-w-0 shrink-0">
+              <p className="text-xs text-muted-foreground">{t("product.total")}</p>
+              <p className="text-lg font-bold text-primary">{formatINR(product.price * qty)}</p>
+            </div>
+          )}
           {product.price === null ? (
             <button
               type="button"
@@ -351,7 +349,20 @@ function ProductDetail() {
         </div>
       </div>
 
-      <BottomNav />
+      {viewer && <ImageViewer src={viewer} alt={loc(product.name, lang)} onClose={() => setViewer(null)} />}
     </main>
   );
+}
+
+/** One line under the name: "Pack of 12 × 1 L" (never a brand, never repeated). */
+function packLine(
+  product: { unitsPerSellUnit: number | null; packLabel: Parameters<typeof loc>[0]; volumeMl: number | null },
+  volume: string | null,
+  lang: Parameters<typeof loc>[1],
+  t: TFunction,
+): string {
+  if (product.unitsPerSellUnit && product.unitsPerSellUnit > 1 && volume) {
+    return t("product.packOf", { units: product.unitsPerSellUnit, size: volume });
+  }
+  return loc(product.packLabel, lang) || volume || "";
 }

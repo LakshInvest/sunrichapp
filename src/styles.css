@@ -350,3 +350,23 @@
     display: none !important;
   }
 }
+
+/* Mobile touch: no double-tap zoom or text selection on controls, visible pressed state. */
+@layer base {
+  button,
+  a,
+  [role="button"],
+  label[for],
+  summary {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  button:not(:disabled):active,
+  a:active,
+  [role="button"]:active {
+    filter: brightness(0.94);
+  }
+}

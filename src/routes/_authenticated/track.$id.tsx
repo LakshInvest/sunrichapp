@@ -242,7 +242,7 @@ function OrderDetail() {
   };
 
   return (
-    <PageShell className={`pb-16 ${deva}`}>
+    <PageShell className={`pb-16 ${deva}`} onRefresh={load}>
       <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <button
           type="button"

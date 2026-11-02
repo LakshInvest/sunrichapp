@@ -4,9 +4,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { CircleAlert, Droplets, Minus, Plus } from "lucide-react";
+import { ArrowLeft, CircleAlert, Droplets, Minus, Plus } from "lucide-react";
 import en from "@/locales/en.json";
-import { BottomNav } from "@/components/BottomNav";
+import { SwipeToRemove } from "@/components/SwipeToRemove";
 import { SmartImage } from "@/components/SmartImage";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { ErrorState, GridSkeleton } from "@/components/catalog/states";
@@ -168,19 +168,27 @@ function Cart() {
 
   return (
     <PageShell className={`${deva}`}>
-      <div className="px-5 pb-44 pt-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-primary">{t("cart.title")}</h1>
-          {rows.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setConfirmClear(true)}
-              className="min-h-9 text-sm font-semibold text-destructive"
-            >
-              {t("cart.clearCart")}
-            </button>
-          )}
-        </div>
+      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))]">
+        <button
+          type="button"
+          onClick={() => (window.history.length > 1 ? window.history.back() : void navigate({ to: "/home" }))}
+          aria-label={t("registration.back")}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-foreground transition active:scale-95"
+        >
+          <ArrowLeft className="h-5 w-5" aria-hidden />
+        </button>
+        <h1 className="min-w-0 flex-1 truncate text-lg font-bold text-foreground">{t("cart.title")}</h1>
+        {rows.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setConfirmClear(true)}
+            className="min-h-11 shrink-0 px-3 text-sm font-semibold text-destructive"
+          >
+            {t("cart.clearCart")}
+          </button>
+        )}
+      </header>
+      <div className="px-5 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-1">
 
         {loading ? (
           <div className="mt-6">
@@ -207,10 +215,16 @@ function Cart() {
           <>
             <ul className="mt-5 space-y-3">
               {rows.map(({ product, qty, changed }) => (
-                <li
+                <SwipeToRemove
                   key={product.id}
-                  className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm"
+                  label={t("cart.remove")}
+                  disabled={offline}
+                  onRemove={() => {
+                    forgetCartPrice(product.id);
+                    setQty(product.id, 0);
+                  }}
                 >
+                <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm">
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-secondary/10">
                     <SmartImage width={64}
                       src={product.imageUrl ?? product.images[0] ?? null}
@@ -285,9 +299,11 @@ function Cart() {
                       </button>
                     </div>
                   )}
-                </li>
+                </div>
+                </SwipeToRemove>
               ))}
             </ul>
+            {rows.length > 0 && <p className="mt-2 text-center text-[11px] text-muted-foreground">{t("cart.swipeHint")}</p>}
 
             {offline && <p className="mt-3 text-center text-xs text-muted-foreground">{t("offline.cartHint")}</p>}
 
@@ -367,7 +383,6 @@ function Cart() {
         }}
       />
 
-      <BottomNav />
     </PageShell>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Crosshair, Loader2, MapPin } from "lucide-react";
+import { Crosshair, Loader2, LocateOff, MapPin } from "lucide-react";
+import { locateDevice } from "@/lib/native";
 import { SheetDrawer } from "./SheetDrawer";
 import { PinMap } from "./PinMap";
 import { PlaceSearch } from "./PlaceSearch";
@@ -41,8 +42,9 @@ export function LocationPicker({
 }) {
   const { t } = useTranslation();
   const [locating, setLocating] = useState(false);
-  const [denied, setDenied] = useState(false);
+  const [problem, setProblem] = useState<"denied" | "off" | null>(null);
   const [disclose, setDisclose] = useState(false);
+  const isDefault = value.lat === DEFAULT_LOCATION.lat && value.lng === DEFAULT_LOCATION.lng;
 
   // Play policy: our own prominent disclosure before the system prompt.
   const locate = () => {
@@ -51,34 +53,23 @@ export function LocationPicker({
       setDisclose(true);
       return;
     }
-    runLocate();
+    void runLocate();
   };
   useEffect(() => {
-    if (!autoLocate) return;
+    if (!autoLocate && !isDefault) return;
     // Wait for the parent sheet to finish opening before stacking the explanation sheet.
     const id = setTimeout(locate, 450);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoLocate]);
 
-  const runLocate = () => {
-    setDenied(false);
+  const runLocate = async () => {
+    setProblem(null);
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setLocating(false);
-        onChange({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-          accuracy: pos.coords.accuracy ?? null,
-        });
-      },
-      () => {
-        setLocating(false);
-        setDenied(true);
-      },
-      { enableHighAccuracy: true, timeout: 15_000, maximumAge: 30_000 },
-    );
+    const r = await locateDevice();
+    setLocating(false);
+    if (r.ok) onChange({ lat: r.lat, lng: r.lng, accuracy: r.accuracy });
+    else setProblem(r.reason);
   };
 
   // Pin → address: debounce while the pin moves, then reverse geocode (browser Geocoder).
@@ -98,7 +89,7 @@ export function LocationPicker({
             onClick={() => {
               localStorage.setItem("sunrich.locConsent", "1");
               setDisclose(false);
-              runLocate();
+              void runLocate();
             }}
             className="mt-5 min-h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground transition active:scale-[0.98]"
           >
@@ -110,6 +101,33 @@ export function LocationPicker({
             className="mt-2 min-h-12 w-full rounded-xl text-base font-semibold text-muted-foreground"
           >
             {t("location.notNow")}
+          </button>
+        </div>
+      </SheetDrawer>
+      <SheetDrawer open={problem !== null} onOpenChange={(o) => !o && setProblem(null)}>
+        <div className="px-5 pb-[max(2rem,env(safe-area-inset-bottom))] pt-4 text-center" data-testid="location-problem">
+          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-accent/15">
+            {problem === "off" ? <LocateOff className="h-6 w-6 text-accent-foreground" aria-hidden /> : <MapPin className="h-6 w-6 text-secondary" aria-hidden />}
+          </span>
+          <h2 className="mt-3 text-lg font-bold text-foreground">
+            {problem === "off" ? t("location.offTitle") : t("location.deniedTitle")}
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            {problem === "off" ? t("location.offBody") : t("location.deniedBody")}
+          </p>
+          <button
+            type="button"
+            onClick={() => void runLocate()}
+            className="mt-5 min-h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground transition active:scale-[0.98]"
+          >
+            {problem === "off" ? t("location.retry") : t("location.allow")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setProblem(null)}
+            className="mt-2 min-h-12 w-full rounded-xl text-base font-semibold text-secondary"
+          >
+            {t("location.manual")}
           </button>
         </div>
       </SheetDrawer>
@@ -128,13 +146,6 @@ export function LocationPicker({
           {t("registration.accuracy", { meters: Math.max(1, Math.round(value.accuracy)) })}
         </p>
       )}
-      {denied && (
-        <p role="status" className="rounded-xl bg-accent/10 px-4 py-3 text-center text-sm text-foreground">
-          <span className="font-semibold">{t("registration.locationDenied")}. </span>
-          {t("registration.locationDeniedHelp")}
-        </p>
-      )}
-
       <PlaceSearch
         onPick={(d) => {
           if (d) onChange({ lat: d.lat, lng: d.lng, accuracy: null });

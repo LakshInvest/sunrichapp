@@ -21,26 +21,49 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 
 const radianAngle = (deg: number) => (deg * Math.PI) / 180;
 
-/** Renders the rotated image to a safe area, then extracts the crop at 512×512. */
+/**
+ * Draws the (rotated) image onto its bounding box — the same coordinate space
+ * react-easy-crop reports croppedAreaPixels in — then scales exactly the
+ * chosen square into a 512×512 canvas on a white background (JPEG has no
+ * transparency, so unfilled pixels would turn black).
+ */
 async function renderCrop(src: string, crop: Area, rotation: number): Promise<HTMLCanvasElement | null> {
   const image = await loadImage(src);
+  const w = image.naturalWidth || image.width;
+  const h = image.naturalHeight || image.height;
+  const rad = radianAngle(rotation);
+  const bw = Math.abs(Math.cos(rad) * w) + Math.abs(Math.sin(rad) * h);
+  const bh = Math.abs(Math.sin(rad) * w) + Math.abs(Math.cos(rad) * h);
+  // Phones cap canvas size; shrink huge camera photos first and scale the crop with them.
+  const scale = Math.min(1, 4096 / Math.max(bw, bh));
   const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bw * scale);
+  canvas.height = Math.round(bh * scale);
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
-  const maxSize = Math.max(image.width, image.height);
-  const safeArea = 2 * ((maxSize / 2) * Math.sqrt(2));
-  canvas.width = canvas.height = safeArea;
-  ctx.translate(safeArea / 2, safeArea / 2);
-  ctx.rotate(radianAngle(rotation));
-  ctx.translate(-safeArea / 2, -safeArea / 2);
-  ctx.drawImage(image, (safeArea - image.width) / 2, (safeArea - image.height) / 2);
-  const data = ctx.getImageData(crop.x, crop.y, crop.width, crop.height);
+  ctx.scale(scale, scale);
+  ctx.translate(bw / 2, bh / 2);
+  ctx.rotate(rad);
+  ctx.drawImage(image, -w / 2, -h / 2, w, h);
 
   const out = document.createElement("canvas");
   out.width = out.height = OUT_SIZE;
   const outCtx = out.getContext("2d");
   if (!outCtx) return null;
-  outCtx.putImageData(data, 0, 0);
+  outCtx.fillStyle = "#ffffff";
+  outCtx.fillRect(0, 0, OUT_SIZE, OUT_SIZE);
+  outCtx.imageSmoothingQuality = "high";
+  outCtx.drawImage(
+    canvas,
+    crop.x * scale,
+    crop.y * scale,
+    crop.width * scale,
+    crop.height * scale,
+    0,
+    0,
+    OUT_SIZE,
+    OUT_SIZE,
+  );
   return out;
 }
 

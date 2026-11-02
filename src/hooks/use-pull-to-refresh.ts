@@ -14,6 +14,10 @@ export function usePullToRefresh(onRefresh: () => Promise<unknown> | unknown) {
   const onTouchStart = useCallback((e: React.TouchEvent) => {
     if (refreshing) return;
     // These screens scroll on the window, not an inner container.
+    // Inner scrollers (chat list) mark themselves with data-scroll-area.
+    const inner = (e.target as HTMLElement | null)?.closest?.("[data-scroll-area]") as HTMLElement | null;
+    if (inner && inner.scrollTop > 0) return;
+    if (document.querySelector('[role="dialog"]')) return;
     if (window.scrollY <= 0) {
       startY.current = e.touches[0]?.clientY ?? null;
     }

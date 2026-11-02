@@ -19,10 +19,8 @@ import {
   Loader2,
   LogOut,
   MapPin,
-  MessagesSquare,
   ShieldCheck,
   Trash2,
-  Wallet,
   Smartphone,
   type LucideIcon,
 } from "lucide-react";
@@ -341,11 +339,11 @@ function Account() {
   const notActive = customer?.status && customer.status !== "active";
 
   return (
-    <PageShell className={`px-5 pb-28 pt-8 ${deva}`}>
-      <h1 className="text-3xl font-bold text-primary">{t("account.title")}</h1>
+    <PageShell className={`px-5 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] ${deva}`}>
+      <h1 className="text-2xl font-bold text-primary">{t("account.title")}</h1>
 
       {/* Profile header card */}
-      <section className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+      <section className="mt-3 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         <div className="bg-gradient-to-br from-primary via-primary to-secondary px-5 py-6">
           <div className="flex items-center gap-4">
             <button
@@ -367,7 +365,7 @@ function Account() {
               )}
             </button>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xl font-bold text-primary-foreground">{profile?.name || "…"}</p>
+              <p className="line-clamp-2 break-words text-xl font-bold leading-tight text-primary-foreground">{profile?.name || "…"}</p>
               <p className="mt-0.5 text-sm text-primary-foreground/80">{profile?.mobile || "…"}</p>
               {typeLabel && (
                 <span className="mt-1.5 inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
@@ -445,10 +443,6 @@ function Account() {
 
       {/* Menu groups */}
       <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">
-        <MenuItem icon={Wallet} label={t("account.payments")} onClick={() => navigate({ to: "/payments" })} />
-      </section>
-
-      <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">
         {settings?.multipleAddresses === false ? (
           <MenuItem icon={MapPin} label={t("account.deliveryAddress")} onClick={() => setAddressOpen(true)} />
         ) : (
@@ -457,11 +451,9 @@ function Account() {
         <Separator />
         <MenuItem icon={Smartphone} label={t("devices.title")} onClick={() => navigate({ to: "/devices" })} />
         <Separator />
-        <MenuItem icon={LifeBuoy} label={t("support.title")} onClick={() => navigate({ to: "/support" })} />
-        <Separator />
         <MenuItem
-          icon={MessagesSquare}
-          label={t("account.helpQueries")}
+          icon={LifeBuoy}
+          label={t("support.title")}
           badge={openCount}
           onClick={() => navigate({ to: "/queries" })}
         />

@@ -43,6 +43,10 @@ export async function initNative(opts: {
     import("@capacitor/splash-screen"),
   ]);
   void SplashScreen.hide().catch(() => undefined);
+  // Keyboard resizes the page body so bottom bars sit above it.
+  void import("@capacitor/keyboard")
+    .then(({ Keyboard, KeyboardResize }) => Keyboard.setResizeMode({ mode: KeyboardResize.Body }))
+    .catch(() => undefined);
 
   // sunrich://order/<id> and https://…/order/<id> open that order.
   const urlOpen = await App.addListener("appUrlOpen", ({ url }) => {
@@ -58,13 +62,11 @@ export async function initNative(opts: {
       return;
     }
     if (opts.isHome()) {
+      // Home asks "Exit app?"; a second back press while asked exits.
       const now = Date.now();
-      if (now - lastBack < 2000) {
-        void App.exitApp();
-      } else {
-        lastBack = now;
-        opts.onExitHint();
-      }
+      if (now - lastBack < 2000) void App.exitApp();
+      else opts.onExitHint();
+      lastBack = now;
       return;
     }
     history.back();
@@ -94,6 +96,45 @@ export async function getPosition(): Promise<{ lat: number; lng: number }> {
       { enableHighAccuracy: true, timeout: 15000 },
     ),
   );
+}
+
+export type LocateResult =
+  | { ok: true; lat: number; lng: number; accuracy: number | null }
+  | { ok: false; reason: "denied" | "off" };
+
+/** Classifies a geolocation failure: permission refused vs. location/GPS off or unavailable. */
+export function locateFailure(e: unknown): "denied" | "off" {
+  const code = (e as { code?: unknown })?.code;
+  if (code === 1) return "denied";
+  const msg = String((e as { message?: unknown })?.message ?? e ?? "").toLowerCase();
+  if (/denied|permission|not authori[sz]ed/.test(msg) && !/enable location|services are not enabled/.test(msg)) return "denied";
+  return "off";
+}
+
+/**
+ * Current position with a clear outcome for the location sheet. On Android the
+ * Geolocation plugin shows Google's "Turn on location" dialog itself when
+ * location is off; declining it lands here as "off".
+ */
+export async function locateDevice(): Promise<LocateResult> {
+  try {
+    if (isNative()) {
+      const { Geolocation } = await import("@capacitor/geolocation");
+      let perm = await Geolocation.checkPermissions().catch(() => null);
+      if (!perm || perm.location !== "granted") perm = await Geolocation.requestPermissions().catch(() => null);
+      if (!perm || (perm.location !== "granted" && perm.coarseLocation !== "granted")) return { ok: false, reason: "denied" };
+      const p = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });
+      return { ok: true, lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy ?? null };
+    }
+    if (!("geolocation" in navigator)) return { ok: false, reason: "off" };
+    const p = await new Promise<GeolocationPosition>((resolve, reject) =>
+      navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }),
+    );
+    return { ok: true, lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy ?? null };
+  } catch (e) {
+    console.warn("locate failed", e);
+    return { ok: false, reason: locateFailure(e) };
+  }
 }
 
 /** Take or pick a photo. Returns a File, or null when cancelled / on web (use <input type=file>). */

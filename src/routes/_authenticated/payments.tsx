@@ -10,6 +10,7 @@ import { SheetDrawer } from "@/components/SheetDrawer";
 import { ErrorState, EmptyState, SlowNotice } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
 import { formatINR } from "@/lib/catalogue";
+import { istMonth } from "@/lib/ist";
 import { fetchCreditStatus, type CreditStatus } from "@/lib/orders";
 import {
   fetchOpenBills,

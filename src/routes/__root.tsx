@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import i18n from "../lib/i18n";
 import { exitApp, initNative } from "@/lib/native";
+import { installViewportVars } from "@/lib/keyboard";
 import { AppGate } from "@/components/AppGate";
 import { refreshPushToken } from "@/lib/push";
 
@@ -165,16 +166,8 @@ function RootComponent() {
     return () => i18n.off("languageChanged", on);
   }, []);
 
-  // Keep the focused field visible above the on-screen keyboard.
-  useEffect(() => {
-    const onFocus = (e: FocusEvent) => {
-      const el = e.target as HTMLElement | null;
-      if (!el || !/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
-      setTimeout(() => el.scrollIntoView({ block: "center", behavior: "smooth" }), 300);
-    };
-    document.addEventListener("focusin", onFocus);
-    return () => document.removeEventListener("focusin", onFocus);
-  }, []);
+  // Keyboard-safe sizing (--app-h / --kb) + focused field kept in view.
+  useEffect(() => installViewportVars(), []);
 
   return (
     <QueryClientProvider client={queryClient}>

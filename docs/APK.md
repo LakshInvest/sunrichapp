@@ -101,3 +101,13 @@ Or with the phone plugged in (USB debugging on): click the green ▶ Run button 
 3. "Open app settings" (shown when location is permanently refused) uses `capacitor-native-settings` — nothing to configure in the Android project; the plugin opens the system App Details screen itself.
 4. Back button is handled in JavaScript (second press on Home within 2 s exits, otherwise the app goes back one screen). No Android-project change is needed.
 5. Build: Android Studio → Build → Build APK(s) → install `android\app\build\outputs\apk\debug\app-debug.apk`.
+
+## Domain switch to user.sunrich.in (app opened the browser)
+The shell now loads `https://user.sunrich.in`; `allowNavigation` covers `user.sunrich.in`, `*.sunrich.in` and `*.lovable.app` so nothing is treated as an external link. Cleartext stays off.
+1. Get the latest code (`git pull`), then `npm install`.
+2. `npx cap sync android` — copies the new server URL into `android/app/src/main/assets/capacitor.config.json`.
+3. Open `android/app/src/main/AndroidManifest.xml`: in the `https` intent-filter set `android:host="user.sunrich.in"` (replace any `sunrichapp.lovable.app`). Keep the `sunrich://order` filter as is.
+4. Search the `android/` folder for `sunrichapp.lovable.app` and replace any hit with `user.sunrich.in`.
+5. Raise `versionCode` (and `versionName`) in `android/app/build.gradle`.
+6. Android Studio → Build → Build APK(s); uninstall the old app on the phone, then install the new `app-debug.apk`.
+7. Check: the app opens inside itself (no browser), login works, and an `https://user.sunrich.in/order/<id>` link opens the order in the app.

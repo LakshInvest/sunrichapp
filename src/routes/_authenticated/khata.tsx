@@ -13,6 +13,7 @@ import { useLang } from "@/hooks/use-lang";
 import { useOffline } from "@/hooks/use-offline";
 import { supabase } from "@/integrations/supabase/client";
 import { formatINR } from "@/lib/catalogue";
+import { istToday } from "@/lib/ist";
 import { dateLabel } from "@/lib/order-format";
 import { getMyCustomerId } from "@/lib/orders";
 import { fetchAppInfo } from "@/lib/app-info";

@@ -307,14 +307,14 @@ export const pinLogin = createServerFn({ method: "POST" })
     if (!mobileSchema.safeParse(m10).success) return { ok: false, status: "not_registered" };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: rows, error } = await supabaseAdmin.rpc("check_pin", {
+    const { data: rows, error } = await supabaseAdmin.rpc("check_pin_login", {
       p_mobile: `+91${m10}`,
       p_device_id: data.deviceId,
       p_pin: data.pin,
       p_user_type: "customer",
     });
     if (error) {
-      console.error("check_pin failed", error.message);
+      console.error("check_pin_login failed", error.message);
       return { ok: false, status: "generic" };
     }
     const row = rows?.[0];
@@ -330,8 +330,8 @@ export const pinLogin = createServerFn({ method: "POST" })
       return { ok: false, status: (known as readonly string[]).includes(result) ? (result as (typeof known)[number]) : "generic" };
     }
 
-    const { data: u } = await supabaseAdmin.auth.admin.getUserById(row.out_user_id);
-    const email = u?.user?.email;
+    // check_pin_login returns the sign-in email, saving a user lookup.
+    const email = row.out_email;
     if (!email) return { ok: false, status: "generic" };
     const { data: link, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({ type: "magiclink", email });
     if (linkErr || !link?.properties?.hashed_token) {

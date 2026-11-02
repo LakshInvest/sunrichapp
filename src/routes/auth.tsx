@@ -1,3 +1,4 @@
+import { markFirstScreen } from "@/lib/native";
 import { AppLoader } from "@/components/AppLoader";
 import { BottleLoader } from "@/components/BottleLoader";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
@@ -351,6 +352,7 @@ function ResendRing({ remaining, total }: { remaining: number; total: number }) 
 }
 
 function Login() {
+  useEffect(() => markFirstScreen(), []);
   const { t } = useTranslation();
   const { lang } = useLang();
   const navigate = useNavigate();

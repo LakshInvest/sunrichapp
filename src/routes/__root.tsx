@@ -16,7 +16,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import i18n from "../lib/i18n";
-import { exitApp, initNative } from "@/lib/native";
+import { exitApp, initNative, markFirstScreen } from "@/lib/native";
 import { installViewportVars } from "@/lib/keyboard";
 import { AppGate } from "@/components/AppGate";
 import { refreshPushToken } from "@/lib/push";
@@ -156,7 +156,11 @@ function RootComponent() {
   // Status-bar icon colour per page (dark icons on light pages).
   useEffect(() => {
     void applyStatusBar(router.state.location.pathname);
-    return router.subscribe("onResolved", ({ toLocation }) => void applyStatusBar(toLocation.pathname));
+    return router.subscribe("onResolved", ({ toLocation }) => {
+      void applyStatusBar(toLocation.pathname);
+      // First settled real screen (not the "/" redirect) hides the native splash.
+      if (toLocation.pathname !== "/") markFirstScreen();
+    });
   }, [router]);
 
   // Push token carries the language: refresh it when the language changes.

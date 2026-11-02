@@ -1,3 +1,4 @@
+import { markFirstScreen } from "@/lib/native";
 import { useCallback, useEffect, useMemo, useRef, useState, type UIEvent } from "react";
 import { PageShell } from "@/components/PageShell";
 import { serverMessage } from "@/lib/form-errors";
@@ -83,6 +84,7 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 };
 
 function Home() {
+  useEffect(() => markFirstScreen(), []);
   const { t } = useTranslation();
   const { lang } = useLang();
   const navigate = useNavigate();

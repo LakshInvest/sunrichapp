@@ -1,3 +1,4 @@
+import { readSwr, swr } from "@/lib/swr-cache";
 import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -60,29 +61,31 @@ function KhataPage() {
   const offline = useOffline();
   const deva = lang === "en" ? "" : "font-deva";
 
-  const [sum, setSum] = useState<KhataSummary | null>(null);
+  const [sum, setSum] = useState<KhataSummary | null>(() => readSwr<KhataSummary>("khata.sum"));
   const [sumErr, setSumErr] = useState<string | null>(null);
-  const [proofs, setProofs] = useState<KhataProof[]>([]);
+  const [proofs, setProofs] = useState<KhataProof[]>(() => readSwr<KhataProof[]>("khata.proofs") ?? []);
   const [range, setRange] = useState<KhataRange>("last3");
   const [custom, setCustom] = useState(() => khataRange("thisMonth"));
   const period = range === "custom" ? custom : khataRange(range);
   const [filter, setFilter] = useState<Filter>("all");
-  const [rows, setRows] = useState<KhataEntry[] | null>(null);
+  const [rows, setRows] = useState<KhataEntry[] | null>(() => readSwr<KhataEntry[]>("khata.rows.last3"));
   const [rowsErr, setRowsErr] = useState<string | null>(null);
   const [stmtOpen, setStmtOpen] = useState(false);
 
   const loadTop = useCallback(() => {
     setSumErr(null);
-    fetchKhataSummary().then(setSum, (e) => setSumErr(serverMessage(e, t("errors.generic"))));
-    fetchKhataProofs().then(setProofs, () => setProofs([]));
+    swr("khata.sum", fetchKhataSummary).then(setSum, (e) => setSumErr(serverMessage(e, t("errors.generic"))));
+    swr("khata.proofs", fetchKhataProofs).then(setProofs, () => setProofs([]));
   }, [t]);
   useEffect(loadTop, [loadTop]);
 
   const loadRows = useCallback(() => {
-    setRows(null);
+    const key = range === "last3" ? "khata.rows.last3" : null;
+    setRows(key ? readSwr<KhataEntry[]>(key) : null);
     setRowsErr(null);
-    fetchKhataEntries(period.from, period.to).then(setRows, (e) => setRowsErr(serverMessage(e, t("errors.generic"))));
-  }, [period.from, period.to, t]);
+    const get = () => fetchKhataEntries(period.from, period.to);
+    (key ? swr(key, get) : get()).then(setRows, (e) => setRowsErr(serverMessage(e, t("errors.generic"))));
+  }, [period.from, period.to, range, t]);
   useEffect(loadRows, [loadRows]);
 
   // Pending at the top; rejected ones from the last 30 days so the reason is seen.

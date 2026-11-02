@@ -20,6 +20,7 @@ import { exitApp, initNative, markFirstScreen } from "@/lib/native";
 import { installViewportVars } from "@/lib/keyboard";
 import { registerServiceWorker } from "@/lib/sw-register";
 import { clearGate } from "@/lib/gate-cache";
+import { clearUserCaches } from "@/lib/swr-cache";
 import { AppGate } from "@/components/AppGate";
 import { refreshPushToken } from "@/lib/push";
 
@@ -139,6 +140,7 @@ function RootComponent() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       if (event === "SIGNED_IN") void refreshPushToken();
+      if (event === "SIGNED_OUT") clearUserCaches();
       void router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });

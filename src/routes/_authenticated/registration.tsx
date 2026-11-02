@@ -573,7 +573,7 @@ function DetailsStep({
 
       {error && <p data-field-error role="alert" className="text-sm font-medium text-destructive">{error}</p>}
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur" data-testid="reg-action-bar"><div className="mx-auto max-w-md space-y-1">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur" data-kb-bar data-testid="reg-action-bar"><div className="mx-auto max-w-md space-y-1">
       <button
         type="button"
         onClick={() => void save()}
@@ -853,7 +853,7 @@ function DocsStep({
 
       {error && <p data-field-error role="alert" className="text-sm font-medium text-destructive">{error}</p>}
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur" data-testid="reg-action-bar"><div className="mx-auto max-w-md space-y-1">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur" data-kb-bar data-testid="reg-action-bar"><div className="mx-auto max-w-md space-y-1">
       <button
         type="button"
         onClick={() => void submit()}

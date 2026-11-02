@@ -385,7 +385,14 @@ function Home() {
                     alt=""
                     loading="lazy"
                     decoding="async"
-                    onError={(e) => (e.currentTarget.style.display = "none")}
+                    onError={(e) => {
+                      const img = e.currentTarget;
+                      // Resized copy unavailable: fall back to the original once, then hide.
+                      if (banner.imageUrl && img.src !== banner.imageUrl && !img.dataset["plain"]) {
+                        img.dataset["plain"] = "1";
+                        img.src = banner.imageUrl;
+                      } else img.style.display = "none";
+                    }}
                     className="absolute inset-0 h-full w-full object-cover"
                   />
                 )}

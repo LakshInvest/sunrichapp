@@ -1,6 +1,6 @@
 # Building the Sunrich APK on Windows
 
-The APK is a thin "live-site" shell: it loads **https://sunrichapp.lovable.app**.
+The APK is a thin "live-site" shell: it loads **https://user.sunrich.in**.
 Every feature change you publish appears in the app instantly. Rebuild only to bump the version.
 
 ## 1. One-time installs
@@ -63,7 +63,7 @@ Inside the main `<activity>` add (deep links):
   <action android:name="android.intent.action.VIEW" />
   <category android:name="android.intent.category.DEFAULT" />
   <category android:name="android.intent.category.BROWSABLE" />
-  <data android:scheme="https" android:host="sunrichapp.lovable.app" android:pathPrefix="/order/" />
+  <data android:scheme="https" android:host="user.sunrich.in" android:pathPrefix="/order/" />
 </intent-filter>
 ```
 Notification icon: in Android Studio right-click `app\res` → New → Image Asset → *Notification Icons*, name it `ic_stat_sunrich`.

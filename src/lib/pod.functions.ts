@@ -1,4 +1,4 @@
-import { ownCid } from "@/lib/own-customer.server-safe";
+import { ownCid } from "@/lib/own-customer";
 // ============= Full file contents =============
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";

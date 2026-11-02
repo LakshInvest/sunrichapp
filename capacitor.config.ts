@@ -8,6 +8,8 @@ const config: CapacitorConfig = {
   server: {
     url: "https://user.sunrich.in",
     cleartext: false,
+    // Local navy "No internet — Retry" page instead of a WebView error.
+    errorPath: "offline.html",
     androidScheme: "https",
     allowNavigation: [
       "user.sunrich.in",
@@ -22,19 +24,20 @@ const config: CapacitorConfig = {
     ],
   },
   android: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#0B2545",
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 1200,
-      launchAutoHide: true,
-      backgroundColor: "#FFFFFF",
-      androidScaleType: "CENTER",
+      // Hidden from JS once Login/PIN/Home has rendered (src/lib/native.ts).
+      launchShowDuration: 0,
+      launchAutoHide: false,
+      backgroundColor: "#0B2545",
+      androidScaleType: "CENTER_CROP",
       showSpinner: false,
     },
     StatusBar: {
       backgroundColor: "#0B2545",
-      style: "DARK",
+      style: "DARK", // DARK = light icons on the navy bar
       overlaysWebView: false,
     },
     PushNotifications: {

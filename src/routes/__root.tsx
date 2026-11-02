@@ -16,8 +16,11 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import i18n from "../lib/i18n";
-import { exitApp, initNative } from "@/lib/native";
+import { exitApp, initNative, markFirstScreen } from "@/lib/native";
 import { installViewportVars } from "@/lib/keyboard";
+import { registerServiceWorker } from "@/lib/sw-register";
+import { clearGate } from "@/lib/gate-cache";
+import { clearUserCaches } from "@/lib/swr-cache";
 import { AppGate } from "@/components/AppGate";
 import { refreshPushToken } from "@/lib/push";
 
@@ -62,7 +65,8 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
-              router.invalidate();
+              clearGate();
+      router.invalidate();
               reset();
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
@@ -136,6 +140,7 @@ function RootComponent() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       if (event === "SIGNED_IN") void refreshPushToken();
+      if (event === "SIGNED_OUT") clearUserCaches();
       void router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });
@@ -156,7 +161,11 @@ function RootComponent() {
   // Status-bar icon colour per page (dark icons on light pages).
   useEffect(() => {
     void applyStatusBar(router.state.location.pathname);
-    return router.subscribe("onResolved", ({ toLocation }) => void applyStatusBar(toLocation.pathname));
+    return router.subscribe("onResolved", ({ toLocation }) => {
+      void applyStatusBar(toLocation.pathname);
+      // First settled real screen (not the "/" redirect) hides the native splash.
+      if (toLocation.pathname !== "/") markFirstScreen();
+    });
   }, [router]);
 
   // Push token carries the language: refresh it when the language changes.
@@ -168,6 +177,9 @@ function RootComponent() {
 
   // Keyboard-safe sizing (--app-h / --kb) + focused field kept in view.
   useEffect(() => installViewportVars(), []);
+
+  // Offline/speed cache (published site only).
+  useEffect(() => registerServiceWorker(), []);
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2732 2732">
-  <rect width="2732" height="2732" fill="#0B2545"/>
-  <g transform="translate(1366 1180)">
-    <circle r="330" fill="none" stroke="#C9A44C" stroke-width="36" stroke-dasharray="1558 519" stroke-linecap="round" transform="rotate(-90)"/>
-    <path d="M0 -224 C 120 -80 198 14 198 92 A 198 198 0 0 1 -198 92 C -198 14 -120 -80 0 -224 Z" fill="#2EA3C7"/>
-  </g>
-  <text x="1366" y="1720" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="150" font-weight="700" letter-spacing="10" fill="#F8F7F3">SUNRICH</text>
-  <text x="1366" y="1800" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="56" letter-spacing="14" fill="#F8F7F3" opacity="0.7">PACKAGED DRINKING WATER</text>
-</svg>

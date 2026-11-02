@@ -1,3 +1,4 @@
+import { readSwr, swr } from "@/lib/swr-cache";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PageShell } from "@/components/PageShell";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -33,14 +34,14 @@ function MyOrders() {
   const offline = useOffline();
   const deva = lang === "en" ? "" : "font-deva";
 
-  const [orders, setOrders] = useState<OrderDto[] | null>(null);
+  const [orders, setOrders] = useState<OrderDto[] | null>(() => readSwr<OrderDto[]>("orders"));
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<OrderGroup>("active");
   const [unpaid, setUnpaid] = useState<Set<string>>(new Set());
 
   const load = useCallback(async () => {
     try {
-      const list = await fetchMyOrders();
+      const list = await swr("orders", fetchMyOrders);
       setOrders(list);
       setError(null);
       fetchOrdersAwaitingPayment(list).then((u) => setUnpaid(new Set(u.map((o) => o.id))), () => undefined);

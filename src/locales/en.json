@@ -137,7 +137,9 @@
     "emptyBody": "The Sunrich catalogue is being set up. Please check back soon.",
     "askUs": "Ask the Sunrich team",
     "sortArranged": "As arranged",
-    "perPack": "/pack"
+    "perPack": "/pack",
+    "rateAfterApproval": "Rate after approval",
+    "mrp": "MRP {{amount}}"
   },
   "product": {
     "quantity": "Quantity",
@@ -359,7 +361,11 @@
     "cancelled": "Cancelled"
   },
   "banner": {
-    "underReview": "Your account is under review. You can order once Sunrich approves it."
+    "underReview": "Your account is under review. You can order once Sunrich approves it.",
+    "verifying": "Your account is being verified. Sunrich team will approve it soon.",
+    "uploadDocs": "Upload documents",
+    "call": "Call Sunrich",
+    "whatsapp": "WhatsApp Sunrich"
   },
   "hold": {
     "title": "Your account is on hold",

@@ -45,7 +45,9 @@ import { RateOrderCard } from "@/components/RateOrderCard";
 import { useAppSettings } from "@/lib/app-settings";
 import { toast } from "sonner";
 import { Repeat2 } from "lucide-react";
-import { getMyRegistration, type RegistrationDto } from "@/lib/registration.functions";
+import { getDocumentRequirements, getMyRegistration, type RegistrationDto } from "@/lib/registration.functions";
+import { hasMissingDocs, isRateLockedStatus, setRateLocked } from "@/lib/rate-lock";
+import { Link } from "@tanstack/react-router";
 import {
   addRecentSearch,
   fetchCatalogue,
@@ -139,12 +141,21 @@ function Home() {
     };
   }, [load]);
 
+  const myDocs = useServerFn(getDocumentRequirements);
+  const [docsMissing, setDocsMissing] = useState(false);
+  const loadReg = useCallback(async () => {
+    const r = await myReg();
+    setReg(r);
+    setRateLocked(isRateLockedStatus(r.status));
+    if (isRateLockedStatus(r.status) && r.customerId) {
+      const d = await myDocs().catch(() => null);
+      setDocsMissing(d ? hasMissingDocs(d.requirements, d.uploaded) : false);
+    } else setDocsMissing(false);
+    return r;
+  }, [myReg, myDocs]);
   useEffect(() => {
     let active = true;
-    void myReg().then((r) => {
-      if (!active) return;
-      setReg(r);
-    });
+    void loadReg().catch(() => undefined);
     return () => {
       active = false;
     };
@@ -221,7 +232,7 @@ function Home() {
     void navigate({ to: "/cart" });
   };
 
-  const pull = usePullToRefresh(() => load(true));
+  const pull = usePullToRefresh(() => Promise.all([load(true), loadReg()]));
 
   const products = data?.products ?? [];
   const deva = lang === "en" ? "" : "font-deva";
@@ -624,10 +635,41 @@ function Home() {
             {pending && (
               <div
                 role="status"
-                className="mx-5 mb-4 flex items-start gap-2 rounded-xl bg-accent/15 px-4 py-3 text-sm font-medium text-foreground"
+                className="mx-5 mb-4 rounded-xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-foreground"
               >
-                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />
-                {t("banner.underReview")}
+                <p className="flex items-start gap-2 font-medium">
+                  <Clock className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />
+                  {t("banner.verifying")}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {docsMissing && (
+                    <Link
+                      to="/registration"
+                      search={{ docs: 1 }}
+                      className="flex min-h-11 items-center rounded-full bg-primary px-4 text-xs font-bold text-primary-foreground"
+                    >
+                      {t("banner.uploadDocs")}
+                    </Link>
+                  )}
+                  {settings?.supportPhone && (
+                    <a
+                      href={`tel:${settings.supportPhone}`}
+                      className="flex min-h-11 items-center rounded-full border border-border bg-card px-4 text-xs font-bold text-foreground"
+                    >
+                      {t("banner.call")}
+                    </a>
+                  )}
+                  {(settings?.supportWhatsapp || settings?.supportPhone) && (
+                    <a
+                      href={`https://wa.me/${(settings.supportWhatsapp || settings.supportPhone || "").replace(/\D/g, "")}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex min-h-11 items-center rounded-full border border-border bg-card px-4 text-xs font-bold text-foreground"
+                    >
+                      {t("banner.whatsapp")}
+                    </a>
+                  )}
+                </div>
               </div>
             )}
 

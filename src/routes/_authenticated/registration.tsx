@@ -50,6 +50,7 @@ export const Route = createFileRoute("/_authenticated/registration")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>): { docs?: 1 } => (s["docs"] ? { docs: 1 } : {}),
   loader: async () => await getMyRegistration(),
   component: Wizard,
 });
@@ -107,17 +108,20 @@ function Wizard() {
   const reload = useServerFn(getMyRegistration);
 
   const [reg, setReg] = useState<RegistrationDto>(reg0);
-  const [step, setStep] = useState<Step>(() => initialStep(reg0));
+  const { docs: wantDocs } = Route.useSearch();
+  // Pending customers may come back from Home to upload missing documents.
+  const docsMode = !!wantDocs && reg0.status === "pending_approval" && !!reg0.customerId;
+  const [step, setStep] = useState<Step>(() => (docsMode ? "docs" : initialStep(reg0)));
   const [typeCode, setTypeCode] = useState<string | null>(reg0.typeCode);
 
   // Anyone already registered belongs on Home, not in the wizard
   // (but let the success screen show after a fresh signup).
   useEffect(() => {
-    if (step === "done") return;
+    if (step === "done" || (docsMode && step !== "type")) return;
     if (reg.customerId && (reg.status === "active" || reg.status === "pending_approval")) {
       void navigate({ to: "/home", replace: true });
     }
-  }, [step, reg.customerId, reg.status, navigate]);
+  }, [step, docsMode, reg.customerId, reg.status, navigate]);
 
   const refresh = async (): Promise<RegistrationDto> => {
     const fresh = await reload();

@@ -10,6 +10,7 @@ import { ImageViewer } from "@/components/ImageViewer";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ErrorState, EmptyState, GridSkeleton } from "@/components/catalog/states";
 import { PriceBlock } from "@/components/catalog/ProductCard";
+import { useRateLocked } from "@/lib/rate-lock";
 import { openPriceRequestChat } from "@/lib/price-request";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
@@ -48,6 +49,7 @@ function ProductDetail() {
   const offline = useOffline();
   const fav = useFavourites();
   const deva = lang === "en" ? "" : "font-deva";
+  const rateLocked = useRateLocked();
 
   const [data, setData] = useState<CatalogData | null>(() => readCatalogueCache());
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -238,7 +240,7 @@ function ProductDetail() {
         )}
 
         {/* Quantity (priced products only) */}
-        {product.price !== null && (
+        {product.price !== null && !rateLocked && (
         <div className="mt-5 flex items-center justify-between rounded-2xl border border-border bg-card p-4">
           <span className="text-sm font-semibold text-foreground">{t("product.quantity")}</span>
           <div className="flex items-center gap-3">
@@ -264,7 +266,7 @@ function ProductDetail() {
           </div>
         </div>
         )}
-        {(product.minOrderQty > 1 || product.maxOrderQty != null) && product.price !== null && (
+        {(product.minOrderQty > 1 || product.maxOrderQty != null) && product.price !== null && !rateLocked && (
           <p className="mt-2 text-center text-xs text-muted-foreground">
             {t("product.qtyLimits", {
               min: product.minOrderQty,
@@ -299,7 +301,7 @@ function ProductDetail() {
                       {loc(s.name, lang)}
                     </p>
                     <p className="text-sm font-bold text-primary">
-                      {s.price === null ? t("catalog.priceOnRequest") : formatINR(s.price)}
+                      {rateLocked ? `🔒 ${t("catalog.rateAfterApproval")}` : s.price === null ? t("catalog.priceOnRequest") : formatINR(s.price)}
                     </p>
                   </button>
                 </div>
@@ -312,6 +314,11 @@ function ProductDetail() {
       {/* Sticky add-to-cart at the very bottom (no tab bar on this screen) */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
         <div className="mx-auto flex max-w-md items-center gap-3">
+          {rateLocked ? (
+            <p className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-muted text-sm font-semibold text-muted-foreground">
+              🔒 {t("catalog.rateAfterApproval")}
+            </p>
+          ) : (<>
           {product.price !== null && qty > 0 && (
             <div className="min-w-0 shrink-0">
               <p className="text-xs text-muted-foreground">{t("product.total")}</p>
@@ -346,6 +353,7 @@ function ProductDetail() {
               {t("product.addToCart")}
             </button>
           )}
+          </>)}
         </div>
       </div>
 

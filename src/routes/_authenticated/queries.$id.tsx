@@ -212,8 +212,16 @@ function Thread() {
     };
   }, [myReg]);
 
+  // Newest message stays in view, also when the keyboard opens/closes.
+  const listRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "end" });
+    const toEnd = () => {
+      const el = listRef.current;
+      if (el) el.scrollTop = el.scrollHeight;
+    };
+    toEnd();
+    window.visualViewport?.addEventListener("resize", toEnd);
+    return () => window.visualViewport?.removeEventListener("resize", toEnd);
   }, [messages]);
 
   const closed = query?.status === "closed";
@@ -271,8 +279,12 @@ function Thread() {
   };
 
   return (
-    <PageShell className={`flex flex-col ${lang === "en" ? "" : "font-deva"}`}>
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
+    <PageShell
+      className={`fixed inset-x-0 top-0 flex !min-h-0 flex-col overflow-hidden ${lang === "en" ? "" : "font-deva"}`}
+      style={{ height: "var(--app-h, 100dvh)" }}
+      onRefresh={load}
+    >
+      <header className="z-20 flex shrink-0 items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <button
           type="button"
           onClick={() => navigate({ to: "/queries" })}
@@ -287,7 +299,7 @@ function Thread() {
         {query && <QueryChip status={query.status} className="mr-2" />}
       </header>
 
-      <div className="flex-1 px-4 py-4">
+      <div ref={listRef} data-scroll-area className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4">
         {missing && <p className="mt-10 text-center text-sm text-muted-foreground">{t("queries.notFound")}</p>}
         {query && parsePriceRequestSubject(query.subject) && (
           <div className="mb-3 flex items-center gap-2.5 rounded-2xl border border-secondary/30 bg-secondary/10 px-3 py-2">
@@ -317,7 +329,7 @@ function Thread() {
         <div ref={endRef} />
       </div>
 
-      <div className="sticky bottom-0 border-t border-border bg-card/95 px-3 py-3 backdrop-blur-md">
+      <div className="shrink-0 border-t border-border bg-card px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" data-testid="chat-composer">
         {closed ? (
           <p className="py-2 text-center text-sm font-medium text-muted-foreground">{t("queries.closedNote")}</p>
         ) : (

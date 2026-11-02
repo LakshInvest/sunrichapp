@@ -19,10 +19,10 @@ export function SwipeToRemove({
 
   return (
     <li className="relative overflow-hidden rounded-2xl">
-      <div aria-hidden className="absolute inset-0 flex items-center justify-end rounded-2xl bg-destructive px-5 text-destructive-foreground">
+      {dx !== 0 && <div aria-hidden className="absolute inset-0 flex items-center justify-end rounded-2xl bg-destructive px-5 text-destructive-foreground">
         <Trash2 className="h-5 w-5" />
         <span className="ml-2 text-sm font-semibold">{label}</span>
-      </div>
+      </div>}
       <div
         className="relative"
         style={{ transform: `translateX(${dx}px)`, transition: start.current ? "none" : "transform 180ms ease-out" }}

@@ -193,3 +193,10 @@ Constraint: existing DB tables/RPCs/policies/buckets only (user-managed backend)
 - [x] Test data: order MFO/26-27/00070 placed through the UI and cancelled immediately; cleanup SQL saved as /mnt/documents/audit_cleanup_20261102.sql (NOT run, per instruction). Only one QA query thread exists (2855e4bf "Audit QA en") — Hindi/Marathi runs reused it.
 - [x] Map picker: graceful pin/coordinate fallback in the sandbox (Google key does not authorize localhost); interactive map verified earlier on the published domain.
 - [ ] Staff reply from Command Center — BLOCKED: CC app is not in this workspace; need its URL.
+
+## task7757 — IST dates + CC chat-reply test
+- [x] src/lib/ist.ts (istToday, istDayOf, istDayStart/End, istShiftDay, istMonth, IST_TZ) — Asia/Kolkata is the single source of "today" and day boundaries; date-only strings count as their own day.
+- [x] Wired into: order formatting (relativeDay/shortDate/dateLabel), PaymentProofSheet, invoice display, Khata passbook/statement ranges + this/last-month chips, Pay now (paid_on default + max date), payments month filter.
+- [x] src/test/ist.test.ts — 1:30 AM IST counts as that IST day; khataRange/relativeDay/shortDate cross-midnight checks. 114 tests pass, typecheck clean.
+- [x] CC chat-reply test: query created in the app (313b5db4), replied from Command Center (qa@sunrich.local) → notification "Sunrich replied to your question" → tap opens the exact chat, staff bubble "QA Tester · Sunrich", composer visible with keyboard open at 320 and 390.
+- [x] Cleanup SQL /mnt/documents/chat_reply_test_cleanup.sql (NOT run). Note: CC at sunrich-command-center.lovable.app, admin login is under "Admin login with email".

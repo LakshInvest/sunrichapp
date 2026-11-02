@@ -96,7 +96,7 @@ function KhataPage() {
   };
 
   return (
-    <PageShell className={`pb-28 ${deva}`}>
+    <PageShell className={`pb-28 ${deva}`} onRefresh={() => Promise.all([loadTop(), loadRows()])}>
       <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <button
           type="button"
@@ -206,7 +206,7 @@ function KhataPage() {
         </section>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         <Button
           type="button"
           disabled={offline}

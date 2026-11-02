@@ -69,11 +69,11 @@ export const sendOtp = createServerFn({ method: "POST" })
       .from("user_profiles")
       .select("id, full_name, user_type, is_active")
       .in("mobile", variants(m10))
+      .eq("user_type", "customer")
       .limit(1)
       .maybeSingle();
     if (profile) {
       if (!profile.is_active) return { ok: false, code: "blocked" };
-      if (profile.user_type === "staff") return { ok: false, code: "staffApp" };
     }
 
     // Store reviewer demo numbers: no WhatsApp, open the PIN screen instead.
@@ -166,6 +166,22 @@ export const sendOtp = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+type Admin = (typeof import("@/integrations/supabase/client.server"))["supabaseAdmin"];
+
+/** Creates the customer user_profiles row; deletes a freshly created auth user on failure. */
+async function createCustomerProfile(admin: Admin, uid: string, m10: string, mobile: string, fresh: boolean) {
+  const { data: company } = await admin.from("companies").select("id").eq("code", "SUNRICH").maybeSingle();
+  const { error } = company
+    ? await admin.from("user_profiles").insert({ id: uid, company_id: company.id, user_type: "customer", full_name: m10, mobile })
+    : { error: { message: "SUNRICH company missing" } };
+  if (error) {
+    console.error("profile create failed", error.message);
+    if (fresh) await admin.auth.admin.deleteUser(uid);
+    return false;
+  }
+  return true;
+}
+
 export const verifyOtp = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({ mobile: z.string(), code: z.string().regex(/^\d{6}$/), deviceId: z.string().min(16).max(200).optional() }).parse(d),
@@ -180,11 +196,11 @@ export const verifyOtp = createServerFn({ method: "POST" })
       .from("user_profiles")
       .select("id, user_type, is_active")
       .in("mobile", variants(m10))
+      .eq("user_type", "customer")
       .limit(1)
       .maybeSingle();
     if (profile) {
       if (!profile.is_active) return { ok: false, code: "blocked" };
-      if (profile.user_type === "staff") return { ok: false, code: "staffApp" };
     }
 
     const { data: row } = await supabaseAdmin
@@ -192,6 +208,8 @@ export const verifyOtp = createServerFn({ method: "POST" })
       .select("id, user_id, code_hash, attempts, max_attempts, expires_at")
       .eq("destination", mobile)
       .eq("purpose", "app_login")
+      // Ignore codes tied to another (staff) account of this number.
+      .or(profile ? `user_id.is.null,user_id.eq.${profile.id}` : "user_id.is.null")
       .is("consumed_at", null)
       .order("created_at", { ascending: false })
       .limit(1)
@@ -213,40 +231,42 @@ export const verifyOtp = createServerFn({ method: "POST" })
     let uid: string | null = profile?.id ?? null;
     if (!uid) {
       const email = `${m10}@app.sunrich.local`;
+      // No `phone` on the auth user: a staff account may already hold it.
       const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
         email,
         password: randomPassword(),
-        phone: mobile,
-        phone_confirm: true,
         email_confirm: true,
       });
       if (createErr || !created.user) {
-        console.error("auth user create failed", createErr?.message);
-        return { ok: false, code: "generic" };
-      }
-      uid = created.user.id;
-      const { data: company } = await supabaseAdmin
-        .from("companies")
-        .select("id")
-        .eq("code", "SUNRICH")
-        .maybeSingle();
-      if (!company) {
-        await supabaseAdmin.auth.admin.deleteUser(uid);
-        return { ok: false, code: "generic" };
-      }
-      const { error: profErr } = await supabaseAdmin.from("user_profiles").insert({
-        id: uid,
-        company_id: company.id,
-        user_type: "customer",
-        full_name: m10,
-        mobile,
-      });
-      if (profErr) {
-        console.error("profile create failed", profErr.message);
-        await supabaseAdmin.auth.admin.deleteUser(uid);
-        return { ok: false, code: "generic" };
+        if (!/already|exists|registered/i.test(createErr?.message ?? "")) {
+          console.error("auth user create failed", createErr?.message);
+          return { ok: false, code: "generic" };
+        }
+        // Email taken: reuse that auth user only when it is a customer.
+        const { data: list } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+        const existing = list?.users.find((x) => x.email?.toLowerCase() === email);
+        if (!existing) return { ok: false, code: "generic" };
+        const { data: prof } = await supabaseAdmin
+          .from("user_profiles")
+          .select("id, user_type, is_active")
+          .eq("id", existing.id)
+          .maybeSingle();
+        if (prof && prof.user_type !== "customer") return { ok: false, code: "generic" };
+        if (prof && !prof.is_active) return { ok: false, code: "blocked" };
+        uid = existing.id;
+        if (prof) {
+          // Profile exists already; skip creation.
+        } else {
+          const r = await createCustomerProfile(supabaseAdmin, uid, m10, mobile, false);
+          if (!r) return { ok: false, code: "generic" };
+        }
+      } else {
+        uid = created.user.id;
+        const r = await createCustomerProfile(supabaseAdmin, uid, m10, mobile, true);
+        if (!r) return { ok: false, code: "generic" };
       }
     }
+    if (!uid) return { ok: false, code: "generic" };
 
     const { data: u } = await supabaseAdmin.auth.admin.getUserById(uid);
     const email = u?.user?.email;
@@ -291,6 +311,7 @@ export const pinLogin = createServerFn({ method: "POST" })
       p_mobile: `+91${m10}`,
       p_device_id: data.deviceId,
       p_pin: data.pin,
+      p_user_type: "customer",
     });
     if (error) {
       console.error("check_pin failed", error.message);
@@ -348,6 +369,7 @@ export const welcomeName = createServerFn({ method: "POST" })
       .from("user_profiles")
       .select("id, full_name")
       .in("mobile", variants(m10))
+      .eq("user_type", "customer")
       .limit(1)
       .maybeSingle();
     if (!profile) return { name: null };

@@ -26,8 +26,11 @@ export const Route = createFileRoute("/_authenticated")({
       if (cached.stale) {
         void getMyRegistration()
           .then((r) => {
+            const before = cached.reg;
             writeGate(localId, r);
             setRateLocked(isRateLockedStatus(r.status));
+            // Status changed since the saved check (approved, blocked…): re-route.
+            if (r.status !== before.status || r.customerId !== before.customerId) window.location.reload();
           })
           .catch(() => undefined);
       }

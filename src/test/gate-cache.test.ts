@@ -12,10 +12,9 @@ const store: Record<string, string> = {};
 
 describe("gate cache 2nd open", () => {
   beforeEach(() => clearGate());
-  it("a saved check up to 24 h old is reused on a cold open and marked for re-check", async () => {
+  it("a saved check up to 24 h old is reused on a cold open and marked for re-check", () => {
     writeGate("u1", reg, 0);
-    const mod = await import("@/lib/gate-cache?cold");
-    const r = mod.readGate("u1", GATE_COLD_MAX_MS);
+    const r = readGate("u1", GATE_COLD_MAX_MS);
     expect(r?.reg.status).toBe("active");
     expect(r?.stale).toBe(true);
   });

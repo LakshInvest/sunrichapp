@@ -39,8 +39,13 @@ export async function listMyAddresses(): Promise<SavedAddress[]> {
 }
 
 /** Maps a customer_addresses row (table or get_home().default_address) to SavedAddress. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function mapAddressRow(r: Record<string, any>): SavedAddress {
+type AddressRow = {
+  id: string; label: string; address_line1: string; address_line2: string | null; landmark: string | null;
+  city: string | null; state: string | null; pincode: string | null; latitude: number | null; longitude: number | null;
+  contact_name: string | null; contact_mobile: string | null; is_default: boolean;
+};
+export function mapAddressRow(row: Record<string, unknown>): SavedAddress {
+  const r = row as unknown as AddressRow;
   return {
     id: r.id,
     label: r.label,

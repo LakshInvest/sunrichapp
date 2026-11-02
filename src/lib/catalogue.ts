@@ -167,56 +167,46 @@ export function arrangeCatalogue<T extends { categories: CatalogCategory[]; prod
   return { ...d, categories: cats.filter((c) => used.has(c.code)), products };
 }
 
+/** Extra Home values returned by get_home() (Khata, default address, chats awaiting the customer). */
+export type HomeExtras = { khata: Record<string, unknown> | null; defaultAddress: Record<string, unknown> | null; awaitingReply: number };
+let homeExtras: HomeExtras | null = null;
+function setHomeExtras(x: HomeExtras) {
+  homeExtras = x;
+}
+/** Last get_home() extras, or null before the first load. */
+export function getHomeExtras(): HomeExtras | null {
+  return homeExtras;
+}
+
 async function loadCatalogue(): Promise<CatalogData> {
   const now = Date.now();
-  const [
-    { data: catalogue, error: catErr },
-    { data: categories, error: catgErr },
-    { data: heroRows, error: heroErr },
-    { data: sectionRows, error: secErr },
-  ] = await Promise.all([
-    supabase.rpc("my_catalogue"),
-    supabase
-      .from("product_categories")
-      .select("id, code, name, name_hi, name_mr, icon_key, image_url, sort_order")
-      .eq("is_active", true)
-      .order("sort_order"),
-    supabase.from("app_hero").select("*").limit(1).maybeSingle(),
-    supabase.from("app_home_sections").select("key, sort_order").eq("is_active", true).order("sort_order"),
+  // One round trip: get_home() returns hero, sections, categories, banners
+  // and this customer's priced catalogue. The customer type (banner
+  // targeting) is read alongside it, not after.
+  const { data: sess } = await supabase.auth.getSession();
+  const uid = sess.session?.user.id;
+  const [{ data: home, error: homeErr }, typeRes] = await Promise.all([
+    supabase.rpc("get_home"),
+    uid
+      ? supabase.from("user_profiles").select("customers(customer_type_id)").eq("id", uid).maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
-  if (catErr) throw new Error(catErr.message);
-  if (catgErr) throw new Error(catgErr.message);
-  if (heroErr) throw new Error(heroErr.message);
-  if (secErr) throw new Error(secErr.message);
+  if (homeErr) throw new Error(homeErr.message);
+  const h = (home ?? {}) as Record<string, unknown>;
+  const arr = (k: string) => (Array.isArray(h[k]) ? (h[k] as Record<string, unknown>[]) : []);
+  const catalogue = arr("products") as unknown as RawProduct[];
+  const categories = arr("categories");
+  const heroRows = (h["hero"] as Record<string, unknown> | null) ?? null;
+  const sectionRows = arr("sections") as unknown as { key: string }[];
+  const custRel = (typeRes.data as { customers?: { customer_type_id?: string | null } | null } | null)?.customers;
+  const customerTypeId: string | null = custRel?.customer_type_id ?? null;
+  setHomeExtras({
+    khata: (h["khata"] as Record<string, unknown> | null) ?? null,
+    defaultAddress: (h["default_address"] as Record<string, unknown> | null) ?? null,
+    awaitingReply: Number(h["awaiting_reply"] ?? 0),
+  });
 
-  // Customer type for banner targeting (best effort — banners simply target all on failure).
-  let customerTypeId: string | null = null;
-  try {
-    const { data: user } = await supabase.auth.getUser();
-    if (user?.user) {
-      const { data: prof } = await supabase
-        .from("user_profiles")
-        .select("customer_id")
-        .eq("id", user.user.id)
-        .maybeSingle();
-      if (prof?.customer_id) {
-        const { data: c } = await supabase
-          .from("customers")
-          .select("customer_type_id")
-          .eq("id", prof.customer_id)
-          .maybeSingle();
-        customerTypeId = c?.customer_type_id ?? null;
-      }
-    }
-  } catch {
-    /* banners show for everyone */
-  }
-
-  const banners: CatalogBanner[] = ((await supabase
-    .from("app_banners")
-    .select("id, image_url, title, title_hi, title_mr, subtitle, subtitle_hi, subtitle_mr, tag, tag_hi, tag_mr, link_type, link_value, customer_type_ids, start_at, end_at, sort_order")
-    .eq("is_active", true)
-    .order("sort_order")).data ?? [])
+  const banners: CatalogBanner[] = (arr("banners") as Record<string, unknown>[])
     .filter((b: Record<string, unknown>) => {
       const start = b["start_at"] ? new Date(String(b["start_at"])).getTime() : null;
       const end = b["end_at"] ? new Date(String(b["end_at"])).getTime() : null;

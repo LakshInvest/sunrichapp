@@ -1,3 +1,4 @@
+import { ownCid } from "@/lib/own-customer.server-safe";
 // ============= Full file contents =============
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -40,6 +41,7 @@ export const getPodUrls = createServerFn({ method: "POST" })
       .from("orders")
       .select("id")
       .eq("id", data.orderId)
+      .or(`customer_id.eq.${await ownCid(context.supabase)},fulfiller_customer_id.eq.${await ownCid(context.supabase)}`)
       .maybeSingle();
     if (!order) return none;
 

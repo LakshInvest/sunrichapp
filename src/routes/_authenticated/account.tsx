@@ -170,7 +170,7 @@ function Account() {
   useEffect(() => {
     if (!settings?.showJarBalance) return;
     let active = true;
-    void supabase
+    void ownCustomerFilter().then((cidFilter) => supabase
       .from("container_balances")
       .select("product_id, balance")
       .eq("customer_id", cidFilter)
@@ -178,7 +178,7 @@ function Account() {
       .then(({ data }) => {
         if (active)
           setJars((data ?? []).map((r) => ({ productId: r.product_id ?? "", balance: Number(r.balance ?? 0) })).filter((r) => r.balance > 0));
-      });
+      }));
     return () => {
       active = false;
     };

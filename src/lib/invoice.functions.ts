@@ -1,3 +1,4 @@
+import { ownCid } from "@/lib/own-customer.server-safe";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -25,6 +26,7 @@ export const getInvoiceFirm = createServerFn({ method: "POST" })
       .from("invoices")
       .select("id, firm_id")
       .eq("id", data.invoiceId)
+      .eq("customer_id", await ownCid(context.supabase))
       .maybeSingle();
     if (!inv) return null;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

@@ -22,8 +22,10 @@ export default defineConfig({
         injectRegister: null,
         manifest: false,
         filename: "sw.js",
+        outDir: "dist/client",
         devOptions: { enabled: false },
         workbox: {
+          globDirectory: "dist/client",
           // Hashed JS/CSS/fonts/images: precached per deploy (versioned by the hash list).
           globPatterns: ["assets/**/*.{js,css,woff,woff2,png,jpg,jpeg,webp,svg}", "*.{png,svg,ico}"],
           globIgnores: ["**/jspdf*", "**/html2canvas*", "**/purify*"],

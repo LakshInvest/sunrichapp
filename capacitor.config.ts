@@ -6,11 +6,12 @@ const config: CapacitorConfig = {
   appName: "Sunrich",
   webDir: "public",
   server: {
-    url: "https://sunrichapp.lovable.app",
+    url: "https://user.sunrich.in",
     cleartext: false,
     androidScheme: "https",
     allowNavigation: [
-      "sunrichapp.lovable.app",
+      "user.sunrich.in",
+      "*.sunrich.in",
       "*.lovable.app",
       "nxlmiovntfdsunqydrqd.supabase.co",
       "*.supabase.co",

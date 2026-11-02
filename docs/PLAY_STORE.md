@@ -35,12 +35,12 @@ account — in English, हिंदी or मराठी.
 - Mobile: `9999900000` · PIN: `1234`
 - Opens the PIN screen directly (no WhatsApp OTP is sent for this number).
 - This account is UI-only: order checkout is disabled, orders cannot be placed.
-- Public pages for review: `https://sunrichapp.lovable.app/privacy`,
+- Public pages for review: `https://user.sunrich.in/privacy`,
   `/terms`, `/delete-account` (no login needed).
 
 ## Deep links to test
 - `sunrich://order/<order-id>` — opens that order's detail screen.
-- `https://sunrichapp.lovable.app/order/<order-id>` — same, on web and in-app.
+- `https://user.sunrich.in/order/<order-id>` — same, on web and in-app.
 - Register both in `android/app/src/main/AndroidManifest.xml`
   (`intent-filter` with scheme `sunrich`, host `order`; App Links for https),
   then open the order detail / track list after sign-in.

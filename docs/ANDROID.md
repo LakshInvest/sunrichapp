@@ -21,9 +21,9 @@ The device token is saved with `save_my_push_token` (device id, platform, app, l
 A push may carry `data.url` (for example `/track/<order id>`); tapping it opens that screen.
 
 ## Play Console checklist
-- Privacy policy URL: `https://sunrichapp.lovable.app/privacy`
-- Account deletion URL: `https://sunrichapp.lovable.app/delete-account`
-- Terms: `https://sunrichapp.lovable.app/terms`
+- Privacy policy URL: `https://user.sunrich.in/privacy`
+- Account deletion URL: `https://user.sunrich.in/delete-account`
+- Terms: `https://user.sunrich.in/terms`
 - Reviewer login: the demo shop account (UI only — do not place real orders with it).
 - Data safety: phone number, name, address, location (optional), photos (optional), order and payment history. Encrypted in transit. Deletion on request.
 

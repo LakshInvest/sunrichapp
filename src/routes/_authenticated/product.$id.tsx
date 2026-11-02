@@ -200,7 +200,7 @@ function ProductDetail() {
               aria-label={t("product.viewImage")}
               className="block w-full shrink-0 snap-center"
             >
-              <SmartImage src={url} alt={`${loc(product.name, lang)} ${i + 1}`} className="aspect-square w-full object-cover" />
+              <SmartImage src={url} width={400} eager={i === 0} alt={`${loc(product.name, lang)} ${i + 1}`} className="aspect-square w-full object-cover" />
             </button>
           ))
         ) : (

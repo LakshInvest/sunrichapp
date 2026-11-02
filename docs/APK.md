@@ -93,4 +93,11 @@ android\app\build\outputs\apk\debug\app-debug.apk
 Or with the phone plugged in (USB debugging on): click the green ▶ Run button in Android Studio.
 
 ## Plugins included
-@capacitor/app, browser, camera, geolocation, haptics, keyboard, local-notifications, network, preferences, push-notifications, share, splash-screen, status-bar (plus core, android, cli).
+@capacitor/app, browser, camera, geolocation, haptics, keyboard, local-notifications, native-settings, network, preferences, push-notifications, share, splash-screen, status-bar (plus core, android, cli).
+
+## Rebuild checklist (keyboard, app-settings, back button)
+1. `npm run build` then `npx cap sync android` — this copies the web build and the new plugin (`capacitor-native-settings`) into the Android project.
+2. Keyboard behaviour needs no code in the Android project: the app sets `resizeOnFullScreen: true` and `KeyboardResize.Body` from JavaScript (capacitor.config.ts / src/lib/native.ts). If the keyboard still hides the reply box, confirm AndroidManifest's main activity has `android:windowSoftInputMode="adjustResize"`.
+3. "Open app settings" (shown when location is permanently refused) uses `capacitor-native-settings` — nothing to configure in the Android project; the plugin opens the system App Details screen itself.
+4. Back button is handled in JavaScript (second press on Home within 2 s exits, otherwise the app goes back one screen). No Android-project change is needed.
+5. Build: Android Studio → Build → Build APK(s) → install `android\app\build\outputs\apk\debug\app-debug.apk`.

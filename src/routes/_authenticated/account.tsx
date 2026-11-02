@@ -365,7 +365,7 @@ function Account() {
               )}
             </button>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xl font-bold text-primary-foreground">{profile?.name || "…"}</p>
+              <p className="line-clamp-2 break-words text-xl font-bold leading-tight text-primary-foreground">{profile?.name || "…"}</p>
               <p className="mt-0.5 text-sm text-primary-foreground/80">{profile?.mobile || "…"}</p>
               {typeLabel && (
                 <span className="mt-1.5 inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">

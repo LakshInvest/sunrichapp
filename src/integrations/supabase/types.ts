@@ -2522,6 +2522,38 @@ export type Database = {
           },
         ]
       }
+      go_live_signoffs: {
+        Row: {
+          check_key: string
+          company_id: string
+          note: string | null
+          signed_at: string
+          signed_by: string | null
+        }
+        Insert: {
+          check_key: string
+          company_id: string
+          note?: string | null
+          signed_at?: string
+          signed_by?: string | null
+        }
+        Update: {
+          check_key?: string
+          company_id?: string
+          note?: string | null
+          signed_at?: string
+          signed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "go_live_signoffs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_lines: {
         Row: {
           cgst: number

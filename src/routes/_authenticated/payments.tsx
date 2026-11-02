@@ -10,6 +10,7 @@ import { SheetDrawer } from "@/components/SheetDrawer";
 import { ErrorState, EmptyState, SlowNotice } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
 import { formatINR } from "@/lib/catalogue";
+import { istMonth } from "@/lib/ist";
 import { fetchCreditStatus, type CreditStatus } from "@/lib/orders";
 import {
   fetchOpenBills,
@@ -43,10 +44,7 @@ export const Route = createFileRoute("/_authenticated/payments")({
   component: Payments,
 });
 
-function thisMonth() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-}
+const thisMonth = istMonth;
 function shiftMonth(month: string, by: number) {
   const [y, m] = month.split("-").map(Number) as [number, number];
   const d = new Date(y, m - 1 + by, 1);
@@ -395,7 +393,7 @@ function MineTab({ lang }: { lang: string }) {
 
 function StatementTab({ lang }: { lang: string }) {
   const { t } = useTranslation();
-  const [month, setMonth] = useState(thisMonth);
+  const [month, setMonth] = useState<string>(thisMonth);
   const fn = useMemo(() => () => fetchStatement(month), [month]);
   const { data, error, loading, load } = useLoad<StatementRow[]>(fn);
   const [y, m] = month.split("-").map(Number) as [number, number];

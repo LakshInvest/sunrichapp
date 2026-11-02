@@ -9,32 +9,29 @@ export function statusChipClass(status: string): string {
   return "bg-muted text-foreground";
 }
 
-const locale = (lang: string) => (lang === "en" ? "en-IN" : lang === "hi" ? "hi-IN" : "mr-IN");
-const pad = (v: number) => String(v).padStart(2, "0");
-const dayKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+import { istDayOf, istShiftDay, istToday, IST_TZ } from "@/lib/ist";
 
-/** Which friendly word a date gets: today / tomorrow / yesterday, or a plain date. */
+const locale = (lang: string) => (lang === "en" ? "en-IN" : lang === "hi" ? "hi-IN" : "mr-IN");
+
+/** Which friendly word a date gets: today / tomorrow / yesterday, or a plain date.
+ *  Days are compared in IST, so 1:30 AM IST counts as that IST day. */
 export function relativeDay(iso: string, now = new Date()): "today" | "tomorrow" | "yesterday" | null {
-  const d = new Date(iso.length === 10 ? `${iso}T00:00:00` : iso);
-  if (Number.isNaN(d.getTime())) return null;
-  const k = dayKey(d);
-  const shift = (n: number) => {
-    const x = new Date(now);
-    x.setDate(x.getDate() + n);
-    return dayKey(x);
-  };
-  if (k === shift(0)) return "today";
-  if (k === shift(1)) return "tomorrow";
-  if (k === shift(-1)) return "yesterday";
+  const k = istDayOf(iso, now);
+  if (!k) return null;
+  const t = istToday(now);
+  if (k === t) return "today";
+  if (k === istShiftDay(t, 1)) return "tomorrow";
+  if (k === istShiftDay(t, -1)) return "yesterday";
   return null;
 }
 
-/** Plain short date: "31 Oct", plus the year only when it is not this year. */
+/** Plain short date: "31 Oct", plus the year only when it is not this year (IST). */
 export function shortDate(iso: string, lang: string, now = new Date()): string {
   const d = new Date(iso.length === 10 ? `${iso}T00:00:00` : iso);
   if (Number.isNaN(d.getTime())) return iso;
-  const opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" };
-  if (d.getFullYear() !== now.getFullYear()) opts.year = "numeric";
+  const sameYear = istDayOf(iso, now)?.slice(0, 4) === istToday(now).slice(0, 4);
+  const opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short", timeZone: IST_TZ };
+  if (!sameYear) opts.year = "numeric";
   return d.toLocaleDateString(locale(lang), opts);
 }
 

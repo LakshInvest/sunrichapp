@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { istToday } from "@/lib/ist";
 import { useServerFn } from "@tanstack/react-start";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Banknote, CheckCircle2, FileCheck2, Landmark, Loader2, Paperclip, Smartphone, X } from "lucide-react";
@@ -49,7 +50,7 @@ const MODES: { m: Mode; icon: typeof Smartphone }[] = [
   { m: "bank", icon: Landmark },
   { m: "cheque", icon: FileCheck2 },
 ];
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => istToday();
 
 function PayPage() {
   const { t } = useTranslation();

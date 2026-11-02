@@ -7,7 +7,7 @@ export function initialsOf(name?: string | null): string {
   return letters ? letters.toUpperCase() : "S";
 }
 
-/** Avatar circle: the profile photo when present, else initials on aqua. */
+/** Avatar circle: the profile photo when present, else initials on the primary colour. */
 export function ProfileAvatar({
   src,
   name,
@@ -25,7 +25,7 @@ export function ProfileAvatar({
         src={src}
         alt={name ?? ""}
         onError={() => setFailed(true)}
-        className={cn("rounded-full object-cover", className)}
+        className={cn("aspect-square shrink-0 rounded-full bg-muted object-cover", className)}
       />
     );
   }
@@ -35,7 +35,7 @@ export function ProfileAvatar({
       role="img"
       aria-label={name ?? ""}
       className={cn(
-        "flex items-center justify-center rounded-full bg-secondary font-bold text-primary-foreground",
+        "flex aspect-square shrink-0 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground",
         className,
       )}
     >

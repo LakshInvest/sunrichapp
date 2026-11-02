@@ -1,7 +1,8 @@
 import { markFirstScreen } from "@/lib/native";
 import { AppLoader } from "@/components/AppLoader";
 import { BottleLoader } from "@/components/BottleLoader";
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate, useRouter } from "@tanstack/react-router";
+import { writeGate } from "@/lib/gate-cache";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";

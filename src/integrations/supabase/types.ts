@@ -4755,6 +4755,7 @@ export type Database = {
           company_id: string
           created_at: string
           customer_vehicle_no: string | null
+          driver_started_at: string | null
           driver_user_id: string | null
           end_odometer: number | null
           end_odometer_photo_url: string | null
@@ -4794,6 +4795,7 @@ export type Database = {
           company_id: string
           created_at?: string
           customer_vehicle_no?: string | null
+          driver_started_at?: string | null
           driver_user_id?: string | null
           end_odometer?: number | null
           end_odometer_photo_url?: string | null
@@ -4833,6 +4835,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           customer_vehicle_no?: string | null
+          driver_started_at?: string | null
           driver_user_id?: string | null
           end_odometer?: number | null
           end_odometer_photo_url?: string | null

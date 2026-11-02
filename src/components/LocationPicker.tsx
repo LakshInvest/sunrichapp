@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Crosshair, Loader2, LocateOff, MapPin } from "lucide-react";
-import { locateDevice } from "@/lib/native";
+import { isNative, locateDevice, openAppSettings } from "@/lib/native";
 import { SheetDrawer } from "./SheetDrawer";
 import { PinMap } from "./PinMap";
 import { PlaceSearch } from "./PlaceSearch";
@@ -72,6 +72,23 @@ export function LocationPicker({
     else setProblem(r.reason);
   };
 
+  // "Allow" in the permission sheet: retry the request; when the permission
+  // was permanently refused (native retries land as denied immediately), open
+  // the phone's App-settings page so the customer can enable it there.
+  const tapAllow = async () => {
+    if (locating) return;
+    setLocating(true);
+    const r = await locateDevice();
+    setLocating(false);
+    if (r.ok) {
+      setProblem(null);
+      onChange({ lat: r.lat, lng: r.lng, accuracy: r.accuracy });
+      return;
+    }
+    if (r.reason === "denied" && isNative()) await openAppSettings();
+    else setProblem(r.reason);
+  };
+
   // Pin → address: debounce while the pin moves, then reverse geocode (browser Geocoder).
   const pinAddress = useReverseAddress(value);
 
@@ -117,7 +134,7 @@ export function LocationPicker({
           </p>
           <button
             type="button"
-            onClick={() => void runLocate()}
+            onClick={() => void tapAllow()}
             className="mt-5 min-h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground transition active:scale-[0.98]"
           >
             {problem === "off" ? t("location.retry") : t("location.allow")}

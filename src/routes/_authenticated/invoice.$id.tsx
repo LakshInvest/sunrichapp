@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Download, Loader2, MessageCircle, Share2 } from "lucide-react";
 import { openExternal } from "@/lib/native";
+import { serverMessage } from "@/lib/form-errors";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import en from "@/locales/en.json";
@@ -68,7 +69,7 @@ function InvoiceScreen() {
       setInv(i);
       setFirm(f);
     } catch (e) {
-      setError((e as Error).message);
+      setError(serverMessage(e, t("errors.generic")));
     }
   }, [id, firmFn]);
 

@@ -845,7 +845,7 @@ function Login() {
                     }}
                     placeholder="98765 43210"
                     aria-invalid={!!error}
-                    className="h-14 flex-1 bg-transparent px-4 text-lg tracking-wider text-foreground outline-none"
+                    className="h-14 min-w-0 flex-1 bg-transparent px-4 text-lg tracking-wider text-foreground outline-none"
                   />
                 </div>
               </label>

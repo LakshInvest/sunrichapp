@@ -184,3 +184,12 @@ Constraint: existing DB tables/RPCs/policies/buckets only (user-managed backend)
 - [x] Account: Khata card tap, one "Help & support" row
 - [ ] Full 4-size × 3-language audit of every route (partly done at 360×800 English)
 - [ ] Live keyboard and native Android checks (needs a real phone / new app build)
+
+## context2989 — full layout audit + chat keyboard + app settings + rebuild notes
+- [x] Audit every route at 320×640 / 360×800 / 390×844 / 412×915 × en/hi/mr (324 automated checks: 0 overflow, 0 missing keys, 0 JS errors after fixes) plus manual fixes: /auth number input overflow at 320, chat reply input at 320, ProductCard "/pack" suffix, Account name truncation, invoice load error showed a raw UUID (friendly now), order detail doubled "Delivery by Sunrich · delivery Today" wording.
+- [x] Chat keyboard test at 320 and 390 (simulated keyboard): composer stays fully visible above the keyboard on both.
+- [x] Location permanently refused → the sheet's Allow retry now opens the phone's App Settings (capacitor-native-settings 8.2.0); manual-pin fallback stays.
+- [x] Android rebuild checklist (keyboard mode, settings plugin, back button) added to docs/APK.md.
+- [x] Test data: order MFO/26-27/00070 placed through the UI and cancelled immediately; cleanup SQL saved as /mnt/documents/audit_cleanup_20261102.sql (NOT run, per instruction). Only one QA query thread exists (2855e4bf "Audit QA en") — Hindi/Marathi runs reused it.
+- [x] Map picker: graceful pin/coordinate fallback in the sandbox (Google key does not authorize localhost); interactive map verified earlier on the published domain.
+- [ ] Staff reply from Command Center — BLOCKED: CC app is not in this workspace; need its URL.

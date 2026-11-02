@@ -440,7 +440,7 @@ function OrderDetail() {
             {t("success.deliveredBy", {
               who: order.fulfillerCustomerId ? t("success.byDistributor") : t("success.bySunrich"),
             })}
-            {order.deliveryDate ? ` · ${t("checkout.deliversOn", { date: dateLabel(order.deliveryDate, lang) })}` : ""}
+            {order.deliveryDate ? ` · ${dateLabel(order.deliveryDate, lang)}` : ""}
             <SlotText value={order.deliverySlot} />
           </p>
           <div className="mt-3">

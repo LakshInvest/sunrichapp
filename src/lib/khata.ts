@@ -221,6 +221,8 @@ export async function uploadPaymentFile(file: Blob, name: string, mime: string):
 /* ---------- Date ranges (IST) ---------- */
 import { istShiftDay, istToday } from "@/lib/ist";
 
+export type KhataRange = "thisMonth" | "lastMonth" | "last3" | "custom";
+
 /** This month / last month / last 3 months (incl. this one), ending today at most — in IST. */
 export function khataRange(key: Exclude<KhataRange, "custom">, now = new Date()): { from: string; to: string } {
   const today = istToday(now);

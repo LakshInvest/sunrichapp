@@ -30,6 +30,21 @@ export function openExternal(url: string): void {
  * Back closes an open sheet/dialog first (they own a history entry), then
  * goes back one screen; on Home a second press within 2 s exits.
  */
+let splashHide: (() => void) | null = null;
+let firstScreenShown = false;
+let splashDone = false;
+function hideSplashNow() {
+  if (splashDone || !splashHide) return;
+  splashDone = true;
+  splashHide();
+}
+/** Call once Login, PIN or Home has painted; hides the native splash. */
+export function markFirstScreen() {
+  firstScreenShown = true;
+  if (typeof window === "undefined") return;
+  requestAnimationFrame(() => hideSplashNow());
+}
+
 export async function initNative(opts: {
   isHome: () => boolean;
   onExitHint: () => void;
@@ -42,7 +57,11 @@ export async function initNative(opts: {
     import("@capacitor/app"),
     import("@capacitor/splash-screen"),
   ]);
-  void SplashScreen.hide().catch(() => undefined);
+  // The native navy splash stays up until the first real screen renders
+  // (markFirstScreen); never longer than 8 s.
+  splashHide = () => void SplashScreen.hide({ fadeOutDuration: 200 }).catch(() => undefined);
+  if (firstScreenShown) splashHide();
+  else setTimeout(() => hideSplashNow(), 8000);
   // Keyboard resizes the page body so bottom bars sit above it.
   void import("@capacitor/keyboard")
     .then(({ Keyboard, KeyboardResize }) => Keyboard.setResizeMode({ mode: KeyboardResize.Body }))

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyRegistration } from "@/lib/registration.functions";
 import { isRateLockedStatus, setRateLocked } from "@/lib/rate-lock";
+import { readGate, writeGate } from "@/lib/gate-cache";
 
 /**
  * Auth gate: every route under this pathless layout requires a signed-in
@@ -14,11 +15,30 @@ import { isRateLockedStatus, setRateLocked } from "@/lib/rate-lock";
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async ({ location }) => {
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) {
-      throw redirect({ to: "/auth" });
+    // Page changes reuse the last check (local session + cached registration);
+    // a cold open, or a check older than 5 min, goes to the network.
+    const { data: local } = await supabase.auth.getSession();
+    const localId = local.session?.user.id;
+    const cached = localId ? readGate(localId) : null;
+    let reg;
+    if (cached && localId) {
+      reg = cached.reg;
+      if (cached.stale) {
+        void getMyRegistration()
+          .then((r) => {
+            writeGate(localId, r);
+            setRateLocked(isRateLockedStatus(r.status));
+          })
+          .catch(() => undefined);
+      }
+    } else {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) {
+        throw redirect({ to: "/auth" });
+      }
+      reg = await getMyRegistration();
+      writeGate(data.user.id, reg);
     }
-    const reg = await getMyRegistration();
     setRateLocked(isRateLockedStatus(reg.status));
     const here = location.pathname;
     if (reg.status === "blocked") {

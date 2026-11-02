@@ -47,6 +47,7 @@ import { useAppSettings } from "@/lib/app-settings";
 import { toast } from "sonner";
 import { Repeat2 } from "lucide-react";
 import { getDocumentRequirements, getMyRegistration, type RegistrationDto } from "@/lib/registration.functions";
+import { writeGate } from "@/lib/gate-cache";
 import { hasMissingDocs, isRateLockedStatus, setRateLocked } from "@/lib/rate-lock";
 import { Link } from "@tanstack/react-router";
 import {
@@ -149,6 +150,7 @@ function Home() {
     const r = await myReg();
     setReg(r);
     setRateLocked(isRateLockedStatus(r.status));
+    void supabase.auth.getSession().then(({ data }) => data.session && writeGate(data.session.user.id, r));
     if (isRateLockedStatus(r.status) && r.customerId) {
       const d = await myDocs().catch(() => null);
       setDocsMissing(d ? hasMissingDocs(d.requirements, d.uploaded) : false);

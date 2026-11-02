@@ -17,8 +17,15 @@ export function KhataPayShortcut() {
     const off = onHomeExtras((x) => pick(x.khata));
     const x = getHomeExtras();
     if (x) pick(x.khata);
-    else fetchKhataSummary().then((s) => setOverdue(s.overdue), () => setOverdue(0));
-    return () => void off();
+    const id = x
+      ? undefined
+      : setTimeout(() => {
+          if (!getHomeExtras()) fetchKhataSummary().then((s) => setOverdue(s.overdue), () => setOverdue(0));
+        }, 2500);
+    return () => {
+      if (id) clearTimeout(id);
+      off();
+    };
   }, []);
   if (!(overdue > 0)) return null;
   return (

@@ -144,8 +144,13 @@ function Home() {
     };
     const x = getHomeExtras();
     if (x) useDefault(x);
-    else void loadAddresses();
-    return onHomeExtras(useDefault);
+    // Home served from cache (no get_home call): load the list directly.
+    const id = x ? undefined : setTimeout(() => !getHomeExtras() && void loadAddresses(), 2500);
+    const off = onHomeExtras(useDefault);
+    return () => {
+      if (id) clearTimeout(id);
+      off();
+    };
   }, [loadAddresses, selectedId, addrFull]);
   useEffect(() => {
     if (addressOpen && !addrFull) void loadAddresses();

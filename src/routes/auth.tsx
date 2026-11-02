@@ -369,7 +369,7 @@ function Login() {
     const id = setTimeout(() => {
       for (const path of ["/_authenticated", "/_authenticated/home"] as const) {
         const r = router.routesById[path];
-        if (r) void router.loadRouteChunk(r).catch(() => undefined);
+        if (r) void router.loadRouteChunk(r)?.catch(() => undefined);
       }
     }, 300);
     return () => clearTimeout(id);

@@ -13,7 +13,6 @@ export function PriceLine({ product, size = "card" }: { product: CatalogProduct;
     <span className="flex min-w-0 items-baseline gap-1.5 whitespace-nowrap">
       <span className={`font-bold text-primary ${size === "detail" ? "text-2xl" : "text-[17px] leading-none"}`}>
         {formatINR(product.price)}
-        {size === "card" && <span className="text-[10px] font-medium text-muted-foreground">{t("catalog.perPack")}</span>}
       </span>
       {size === "detail" && product.mrp !== null && product.mrp > product.price && (
         <span className="truncate text-sm text-muted-foreground line-through">{formatINR(product.mrp)}</span>

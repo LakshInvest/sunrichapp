@@ -1,11 +1,28 @@
 import { useTranslation } from "react-i18next";
-import { Heart, Minus, Plus } from "lucide-react";
+import { Heart, Lock, Minus, Plus } from "lucide-react";
+import { useRateLocked } from "@/lib/rate-lock";
 import { SmartImage } from "@/components/SmartImage";
 import { formatINR, loc, priceSave, type CatalogProduct } from "@/lib/catalogue";
 
 /** Price + struck MRP on one line. Shared by cards, the detail screen and the cart. */
 export function PriceLine({ product, size = "card" }: { product: CatalogProduct; size?: "card" | "detail" }) {
   const { t } = useTranslation();
+  const locked = useRateLocked();
+  if (locked) {
+    return (
+      <span className="flex min-w-0 flex-col leading-tight">
+        {product.mrp !== null && (
+          <span className={`text-muted-foreground ${size === "detail" ? "text-sm" : "text-[11px]"}`}>
+            {t("catalog.mrp", { amount: formatINR(product.mrp) })}
+          </span>
+        )}
+        <span className={`flex items-center gap-1 font-semibold text-foreground ${size === "detail" ? "text-base" : "text-xs"}`}>
+          <Lock className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
+          {t("catalog.rateAfterApproval")}
+        </span>
+      </span>
+    );
+  }
   if (product.price === null) {
     return <span className="text-sm font-semibold text-foreground">{t("catalog.priceOnRequest")}</span>;
   }
@@ -24,9 +41,10 @@ export function PriceLine({ product, size = "card" }: { product: CatalogProduct;
 /** Save + deposit lines under the price row. */
 export function PriceExtras({ product, size = "card" }: { product: CatalogProduct; size?: "card" | "detail" }) {
   const { t } = useTranslation();
+  const locked = useRateLocked();
   const save = priceSave(product);
   const deposit = product.isReturnable && product.depositAmount != null && product.depositAmount > 0;
-  if (save === null && !deposit) return null;
+  if (locked || (save === null && !deposit)) return null;
   const small = size === "detail" ? "text-sm" : "text-[11px]";
   return (
     <div className="mt-1 space-y-0.5 leading-tight">
@@ -87,6 +105,7 @@ export function ProductCard({
   onPriceRequest?: () => void;
 }) {
   const { t } = useTranslation();
+  const locked = useRateLocked();
   const blocked = !canOrder;
   const disabled = blocked || offline;
   const name = loc(product.name, lang);
@@ -120,7 +139,7 @@ export function ProductCard({
       <div className="mt-auto px-0.5 pt-2">
         <div className="flex items-center justify-between gap-1">
           <PriceLine product={product} />
-          {product.price === null ? (
+          {locked ? null : product.price === null ? (
             onPriceRequest ? (
               <button
                 type="button"

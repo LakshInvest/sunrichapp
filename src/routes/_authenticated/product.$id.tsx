@@ -10,6 +10,7 @@ import { ImageViewer } from "@/components/ImageViewer";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ErrorState, EmptyState, GridSkeleton } from "@/components/catalog/states";
 import { PriceBlock } from "@/components/catalog/ProductCard";
+import { useRateLocked } from "@/lib/rate-lock";
 import { openPriceRequestChat } from "@/lib/price-request";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
@@ -48,6 +49,7 @@ function ProductDetail() {
   const offline = useOffline();
   const fav = useFavourites();
   const deva = lang === "en" ? "" : "font-deva";
+  const rateLocked = useRateLocked();
 
   const [data, setData] = useState<CatalogData | null>(() => readCatalogueCache());
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -238,7 +240,7 @@ function ProductDetail() {
         )}
 
         {/* Quantity (priced products only) */}
-        {product.price !== null && (
+        {product.price !== null && !rateLocked && (
         <div className="mt-5 flex items-center justify-between rounded-2xl border border-border bg-card p-4">
           <span className="text-sm font-semibold text-foreground">{t("product.quantity")}</span>
           <div className="flex items-center gap-3">
@@ -264,7 +266,7 @@ function ProductDetail() {
           </div>
         </div>
         )}
-        {(product.minOrderQty > 1 || product.maxOrderQty != null) && product.price !== null && (
+        {(product.minOrderQty > 1 || product.maxOrderQty != null) && product.price !== null && !rateLocked && (
           <p className="mt-2 text-center text-xs text-muted-foreground">
             {t("product.qtyLimits", {
               min: product.minOrderQty,

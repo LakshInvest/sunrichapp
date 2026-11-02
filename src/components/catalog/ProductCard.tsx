@@ -91,6 +91,7 @@ export function ProductCard({
   onDec,
   onToggleFavourite,
   onPriceRequest,
+  onPrefetch,
 }: {
   product: CatalogProduct;
   qty: number;
@@ -103,6 +104,7 @@ export function ProductCard({
   onDec: () => void;
   onToggleFavourite: () => void;
   onPriceRequest?: () => void;
+  onPrefetch?: () => void;
 }) {
   const { t } = useTranslation();
   const locked = useRateLocked();
@@ -111,7 +113,7 @@ export function ProductCard({
   const name = loc(product.name, lang);
   return (
     <div className="relative flex h-full flex-col rounded-2xl border border-border bg-card p-2 shadow-sm">
-      <button type="button" onClick={onOpen} aria-label={name} className="block aspect-square w-full overflow-hidden rounded-xl bg-secondary/10">
+      <button type="button" onClick={onOpen} onPointerDown={onPrefetch} aria-label={name} className="block aspect-square w-full overflow-hidden rounded-xl bg-secondary/10">
         <SmartImage width={180}
           src={product.imageUrl ?? product.images[0] ?? null}
           alt={name}

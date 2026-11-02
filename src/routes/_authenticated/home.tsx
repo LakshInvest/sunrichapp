@@ -48,6 +48,8 @@ import { toast } from "sonner";
 import { Repeat2 } from "lucide-react";
 import { getDocumentRequirements, getMyRegistration, type RegistrationDto } from "@/lib/registration.functions";
 import { writeGate } from "@/lib/gate-cache";
+import { swr } from "@/lib/swr-cache";
+import { useRouter } from "@tanstack/react-router";
 import { hasMissingDocs, isRateLockedStatus, setRateLocked } from "@/lib/rate-lock";
 import { Link } from "@tanstack/react-router";
 import {
@@ -86,6 +88,17 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 
 function Home() {
   useEffect(() => markFirstScreen(), []);
+  const routerForPreload = useRouter();
+  // After Home shows, load the other main tabs' code (and orders data) in the background.
+  useEffect(() => {
+    const id = setTimeout(() => {
+      for (const to of ["/order", "/track", "/account", "/khata", "/cart"] as const) {
+        void routerForPreload.preloadRoute({ to }).catch(() => undefined);
+      }
+      void swr("orders", fetchMyOrders).catch(() => undefined);
+    }, 1200);
+    return () => clearTimeout(id);
+  }, [routerForPreload]);
   const { t } = useTranslation();
   const { lang } = useLang();
   const navigate = useNavigate();

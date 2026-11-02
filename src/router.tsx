@@ -12,7 +12,9 @@ export const getRouter = () => {
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
     defaultPendingComponent: AppLoader,
-    defaultPendingMs: 150,
+    defaultPendingMs: 600,
+    // Links load the next screen's code on hover / touch-down.
+    defaultPreload: "intent",
   });
 
   return router;

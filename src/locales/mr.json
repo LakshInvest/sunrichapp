@@ -137,7 +137,9 @@
     "emptyBody": "Sunrich कॅटलॉग तयार होत आहे. कृपया थोड्या वेळाने पहा.",
     "askUs": "सनरिच टीमला विचारा",
     "sortArranged": "सनरिच क्रम",
-    "perPack": "/पॅक"
+    "perPack": "/पॅक",
+    "rateAfterApproval": "मंजुरीनंतर दर दिसेल",
+    "mrp": "MRP {{amount}}"
   },
   "product": {
     "quantity": "प्रमाण",
@@ -359,7 +361,11 @@
     "cancelled": "रद्द"
   },
   "banner": {
-    "underReview": "तुमचे खाते तपासणीत आहे. Sunrich च्या मंजुरीनंतर तुम्ही ऑर्डर देऊ शकाल."
+    "underReview": "तुमचे खाते तपासणीत आहे. Sunrich च्या मंजुरीनंतर तुम्ही ऑर्डर देऊ शकाल.",
+    "verifying": "तुमच्या खात्याची पडताळणी सुरू आहे. Sunrich टीम लवकरच मंजुरी देईल.",
+    "uploadDocs": "कागदपत्रे अपलोड करा",
+    "call": "Sunrich ला कॉल करा",
+    "whatsapp": "Sunrich ला WhatsApp करा"
   },
   "hold": {
     "title": "तुमचे खाते स्थगित केले आहे",

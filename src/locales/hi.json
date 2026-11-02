@@ -137,7 +137,9 @@
     "emptyBody": "Sunrich कैटलॉग तैयार हो रहा है। कृपया थोड़ी देर बाद देखें।",
     "askUs": "सनरिच टीम से पूछें",
     "sortArranged": "सनरिच क्रम",
-    "perPack": "/पैक"
+    "perPack": "/पैक",
+    "rateAfterApproval": "मंज़ूरी के बाद रेट दिखेगा",
+    "mrp": "MRP {{amount}}"
   },
   "product": {
     "quantity": "मात्रा",
@@ -359,7 +361,11 @@
     "cancelled": "रद्द"
   },
   "banner": {
-    "underReview": "आपका खाता समीक्षा में है। Sunrich की स्वीकृति के बाद आप ऑर्डर कर सकेंगे।"
+    "underReview": "आपका खाता समीक्षा में है। Sunrich की स्वीकृति के बाद आप ऑर्डर कर सकेंगे।",
+    "verifying": "आपके खाते की जाँच हो रही है। Sunrich टीम जल्द ही इसे मंज़ूर करेगी।",
+    "uploadDocs": "दस्तावेज़ अपलोड करें",
+    "call": "Sunrich को कॉल करें",
+    "whatsapp": "Sunrich को WhatsApp करें"
   },
   "hold": {
     "title": "आपका खाता रोक दिया गया है",

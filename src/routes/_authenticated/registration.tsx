@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { clearGate } from "@/lib/gate-cache";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -125,6 +126,7 @@ function Wizard() {
 
   const refresh = async (): Promise<RegistrationDto> => {
     const fresh = await reload();
+    clearGate(); // the gate must see the new status on the next page change
     setReg(fresh);
     return fresh;
   };

@@ -19,6 +19,7 @@ import i18n from "../lib/i18n";
 import { exitApp, initNative, markFirstScreen } from "@/lib/native";
 import { installViewportVars } from "@/lib/keyboard";
 import { registerServiceWorker } from "@/lib/sw-register";
+import { clearGate } from "@/lib/gate-cache";
 import { AppGate } from "@/components/AppGate";
 import { refreshPushToken } from "@/lib/push";
 
@@ -63,7 +64,8 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
-              router.invalidate();
+              clearGate();
+      router.invalidate();
               reset();
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"

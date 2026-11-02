@@ -170,8 +170,18 @@ export function arrangeCatalogue<T extends { categories: CatalogCategory[]; prod
 /** Extra Home values returned by get_home() (Khata, default address, chats awaiting the customer). */
 export type HomeExtras = { khata: Record<string, unknown> | null; defaultAddress: Record<string, unknown> | null; awaitingReply: number };
 let homeExtras: HomeExtras | null = null;
+const extrasListeners = new Set<(x: HomeExtras) => void>();
 function setHomeExtras(x: HomeExtras) {
   homeExtras = x;
+  extrasListeners.forEach((fn) => fn(x));
+}
+/** Calls fn with the current extras (if any) and every later get_home() result. */
+export function onHomeExtras(fn: (x: HomeExtras) => void): () => void {
+  extrasListeners.add(fn);
+  if (homeExtras) fn(homeExtras);
+  return () => {
+    extrasListeners.delete(fn);
+  };
 }
 /** Last get_home() extras, or null before the first load. */
 export function getHomeExtras(): HomeExtras | null {

@@ -68,7 +68,7 @@ function InvoiceScreen() {
       setInv(i);
       setFirm(f);
     } catch (e) {
-      setError((e as Error).message);
+      setError(serverMessage(e, t("errors.generic")));
     }
   }, [id, firmFn]);
 

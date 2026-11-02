@@ -8,6 +8,7 @@
 - `billing.ts` reads invoices/receipts and `customer_open_bills`/`customer_statement` RPCs. Why: RLS scopes them to the customer.
 - `orders.ts`: own-order filter relies on `customer_id` in ORDER_SELECT; keep it in sync with `fetchMyOrders()`. Shared order/status label helpers live in `order-format.ts`. Why: RLS also returns distributor-routed rows.
 - `app-settings.ts` is the only reader of Command Center `app_settings`; screens use `useAppSettings()` and its pure rule helpers. Why: one cache, testable rules.
+- `ist.ts` is the only source of "today", day starts/ends and month ranges: all day boundaries and date displays are Asia/Kolkata (`istToday`, `istDayStart/End`, `IST_TZ`), and date-only strings count as their own day. Why: a payment at 1:30 AM IST must belong to that IST day, not the previous UTC day.
 - `native.ts` wraps Capacitor and must stay a no-op on the web; plugins are imported dynamically. Why: the web app must not depend on native APIs.
 - `quoteMyOrder` re-reads `credit_status` per firm in the quote (firm-specific limit beats the customer limit, as in `_create_orders`). Why: the firm-less quote figure disagreed with what the server holds.
 - Demo behaviour (`useIsDemo`) comes only from `customers.is_demo`, never `user_profiles.is_demo`. Why: QA accounts use fixed-PIN login but must behave like real shops.

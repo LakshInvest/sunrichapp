@@ -373,7 +373,7 @@ function Thread() {
                 onChange={(e) => setText(e.target.value)}
                 placeholder={t("queries.replyPlaceholder")}
                 aria-label={t("queries.replyPlaceholder")}
-                className="min-h-11 flex-1 rounded-2xl border border-border bg-background px-4 text-[15px] text-foreground outline-none placeholder:text-muted-foreground"
+                className="min-h-11 min-w-0 flex-1 rounded-2xl border border-border bg-background px-4 text-[15px] text-foreground outline-none placeholder:text-muted-foreground"
               />
               <button
                 type="button"

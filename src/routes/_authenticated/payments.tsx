@@ -392,7 +392,7 @@ function MineTab({ lang }: { lang: string }) {
 
 function StatementTab({ lang }: { lang: string }) {
   const { t } = useTranslation();
-  const [month, setMonth] = useState(thisMonth);
+  const [month, setMonth] = useState<string>(thisMonth);
   const fn = useMemo(() => () => fetchStatement(month), [month]);
   const { data, error, loading, load } = useLoad<StatementRow[]>(fn);
   const [y, m] = month.split("-").map(Number) as [number, number];

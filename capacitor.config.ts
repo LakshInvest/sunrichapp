@@ -47,8 +47,10 @@ const config: CapacitorConfig = {
       smallIcon: "ic_stat_sunrich",
       iconColor: "#2EA3C7",
     },
+    // Only Android's windowSoftInputMode="adjustResize" resizes the window;
+    // the plugin must not resize the body as well (double resize = blank page).
     Keyboard: {
-      resize: "body",
+      resize: "none",
       resizeOnFullScreen: true,
     },
   },

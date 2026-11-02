@@ -62,9 +62,9 @@ export async function initNative(opts: {
   splashHide = () => void SplashScreen.hide({ fadeOutDuration: 200 }).catch(() => undefined);
   if (firstScreenShown) splashHide();
   else setTimeout(() => hideSplashNow(), 8000);
-  // Keyboard resizes the page body so bottom bars sit above it.
+  // Android adjustResize is the only keyboard resize; keep the plugin off.
   void import("@capacitor/keyboard")
-    .then(({ Keyboard, KeyboardResize }) => Keyboard.setResizeMode({ mode: KeyboardResize.Body }))
+    .then(({ Keyboard, KeyboardResize }) => Keyboard.setResizeMode({ mode: KeyboardResize.None }))
     .catch(() => undefined);
 
   // sunrich://order/<id> and https://…/order/<id> open that order.

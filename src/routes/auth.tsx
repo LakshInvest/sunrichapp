@@ -1,7 +1,8 @@
 import { markFirstScreen } from "@/lib/native";
 import { AppLoader } from "@/components/AppLoader";
 import { BottleLoader } from "@/components/BottleLoader";
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate, useRouter } from "@tanstack/react-router";
+import { writeGate } from "@/lib/gate-cache";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -362,6 +363,17 @@ function Login() {
   const pinCheck = useServerFn(pinLogin);
   const deviceStatus = useServerFn(getMyDevice);
   const myCustomer = useServerFn(getMyRegistration);
+  const router = useRouter();
+  // Download the Home screen's code while the customer types, not after login.
+  useEffect(() => {
+    const id = setTimeout(() => {
+      for (const path of ["/_authenticated", "/_authenticated/home"] as const) {
+        const r = router.routesById[path];
+        if (r) void router.loadRouteChunk(r)?.catch(() => undefined);
+      }
+    }, 300);
+    return () => clearTimeout(id);
+  }, [router]);
   const nameLookup = useServerFn(welcomeName);
   const offline = useOffline();
 
@@ -464,7 +476,10 @@ function Login() {
   /** Home when registration is done, registration placeholder when it isn't. */
   const routeAfterLogin = async () => {
     sessionStorage.removeItem(AUTH_FLOW_KEY);
-    const reg = await myCustomer();
+    const [reg, { data: sess }] = await Promise.all([myCustomer(), supabase.auth.getSession()]);
+    // Seed the auth gate so Home doesn't repeat the same checks.
+    const uid = sess.session?.user.id;
+    if (uid) writeGate(uid, reg);
     if (!reg.customerId || reg.status === "draft" || reg.status === "rejected") {
       await navigate({ to: "/registration" });
       return;
@@ -639,18 +654,30 @@ function Login() {
         setError(t("auth.errors.generic"));
         return;
       }
-      const { error: rlErr } = await supabase.rpc("record_login", {
-        p_user_agent: navigator.userAgent.slice(0, 500),
-        p_login_method: "pin",
-      });
+      // Record the session and fetch registration side by side.
+      sessionStorage.removeItem(AUTH_FLOW_KEY);
+      const [{ error: rlErr }, reg, { data: sess }] = await Promise.all([
+        supabase.rpc("record_login", {
+          p_user_agent: navigator.userAgent.slice(0, 500),
+          p_login_method: "pin",
+        }),
+        myCustomer(),
+        supabase.auth.getSession(),
+      ]);
       if (rlErr) {
         setError(rlErr.message);
         return;
       }
       setLastMobile(m);
       setPinOk(true);
-      await new Promise((res) => setTimeout(res, 450));
-      await routeAfterLogin();
+      const uid = sess.session?.user.id;
+      if (uid) writeGate(uid, reg);
+      await new Promise((res) => setTimeout(res, 150));
+      if (!reg.customerId || reg.status === "draft" || reg.status === "rejected") {
+        await navigate({ to: "/registration" });
+        return;
+      }
+      await navigate({ to: reg.status === "blocked" ? "/hold" : "/home" });
     } catch {
       setError(t("auth.errors.generic"));
     } finally {

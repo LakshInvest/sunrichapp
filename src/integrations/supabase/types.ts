@@ -5695,6 +5695,10 @@ export type Database = {
         Args: { p_allocations?: Json; p_receipt_id: string }
         Returns: number
       }
+      answer_ask_office: {
+        Args: { p_alert_id: string; p_approve: boolean; p_note?: string }
+        Returns: undefined
+      }
       approve_customer: { Args: { p_customer_id: string }; Returns: undefined }
       approve_order: {
         Args: { p_note?: string; p_order_id: string }

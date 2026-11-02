@@ -178,19 +178,17 @@ function Cart() {
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
         <h1 className="min-w-0 flex-1 truncate text-lg font-bold text-foreground">{t("cart.title")}</h1>
+        {rows.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setConfirmClear(true)}
+            className="min-h-11 shrink-0 px-3 text-sm font-semibold text-destructive"
+          >
+            {t("cart.clearCart")}
+          </button>
+        )}
       </header>
-      <div className="px-5 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-4">
-        <div className="flex items-center justify-end">
-          {rows.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setConfirmClear(true)}
-              className="min-h-9 text-sm font-semibold text-destructive"
-            >
-              {t("cart.clearCart")}
-            </button>
-          )}
-        </div>
+      <div className="px-5 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-1">
 
         {loading ? (
           <div className="mt-6">

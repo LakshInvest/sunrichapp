@@ -1,3 +1,4 @@
+import { ownCustomerFilter } from "@/lib/my-customer";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
@@ -35,10 +36,14 @@ export function BottomNav() {
   const [replied, setReplied] = useState(false);
   useEffect(() => {
     let active = true;
-    void supabase
-      .from("customer_queries")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "open")
+    void ownCustomerFilter()
+      .then((cid) =>
+        supabase
+          .from("customer_queries")
+          .select("id", { count: "exact", head: true })
+          .eq("customer_id", cid)
+          .eq("status", "open"),
+      )
       .then(({ count }) => active && setReplied((count ?? 0) > 0));
     return () => {
       active = false;

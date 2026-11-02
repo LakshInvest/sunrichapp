@@ -56,10 +56,11 @@ export async function fetchNotices(): Promise<Notice[]> {
       .order("created_at", { ascending: false })
       .limit(60),
     supabase.from("invoices").select("id, invoice_no, invoice_date, created_at").eq("customer_id", cid).order("created_at", { ascending: false }).limit(30),
-    supabase.from("customer_queries").select("id, subject, status, updated_at").eq("status", "open").limit(30),
+    supabase.from("customer_queries").select("id, subject, status, updated_at").eq("customer_id", cid).eq("status", "open").limit(30),
     supabase
       .from("payment_proofs")
       .select("id, amount, reference, status, reject_reason, balance_after, reviewed_at")
+      .eq("customer_id", cid)
       .in("status", ["verified", "rejected"])
       .not("reviewed_at", "is", null)
       .order("reviewed_at", { ascending: false })

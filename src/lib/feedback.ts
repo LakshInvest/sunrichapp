@@ -1,3 +1,4 @@
+import { ownCustomerFilter } from "@/lib/my-customer";
 import { supabase } from "@/integrations/supabase/client";
 import type { CatalogProduct } from "@/lib/catalogue";
 
@@ -12,6 +13,7 @@ export async function fetchMyFeedback(orderIds: string[]): Promise<Record<string
   const { data, error } = await supabase
     .from("order_feedback")
     .select("order_id, rating, tags, comment")
+    .eq("customer_id", await ownCustomerFilter())
     .in("order_id", orderIds);
   if (error) throw new Error(error.message);
   const out: Record<string, OrderFeedback> = {};

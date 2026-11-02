@@ -218,19 +218,17 @@ export async function uploadPaymentFile(file: Blob, name: string, mime: string):
   return path;
 }
 
-/* ---------- Date ranges ---------- */
+/* ---------- Date ranges (IST) ---------- */
+import { istShiftDay, istToday } from "@/lib/ist";
 
-export type KhataRange = "thisMonth" | "lastMonth" | "last3" | "custom";
-const isoDay = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-
-/** This month / last month / last 3 months (incl. this one), ending today at most. */
+/** This month / last month / last 3 months (incl. this one), ending today at most — in IST. */
 export function khataRange(key: Exclude<KhataRange, "custom">, now = new Date()): { from: string; to: string } {
-  const y = now.getFullYear();
-  const m = now.getMonth();
-  if (key === "thisMonth") return { from: isoDay(new Date(y, m, 1)), to: isoDay(now) };
-  if (key === "lastMonth") return { from: isoDay(new Date(y, m - 1, 1)), to: isoDay(new Date(y, m, 0)) };
-  return { from: isoDay(new Date(y, m - 2, 1)), to: isoDay(now) };
+  const today = istToday(now);
+  const thisStart = `${today.slice(0, 7)}-01`;
+  const prevStart = istShiftDay(thisStart, -1).slice(0, 7) + "-01";
+  if (key === "thisMonth") return { from: thisStart, to: today };
+  if (key === "lastMonth") return { from: prevStart, to: istShiftDay(thisStart, -1) };
+  return { from: istShiftDay(prevStart, -1).slice(0, 7) + "-01", to: today };
 }
 
 /* ---------- Statement PDF ---------- */

@@ -8,6 +8,7 @@ import { prepareUpload } from "@/lib/image-compress";
 import { scrollToFirstError, serverMessage } from "@/lib/form-errors";
 import { getMyCustomerId } from "@/lib/orders";
 import { submitPaymentProof, validUtr } from "@/lib/payments";
+import { istToday } from "@/lib/ist";
 
 /** The order (or balance) a proof sheet is filled in for. */
 export type ProofTarget = {
@@ -17,7 +18,7 @@ export type ProofTarget = {
   method: "upi" | "bank";
 };
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => istToday();
 
 /** "I've paid": UTR (12 digits) and/or a payment screenshot → submit_payment_proof. */
 export function PaymentProofSheet({

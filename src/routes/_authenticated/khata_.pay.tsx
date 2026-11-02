@@ -49,7 +49,7 @@ const MODES: { m: Mode; icon: typeof Smartphone }[] = [
   { m: "bank", icon: Landmark },
   { m: "cheque", icon: FileCheck2 },
 ];
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => istToday();
 
 function PayPage() {
   const { t } = useTranslation();

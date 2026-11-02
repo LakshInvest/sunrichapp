@@ -50,7 +50,7 @@ export const Route = createFileRoute("/_authenticated/khata")({
 type Filter = "all" | "bills" | "payments";
 const FILTERS: Filter[] = ["all", "bills", "payments"];
 const RANGES: KhataRange[] = ["thisMonth", "lastMonth", "last3", "custom"];
-const todayIso = () => new Date().toISOString().slice(0, 10);
+const todayIso = () => istToday();
 
 function KhataPage() {
   const { t } = useTranslation();

@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_authenticated/invoice/$id")({
 });
 
 const fmtDate = (iso: string | null) =>
-  iso ? new Date(iso.length === 10 ? `${iso}T00:00:00` : iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+  iso ? new Date(iso.length === 10 ? `${iso}T00:00:00` : iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: IST_TZ }) : "—";
 
 function shareText(inv: Invoice, firm: InvoiceFirm | null): string {
   const lines = [

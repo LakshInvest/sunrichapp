@@ -111,3 +111,40 @@ The shell now loads `https://user.sunrich.in`; `allowNavigation` covers `user.su
 5. Raise `versionCode` (and `versionName`) in `android/app/build.gradle`.
 6. Android Studio → Build → Build APK(s); uninstall the old app on the phone, then install the new `app-debug.apk`.
 7. Check: the app opens inside itself (no browser), login works, and an `https://user.sunrich.in/order/<id>` link opens the order in the app.
+
+## Branded launch (navy splash, no white screen)
+The repo has `assets/icon-only.png` (app icon), `assets/splash.png` and `assets/splash-dark.png` (2732×2732, navy #0B2545, logo + "शुद्ध पियो शुद्ध जियो").
+
+1. `git pull` then `npm install` (adds `@capacitor/assets`).
+2. Generate the Android icons and splash images (run in the project folder):
+   ```
+   npx @capacitor/assets generate --android --iconBackgroundColor "#0B2545" --iconBackgroundColorDark "#0B2545" --splashBackgroundColor "#0B2545" --splashBackgroundColorDark "#0B2545"
+   ```
+3. Android 12+ system splash — create `android/app/src/main/res/values-v31/styles.xml`:
+   ```xml
+   <?xml version="1.0" encoding="utf-8"?>
+   <resources>
+       <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+           <item name="windowSplashScreenBackground">#0B2545</item>
+           <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+           <item name="windowSplashScreenIconBackgroundColor">#0B2545</item>
+           <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
+           <item name="android:windowBackground">#0B2545</item>
+       </style>
+   </resources>
+   ```
+4. In `android/app/src/main/res/values/styles.xml`, inside **both** `<style name="AppTheme.NoActionBar" …>` and `<style name="AppTheme.NoActionBarLaunch" …>` add:
+   ```xml
+   <item name="android:windowBackground">#0B2545</item>
+   ```
+   (In `AppTheme.NoActionBarLaunch` keep the existing `android:background` line pointing at `@drawable/splash`.)
+5. Add `android/app/src/main/res/values/colors.xml` (or add the line if the file exists):
+   ```xml
+   <resources>
+       <color name="colorPrimary">#0B2545</color>
+       <color name="colorPrimaryDark">#0B2545</color>
+   </resources>
+   ```
+6. `npx cap sync android` — copies the new splash settings and the local "No internet — Retry" page (`public/offline.html`).
+7. Raise `versionCode`/`versionName` in `android/app/build.gradle`, then Android Studio → Build → Build APK(s). Uninstall the old app, install the new one.
+8. Check: tap the icon → navy screen with the logo only → Login/PIN/Home. Airplane mode → navy "No internet — Retry".

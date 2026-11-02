@@ -60,6 +60,7 @@ import {
   loadRecentSearches,
   loc,
   matchesSearch,
+  onHomeExtras,
   readCatalogueCache,
   saveCartPrice,
   type CatalogData,

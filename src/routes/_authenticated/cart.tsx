@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { CircleAlert, Droplets, Minus, Plus } from "lucide-react";
+import { ArrowLeft, CircleAlert, Droplets, Minus, Plus } from "lucide-react";
 import en from "@/locales/en.json";
 import { SwipeToRemove } from "@/components/SwipeToRemove";
 import { SmartImage } from "@/components/SmartImage";

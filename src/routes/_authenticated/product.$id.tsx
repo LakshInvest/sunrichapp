@@ -301,7 +301,7 @@ function ProductDetail() {
                       {loc(s.name, lang)}
                     </p>
                     <p className="text-sm font-bold text-primary">
-                      {s.price === null ? t("catalog.priceOnRequest") : formatINR(s.price)}
+                      {rateLocked ? `🔒 ${t("catalog.rateAfterApproval")}` : s.price === null ? t("catalog.priceOnRequest") : formatINR(s.price)}
                     </p>
                   </button>
                 </div>
@@ -314,6 +314,11 @@ function ProductDetail() {
       {/* Sticky add-to-cart at the very bottom (no tab bar on this screen) */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
         <div className="mx-auto flex max-w-md items-center gap-3">
+          {rateLocked ? (
+            <p className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-muted text-sm font-semibold text-muted-foreground">
+              🔒 {t("catalog.rateAfterApproval")}
+            </p>
+          ) : (<>
           {product.price !== null && qty > 0 && (
             <div className="min-w-0 shrink-0">
               <p className="text-xs text-muted-foreground">{t("product.total")}</p>
@@ -348,6 +353,7 @@ function ProductDetail() {
               {t("product.addToCart")}
             </button>
           )}
+          </>)}
         </div>
       </div>
 

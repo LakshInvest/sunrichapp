@@ -556,6 +556,9 @@ function DetailsStep({
             </button>
           </div>
         )}
+        {requiresGps && !locationKnown && !fieldErrors["location"] && (
+          <span className="text-xs font-medium text-destructive">{t("location.required")}</span>
+        )}
         {fieldErrors["location"] && (
           <span data-field-error className="text-xs font-medium text-destructive">{fieldErrors["location"]}</span>
         )}

@@ -53,7 +53,7 @@ export function LocationPicker({
       setDisclose(true);
       return;
     }
-    runLocate();
+    void runLocate();
   };
   useEffect(() => {
     if (!autoLocate && !isDefault) return;

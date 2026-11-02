@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Crosshair, Loader2, LocateOff, MapPin } from "lucide-react";
-import { locateDevice } from "@/lib/native";
+import { isNative, locateDevice, openAppSettings } from "@/lib/native";
 import { SheetDrawer } from "./SheetDrawer";
 import { PinMap } from "./PinMap";
 import { PlaceSearch } from "./PlaceSearch";
@@ -134,7 +134,7 @@ export function LocationPicker({
           </p>
           <button
             type="button"
-            onClick={() => void runLocate()}
+            onClick={() => void tapAllow()}
             className="mt-5 min-h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground transition active:scale-[0.98]"
           >
             {problem === "off" ? t("location.retry") : t("location.allow")}

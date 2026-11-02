@@ -343,3 +343,16 @@ function ProductDetail() {
     </main>
   );
 }
+
+/** One line under the name: "Pack of 12 × 1 L" (never a brand, never repeated). */
+function packLine(
+  product: { unitsPerSellUnit: number | null; packLabel: Parameters<typeof loc>[0]; volumeMl: number | null },
+  volume: string | null,
+  lang: Parameters<typeof loc>[1],
+  t: (k: string, o?: Record<string, unknown>) => string,
+): string {
+  if (product.unitsPerSellUnit && product.unitsPerSellUnit > 1 && volume) {
+    return t("product.packOf", { units: product.unitsPerSellUnit, size: volume });
+  }
+  return loc(product.packLabel, lang) || volume || "";
+}

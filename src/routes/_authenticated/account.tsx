@@ -1,3 +1,4 @@
+import { ownCustomerFilter } from "@/lib/my-customer";
 import { serverMessage } from "@/lib/form-errors";
 import { PageShell } from "@/components/PageShell";
 import { useIsDemo } from "@/hooks/use-demo";
@@ -169,14 +170,15 @@ function Account() {
   useEffect(() => {
     if (!settings?.showJarBalance) return;
     let active = true;
-    void supabase
+    void ownCustomerFilter().then((cidFilter) => supabase
       .from("container_balances")
       .select("product_id, balance")
+      .eq("customer_id", cidFilter)
       .gt("balance", 0)
       .then(({ data }) => {
         if (active)
           setJars((data ?? []).map((r) => ({ productId: r.product_id ?? "", balance: Number(r.balance ?? 0) })).filter((r) => r.balance > 0));
-      });
+      }));
     return () => {
       active = false;
     };
@@ -220,6 +222,7 @@ function Account() {
     const { count } = await supabase
       .from("customer_queries")
       .select("id", { count: "exact", head: true })
+      .eq("customer_id", await ownCustomerFilter())
       .eq("status", "open");
     setOpenCount(count ?? 0);
   }, []);

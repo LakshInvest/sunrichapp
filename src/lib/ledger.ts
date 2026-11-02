@@ -1,3 +1,4 @@
+import { ownCustomerFilter } from "@/lib/my-customer";
 /** Account balance, ledger ranges, payment reports and statement PDF — existing RPCs/RLS only. */
 import { supabase } from "@/integrations/supabase/client";
 import { fetchOpenBills, type StatementRow } from "@/lib/billing";
@@ -96,7 +97,7 @@ export function openingOf(rows: StatementRow[]): number {
 }
 
 export async function invoiceIdByNo(no: string): Promise<string | null> {
-  const { data } = await supabase.from("invoices").select("id").eq("invoice_no", no).maybeSingle();
+  const { data } = await supabase.from("invoices").select("id").eq("invoice_no", no).eq("customer_id", await ownCustomerFilter()).maybeSingle();
   return data?.id ?? null;
 }
 

@@ -1,3 +1,4 @@
+import { ownCustomerFilter } from "@/lib/my-customer";
 /** Khata (customer ledger & payments) — reads/writes through the Khata RPCs only. */
 import { supabase } from "@/integrations/supabase/client";
 import { getMyCustomerId } from "@/lib/orders";
@@ -153,6 +154,7 @@ export async function fetchKhataProofs(): Promise<KhataProof[]> {
   const { data, error } = await supabase
     .from("payment_proofs")
     .select("id, amount, method, reference, paid_on, status, reject_reason, balance_after, reviewed_at, created_at")
+    .eq("customer_id", await ownCustomerFilter())
     .order("created_at", { ascending: false })
     .limit(50);
   if (error) throw new Error(error.message);

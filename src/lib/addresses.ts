@@ -1,3 +1,4 @@
+import { ownCustomerFilter } from "@/lib/my-customer";
 import { supabase } from "@/integrations/supabase/client";
 
 /** Saved delivery addresses: own rows via RLS, writes via save_my_address / delete_my_address. */
@@ -29,6 +30,7 @@ export async function listMyAddresses(): Promise<SavedAddress[]> {
   const { data, error } = await supabase
     .from("customer_addresses")
     .select("*")
+    .eq("customer_id", await ownCustomerFilter())
     .eq("is_active", true)
     .order("is_default", { ascending: false })
     .order("created_at");

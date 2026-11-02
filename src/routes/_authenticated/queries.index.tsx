@@ -1,3 +1,4 @@
+import { ownCustomerFilter } from "@/lib/my-customer";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
 import { useCallback, useEffect, useState } from "react";
@@ -55,6 +56,7 @@ function QueriesList() {
     const { data: qs, error } = await supabase
       .from("customer_queries")
       .select("id, subject, status, created_at, updated_at")
+      .eq("customer_id", await ownCustomerFilter())
       .order("created_at", { ascending: false });
     if (error) {
       setFailed(true);

@@ -1,3 +1,4 @@
+import { ownCustomerFilter } from "@/lib/my-customer";
 /** Customer bills, receipts, statement and invoices — read via RLS / existing RPCs only. */
 import { supabase } from "@/integrations/supabase/client";
 import { getMyCustomerId } from "@/lib/orders";
@@ -149,7 +150,7 @@ const INVOICE_SELECT =
   "id, order_id, invoice_no, invoice_date, due_date, customer_name, business_name, customer_gstin, billing_address, place_of_supply, is_interstate, taxable_value, cgst, sgst, igst, deposit_total, round_off, grand_total, amount_paid, invoice_lines(id, description, hsn_code, qty, unit_price, gst_rate, taxable_value, cgst, sgst, igst, line_total, sort_order)";
 
 export async function fetchInvoice(id: string): Promise<Invoice | null> {
-  const { data, error } = await supabase.from("invoices").select(INVOICE_SELECT).eq("id", id).maybeSingle();
+  const { data, error } = await supabase.from("invoices").select(INVOICE_SELECT).eq("id", id).eq("customer_id", await ownCustomerFilter()).maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
   const lines = [...(data.invoice_lines ?? [])]
@@ -198,6 +199,7 @@ export async function fetchInvoiceIdForOrder(orderId: string): Promise<string | 
     .from("invoices")
     .select("id, status")
     .eq("order_id", orderId)
+    .eq("customer_id", await ownCustomerFilter())
     .neq("status", "cancelled")
     .order("invoice_date", { ascending: false })
     .limit(1)

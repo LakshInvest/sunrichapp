@@ -1,3 +1,4 @@
+import { ownCid } from "@/lib/own-customer";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -25,6 +26,7 @@ export const getFirmPaymentInfo = createServerFn({ method: "POST" })
     const { data: orders, error } = await context.supabase
       .from("orders")
       .select("id, order_no, grand_total, firm_id")
+      .eq("customer_id", await ownCid(context.supabase))
       .in("id", data.orderIds);
     if (error) throw new Error(error.message);
     const owned = (orders ?? []).filter((o) => o.firm_id);
@@ -103,15 +105,17 @@ export const getKhataPayInfo = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<KhataPayInfo | null> => {
     const sb = context.supabase;
+    const cid = await ownCid(sb);
     const { data: inv } = await sb
       .from("invoices")
       .select("firm_id, invoice_date, grand_total, amount_paid")
+      .eq("customer_id", cid)
       .eq("status", "issued")
       .order("invoice_date", { ascending: true })
       .limit(50);
     let firmId = (inv ?? []).find((i) => Number(i.grand_total ?? 0) > Number(i.amount_paid ?? 0))?.firm_id ?? null;
     if (!firmId) {
-      const { data: o } = await sb.from("orders").select("firm_id").not("firm_id", "is", null).order("created_at", { ascending: false }).limit(1);
+      const { data: o } = await sb.from("orders").select("firm_id").eq("customer_id", cid).not("firm_id", "is", null).order("created_at", { ascending: false }).limit(1);
       firmId = o?.[0]?.firm_id ?? null;
     }
     if (!firmId) return null;

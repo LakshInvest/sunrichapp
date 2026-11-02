@@ -1,3 +1,4 @@
+import { ownCustomerFilter } from "@/lib/my-customer";
 /** Checkout payment methods, payment proofs and dispatch-time helpers.
  *  Writes go through the existing SECURITY DEFINER RPCs only; reads are RLS-scoped. */
 import { supabase } from "@/integrations/supabase/client";
@@ -69,6 +70,7 @@ export async function fetchMyPaymentProofs(): Promise<PaymentProof[]> {
   const { data, error } = await supabase
     .from("payment_proofs")
     .select("id, order_id, amount, method, reference, paid_on, screenshot_path, status, reject_reason, created_at, orders(order_no)")
+    .eq("customer_id", await ownCustomerFilter())
     .order("created_at", { ascending: false })
     .limit(100);
   if (error) throw new Error(error.message);

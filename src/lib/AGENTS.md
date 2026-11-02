@@ -12,3 +12,4 @@
 - `native.ts` wraps Capacitor and must stay a no-op on the web; plugins are imported dynamically. Why: the web app must not depend on native APIs.
 - `quoteMyOrder` re-reads `credit_status` per firm in the quote (firm-specific limit beats the customer limit, as in `_create_orders`). Why: the firm-less quote figure disagreed with what the server holds.
 - Demo behaviour (`useIsDemo`) comes only from `customers.is_demo`, never `user_profiles.is_demo`. Why: QA accounts use fixed-PIN login but must behave like real shops.
+- Every customer-side read of a customer-owned table filters explicitly by the caller's own customer: browser code via `ownCustomerFilter()`/`getMyCustomerId()` (`my-customer.ts`, cached `my_customer_id`, cleared on sign-out), server fns via `ownCid(context.supabase)` (`own-customer.ts`). Why: staff who are also customers see all rows through RLS.

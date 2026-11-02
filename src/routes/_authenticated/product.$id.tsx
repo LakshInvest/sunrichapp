@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { ArrowLeft, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
 import en from "@/locales/en.json";
 import { SmartImage } from "@/components/SmartImage";
+import { ImageViewer } from "@/components/ImageViewer";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ErrorState, EmptyState, GridSkeleton } from "@/components/catalog/states";
 import { PriceBlock } from "@/components/catalog/ProductCard";
@@ -188,9 +189,15 @@ function ProductDetail() {
       >
         {gallery.length > 0 ? (
           gallery.map((url, i) => (
-            <div key={url} className="w-full shrink-0 snap-center">
+            <button
+              type="button"
+              key={url}
+              onClick={() => setViewer(url)}
+              aria-label={t("product.viewImage")}
+              className="block w-full shrink-0 snap-center"
+            >
               <SmartImage src={url} alt={`${loc(product.name, lang)} ${i + 1}`} className="aspect-square w-full object-cover" />
-            </div>
+            </button>
           ))
         ) : (
           <div className="w-full shrink-0 snap-center">
@@ -340,6 +347,7 @@ function ProductDetail() {
         </div>
       </div>
 
+      {viewer && <ImageViewer src={viewer} alt={loc(product.name, lang)} onClose={() => setViewer(null)} />}
     </main>
   );
 }

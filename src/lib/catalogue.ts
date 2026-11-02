@@ -168,10 +168,22 @@ export function arrangeCatalogue<T extends { categories: CatalogCategory[]; prod
 }
 
 /** Extra Home values returned by get_home() (Khata, default address, chats awaiting the customer). */
-export type HomeExtras = { khata: Record<string, unknown> | null; defaultAddress: Record<string, unknown> | null; awaitingReply: number };
+export type HomeExtras = {
+  khata: Record<string, unknown> | null;
+  defaultAddress: Record<string, unknown> | null;
+  awaitingReply: number;
+  at: number;
+};
 let homeExtras: HomeExtras | null = null;
-function setHomeExtras(x: HomeExtras) {
-  homeExtras = x;
+const extrasListeners = new Set<(x: HomeExtras) => void>();
+function setHomeExtras(x: Omit<HomeExtras, "at">) {
+  homeExtras = { ...x, at: Date.now() };
+  for (const l of extrasListeners) l(homeExtras);
+}
+/** Called whenever a fresh get_home() result arrives. Returns an unsubscribe. */
+export function onHomeExtras(cb: (x: HomeExtras) => void): () => void {
+  extrasListeners.add(cb);
+  return () => extrasListeners.delete(cb);
 }
 /** Last get_home() extras, or null before the first load. */
 export function getHomeExtras(): HomeExtras | null {

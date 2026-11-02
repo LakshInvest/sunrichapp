@@ -1,3 +1,4 @@
+import { getHomeExtras } from "@/lib/catalogue";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
@@ -35,6 +36,14 @@ export function BottomNav() {
   const [replied, setReplied] = useState(false);
   useEffect(() => {
     let active = true;
+    // get_home() already returned the count (own chats only) moments ago.
+    const x = getHomeExtras();
+    if (x && Date.now() - x.at < 30_000) {
+      setReplied(x.awaitingReply > 0);
+      return () => {
+        active = false;
+      };
+    }
     void supabase
       .from("customer_queries")
       .select("id", { count: "exact", head: true })

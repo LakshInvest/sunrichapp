@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { serverMessage } from "@/lib/form-errors";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { ArrowLeft, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
 import en from "@/locales/en.json";
 import { SmartImage } from "@/components/SmartImage";
@@ -358,7 +359,7 @@ function packLine(
   product: { unitsPerSellUnit: number | null; packLabel: Parameters<typeof loc>[0]; volumeMl: number | null },
   volume: string | null,
   lang: Parameters<typeof loc>[1],
-  t: (k: string, o?: Record<string, unknown>) => string,
+  t: TFunction,
 ): string {
   if (product.unitsPerSellUnit && product.unitsPerSellUnit > 1 && volume) {
     return t("product.packOf", { units: product.unitsPerSellUnit, size: volume });

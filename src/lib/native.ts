@@ -98,6 +98,24 @@ export async function getPosition(): Promise<{ lat: number; lng: number }> {
   );
 }
 
+/**
+ * Opens the phone's Settings page for this app. Native only; used when the
+ * customer permanently refused the location permission and Android will no
+ * longer show its own "Allow" dialog.
+ */
+export async function openAppSettings(): Promise<void> {
+  if (!isNative()) return;
+  try {
+    const { NativeSettings, AndroidSettings, IOSSettings } = await import("capacitor-native-settings");
+    await NativeSettings.open({
+      optionAndroid: AndroidSettings.ApplicationDetails,
+      optionIOS: IOSSettings.App,
+    });
+  } catch {
+    /* ignore */
+  }
+}
+
 export type LocateResult =
   | { ok: true; lat: number; lng: number; accuracy: number | null }
   | { ok: false; reason: "denied" | "off" };

@@ -173,3 +173,14 @@ Constraint: existing DB tables/RPCs/policies/buckets only (user-managed backend)
 - [x] A5 no struck MRP on cards
 - [x] A6 map preview via Maps JS (Maps Static API not enabled on key)
 - [ ] Part B Khata — waiting: user runs database/20261101_khata.sql, then build screens + QA
+
+## Prompt-33 (mobile UX)
+- [x] Tab bar only on main tabs; back arrows + bottom bars on product, cart, help
+- [x] Product detail: no brand, single pack line, bar shows Add only at qty 0
+- [x] Profile photo crop applied (scaled crop, white fill), initials on primary
+- [x] Keyboard-safe chat + Pay now
+- [x] Location permission / location-off sheets with Retry and manual pin; "Location is required" hint
+- [x] Pull-to-refresh on Khata, order detail, chat, help list; swipe-to-remove in cart; full-screen photo zoom; pressed state
+- [x] Account: Khata card tap, one "Help & support" row
+- [ ] Full 4-size × 3-language audit of every route (partly done at 360×800 English)
+- [ ] Live keyboard and native Android checks (needs a real phone / new app build)

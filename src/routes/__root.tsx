@@ -18,6 +18,7 @@ import { Toaster } from "@/components/ui/sonner";
 import i18n from "../lib/i18n";
 import { exitApp, initNative, markFirstScreen } from "@/lib/native";
 import { installViewportVars } from "@/lib/keyboard";
+import { registerServiceWorker } from "@/lib/sw-register";
 import { AppGate } from "@/components/AppGate";
 import { refreshPushToken } from "@/lib/push";
 
@@ -172,6 +173,9 @@ function RootComponent() {
 
   // Keyboard-safe sizing (--app-h / --kb) + focused field kept in view.
   useEffect(() => installViewportVars(), []);
+
+  // Offline/speed cache (published site only).
+  useEffect(() => registerServiceWorker(), []);
 
   return (
     <QueryClientProvider client={queryClient}>

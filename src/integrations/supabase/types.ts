@@ -1525,6 +1525,8 @@ export type Database = {
           allow_spot_sale: boolean
           allow_upi: boolean
           arrived_button_enabled: boolean
+          ask_office_no_reply: string
+          ask_office_wait_minutes: number
           auto_credit_block_enabled: boolean
           collect_old_dues: boolean
           company_id: string
@@ -1566,6 +1568,8 @@ export type Database = {
           allow_spot_sale?: boolean
           allow_upi?: boolean
           arrived_button_enabled?: boolean
+          ask_office_no_reply?: string
+          ask_office_wait_minutes?: number
           auto_credit_block_enabled?: boolean
           collect_old_dues?: boolean
           company_id: string
@@ -1607,6 +1611,8 @@ export type Database = {
           allow_spot_sale?: boolean
           allow_upi?: boolean
           arrived_button_enabled?: boolean
+          ask_office_no_reply?: string
+          ask_office_wait_minutes?: number
           auto_credit_block_enabled?: boolean
           collect_old_dues?: boolean
           company_id?: string
@@ -4289,6 +4295,7 @@ export type Database = {
           resolution: string | null
           resolved_at: string | null
           resolved_by: string | null
+          stop_id: string | null
           trip_id: string
         }
         Insert: {
@@ -4302,6 +4309,7 @@ export type Database = {
           resolution?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
+          stop_id?: string | null
           trip_id: string
         }
         Update: {
@@ -4315,9 +4323,17 @@ export type Database = {
           resolution?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
+          stop_id?: string | null
           trip_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "trip_alerts_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "trip_stops"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trip_alerts_trip_id_fkey"
             columns: ["trip_id"]
@@ -4640,10 +4656,62 @@ export type Database = {
           },
         ]
       }
+      trip_returns: {
+        Row: {
+          actual_qty: number
+          expected_qty: number
+          id: string
+          kind: string
+          note: string | null
+          product_id: string | null
+          received_at: string
+          received_by: string | null
+          trip_id: string
+        }
+        Insert: {
+          actual_qty?: number
+          expected_qty?: number
+          id?: string
+          kind: string
+          note?: string | null
+          product_id?: string | null
+          received_at?: string
+          received_by?: string | null
+          trip_id: string
+        }
+        Update: {
+          actual_qty?: number
+          expected_qty?: number
+          id?: string
+          kind?: string
+          note?: string | null
+          product_id?: string | null
+          received_at?: string
+          received_by?: string | null
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_returns_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_returns_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trip_stops: {
         Row: {
           arrived_at: string | null
           delivered_at: string | null
+          do_later_at: string | null
           fail_reason: string | null
           id: string
           is_spot_sale: boolean
@@ -4661,6 +4729,7 @@ export type Database = {
         Insert: {
           arrived_at?: string | null
           delivered_at?: string | null
+          do_later_at?: string | null
           fail_reason?: string | null
           id?: string
           is_spot_sale?: boolean
@@ -4678,6 +4747,7 @@ export type Database = {
         Update: {
           arrived_at?: string | null
           delivered_at?: string | null
+          do_later_at?: string | null
           fail_reason?: string | null
           id?: string
           is_spot_sale?: boolean
@@ -4773,6 +4843,7 @@ export type Database = {
           loaded_at: string | null
           loaded_by: string | null
           planned_by: string | null
+          returns_received_at: string | null
           route_id: string | null
           settle_note: string | null
           settled_at: string | null
@@ -4813,6 +4884,7 @@ export type Database = {
           loaded_at?: string | null
           loaded_by?: string | null
           planned_by?: string | null
+          returns_received_at?: string | null
           route_id?: string | null
           settle_note?: string | null
           settled_at?: string | null
@@ -4853,6 +4925,7 @@ export type Database = {
           loaded_at?: string | null
           loaded_by?: string | null
           planned_by?: string | null
+          returns_received_at?: string | null
           route_id?: string | null
           settle_note?: string | null
           settled_at?: string | null
@@ -5627,6 +5700,17 @@ export type Database = {
         Args: { p_note?: string; p_order_id: string }
         Returns: undefined
       }
+      ask_office: {
+        Args: {
+          p_amount: number
+          p_mode: string
+          p_reason: string
+          p_stop_id: string
+          p_trip_id: string
+        }
+        Returns: string
+      }
+      ask_office_status: { Args: { p_alert_id: string }; Returns: Json }
       auto_block_overdue_customers: { Args: never; Returns: number }
       bulk_approve_orders: { Args: { p_order_ids: string[] }; Returns: Json }
       bulk_update_plan_prices: {
@@ -5777,6 +5861,10 @@ export type Database = {
         Returns: undefined
       }
       finalize_loading: { Args: { p_trip_id: string }; Returns: Json }
+      flag_load_mismatch: {
+        Args: { p_note: string; p_trip_id: string }
+        Returns: string
+      }
       force_logout: {
         Args: { p_reason?: string; p_user_id: string }
         Returns: number
@@ -5895,6 +5983,8 @@ export type Database = {
           allow_spot_sale: boolean
           allow_upi: boolean
           arrived_button_enabled: boolean
+          ask_office_no_reply: string
+          ask_office_wait_minutes: number
           auto_credit_block_enabled: boolean
           collect_old_dues: boolean
           company_id: string
@@ -6071,6 +6161,10 @@ export type Database = {
             }
             Returns: Json
           }
+      receive_returns: {
+        Args: { p_lines: Json; p_note?: string; p_trip_id: string }
+        Returns: undefined
+      }
       record_cash_handover: {
         Args: {
           p_amount: number
@@ -6308,6 +6402,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_stop_later: {
+        Args: { p_later: boolean; p_stop_id: string }
+        Returns: undefined
+      }
       set_user_active: {
         Args: { p_active: boolean; p_user_id: string }
         Returns: undefined
@@ -6397,6 +6495,14 @@ export type Database = {
         Returns: Json
       }
       toggle_favourite: { Args: { p_product_id: string }; Returns: boolean }
+      trip_return_expected: {
+        Args: { p_trip_id: string }
+        Returns: {
+          expected_qty: number
+          kind: string
+          product_id: string
+        }[]
+      }
       update_my_profile: {
         Args: { p_full_name: string; p_language?: string; p_photo_url?: string }
         Returns: undefined

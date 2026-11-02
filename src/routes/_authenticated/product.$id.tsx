@@ -52,6 +52,7 @@ function ProductDetail() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(!readCatalogueCache());
   const [slide, setSlide] = useState(0);
+  const [viewer, setViewer] = useState<string | null>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async (force = false) => {

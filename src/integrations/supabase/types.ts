@@ -649,6 +649,8 @@ export type Database = {
       }
       credit_debit_notes: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           company_id: string
           created_at: string
           created_by: string | null
@@ -660,13 +662,18 @@ export type Database = {
           note_date: string
           note_no: string
           note_type: string
+          order_id: string | null
           reason: string
           status: string
+          stop_id: string | null
           tax_amount: number
           taxable_value: number
           total: number
+          trip_id: string | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           company_id: string
           created_at?: string
           created_by?: string | null
@@ -678,13 +685,18 @@ export type Database = {
           note_date?: string
           note_no: string
           note_type: string
+          order_id?: string | null
           reason: string
           status?: string
+          stop_id?: string | null
           tax_amount?: number
           taxable_value: number
           total: number
+          trip_id?: string | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           company_id?: string
           created_at?: string
           created_by?: string | null
@@ -696,11 +708,14 @@ export type Database = {
           note_date?: string
           note_no?: string
           note_type?: string
+          order_id?: string | null
           reason?: string
           status?: string
+          stop_id?: string | null
           tax_amount?: number
           taxable_value?: number
           total?: number
+          trip_id?: string | null
         }
         Relationships: [
           {
@@ -729,6 +744,27 @@ export type Database = {
             columns: ["invoice_id"]
             isOneToOne: false
             referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
             referencedColumns: ["id"]
           },
         ]
@@ -2988,6 +3024,8 @@ export type Database = {
           pickup_vehicle_no: string | null
           placed_by: string | null
           price_plan_id: string | null
+          redeliver_at: string | null
+          redeliver_reason: string | null
           release_batch_at: string | null
           released_at: string | null
           round_off: number
@@ -3054,6 +3092,8 @@ export type Database = {
           pickup_vehicle_no?: string | null
           placed_by?: string | null
           price_plan_id?: string | null
+          redeliver_at?: string | null
+          redeliver_reason?: string | null
           release_batch_at?: string | null
           released_at?: string | null
           round_off?: number
@@ -3120,6 +3160,8 @@ export type Database = {
           pickup_vehicle_no?: string | null
           placed_by?: string | null
           price_plan_id?: string | null
+          redeliver_at?: string | null
+          redeliver_reason?: string | null
           release_batch_at?: string | null
           released_at?: string | null
           round_off?: number
@@ -5612,6 +5654,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      _stop_credit_note: { Args: { p_stop_id: string }; Returns: undefined }
       add_customer_document: {
         Args: {
           p_doc_number?: string
@@ -5750,6 +5793,19 @@ export type Database = {
           out_user_id: string
         }[]
       }
+      check_pin_login: {
+        Args: {
+          p_device_id: string
+          p_mobile: string
+          p_pin: string
+          p_user_type?: string
+        }
+        Returns: {
+          out_email: string
+          out_result: string
+          out_user_id: string
+        }[]
+      }
       close_query: { Args: { p_query_id: string }; Returns: undefined }
       confirm_cash_handover: { Args: { p_id: string }; Returns: undefined }
       create_credit_debit_note: {
@@ -5824,6 +5880,10 @@ export type Database = {
           entry_type: string
           ref_no: string
         }[]
+      }
+      decide_credit_note: {
+        Args: { p_approve: boolean; p_note_id: string }
+        Returns: string
       }
       delete_my_address: { Args: { p_id: string }; Returns: undefined }
       deliver_stop: {
@@ -5909,6 +5969,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_home: { Args: never; Returns: Json }
       has_perm: {
         Args: { p_action: string; p_module: string }
         Returns: boolean

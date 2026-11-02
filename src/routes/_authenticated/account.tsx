@@ -19,10 +19,8 @@ import {
   Loader2,
   LogOut,
   MapPin,
-  MessagesSquare,
   ShieldCheck,
   Trash2,
-  Wallet,
   Smartphone,
   type LucideIcon,
 } from "lucide-react";

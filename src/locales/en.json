@@ -150,7 +150,9 @@
     "notFound": "Product not available",
     "notFoundBody": "This product is not in your catalogue any more.",
     "metaTitle": "Sunrich — Product",
-    "metaDescription": "Product details and price from your Sunrich catalogue."
+    "metaDescription": "Product details and price from your Sunrich catalogue.",
+    "packOf": "Pack of {{units}} × {{size}}",
+    "viewImage": "View photo full screen"
   },
   "cart": {
     "title": "Cart",
@@ -183,7 +185,8 @@
     "addMore": "Add {{amount}} more to place your order",
     "minOrder": "Minimum order {{amount}}",
     "priceNotAvailable": "Price not available",
-    "remove": "Remove"
+    "remove": "Remove",
+    "swipeHint": "Swipe an item left to remove it"
   },
   "order": {
     "title": "Shop",
@@ -638,7 +641,8 @@
     "loadError": "Couldn't load. Please try again.",
     "packs_one": "{{count}} pack",
     "packs_other": "{{count}} packs",
-    "back": "Back"
+    "back": "Back",
+    "close": "Close"
   },
   "invoice": {
     "metaTitle": "Invoice — Sunrich",
@@ -749,7 +753,15 @@
     "noResults": "No matches",
     "looking": "Finding that place…",
     "openInMaps": "Open in Google Maps",
-    "error": "Couldn't load maps right now — check your connection and try again."
+    "error": "Couldn't load maps right now — check your connection and try again.",
+    "offTitle": "Your location is off",
+    "offBody": "Please turn on Location on your phone and tap Retry.",
+    "deniedTitle": "Allow location to set your delivery address",
+    "deniedBody": "We use it only to put the delivery pin on the map. If you said no before, allow Location for Sunrich in your phone settings.",
+    "allow": "Allow",
+    "retry": "Retry",
+    "manual": "Set on map manually",
+    "required": "Location is required"
   },
   "native": {
     "backToExit": "Press back again to exit",

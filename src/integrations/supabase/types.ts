@@ -6074,6 +6074,21 @@ export type Database = {
         Returns: string
       }
       order_payment_hold: { Args: { p_order_id: string }; Returns: boolean }
+      pending_ask_office: {
+        Args: never
+        Returns: {
+          alert_id: string
+          customer: string
+          deadline: string
+          driver: string
+          order_no: string
+          raised_at: string
+          request: Json
+          stop_id: string
+          trip_id: string
+          trip_no: string
+        }[]
+      }
       place_my_order: {
         Args: { p_delivery?: Json; p_lines: Json; p_notes?: string }
         Returns: Json

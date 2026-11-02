@@ -22,3 +22,13 @@ describe("keyboard inset", () => {
     expect(keyboardInset(800, 820, 0)).toBe(0);
   });
 });
+
+import { revealDelta } from "@/lib/keyboard";
+describe("keyboard reveal", () => {
+  it("scrolls a field hidden behind the Submit bar up just enough", () => {
+    expect(revealDelta(600, 648, 0, 560)).toBe(100);
+  });
+  it("leaves a visible field alone", () => {
+    expect(revealDelta(200, 248, 0, 560)).toBe(0);
+  });
+});

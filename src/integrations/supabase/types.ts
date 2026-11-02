@@ -485,6 +485,33 @@ export type Database = {
           },
         ]
       }
+      client_ops: {
+        Row: {
+          created_at: string
+          id: string
+          result: Json | null
+          rpc: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          result?: Json | null
+          rpc: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          result?: Json | null
+          rpc?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           brand_accent: string
@@ -1594,6 +1621,7 @@ export type Database = {
           updated_by: string | null
           vehicle_check_enabled: boolean
           vehicle_check_items: string[]
+          visitor_photo: string
         }
         Insert: {
           allow_cash?: boolean
@@ -1637,6 +1665,7 @@ export type Database = {
           updated_by?: string | null
           vehicle_check_enabled?: boolean
           vehicle_check_items?: string[]
+          visitor_photo?: string
         }
         Update: {
           allow_cash?: boolean
@@ -1680,6 +1709,7 @@ export type Database = {
           updated_by?: string | null
           vehicle_check_enabled?: boolean
           vehicle_check_items?: string[]
+          visitor_photo?: string
         }
         Relationships: [
           {
@@ -2112,6 +2142,90 @@ export type Database = {
           },
         ]
       }
+      gate_entries: {
+        Row: {
+          challan_photo_path: string | null
+          company_id: string
+          courier_name: string | null
+          created_at: string
+          entry_type: string
+          from_place: string | null
+          handed_at: string | null
+          handed_by: string | null
+          handed_to: string | null
+          id: string
+          in_at: string
+          in_by: string
+          meet_user_id: string | null
+          mobile: string
+          name: string
+          out_at: string | null
+          out_by: string | null
+          parcel_count: number | null
+          people_count: number
+          person_type: string
+          photo_path: string | null
+          purpose: string | null
+          staff_user_id: string | null
+          updated_at: string
+          vehicle_no: string | null
+        }
+        Insert: {
+          challan_photo_path?: string | null
+          company_id?: string
+          courier_name?: string | null
+          created_at?: string
+          entry_type?: string
+          from_place?: string | null
+          handed_at?: string | null
+          handed_by?: string | null
+          handed_to?: string | null
+          id?: string
+          in_at?: string
+          in_by?: string
+          meet_user_id?: string | null
+          mobile: string
+          name: string
+          out_at?: string | null
+          out_by?: string | null
+          parcel_count?: number | null
+          people_count?: number
+          person_type?: string
+          photo_path?: string | null
+          purpose?: string | null
+          staff_user_id?: string | null
+          updated_at?: string
+          vehicle_no?: string | null
+        }
+        Update: {
+          challan_photo_path?: string | null
+          company_id?: string
+          courier_name?: string | null
+          created_at?: string
+          entry_type?: string
+          from_place?: string | null
+          handed_at?: string | null
+          handed_by?: string | null
+          handed_to?: string | null
+          id?: string
+          in_at?: string
+          in_by?: string
+          meet_user_id?: string | null
+          mobile?: string
+          name?: string
+          out_at?: string | null
+          out_by?: string | null
+          parcel_count?: number | null
+          people_count?: number
+          person_type?: string
+          photo_path?: string | null
+          purpose?: string | null
+          staff_user_id?: string | null
+          updated_at?: string
+          vehicle_no?: string | null
+        }
+        Relationships: []
+      }
       gate_passes: {
         Row: {
           id: string
@@ -2146,6 +2260,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      gate_problems: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          note: string | null
+          photo_path: string | null
+          problem_type: string
+          raised_at: string
+          raised_by: string
+          resolved_at: string | null
+          resolved_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          photo_path?: string | null
+          problem_type: string
+          raised_at?: string
+          raised_by?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          photo_path?: string | null
+          problem_type?: string
+          raised_at?: string
+          raised_by?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       geo_areas: {
         Row: {
@@ -2596,6 +2752,42 @@ export type Database = {
           },
         ]
       }
+      guard_shifts: {
+        Row: {
+          company_id: string
+          created_at: string
+          ended_at: string | null
+          guard_user_id: string
+          handed_over_by: string | null
+          id: string
+          selfie_path: string | null
+          started_at: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          ended_at?: string | null
+          guard_user_id: string
+          handed_over_by?: string | null
+          id?: string
+          selfie_path?: string | null
+          started_at?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          ended_at?: string | null
+          guard_user_id?: string
+          handed_over_by?: string | null
+          id?: string
+          selfie_path?: string | null
+          started_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       invoice_lines: {
         Row: {
           cgst: number
@@ -2809,6 +3001,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      material_passes: {
+        Row: {
+          company_id: string
+          created_at: string
+          direction: string
+          id: string
+          is_returnable: boolean
+          issued_at: string
+          issued_by: string | null
+          items: string
+          party: string | null
+          pass_no: string
+          qr_token: string
+          scanned_at: string | null
+          scanned_by: string | null
+          updated_at: string
+          vehicle_no: string | null
+        }
+        Insert: {
+          company_id?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          is_returnable?: boolean
+          issued_at?: string
+          issued_by?: string | null
+          items: string
+          party?: string | null
+          pass_no: string
+          qr_token?: string
+          scanned_at?: string | null
+          scanned_by?: string | null
+          updated_at?: string
+          vehicle_no?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          is_returnable?: boolean
+          issued_at?: string
+          issued_by?: string | null
+          items?: string
+          party?: string | null
+          pass_no?: string
+          qr_token?: string
+          scanned_at?: string | null
+          scanned_by?: string | null
+          updated_at?: string
+          vehicle_no?: string | null
+        }
+        Relationships: []
       }
       order_feedback: {
         Row: {
@@ -4212,6 +4458,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      staff_notifications: {
+        Row: {
+          body: string | null
+          company_id: string
+          created_at: string
+          id: string
+          kind: string
+          read_at: string | null
+          ref_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          kind: string
+          read_at?: string | null
+          ref_id?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          read_at?: string | null
+          ref_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       stock_movements: {
         Row: {
@@ -5933,6 +6218,13 @@ export type Database = {
         Args: { p_reason?: string; p_user_id: string }
         Returns: number
       }
+      gate_change_guard: {
+        Args: { p_mobile: string; p_pin: string; p_selfie: string }
+        Returns: Json
+      }
+      gate_entry_in: { Args: { p: Json }; Returns: string }
+      gate_entry_out: { Args: { p_entry_id: string }; Returns: undefined }
+      gate_find_person: { Args: { p_mobile: string }; Returns: Json }
       gate_in: {
         Args: {
           p_fuel_amount?: number
@@ -5942,13 +6234,40 @@ export type Database = {
         }
         Returns: undefined
       }
+      gate_material_scan: { Args: { p_token: string }; Returns: undefined }
       gate_out: {
         Args: { p_odometer?: number; p_qr_token: string }
         Returns: string
       }
+      gate_parcel_handover: {
+        Args: { p_entry_id: string; p_received_by: string }
+        Returns: undefined
+      }
       gate_pickup_handover: {
         Args: { p_order_no: string; p_otp: string }
         Returns: string
+      }
+      gate_register: {
+        Args: { p_from: string; p_kind?: string; p_to: string }
+        Returns: {
+          at: string
+          by_name: string
+          detail: string
+          kind: string
+          title: string
+        }[]
+      }
+      gate_report_problem: {
+        Args: { p_note: string; p_photo?: string; p_type: string }
+        Returns: string
+      }
+      gate_scan_lookup: { Args: { p_token: string }; Returns: Json }
+      gate_staff_list: {
+        Args: never
+        Returns: {
+          full_name: string
+          id: string
+        }[]
       }
       geo_find_shape: {
         Args: { p_kind: string; p_name: string; p_state?: string }
@@ -6081,6 +6400,7 @@ export type Database = {
           updated_by: string | null
           vehicle_check_enabled: boolean
           vehicle_check_items: string[]
+          visitor_photo: string
         }
         SetofOptions: {
           from: "*"
@@ -6394,6 +6714,10 @@ export type Database = {
       }
       revoke_my_device: { Args: { p_device_id: string }; Returns: undefined }
       revoke_user_devices: { Args: { p_user_id: string }; Returns: number }
+      run_op: {
+        Args: { p_args: Json; p_op_id: string; p_rpc: string }
+        Returns: Json
+      }
       save_my_address: {
         Args: {
           p_address_line1: string

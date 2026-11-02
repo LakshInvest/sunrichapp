@@ -1,3 +1,4 @@
+import { sizedUrl } from "@/components/SmartImage";
 import { markFirstScreen } from "@/lib/native";
 import { useCallback, useEffect, useMemo, useRef, useState, type UIEvent } from "react";
 import { PageShell } from "@/components/PageShell";
@@ -380,8 +381,10 @@ function Home() {
               >
                 {banner.imageUrl && (
                   <img
-                    src={banner.imageUrl}
+                    src={sizedUrl(banner.imageUrl, 400)}
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     onError={(e) => (e.currentTarget.style.display = "none")}
                     className="absolute inset-0 h-full w-full object-cover"
                   />

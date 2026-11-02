@@ -20,7 +20,7 @@ export function scrollToFirstError(): void {
  * used. The real error always goes to the console for us.
  */
 const NETWORK_RE = /failed to fetch|load failed|networkerror|network request failed|fetch failed|internet|offline|timed?\s?out|econn|enotfound|dns/i;
-const TECHNICAL_RE = /pgrst|pgcode|42501|permission denied|row-level|violates|jwt|api key|schema cache|relation|column|duplicate key|stack|traceback|\bnull\b|\bundefined\b|\bhttp \d|\b50[0-9]\b|\b40[0-9]\b|postgres|sqlstate|supabase/i;
+const TECHNICAL_RE = /pgrst|pgcode|42501|permission denied|row-level|violates|jwt|api key|schema cache|relation|column|duplicate key|stack|traceback|\bnull\b|\bundefined\b|\bhttp \d|\b50[0-9]\b|\b40[0-9]\b|postgres|sqlstate|supabase|invalid input syntax|invalid text representation|\buuid\b|\bsyntax error\b/i;
 /** The pricing engine rejects unpriced lines ("No price set for <name>") — always show the friendly price message. */
 const NO_PRICE_RE = /^no price set for /i;
 

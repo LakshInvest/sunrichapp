@@ -44,20 +44,32 @@ security invoker
 set search_path to 'public'
 as $function$
 declare
-  v_khata jsonb;
+  v_cid     uuid := public.my_customer_id();
+  v_company uuid := public.my_company_id();
+  v_khata   jsonb;
 begin
   if auth.uid() is null then
     raise exception 'Not allowed';
   end if;
 
-  begin
-    v_khata := public.my_khata_summary();
-  exception when others then
-    v_khata := null;   -- no customer yet (registration not finished)
-  end;
+  -- Staff who are also customers see every row through RLS, so every
+  -- customer-owned read below is filtered explicitly by the caller's own
+  -- customer. No customer yet (registration not finished) -> empty values.
+  if v_cid is not null then
+    begin
+      v_khata := public.my_khata_summary();
+    exception when others then
+      v_khata := null;
+    end;
+  end if;
 
   return jsonb_build_object(
-    'hero', (select to_jsonb(h) from public.app_hero h limit 1),
+    -- app_hero has no is_active column: one row per company; newest edit wins.
+    'hero', (
+      select to_jsonb(h) from public.app_hero h
+      where h.company_id = v_company
+      order by h.updated_at desc nulls last
+      limit 1),
     'sections', coalesce((
       select jsonb_agg(jsonb_build_object('key', s.key, 'sort_order', s.sort_order) order by s.sort_order)
       from public.app_home_sections s where s.is_active), '[]'::jsonb),
@@ -78,11 +90,17 @@ begin
       from public.app_banners b where b.is_active), '[]'::jsonb),
     'products', coalesce((select jsonb_agg(to_jsonb(p)) from public.my_catalogue() p), '[]'::jsonb),
     'khata', v_khata,
-    'default_address', (
+    'default_address', case when v_cid is null then null else (
       select to_jsonb(a) from public.customer_addresses a
-      where a.is_active order by a.is_default desc, a.created_at asc limit 1),
-    'open_queries', (select count(*) from public.customer_queries q where q.status = 'open'),
-    'company_id', public.my_company_id(),
+      where a.customer_id = v_cid and a.is_active
+      order by a.is_default desc, a.created_at asc
+      limit 1) end,
+    -- 'open' = Sunrich has replied and the chat waits for the CUSTOMER
+    -- (customer_raise_query inserts 'answered' = waiting for Sunrich).
+    'awaiting_reply', case when v_cid is null then 0 else (
+      select count(*) from public.customer_queries q
+      where q.customer_id = v_cid and q.status = 'open') end,
+    'company_id', v_company,
     'session_id', public.current_session_id()
   );
 end;

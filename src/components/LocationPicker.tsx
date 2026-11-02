@@ -72,6 +72,23 @@ export function LocationPicker({
     else setProblem(r.reason);
   };
 
+  // "Allow" in the permission sheet: retry the request; when the permission
+  // was permanently refused (native retries land as denied immediately), open
+  // the phone's App-settings page so the customer can enable it there.
+  const tapAllow = async () => {
+    if (locating) return;
+    setLocating(true);
+    const r = await locateDevice();
+    setLocating(false);
+    if (r.ok) {
+      setProblem(null);
+      onChange({ lat: r.lat, lng: r.lng, accuracy: r.accuracy });
+      return;
+    }
+    if (r.reason === "denied" && isNative()) await openAppSettings();
+    else setProblem(r.reason);
+  };
+
   // Pin → address: debounce while the pin moves, then reverse geocode (browser Geocoder).
   const pinAddress = useReverseAddress(value);
 

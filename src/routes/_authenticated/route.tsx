@@ -3,6 +3,7 @@ import { Outlet, redirect, createFileRoute, useNavigate } from "@tanstack/react-
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyRegistration } from "@/lib/registration.functions";
+import { isRateLockedStatus, setRateLocked } from "@/lib/rate-lock";
 
 /**
  * Auth gate: every route under this pathless layout requires a signed-in
@@ -18,13 +19,15 @@ export const Route = createFileRoute("/_authenticated")({
       throw redirect({ to: "/auth" });
     }
     const reg = await getMyRegistration();
+    setRateLocked(isRateLockedStatus(reg.status));
     const here = location.pathname;
     if (reg.status === "blocked") {
       if (here !== "/hold") throw redirect({ to: "/hold" });
       return;
     }
-    if (reg.status === "pending_approval" && here !== "/under-review") {
-      throw redirect({ to: "/under-review" });
+    // Pending customers browse (rates hidden) but cannot reach cart/checkout.
+    if (reg.status === "pending_approval" && (here === "/cart" || here === "/checkout")) {
+      throw redirect({ to: "/home" });
     }
     if ((!reg.customerId || reg.status === "draft" || reg.status === "rejected") && here !== "/registration") {
       throw redirect({ to: "/registration" });

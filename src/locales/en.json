@@ -48,7 +48,6 @@
       "generic": "Something went wrong. Please try again.",
       "provider": "Could not send OTP. Please try again.",
       "blocked": "Your account is blocked. Please contact Sunrich.",
-      "staffApp": "Please use the Sunrich office app.",
       "ipLimit": "Too many OTP requests from your network. Please try again later."
     },
     "metaTitle": "Sunrich — Log in",

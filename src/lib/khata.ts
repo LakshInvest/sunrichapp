@@ -120,7 +120,11 @@ export function upiPayLink(upiId: string, payee: string, amount: number, note: s
 export async function fetchKhataSummary(): Promise<KhataSummary> {
   const { data, error } = await supabase.rpc("my_khata_summary");
   if (error) throw new Error(error.message);
-  const r = (data ?? {}) as Record<string, unknown>;
+  return mapKhataSummary((data ?? {}) as Record<string, unknown>);
+}
+
+/** Maps my_khata_summary() / get_home().khata JSON to KhataSummary. */
+export function mapKhataSummary(r: Record<string, unknown>): KhataSummary {
   return {
     due: n(r["due"]),
     advance: n(r["advance"]),

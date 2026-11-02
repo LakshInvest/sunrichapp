@@ -35,7 +35,18 @@ export async function listMyAddresses(): Promise<SavedAddress[]> {
     .order("is_default", { ascending: false })
     .order("created_at");
   if (error) throw new Error(error.message);
-  return (data ?? []).map((r) => ({
+  return (data ?? []).map((r) => mapAddressRow(r as unknown as Record<string, unknown>));
+}
+
+/** Maps a customer_addresses row (table or get_home().default_address) to SavedAddress. */
+type AddressRow = {
+  id: string; label: string; address_line1: string; address_line2: string | null; landmark: string | null;
+  city: string | null; state: string | null; pincode: string | null; latitude: number | null; longitude: number | null;
+  contact_name: string | null; contact_mobile: string | null; is_default: boolean;
+};
+export function mapAddressRow(row: Record<string, unknown>): SavedAddress {
+  const r = row as unknown as AddressRow;
+  return {
     id: r.id,
     label: r.label,
     line1: r.address_line1,
@@ -49,7 +60,7 @@ export async function listMyAddresses(): Promise<SavedAddress[]> {
     contactName: r.contact_name,
     contactMobile: r.contact_mobile,
     isDefault: r.is_default,
-  }));
+  };
 }
 
 export type AddressInput = Omit<SavedAddress, "id"> & { id: string | null };

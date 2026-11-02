@@ -28,7 +28,7 @@ import { SmartImage } from "@/components/SmartImage";
 import { AddressSwitcher } from "@/components/AddressSwitcher";
 import { PayReminder } from "@/components/PayReminder";
 import { KhataPayShortcut } from "@/components/KhataPayShortcut";
-import { listMyAddresses, labelKey, type SavedAddress } from "@/lib/addresses";
+import { listMyAddresses, mapAddressRow, labelKey, type SavedAddress } from "@/lib/addresses";
 import { pickSelected, shortArea, useSelectedAddressId } from "@/lib/selected-address";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { ProductCard } from "@/components/catalog/ProductCard";
@@ -60,6 +60,7 @@ import {
   loadRecentSearches,
   loc,
   matchesSearch,
+  onHomeExtras,
   readCatalogueCache,
   saveCartPrice,
   type CatalogData,
@@ -128,9 +129,29 @@ function Home() {
       /* header falls back to the registered address */
     }
   }, []);
+  // Header uses get_home()'s default address; the full list loads only when
+  // the customer picked another address or opens the address sheet.
   useEffect(() => {
-    void loadAddresses();
+    let got = false;
+    const off = onHomeExtras((x) => {
+      if (got) return;
+      got = true;
+      const def = x.defaultAddress ? mapAddressRow(x.defaultAddress) : null;
+      if (def && (!selectedId || selectedId === def.id)) setAddrList((cur) => (cur.length ? cur : [def]));
+      else if (selectedId) void loadAddresses();
+    });
+    const timer = setTimeout(() => {
+      if (!got) void loadAddresses();
+    }, 2500);
+    return () => {
+      off();
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadAddresses]);
+  useEffect(() => {
+    if (addressOpen) void loadAddresses();
+  }, [addressOpen, loadAddresses]);
   const myReg = useServerFn(getMyRegistration);
 
   const load = useCallback(async (force = false) => {

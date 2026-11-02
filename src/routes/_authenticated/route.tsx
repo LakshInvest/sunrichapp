@@ -16,7 +16,8 @@ export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async ({ location }) => {
     // Page changes reuse the last check (local session + cached registration);
-    // a cold open, or a check older than 5 min, goes to the network.
+    // a cold open starts from the saved check (≤24 h) and re-checks in the
+    // background. The session-cancellation check in Gate always runs.
     const { data: local } = await supabase.auth.getSession();
     const localId = local.session?.user.id;
     const cached = localId ? readGate(localId) : null;
@@ -24,9 +25,12 @@ export const Route = createFileRoute("/_authenticated")({
     if (cached && localId) {
       reg = cached.reg;
       if (cached.stale) {
+        const before = reg;
         void getMyRegistration()
           .then((r) => {
             writeGate(localId, r);
+            // Status changed since the saved check: reload so routing re-applies.
+            if (r.status !== before.status || r.customerId !== before.customerId) window.location.reload();
             setRateLocked(isRateLockedStatus(r.status));
           })
           .catch(() => undefined);

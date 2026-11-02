@@ -1,3 +1,4 @@
+import { getHomeExtras, onHomeExtras } from "@/lib/catalogue";
 import { ownCustomerFilter } from "@/lib/my-customer";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -34,7 +35,13 @@ export function BottomNav() {
   }, [pathname]);
 
   const [replied, setReplied] = useState(false);
+  // On Home the chat count comes from get_home(); other tabs ask directly.
   useEffect(() => {
+    if (pathname !== "/home") return;
+    return onHomeExtras((x) => setReplied(x.awaitingReply > 0));
+  }, [pathname]);
+  useEffect(() => {
+    if (pathname === "/home" && getHomeExtras()) return;
     let active = true;
     void ownCustomerFilter()
       .then((cid) =>

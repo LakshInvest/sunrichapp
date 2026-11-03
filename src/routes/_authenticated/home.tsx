@@ -64,6 +64,7 @@ import {
   loc,
   matchesSearch,
   onHomeExtras,
+  getHomeExtras,
   readCatalogueCache,
   saveCartPrice,
   type CatalogData,

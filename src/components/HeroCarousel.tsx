@@ -85,13 +85,6 @@ export function HeroCarousel({
       )}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-primary/70 to-transparent" aria-hidden />
       <div className="absolute inset-x-0 top-0 px-5 pt-[max(1rem,env(safe-area-inset-top))]">{overlay}</div>
-      {banners.length > 1 && (
-        <div className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5" aria-hidden>
-          {banners.map((b, i) => (
-            <span key={b.id} className={`h-1.5 rounded-full transition-all ${i === index ? "w-4 bg-primary-foreground" : "w-1.5 bg-primary-foreground/50"}`} />
-          ))}
-        </div>
-      )}
     </div>
   );
 }

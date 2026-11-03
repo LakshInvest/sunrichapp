@@ -357,7 +357,7 @@ function Home() {
 
     if (key === "categories") {
       return (
-        <div key="categories" className="no-scrollbar sticky top-0 z-20 mt-3 flex gap-2 overflow-x-auto bg-background px-5 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))]">
+        <div key="categories" className="no-scrollbar sticky top-0 z-20 mt-1 flex gap-2 overflow-x-auto bg-background px-3 pb-2 pt-1">
           <button
             type="button"
             onClick={() => setCategory("all")}
@@ -657,7 +657,7 @@ function Home() {
               </div>
             )}
 
-            <div className="relative z-30 px-5">
+            <div className="relative z-30 px-3">
               <SearchBox
                 value={search}
                 onChange={setSearch}

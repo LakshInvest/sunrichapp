@@ -55,3 +55,21 @@ export function useOrderLabels() {
   const { lang } = useLang();
   return { statusChipClass, dateLabel: (iso: string | null) => dateLabel(iso, lang) };
 }
+
+/** Indian date: "02 Nov 2026" (IST). */
+export function indDate(iso: string | null, lang = "en"): string {
+  if (!iso) return "—";
+  const d = new Date(iso.length === 10 ? `${iso}T00:00:00+05:30` : iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString(locale(lang), { day: "2-digit", month: "short", year: "numeric", timeZone: IST_TZ });
+}
+
+/** Indian date + time: "2 Nov, 4:30 PM" (IST). */
+export function indDateTime(iso: string | null, lang = "en"): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const day = d.toLocaleDateString(locale(lang), { day: "numeric", month: "short", timeZone: IST_TZ });
+  const time = d.toLocaleTimeString(locale(lang), { hour: "numeric", minute: "2-digit", hour12: true, timeZone: IST_TZ });
+  return `${day}, ${time}`;
+}

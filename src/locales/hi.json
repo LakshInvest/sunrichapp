@@ -93,7 +93,7 @@
     "deliveryToday": "आज शाम 6 बजे तक डिलीवरी",
     "locationLabel": "होम",
     "locationArea": "लातूर",
-    "searchPlaceholder": "जार, बोतल खोजें…",
+    "searchPlaceholder": "प्रोडक्ट खोजें",
     "searchNoResults": "कोई उत्पाद नहीं मिला।",
     "cart": "कार्ट",
     "profile": "आपका अकाउंट",
@@ -493,7 +493,7 @@
     "byDistributor": "आपके डिस्ट्रीब्यूटर",
     "trackOrder": "ऑर्डर ट्रैक करें",
     "continueShopping": "और खरीदें",
-    "payCredit": "भुगतान: उधार पर",
+    "payCredit": "आपके खाते में जोड़ा गया।",
     "payCash": "ऑर्डर आने पर डिलीवरी करने वाले को नकद दें।",
     "payCheque": "ऑर्डर आने पर डिलीवरी करने वाले को चेक दें।",
     "payUpiTitle": "UPI से भुगतान करें",
@@ -525,7 +525,12 @@
     "notAccepted": "भुगतान स्वीकार नहीं हुआ",
     "sendAgain": "फिर भेजें",
     "checking": "आपका भुगतान जांचा जा रहा है — पुष्टि होते ही भेज दिया जाएगा",
-    "shotMissing": "स्क्रीनशॉट अभी नहीं खुला।"
+    "shotMissing": "स्क्रीनशॉट अभी नहीं खुला।",
+    "done": "ऑर्डर हो गया",
+    "deliveryOn": "{{date}} डिलीवरी",
+    "pickupOn": "{{date}} पिकअप",
+    "checkNote": "पेमेंट चेक होते ही Sunrich ऑर्डर भेजेगा।",
+    "payLater": "बाद में पे करूँगा"
   },
   "trackDetail": {
     "metaTitle": "सनरिच — ऑर्डर विवरण",
@@ -1126,5 +1131,99 @@
       "rejected": "{{amount}} का भुगतान स्वीकार नहीं: {{reason}}"
     },
     "runningAdv": "एडवांस {{amount}}"
+  },
+  "cart2": {
+    "continue": "{{amount}} · आगे बढ़ें →",
+    "youSave": "आप {{amount}} बचा रहे हैं",
+    "totalMargin": "कुल मार्जिन {{amount}}"
+  },
+  "checkout2": {
+    "howTitle": "ऑर्डर कैसे लेना है?",
+    "confirmTitle": "ऑर्डर पक्का करें",
+    "sunrich": "Sunrich डिलीवर करेगा",
+    "pickup": "मैं खुद लूँगा",
+    "plantDefault": "Sunrich प्लांट, MIDC लातूर",
+    "items_one": "{{count}} आइटम",
+    "items_other": "{{count}} आइटम",
+    "addNote": "नोट जोड़ें",
+    "place": "ऑर्डर करें · {{amount}}",
+    "creditLow": "क्रेडिट में सिर्फ़ {{amount}} बचे हैं"
+  },
+  "upi": {
+    "payNow": "अभी पे करें",
+    "payAmount": "{{amount}} UPI ऐप से पे करें",
+    "paidEnterUtr": "पे कर दिया? UTR डालें",
+    "noApp": "कोई UPI ऐप नहीं मिला। QR स्कैन करें या UPI ID कॉपी करें।",
+    "returnTitle": "पेमेंट हो गया?",
+    "returnYes": "हाँ, UTR / स्क्रीनशॉट डालें",
+    "returnNo": "अभी नहीं"
+  },
+  "khata2": {
+    "yourBalance": "आपका बाकी",
+    "overdue": "{{amount}} ओवरड्यू",
+    "advance": "{{amount}} एडवांस",
+    "advanceNote": "अगले ऑर्डर में अपने आप कट जाएगा",
+    "allClear": "सब क्लियर ✓",
+    "colDate": "तारीख",
+    "colBill": "बिल",
+    "colPaid": "जमा",
+    "colBalance": "बाकी",
+    "advShort": "एडवांस",
+    "rejected": "रिजेक्ट: {{reason}}",
+    "noReason": "कारण नहीं बताया",
+    "sendAgain": "दोबारा भेजें",
+    "verifying": "वेरिफिकेशन में"
+  },
+  "orders2": {
+    "active": "चल रहे हैं",
+    "past": "पहले के",
+    "reorder": "फिर से ऑर्डर",
+    "invoice": "इनवॉइस",
+    "startShopping": "खरीदारी शुरू करें"
+  },
+  "track2": {
+    "kmAway": "{{km}} किमी दूर",
+    "pay": {
+      "unpaid": "बाकी",
+      "verifying": "वेरिफिकेशन में",
+      "paid": "पेड ✓"
+    },
+    "packsTimes": "{{count}} पैक × {{price}}",
+    "total": "कुल",
+    "cancelLink": "ऑर्डर कैंसल करें"
+  },
+  "smart": {
+    "overdue": "{{amount}} बाकी",
+    "dispatched": "आपका ऑर्डर निकल चुका है",
+    "pay": "अभी पे करें",
+    "track": "ट्रैक करें",
+    "reorder": "फिर से ऑर्डर",
+    "dismiss": "छिपाएँ"
+  },
+  "product2": {
+    "pack": "पैक",
+    "perBottle": "{{amount}} प्रति बोतल",
+    "mrpPerBottle": "MRP {{amount}} प्रति बोतल",
+    "margin": "मार्जिन {{amount}}",
+    "save": "बचत {{amount}}",
+    "viewCart": "कार्ट देखें · {{amount}}"
+  },
+  "account2": {
+    "business": "बिज़नेस डिटेल्स",
+    "businessName": "दुकान / बिज़नेस",
+    "owner": "मालिक",
+    "type": "प्रकार",
+    "gst": "GSTIN",
+    "code": "ग्राहक कोड",
+    "businessHint": "बदलने के लिए Help & support से Sunrich को मैसेज करें।",
+    "logoutConfirm": "पक्का लॉग आउट करना है?"
+  },
+  "address2": {
+    "moveMap": "पिन को अपनी दुकान या घर पर लाएँ",
+    "confirmPin": "यह लोकेशन सही है",
+    "changePin": "लोकेशन बदलें",
+    "line1": "दुकान / घर नं., गली",
+    "landmark": "लैंडमार्क (वैकल्पिक)",
+    "someoneElse": "किसी और को डिलीवर करना है?"
   }
 }

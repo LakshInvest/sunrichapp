@@ -200,3 +200,15 @@ Constraint: existing DB tables/RPCs/policies/buckets only (user-managed backend)
 - [x] src/test/ist.test.ts — 1:30 AM IST counts as that IST day; khataRange/relativeDay/shortDate cross-midnight checks. 114 tests pass, typecheck clean.
 - [x] CC chat-reply test: query created in the app (313b5db4), replied from Command Center (qa@sunrich.local) → notification "Sunrich replied to your question" → tap opens the exact chat, staff bubble "QA Tester · Sunrich", composer visible with keyboard open at 320 and 390.
 - [x] Cleanup SQL /mnt/documents/chat_reply_test_cleanup.sql (NOT run). Note: CC at sunrich-command-center.lovable.app, admin login is under "Admin login with email".
+
+## input9039 (Prompt-35) — full app redesign
+- [x] 1 Cart + 2-step checkout + UPI app intents + "Payment ho gaya?" sheet + order-success
+- [x] 2 Khata ledger by date, reject reason + Send again, Pay now
+- [x] 3 Orders single list; Track: big map, live truck pin + km (needs my_order_truck SQL), timeline with times, pay card, items with photos
+- [x] 4 Home banner carousel (per-banner seconds), smart card, saved-copy instant open
+- [x] 5 Product page: per-bottle rate, Margin/Save, no heart, stepper + View cart
+- [x] 6 Account one list + business details + inline language; map-first address
+- [x] 7 2 s launch animation from the native frame
+- [ ] Run database/20261103_app_redesign.sql — WAITING on user
+- [ ] Signed-in screen photos — BLOCKED: test browser can't sign in to this user-managed backend
+- [ ] Map in APK — needs the error code shown on the phone (now displayed under the map fallback)

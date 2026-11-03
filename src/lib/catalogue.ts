@@ -1,3 +1,4 @@
+import { readSwr, writeSwr } from "@/lib/swr-cache";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -66,6 +67,7 @@ export type CatalogBanner = {
   linkType: string;
   linkValue: string | null;
   sortOrder: number;
+  displaySeconds?: number;
 };
 
 export type CatalogHero = {
@@ -169,10 +171,12 @@ export function arrangeCatalogue<T extends { categories: CatalogCategory[]; prod
 
 /** Extra Home values returned by get_home() (Khata, default address, chats awaiting the customer). */
 export type HomeExtras = { khata: Record<string, unknown> | null; defaultAddress: Record<string, unknown> | null; awaitingReply: number };
-let homeExtras: HomeExtras | null = null;
+// Saved copy from the last open, so Home's Khata strip and address show instantly on a cold open.
+let homeExtras: HomeExtras | null = readSwr<HomeExtras>("homeExtras");
 const extrasListeners = new Set<(x: HomeExtras) => void>();
 function setHomeExtras(x: HomeExtras) {
   homeExtras = x;
+  writeSwr("homeExtras", x);
   extrasListeners.forEach((fn) => fn(x));
 }
 /** Calls fn with the current extras (if any) and every later get_home() result. */
@@ -235,6 +239,7 @@ async function loadCatalogue(): Promise<CatalogData> {
       linkType: String(b["link_type"] ?? "none"),
       linkValue: (b["link_value"] as string) ?? null,
       sortOrder: num(b["sort_order"]) ?? 0,
+      displaySeconds: Math.min(30, Math.max(2, num(b["display_seconds"]) ?? 5)),
     }));
 
   const heroRow = heroRows as Record<string, unknown> | null;

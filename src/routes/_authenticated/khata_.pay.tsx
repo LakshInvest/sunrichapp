@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+import { openUpi, upiRef } from "@/lib/upi";
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { istToday } from "@/lib/ist";
@@ -21,7 +23,6 @@ import {
   payChoices,
   submitMyPayment,
   uploadPaymentFile,
-  upiPayLink,
   validPayAmount,
   type KhataSummary,
   type PaymentInput,
@@ -291,12 +292,17 @@ function PayPage() {
                     </div>
                   )}
                   <CopyRow label={t("khata.pay.upiId")} value={info.upiId} />
-                  <a
-                    href={upiPayLink(info.upiId, info.payeeName ?? info.firmName, amount, "Sunrich Khata")}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void openUpi({ pa: info.upiId!, pn: info.payeeName ?? info.firmName, amount, orderNo: "Khata", ref: upiRef("KHATA") }).then(
+                        (ok) => ok || toast.error(t("upi.noApp")),
+                      )
+                    }
                     className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-primary text-sm font-semibold text-primary"
                   >
                     <Smartphone className="h-4 w-4" aria-hidden /> {t("khata.pay.payWithUpi")}
-                  </a>
+                  </button>
                 </>
               ) : (
                 <p className="text-sm text-muted-foreground">{t("khata.pay.noUpi")}</p>

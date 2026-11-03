@@ -1,6 +1,6 @@
 import { readSwr, swr } from "@/lib/swr-cache";
 import { useCallback, useEffect, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { ArrowLeft, Clock, Download, FileText, IndianRupee, Loader2, Share2, XCircle } from "lucide-react";
@@ -16,7 +16,7 @@ import { useOffline } from "@/hooks/use-offline";
 import { supabase } from "@/integrations/supabase/client";
 import { formatINR } from "@/lib/catalogue";
 import { istToday } from "@/lib/ist";
-import { dateLabel } from "@/lib/order-format";
+import { dateLabel, indDate } from "@/lib/order-format";
 import { getMyCustomerId } from "@/lib/orders";
 import { fetchAppInfo } from "@/lib/app-info";
 import { fetchOpenBills } from "@/lib/billing";
@@ -102,15 +102,8 @@ function KhataPage() {
 
   return (
     <PageShell className={`pb-48 ${deva}`} onRefresh={() => Promise.all([loadTop(), loadRows()])}>
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-5 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
+      <header className="sticky top-0 z-20 flex items-center gap-2 bg-background/95 px-5 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <h1 className="min-w-0 flex-1 truncate text-base font-bold">{t("khata.title")}</h1>
-        <button
-          type="button"
-          onClick={() => setStmtOpen(true)}
-          className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-secondary"
-        >
-          <FileText className="h-4 w-4" aria-hidden /> {t("khata.statement")}
-        </button>
       </header>
 
       <div className="space-y-5 px-5 pt-5">
@@ -168,37 +161,41 @@ function KhataPage() {
           ) : list.length === 0 ? (
             <EmptyState title={t("khata.noEntries")} body="" />
           ) : (
-            <ul className="mt-4 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-sm" data-testid="khata-entries">
-              {list.map((r, i) => {
-                const plus = r.debit > 0;
-                const amt = plus ? r.debit : r.credit;
-                return (
-                  <li key={`${r.refNo}-${r.date}-${i}`}>
-                    <button
-                      type="button"
-                      disabled={r.kind !== "bill"}
-                      onClick={() => openEntry(r)}
-                      className="flex w-full items-start gap-3 px-4 py-3 text-left disabled:cursor-default"
-                    >
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-semibold">{t(`khata.kind.${r.kind}`)}</span>
-                        <span className="block truncate text-xs text-muted-foreground">
-                          {dateLabel(r.date, lang)}
-                          {r.refNo ? ` · ${r.refNo}` : ""}
-                        </span>
-                      </span>
-                      <span className="shrink-0 text-right">
-                        <span className={`block text-sm font-bold ${plus ? "text-foreground" : "text-success"}`}>
-                          {plus ? "+" : "−"}
-                          {formatINR(amt)}
-                        </span>
-                        <span className="block text-[11px] text-muted-foreground">{r.balance < 0 ? t("khata.runningAdv", { amount: formatINR(-r.balance) }) : t("khata.runningBal", { amount: formatINR(r.balance) })}</span>
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="mt-4" data-testid="khata-entries">
+              <div className="grid grid-cols-[1fr_4.25rem_4.25rem_4.75rem] gap-1 px-1 pb-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                <span>{t("khata2.colDate")}</span>
+                <span className="text-right">{t("khata2.colBill")}</span>
+                <span className="text-right">{t("khata2.colPaid")}</span>
+                <span className="text-right">{t("khata2.colBalance")}</span>
+              </div>
+              {groupByDate(list).map(([day, items]) => (
+                <div key={day} className="border-t border-border/70">
+                  <p className="px-1 pt-2 text-xs font-semibold text-muted-foreground">{indDate(day, lang)}</p>
+                  <ul>
+                    {items.map((r, i) => (
+                      <li key={`${r.refNo}-${i}`}>
+                        <button
+                          type="button"
+                          disabled={r.kind !== "bill"}
+                          onClick={() => openEntry(r)}
+                          className="grid min-h-12 w-full grid-cols-[1fr_4.25rem_4.25rem_4.75rem] items-center gap-1 px-1 py-1.5 text-left text-xs disabled:cursor-default"
+                        >
+                          <span className="min-w-0">
+                            <span className="block truncate font-medium text-foreground">{t(`khata.kind.${r.kind}`)}</span>
+                            {r.refNo && <span className="block truncate text-[11px] text-muted-foreground">{r.refNo}</span>}
+                          </span>
+                          <span className="text-right font-semibold text-destructive">{r.debit > 0 ? formatINR(r.debit) : ""}</span>
+                          <span className="text-right font-semibold text-success">{r.credit > 0 ? formatINR(r.credit) : ""}</span>
+                          <span className={`text-right text-xs font-semibold ${r.balance < 0 ? "text-success" : "text-foreground"}`}>
+                            {r.balance < 0 ? `${formatINR(-r.balance)} ${t("khata2.advShort")}` : formatINR(r.balance)}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
           )}
         </section>
       </div>
@@ -224,6 +221,15 @@ function KhataPage() {
   );
 }
 
+function groupByDate(rows: KhataEntry[]): [string, KhataEntry[]][] {
+  const m = new Map<string, KhataEntry[]>();
+  for (const r of rows) {
+    const k = (r.date ?? "").slice(0, 10);
+    m.set(k, [...(m.get(k) ?? []), r]);
+  }
+  return [...m.entries()];
+}
+
 function ProofRow({ p }: { p: KhataProof }) {
   const { t } = useTranslation();
   const { lang } = useLang();
@@ -242,8 +248,8 @@ function ProofRow({ p }: { p: KhataProof }) {
             pending ? "bg-accent/20 text-accent-foreground" : "bg-destructive/10 text-destructive"
           }`}
         >
-          {pending ? <Clock className="h-3 w-3" aria-hidden /> : <XCircle className="h-3 w-3" aria-hidden />}
-          {pending ? t("khata.pendingTag") : t("khata.rejectedTag")}
+          {pending ? null : <XCircle className="h-3 w-3" aria-hidden />}
+          {pending ? `⏳ ${t("khata2.verifying")}` : t("khata.rejectedTag")}
         </span>
       </div>
       <span className="mt-0.5 block truncate text-xs text-muted-foreground">
@@ -253,7 +259,12 @@ function ProofRow({ p }: { p: KhataProof }) {
       {pending ? (
         <span className="mt-1 block text-xs text-muted-foreground">{t("khata.pendingNote")}</span>
       ) : (
-        p.rejectReason && <span className="mt-1 block text-xs font-medium text-destructive">{p.rejectReason}</span>
+        <>
+          <span className="mt-1 block text-xs font-medium text-destructive">✕ {t("khata2.rejected", { reason: p.rejectReason || t("khata2.noReason") })}</span>
+          <Link to="/khata/pay" className="mt-2 inline-flex min-h-10 items-center rounded-full border border-destructive/40 px-4 text-xs font-bold text-destructive">
+            {t("khata2.sendAgain")}
+          </Link>
+        </>
       )}
     </div>
   );

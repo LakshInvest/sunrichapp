@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@capacitor/app": "^7",
+    "@capacitor/app-launcher": "^7",
     "@capacitor/browser": "^7",
     "@capacitor/camera": "^7",
     "@capacitor/core": "^7",

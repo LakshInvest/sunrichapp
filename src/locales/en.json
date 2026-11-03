@@ -93,7 +93,7 @@
     "deliveryToday": "Delivery today by 6 PM",
     "locationLabel": "Home",
     "locationArea": "Latur",
-    "searchPlaceholder": "Search jars, bottles…",
+    "searchPlaceholder": "Search products",
     "searchNoResults": "No products match your search.",
     "cart": "Cart",
     "profile": "Your account",
@@ -493,7 +493,7 @@
     "byDistributor": "your distributor",
     "trackOrder": "Track order",
     "continueShopping": "Continue shopping",
-    "payCredit": "Payment: on credit",
+    "payCredit": "Added to your Khata.",
     "payCash": "Pay cash to the delivery person when the order arrives.",
     "payCheque": "Give the cheque to the delivery person when the order arrives.",
     "payUpiTitle": "Pay by UPI",
@@ -525,7 +525,12 @@
     "notAccepted": "Payment not accepted",
     "sendAgain": "Send again",
     "checking": "Checking your payment — we’ll dispatch as soon as it’s verified",
-    "shotMissing": "Could not open the screenshot right now."
+    "shotMissing": "Could not open the screenshot right now.",
+    "done": "Order placed",
+    "deliveryOn": "{{date}} delivery",
+    "pickupOn": "pickup {{date}}",
+    "checkNote": "Sunrich will send the order as soon as the payment is checked.",
+    "payLater": "I'll pay later"
   },
   "trackDetail": {
     "metaTitle": "Sunrich — Order detail",
@@ -1126,5 +1131,99 @@
       "rejected": "Payment of {{amount}} not accepted: {{reason}}"
     },
     "runningAdv": "Adv {{amount}}"
+  },
+  "cart2": {
+    "continue": "{{amount}} · Continue →",
+    "youSave": "You are saving {{amount}}",
+    "totalMargin": "Total margin {{amount}}"
+  },
+  "checkout2": {
+    "howTitle": "How do you want your order?",
+    "confirmTitle": "Confirm order",
+    "sunrich": "Sunrich delivers",
+    "pickup": "I'll pick it up",
+    "plantDefault": "Sunrich plant, MIDC Latur",
+    "items_one": "{{count}} item",
+    "items_other": "{{count}} items",
+    "addNote": "Add a note",
+    "place": "Place order · {{amount}}",
+    "creditLow": "Only {{amount}} left in credit"
+  },
+  "upi": {
+    "payNow": "Pay now",
+    "payAmount": "Pay {{amount}} with UPI app",
+    "paidEnterUtr": "Paid? Enter UTR",
+    "noApp": "No UPI app found. Scan the QR or copy the UPI ID.",
+    "returnTitle": "Payment done?",
+    "returnYes": "Yes, enter UTR / screenshot",
+    "returnNo": "Not yet"
+  },
+  "khata2": {
+    "yourBalance": "Your balance",
+    "overdue": "{{amount}} overdue",
+    "advance": "{{amount}} advance",
+    "advanceNote": "will be used on your next order automatically",
+    "allClear": "All clear ✓",
+    "colDate": "Date",
+    "colBill": "Bill",
+    "colPaid": "Paid",
+    "colBalance": "Balance",
+    "advShort": "adv",
+    "rejected": "Rejected: {{reason}}",
+    "noReason": "no reason given",
+    "sendAgain": "Send again",
+    "verifying": "Being verified"
+  },
+  "orders2": {
+    "active": "In progress",
+    "past": "Earlier",
+    "reorder": "Reorder",
+    "invoice": "Invoice",
+    "startShopping": "Start shopping"
+  },
+  "track2": {
+    "kmAway": "{{km}} km away",
+    "pay": {
+      "unpaid": "Unpaid",
+      "verifying": "Being verified",
+      "paid": "Paid ✓"
+    },
+    "packsTimes": "{{count}} packs × {{price}}",
+    "total": "Total",
+    "cancelLink": "Cancel order"
+  },
+  "smart": {
+    "overdue": "{{amount}} due",
+    "dispatched": "Your order is on the way",
+    "pay": "Pay now",
+    "track": "Track",
+    "reorder": "Reorder",
+    "dismiss": "Hide"
+  },
+  "product2": {
+    "pack": "pack",
+    "perBottle": "{{amount}} per bottle",
+    "mrpPerBottle": "MRP {{amount}} per bottle",
+    "margin": "Margin {{amount}}",
+    "save": "Save {{amount}}",
+    "viewCart": "View cart · {{amount}}"
+  },
+  "account2": {
+    "business": "Business details",
+    "businessName": "Shop / business",
+    "owner": "Owner",
+    "type": "Type",
+    "gst": "GSTIN",
+    "code": "Customer code",
+    "businessHint": "To change these, message Sunrich from Help & support.",
+    "logoutConfirm": "Are you sure you want to log out?"
+  },
+  "address2": {
+    "moveMap": "Move the pin to your shop or home",
+    "confirmPin": "This location is correct",
+    "changePin": "Change location",
+    "line1": "Shop / house no., street",
+    "landmark": "Landmark (optional)",
+    "someoneElse": "Deliver to someone else?"
   }
 }

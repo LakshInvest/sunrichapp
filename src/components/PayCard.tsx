@@ -1,17 +1,20 @@
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { installedUpiApps, markUpiLaunched, openUpi, upiLink, upiRef, UPI_APPS, type UpiApp } from "@/lib/upi";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
-import { Copy, Landmark, Smartphone } from "lucide-react";
+import { Copy, Smartphone } from "lucide-react";
 import { formatINR } from "@/lib/catalogue";
 import type { FirmPayInfo } from "@/lib/payments.functions";
 import { CopyRow } from "@/components/PaymentProofSheet";
 
-/** UPI or bank-transfer "pay now" card, shared by the order-placed screen and order detail. */
+/** UPI or bank-transfer "pay now" card, shared by order success, order detail and Khata. */
 export function PayCard({
   method,
   info,
   amount,
   orderNo,
+  orderId,
   hold,
   title,
   onPaid,
@@ -20,6 +23,7 @@ export function PayCard({
   info: FirmPayInfo | null;
   amount: number;
   orderNo: string;
+  orderId?: string | undefined;
   hold?: boolean | undefined;
   title?: string | undefined;
   onPaid: () => void;
@@ -27,8 +31,20 @@ export function PayCard({
   const { t } = useTranslation();
   const payee = info?.payeeName || info?.firmName || "";
   const upiId = info?.upiId ?? "";
-  const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payee)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(orderNo)}`;
+  const [ref] = useState(() => upiRef(orderNo));
+  const params = { pa: upiId, pn: payee, amount, orderNo, ref };
+  const link = upiLink(params);
   const hasDetails = method === "upi" ? !!upiId || !!info?.qrUrl : !!info?.bank;
+  const [apps, setApps] = useState<UpiApp[]>([]);
+  useEffect(() => {
+    if (method === "upi") void installedUpiApps().then(setApps);
+  }, [method]);
+
+  const launch = async (app?: UpiApp) => {
+    if (orderId) markUpiLaunched(orderId);
+    const ok = await openUpi(params, app);
+    if (!ok) toast.error(t("upi.noApp"));
+  };
 
   const copy = async (v: string) => {
     try {
@@ -40,48 +56,48 @@ export function PayCard({
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 text-left shadow-sm" data-testid={`pay-card-${method}`}>
-      <p className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-        {method === "upi" ? <Smartphone className="h-4 w-4 text-secondary" aria-hidden /> : <Landmark className="h-4 w-4 text-secondary" aria-hidden />}
-        {title ?? (method === "upi" ? t("success.payUpiTitle") : t("success.bankTitle"))}
-      </p>
-      <p className="mt-1 text-3xl font-bold tracking-tight text-primary">{formatINR(amount)}</p>
-      <p className="text-xs text-muted-foreground">{t("success.orderNoLabel", { no: orderNo })}</p>
+    <div className="rounded-2xl bg-card p-4 text-left shadow-sm" data-testid={`pay-card-${method}`}>
+      <p className="text-sm font-bold text-foreground">{title ?? (method === "upi" ? t("upi.payNow") : t("success.bankTitle"))}</p>
 
       {!hasDetails ? (
         <p className="mt-3 rounded-xl bg-muted px-3 py-2.5 text-sm text-muted-foreground">{t("success.infoMissing")}</p>
       ) : method === "upi" ? (
         <>
-          {payee && <p className="mt-3 text-sm font-semibold text-foreground">{t("pay.payTo", { name: payee })}</p>}
           {upiId && (
-            <div className="mt-2 flex items-center justify-between gap-2 rounded-xl bg-muted px-3 py-1">
+            <button
+              type="button"
+              onClick={() => void launch()}
+              className="mt-3 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-primary-foreground transition active:scale-[0.98]"
+            >
+              <Smartphone className="h-4 w-4" aria-hidden /> {t("upi.payAmount", { amount: formatINR(amount) })}
+            </button>
+          )}
+          {upiId && apps.length > 0 && (
+            <div className="mt-2 flex gap-2">
+              {UPI_APPS.filter((a) => apps.includes(a.id)).map((a) => (
+                <button key={a.id} type="button" onClick={() => void launch(a.id)} className="min-h-11 flex-1 rounded-xl border border-border text-sm font-semibold text-foreground active:scale-95">
+                  {a.label}
+                </button>
+              ))}
+            </div>
+          )}
+          {upiId && (
+            <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-muted px-3 py-1">
               <span className="min-w-0 truncate font-mono text-sm font-semibold text-foreground">{upiId}</span>
-              <button
-                type="button"
-                onClick={() => void copy(upiId)}
-                className="flex min-h-11 shrink-0 items-center gap-1 px-2 text-sm font-semibold text-secondary"
-              >
+              <button type="button" onClick={() => void copy(upiId)} className="flex min-h-11 shrink-0 items-center gap-1 px-2 text-sm font-semibold text-secondary">
                 <Copy className="h-4 w-4" aria-hidden /> {t("success.copy")}
               </button>
             </div>
           )}
-          {upiId && (
-            <a
-              href={upiLink}
-              className="mt-4 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-primary-foreground transition active:scale-[0.98]"
-            >
-              <Smartphone className="h-4 w-4" aria-hidden /> {t("success.payWithApp")}
-            </a>
-          )}
           <div className="mt-4 flex flex-col items-center">
-            <div className="rounded-xl border border-border bg-qr p-3">
+            <div className="rounded-xl bg-qr p-3">
               {info?.qrUrl ? (
-                <img src={info.qrUrl} alt={t("pay.qrAlt")} width={200} height={200} className="h-[200px] w-[200px]" />
+                <img src={info.qrUrl} alt={t("pay.qrAlt")} width={180} height={180} className="h-[180px] w-[180px]" />
               ) : (
-                <QRCodeSVG value={upiLink} size={200} level="M" aria-label={t("pay.qrAlt")} />
+                <QRCodeSVG value={link} size={180} level="M" aria-label={t("pay.qrAlt")} />
               )}
             </div>
-            <p className="mt-2 text-center text-xs text-muted-foreground">{t("pay.qrHint")}</p>
+            {payee && <p className="mt-2 text-center text-xs text-muted-foreground">{t("pay.payTo", { name: payee })}</p>}
           </div>
         </>
       ) : (
@@ -96,13 +112,9 @@ export function PayCard({
       <button
         type="button"
         onClick={onPaid}
-        className={`mt-3 flex min-h-12 w-full items-center justify-center rounded-xl text-sm font-semibold transition active:scale-[0.98] ${
-          method === "bank" && hasDetails
-            ? "bg-primary text-primary-foreground"
-            : "border border-secondary/40 bg-secondary/10 text-primary"
-        }`}
+        className="mt-3 flex min-h-12 w-full items-center justify-center rounded-xl border border-primary/30 text-sm font-semibold text-primary transition active:scale-[0.98]"
       >
-        {t("pay.ivePaidUtr")}
+        {t("upi.paidEnterUtr")}
       </button>
       {hold && <p className="mt-2 text-center text-xs text-muted-foreground">{t("pay.holdNote")}</p>}
     </div>

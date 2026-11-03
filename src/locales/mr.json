@@ -1035,8 +1035,8 @@
     "passbook": "पासबुक",
     "filter": {
       "all": "सर्व",
-      "bills": "बिले",
-      "payments": "पेमेंट"
+      "bills": "बिल",
+      "payments": "जमा"
     },
     "kind": {
       "bill": "बिल",

@@ -1034,9 +1034,9 @@
     "statement": "स्टेटमेंट",
     "passbook": "पासबुक",
     "filter": {
-      "all": "सभी",
+      "all": "सब",
       "bills": "बिल",
-      "payments": "भुगतान"
+      "payments": "जमा"
     },
     "kind": {
       "bill": "बिल",

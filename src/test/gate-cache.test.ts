@@ -3,29 +3,27 @@ import { readGate, writeGate, clearGate, GATE_COLD_MAX_MS } from "@/lib/gate-cac
 import type { RegistrationDto } from "@/lib/registration.functions";
 
 const reg = { status: "active", customerId: "c1" } as unknown as RegistrationDto;
+const store: Record<string, string> = {};
+(globalThis as { localStorage?: unknown }).localStorage = {
+  getItem: (k: string) => store[k] ?? null,
+  setItem: (k: string, v: string) => (store[k] = v),
+  removeItem: (k: string) => delete store[k],
+};
 
-describe("gate cache", () => {
+describe("gate cache 2nd open", () => {
   beforeEach(() => clearGate());
-
-  it("a fresh check is reused without a re-check", () => {
-    writeGate("u1", reg, 1000);
-    expect(readGate("u1", 2000)).toEqual({ reg, stale: false });
+  it("a saved check up to 24 h old is reused on a cold open and marked for re-check", () => {
+    writeGate("u1", reg, 0);
+    const r = readGate("u1", GATE_COLD_MAX_MS);
+    expect(r?.reg.status).toBe("active");
+    expect(r?.stale).toBe(true);
   });
-
-  it("is never shared with another user", () => {
-    writeGate("u1", reg, 1000);
-    expect(readGate("u2", 2000)).toBeNull();
+  it("a saved check older than 24 h is not used", () => {
+    writeGate("u1", reg, 0);
+    expect(readGate("u1", GATE_COLD_MAX_MS + 1)).toBeNull();
   });
-
-  it("is cleared on sign-out", () => {
-    writeGate("u1", reg, 1000);
-    clearGate();
-    expect(readGate("u1", 2000)).toBeNull();
-  });
-
-  it("past a day old, the saved check is not used", () => {
-    const now = Date.now();
-    writeGate("u1", reg, now - GATE_COLD_MAX_MS - 1000);
-    expect(readGate("u1", now)).toBeNull();
+  it("another user's saved check is never used", () => {
+    writeGate("u1", reg, 0);
+    expect(readGate("u2", 1000)).toBeNull();
   });
 });

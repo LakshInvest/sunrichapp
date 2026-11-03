@@ -28,10 +28,30 @@ export function mapsBrowserKey(): Promise<string> {
   return keyPromise;
 }
 
+/**
+ * Last Google Maps error code (e.g. RefererNotAllowedMapError, ApiNotActivatedMapError,
+ * BillingNotEnabledMapError, InvalidKeyMapError). Google only reports it on the console,
+ * so we listen there; fallbacks show it in small text so a phone tells us the real cause.
+ */
+let lastMapsError: string | null = null;
+export const getMapsError = () => lastMapsError;
+function watchMapsErrors() {
+  if (typeof window === "undefined" || (window as unknown as { __gmErrWatch?: boolean }).__gmErrWatch) return;
+  (window as unknown as { __gmErrWatch?: boolean }).__gmErrWatch = true;
+  const orig = console.error.bind(console);
+  console.error = (...args: unknown[]) => {
+    const text = args.map(String).join(" ");
+    const m = /Google Maps JavaScript API (?:error|warning): (\w+)/.exec(text);
+    if (m?.[1]) lastMapsError = m[1];
+    orig(...args);
+  };
+}
+
 let loader: Promise<typeof google.maps> | null = null;
 /** Loads the Maps JavaScript API (Places included) once; resolves on ready. */
 export function loadGoogleMaps(): Promise<typeof google.maps> {
   if (typeof window === "undefined") return Promise.reject(new Error("Maps are browser-only"));
+  watchMapsErrors();
   loader ??= (async () => {
     if (window.google?.maps?.places) return window.google.maps;
     const key = await mapsBrowserKey();
@@ -52,6 +72,7 @@ export function loadGoogleMaps(): Promise<typeof google.maps> {
       s.dataset["sunrichGmaps"] = "1";
       s.onerror = () => {
         window.clearTimeout(timer);
+        lastMapsError ??= "ScriptLoadFailed";
         reject(new Error("Google Maps failed to load"));
       };
       document.head.appendChild(s);
@@ -121,6 +142,30 @@ export async function reverseGeocode(lat: number, lng: number): Promise<string> 
     return res.results?.[0]?.formatted_address ?? "";
   } catch {
     return "";
+  }
+}
+
+/** Pin → area, city, pincode (and the full line) for the map-first address form. */
+export async function reverseGeocodeParts(
+  lat: number,
+  lng: number,
+): Promise<{ full: string; area: string; city: string; pincode: string; state: string }> {
+  const empty = { full: "", area: "", city: "", pincode: "", state: "" };
+  try {
+    const maps = await loadGoogleMaps();
+    const res = await new maps.Geocoder().geocode({ location: { lat, lng }, region: "in" });
+    const r = res.results?.[0];
+    if (!r) return empty;
+    const get = (type: string) => r.address_components.find((c) => c.types.includes(type))?.long_name ?? "";
+    return {
+      full: r.formatted_address ?? "",
+      area: get("sublocality_level_1") || get("sublocality") || get("neighborhood") || get("route"),
+      city: get("locality") || get("administrative_area_level_3") || get("administrative_area_level_2"),
+      pincode: get("postal_code"),
+      state: get("administrative_area_level_1"),
+    };
+  } catch {
+    return empty;
   }
 }
 

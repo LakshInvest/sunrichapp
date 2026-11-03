@@ -1,15 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { defaultPayMethod, releaseLine, validUtr } from "@/lib/payments";
+import { creditChoice, defaultPayMethod, releaseLine, validUtr } from "@/lib/payments";
 
 describe("defaultPayMethod", () => {
-  it("pre-selects credit when the customer has a limit and is not blocked", () => {
-    expect(defaultPayMethod({ credit_limit: 10000, credit_blocked: false })).toBe("credit");
+  it("always starts on UPI, never Credit", () => {
+    expect(defaultPayMethod({ credit_limit: 10000, credit_blocked: false })).toBe("upi");
+    expect(defaultPayMethod(null)).toBe("upi");
   });
+});
 
-  it("falls back to cash with no limit, a blocked account or no quote", () => {
-    expect(defaultPayMethod({ credit_limit: 0, credit_blocked: false })).toBe("cash");
-    expect(defaultPayMethod({ credit_limit: 5000, credit_blocked: true })).toBe("cash");
-    expect(defaultPayMethod(null)).toBe("cash");
+describe("creditChoice", () => {
+  it("blocks Credit when ₹200 is left on a ₹440 bill", () => {
+    expect(creditChoice({ credit_limit: 5000, credit_available: 200, credit_blocked: false }, 440)).toEqual({ shown: true, allowed: false, available: 200 });
+  });
+  it("allows Credit when the bill fits", () => {
+    expect(creditChoice({ credit_limit: 5000, credit_available: 440, credit_blocked: false }, 440).allowed).toBe(true);
+  });
+  it("hides Credit with no limit", () => {
+    expect(creditChoice({ credit_limit: 0, credit_available: 0, credit_blocked: false }, 100).shown).toBe(false);
   });
 });
 

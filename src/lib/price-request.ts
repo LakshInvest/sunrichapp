@@ -58,9 +58,11 @@ export async function findOpenPriceRequestQuery(subject: string): Promise<string
 
 async function supabaseListOpen() {
   const { supabase } = await import("@/integrations/supabase/client");
+  const { ownCustomerFilter } = await import("@/lib/my-customer");
   return supabase
     .from("customer_queries")
     .select("id, subject, status")
+    .eq("customer_id", await ownCustomerFilter())
     .in("status", ["answered", "open"])
     .order("created_at", { ascending: false })
     .limit(50);

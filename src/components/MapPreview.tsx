@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { MapPin } from "lucide-react";
-import { loadGoogleMaps } from "@/lib/gmaps";
+import { getMapsError, loadGoogleMaps } from "@/lib/gmaps";
 
 /**
  * Read-only map preview with a pin, rendered with the Maps JavaScript API in
@@ -13,11 +13,16 @@ export default function MapPreview({
   lng,
   className = "h-36 w-full overflow-hidden rounded-xl border border-border",
   address,
+  truck,
+  interactive = false,
 }: {
   lat: number;
   lng: number;
   className?: string;
   address?: string | null;
+  /** Live truck position (after "Out for delivery"). */
+  truck?: { lat: number; lng: number } | null;
+  interactive?: boolean;
 }) {
   const divRef = useRef<HTMLDivElement | null>(null);
   const [failed, setFailed] = useState(false);
@@ -37,10 +42,22 @@ export default function MapPreview({
           zoom: 16,
           clickableIcons: false,
           disableDefaultUI: true,
-          gestureHandling: "none",
+          gestureHandling: interactive ? "greedy" : "none",
           keyboardShortcuts: false,
         });
         new maps.Marker({ map, position: { lat, lng } });
+        if (truck) {
+          new maps.Marker({
+            map,
+            position: truck,
+            label: { text: "🚚", fontSize: "22px" },
+            icon: { path: maps.SymbolPath.CIRCLE, scale: 16, fillColor: "#ffffff", fillOpacity: 1, strokeColor: "#0B2545", strokeWeight: 2 },
+          });
+          const b = new maps.LatLngBounds();
+          b.extend({ lat, lng });
+          b.extend(truck);
+          map.fitBounds(b, 48);
+        }
         setReady(true);
       })
       .catch(() => {
@@ -49,13 +66,14 @@ export default function MapPreview({
     return () => {
       alive = false;
     };
-  }, [lat, lng]);
+  }, [lat, lng, truck?.lat, truck?.lng, interactive]);
 
   if (failed) {
     return (
       <div className={`${className} flex flex-col items-center justify-center gap-1 bg-muted px-3 text-center text-muted-foreground`}>
         <MapPin className="h-6 w-6 text-secondary" aria-hidden />
         {address && <span className="line-clamp-2 text-xs font-medium text-foreground">{address}</span>}
+        {getMapsError() && <span className="text-[10px] opacity-60" data-testid="maps-error">{getMapsError()}</span>}
       </div>
     );
   }

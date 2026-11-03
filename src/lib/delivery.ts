@@ -90,3 +90,26 @@ export function lineIssues(l: DeliveredLine): Array<"short" | "damaged" | "retur
 export function showDeliveryOtp(status: string, otp: string | null | undefined): boolean {
   return status === "dispatched" && !!otp && String(otp).trim() !== "";
 }
+
+/** Latest truck GPS ping for one of the caller's own orders (after dispatch). Null when unavailable. */
+export async function fetchTruckPosition(orderId: string): Promise<{ lat: number; lng: number; at: string } | null> {
+  try {
+    const { data, error } = await supabase.rpc("my_order_truck" as never, { p_order_id: orderId } as never);
+    if (!error && data) {
+      const r = (Array.isArray(data) ? data[0] : data) as { latitude?: number; longitude?: number; recorded_at?: string } | undefined;
+      if (r?.latitude != null && r.longitude != null) return { lat: Number(r.latitude), lng: Number(r.longitude), at: String(r.recorded_at ?? "") };
+    }
+  } catch {
+    /* function not installed yet */
+  }
+  return null;
+}
+
+/** Straight-line distance in km. */
+export function kmBetween(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}

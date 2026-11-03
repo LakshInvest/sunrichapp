@@ -1,8 +1,11 @@
 import { useTranslation } from "react-i18next";
-import { Heart, Lock, Minus, Plus } from "lucide-react";
+import { useState } from "react";
+import { Lock, Minus, Plus } from "lucide-react";
 import { useRateLocked } from "@/lib/rate-lock";
 import { useRouter } from "@tanstack/react-router";
 import { SmartImage } from "@/components/SmartImage";
+import { isBusinessType, useTypeCode } from "@/lib/customer-type";
+import { formatPack, fixName } from "@/lib/pack-label";
 import { formatINR, loc, priceSave, type CatalogProduct } from "@/lib/catalogue";
 
 /** Price + struck MRP on one line. Shared by cards, the detail screen and the cart. */
@@ -44,6 +47,7 @@ export function PriceExtras({ product, size = "card" }: { product: CatalogProduc
   const { t } = useTranslation();
   const locked = useRateLocked();
   const save = priceSave(product);
+  const saveKey = isBusinessType(useTypeCode()) ? "product2.margin" : "catalog.save";
   const deposit = product.isReturnable && product.depositAmount != null && product.depositAmount > 0;
   if (locked || (save === null && !deposit)) return null;
   const small = size === "detail" ? "text-sm" : "text-[11px]";
@@ -51,7 +55,7 @@ export function PriceExtras({ product, size = "card" }: { product: CatalogProduc
     <div className="mt-1 space-y-0.5 leading-tight">
       {save !== null && (
         <p className={`whitespace-nowrap font-semibold text-success ${small}`}>
-          {t("catalog.save", { amount: formatINR(save) })}
+          {t(saveKey, { amount: formatINR(save) })}
         </p>
       )}
       {deposit && (
@@ -80,6 +84,83 @@ export function PriceBlock({
   );
 }
 
+/** "− 5 +" stepper; tapping the number lets the customer type a quantity (0 removes). */
+export function QtyStepper({
+  qty,
+  onInc,
+  onDec,
+  onSet,
+  max,
+  className = "h-10",
+}: {
+  qty: number;
+  onInc: () => void;
+  onDec: () => void;
+  onSet: (n: number) => void;
+  max?: number | null;
+  className?: string;
+}) {
+  const { t } = useTranslation();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const commit = () => {
+    setEditing(false);
+    const n = parseInt(draft, 10);
+    if (Number.isFinite(n) && n >= 0) onSet(n);
+  };
+  return (
+    <div className={`flex w-full items-center justify-between rounded-full bg-primary text-primary-foreground ${className}`}>
+      <button type="button" onClick={onDec} aria-label={t("home.decreaseQty")} className="flex h-full w-11 items-center justify-center rounded-full active:scale-90">
+        <Minus className="h-4 w-4" />
+      </button>
+      {editing ? (
+        <input
+          autoFocus
+          inputMode="numeric"
+          enterKeyHint="done"
+          pattern="[0-9]*"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value.replace(/\D/g, "").slice(0, 4))}
+          onFocus={(e) => {
+            document.documentElement.dataset["typing"] = "1";
+            const el = e.currentTarget;
+            el.select();
+            setTimeout(() => el.scrollIntoView({ block: "center", behavior: "smooth" }), 350);
+          }}
+          onBlur={() => {
+            delete document.documentElement.dataset["typing"];
+            commit();
+          }}
+          onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
+          aria-label={t("home.typeQty")}
+          className="h-full w-12 min-w-0 bg-transparent text-center text-sm font-bold text-primary-foreground caret-transparent outline-none selection:bg-transparent"
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={() => {
+            setDraft(String(qty));
+            setEditing(true);
+          }}
+          aria-label={t("home.typeQty")}
+          className="h-full min-w-12 select-none bg-transparent text-center text-sm font-bold outline-none [-webkit-tap-highlight-color:transparent] focus:outline-none"
+        >
+          {qty}
+        </button>
+      )}
+      <button
+        type="button"
+        onClick={onInc}
+        disabled={max != null && qty >= max}
+        aria-label={t("home.increaseQty")}
+        className="flex h-full w-11 items-center justify-center rounded-full active:scale-90 disabled:opacity-40"
+      >
+        <Plus className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
 export function ProductCard({
   product,
   qty,
@@ -90,7 +171,7 @@ export function ProductCard({
   onAdd,
   onInc,
   onDec,
-  onToggleFavourite,
+  onSetQty,
   onPriceRequest,
   onPrefetch,
 }: {
@@ -103,93 +184,57 @@ export function ProductCard({
   onAdd: () => void;
   onInc: () => void;
   onDec: () => void;
-  onToggleFavourite: () => void;
+  onSetQty?: (n: number) => void;
+  onToggleFavourite?: () => void;
   onPriceRequest?: () => void;
   onPrefetch?: () => void;
 }) {
   const { t } = useTranslation();
   const locked = useRateLocked();
   const router = useRouter();
-  // Touch-down: start loading the detail screen before the tap completes.
   const prefetch = onPrefetch ?? (() => void router.preloadRoute({ to: "/product/$id", params: { id: product.id } }).catch(() => undefined));
   const blocked = !canOrder;
   const disabled = blocked || offline;
-  const name = loc(product.name, lang);
+  const name = fixName(loc(product.name, lang));
+  const pack = formatPack(loc(product.packLabel, lang), product.unitsPerSellUnit, product.volumeMl);
+  const save = locked ? null : priceSave(product);
+  const saveKey = isBusinessType(useTypeCode()) ? "product2.margin" : "catalog.save";
   return (
-    <div className="relative flex h-full flex-col rounded-2xl border border-border bg-card p-2 shadow-sm">
-      <button type="button" onClick={onOpen} onPointerDown={prefetch} aria-label={name} className="block aspect-square w-full overflow-hidden rounded-xl bg-secondary/10">
-        <SmartImage width={180}
-          src={product.imageUrl ?? product.images[0] ?? null}
-          alt={name}
-          className="h-full w-full object-contain p-2"
-        />
+    <div className="flex h-full flex-col rounded-2xl bg-card p-2.5 shadow-[0_1px_8px_-2px_color-mix(in_oklab,var(--primary)_14%,transparent)]">
+      <button type="button" onClick={onOpen} onPointerDown={prefetch} aria-label={name} className="block aspect-square w-full overflow-hidden rounded-xl bg-card">
+        <SmartImage width={180} src={product.imageUrl ?? product.images[0] ?? null} alt={name} className="h-full w-full bg-card object-contain p-1 mix-blend-multiply" />
       </button>
-      <button
-        type="button"
-        onClick={onToggleFavourite}
-        aria-pressed={product.isFavourite}
-        aria-label={t(product.isFavourite ? "catalog.removeFavourite" : "catalog.addFavourite")}
-        className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full transition active:scale-90"
-      >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm">
-          <Heart
-            aria-hidden
-            className={`h-3.5 w-3.5 ${product.isFavourite ? "fill-destructive text-destructive" : "text-muted-foreground"}`}
-          />
-        </span>
-      </button>
-      <button type="button" onClick={onOpen} className="mt-2 px-0.5 text-left">
+      <button type="button" onClick={onOpen} className="mt-2 text-left">
         <p className="truncate text-sm font-bold leading-snug text-foreground">{name}</p>
-        <p className="truncate text-xs leading-tight text-muted-foreground">{loc(product.packLabel, lang) || "\u00a0"}</p>
+        <p className="truncate text-xs leading-tight text-muted-foreground">{pack || "\u00a0"}</p>
       </button>
-      <div className="mt-auto px-0.5 pt-2">
-        <div className="flex items-center justify-between gap-1">
-          <PriceLine product={product} />
-          {locked ? null : product.price === null ? (
-            onPriceRequest ? (
-              <button
-                type="button"
-                onClick={onPriceRequest}
-                className="relative flex h-8 shrink-0 items-center whitespace-nowrap rounded-full border border-secondary/50 bg-secondary/10 px-3 text-xs font-bold text-secondary-foreground transition active:scale-95 after:absolute after:-inset-y-2 after:-inset-x-1 after:content-['']"
-              >
-                {t("catalog.priceOnRequest")}
-              </button>
-            ) : null
-          ) : qty === 0 ? (
-            <button
-              type="button"
-              onClick={onAdd}
-              disabled={disabled}
-              title={blocked ? t("cart.orderingAfterApproval") : offline ? t("offline.hint") : undefined}
-              className="relative flex h-8 shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-primary pl-2 pr-3 text-xs font-bold text-primary-foreground shadow-sm transition active:scale-95 after:absolute after:-inset-y-2 after:-inset-x-1 after:content-[''] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Plus className="h-3.5 w-3.5" aria-hidden />
-              {t("home.addToCart")}
+      <div className="mt-1.5 flex min-h-9 flex-col justify-end">
+        <PriceLine product={product} />
+        <p className="h-4 text-[11px] font-semibold leading-4 text-success">{save !== null ? t(saveKey, { amount: formatINR(save) }) : ""}</p>
+      </div>
+      <div className="mt-auto pt-2">
+        {locked ? (
+          <div className="h-10" />
+        ) : product.price === null ? (
+          onPriceRequest ? (
+            <button type="button" onClick={onPriceRequest} className="flex h-10 w-full items-center justify-center rounded-full bg-secondary/15 text-xs font-bold text-primary active:scale-95">
+              {t("catalog.priceOnRequest")}
             </button>
-          ) : (
-            <div className="flex h-8 shrink-0 items-center rounded-full bg-primary text-primary-foreground">
-              <button
-                type="button"
-                onClick={onDec}
-                aria-label={t("home.decreaseQty")}
-                className="relative flex h-8 w-7 items-center justify-center rounded-full transition active:scale-90 after:absolute after:-inset-y-2 after:-inset-x-1 after:content-['']"
-              >
-                <Minus className="h-3.5 w-3.5" />
-              </button>
-              <span className="min-w-4 text-center text-xs font-bold">{qty}</span>
-              <button
-                type="button"
-                onClick={onInc}
-                disabled={product.maxOrderQty != null && qty >= product.maxOrderQty}
-                aria-label={t("home.increaseQty")}
-                className="relative flex h-8 w-7 items-center justify-center rounded-full transition after:absolute after:-inset-y-2 after:-inset-x-1 after:content-[''] active:scale-90 disabled:opacity-40"
-              >
-                <Plus className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          )}
-        </div>
-        <PriceExtras product={product} />
+          ) : <div className="h-10" />
+        ) : qty === 0 ? (
+          <button
+            type="button"
+            onClick={onAdd}
+            disabled={disabled}
+            title={blocked ? t("cart.orderingAfterApproval") : offline ? t("offline.hint") : undefined}
+            className="ml-auto flex h-10 items-center justify-center gap-1 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground shadow-sm transition active:scale-95 disabled:opacity-50"
+          >
+            <Plus className="h-4 w-4" aria-hidden />
+            {t("home.addToCart")}
+          </button>
+        ) : (
+          <QtyStepper qty={qty} onInc={onInc} onDec={onDec} onSet={(n) => (onSetQty ? onSetQty(n) : n === 0 && onDec())} max={product.maxOrderQty} />
+        )}
       </div>
     </div>
   );

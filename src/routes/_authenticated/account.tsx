@@ -1,3 +1,4 @@
+import { ownCustomerFilter } from "@/lib/my-customer";
 import { serverMessage } from "@/lib/form-errors";
 import { PageShell } from "@/components/PageShell";
 import { useIsDemo } from "@/hooks/use-demo";
@@ -149,6 +150,7 @@ function Account() {
   const [addressOpen, setAddressOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [bizOpen, setBizOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editName, setEditName] = useState("");
   const [logoutOpen, setLogoutOpen] = useState(false);
@@ -169,14 +171,15 @@ function Account() {
   useEffect(() => {
     if (!settings?.showJarBalance) return;
     let active = true;
-    void supabase
+    void ownCustomerFilter().then((cidFilter) => supabase
       .from("container_balances")
       .select("product_id, balance")
+      .eq("customer_id", cidFilter)
       .gt("balance", 0)
       .then(({ data }) => {
         if (active)
           setJars((data ?? []).map((r) => ({ productId: r.product_id ?? "", balance: Number(r.balance ?? 0) })).filter((r) => r.balance > 0));
-      });
+      }));
     return () => {
       active = false;
     };
@@ -220,6 +223,7 @@ function Account() {
     const { count } = await supabase
       .from("customer_queries")
       .select("id", { count: "exact", head: true })
+      .eq("customer_id", await ownCustomerFilter())
       .eq("status", "open");
     setOpenCount(count ?? 0);
   }, []);
@@ -339,12 +343,12 @@ function Account() {
   const notActive = customer?.status && customer.status !== "active";
 
   return (
-    <PageShell className={`px-5 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] ${deva}`}>
+    <PageShell className={`px-5 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] ${deva}`}>
       <h1 className="text-2xl font-bold text-primary">{t("account.title")}</h1>
 
       {/* Profile header card */}
-      <section className="mt-3 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-        <div className="bg-gradient-to-br from-primary via-primary to-secondary px-5 py-6">
+      <section className="mt-3 overflow-hidden rounded-2xl bg-card shadow-sm">
+        <div className="bg-primary px-5 py-6">
           <div className="flex items-center gap-4">
             <button
               type="button"
@@ -365,13 +369,11 @@ function Account() {
               )}
             </button>
             <div className="min-w-0 flex-1">
-              <p className="line-clamp-2 break-words text-lg font-bold leading-tight text-primary-foreground">{profile?.name || "…"}</p>
-              <p className="mt-0.5 text-sm text-primary-foreground/80">{profile?.mobile || "…"}</p>
-              {typeLabel && (
-                <span className="mt-1.5 inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
-                  {typeLabel}
-                </span>
-              )}
+              <p className="line-clamp-2 break-words text-lg font-bold leading-tight text-primary-foreground">{customer?.businessName || profile?.name || "…"}</p>
+              <p className="mt-0.5 truncate text-sm text-primary-foreground/85">
+                {[customer?.businessName ? profile?.name : null, typeLabel].filter(Boolean).join(" · ")}
+              </p>
+              <p className="text-sm text-primary-foreground/75">{profile?.mobile || "…"}</p>
               {isDemo && (
                 <span className="ml-1.5 mt-1.5 inline-block rounded-full bg-accent px-2.5 py-0.5 text-xs font-semibold text-accent-foreground">
                   {t("demo.chip")}
@@ -404,13 +406,6 @@ function Account() {
         )}
       </section>
 
-      {/* Khata (top of Account; tap → passbook) */}
-      {!balanceFailed && (
-        <button type="button" onClick={() => navigate({ to: "/khata" })} className="mt-4 block w-full text-left" aria-label={t("khata.title")} data-testid="account-khata">
-          <KhataBalanceCard sum={balance} compact />
-        </button>
-      )}
-
       {settings?.showJarBalance && jars.length > 0 && (
         <section className="mt-4 flex items-start gap-3 rounded-2xl border border-secondary/30 bg-secondary/5 p-4">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary/15">
@@ -441,31 +436,41 @@ function Account() {
       )}
 
 
-      {/* Menu groups */}
-      <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">
+      {/* One clean list */}
+      <section className="mt-4 rounded-2xl bg-card shadow-sm">
         {settings?.multipleAddresses === false ? (
           <MenuItem icon={MapPin} label={t("account.deliveryAddress")} onClick={() => setAddressOpen(true)} />
         ) : (
           <MenuItem icon={MapPin} label={t("addresses.title")} onClick={() => navigate({ to: "/addresses" })} />
         )}
         <Separator />
+        <MenuItem icon={FileText} label={t("account2.business")} onClick={() => setBizOpen(true)} />
+        <Separator />
         <MenuItem icon={Smartphone} label={t("devices.title")} onClick={() => navigate({ to: "/devices" })} />
         <Separator />
-        <MenuItem
-          icon={LifeBuoy}
-          label={t("support.title")}
-          badge={openCount}
-          onClick={() => navigate({ to: "/queries" })}
-        />
-      </section>
-
-      <section className="mt-4 rounded-2xl border border-border bg-card shadow-sm">
-        <MenuItem icon={Languages} label={t("account.language")} onClick={() => setLangOpen(true)} />
+        <MenuItem icon={LifeBuoy} label={t("support.title")} badge={openCount} onClick={() => navigate({ to: "/queries" })} />
+        <Separator />
+        <div className="flex min-h-14 items-center gap-3 px-4">
+          <Languages className="h-5 w-5 shrink-0 text-secondary" aria-hidden />
+          <span className="min-w-0 flex-1 text-sm font-semibold text-foreground">{t("account.language")}</span>
+          <div role="group" aria-label={t("account.language")} className="flex rounded-full bg-muted p-0.5">
+            {(["en", "hi", "mr"] as const).map((l) => (
+              <button
+                key={l}
+                type="button"
+                aria-pressed={lang === l}
+                onClick={() => choose(l)}
+                className={`min-h-9 min-w-11 rounded-full px-2 text-xs font-bold ${lang === l ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+              >
+                {l === "en" ? "EN" : l === "hi" ? "हिं" : "मरा"}
+              </button>
+            ))}
+          </div>
+        </div>
         <Separator />
         <MenuItem icon={Info} label={t("account.about")} onClick={() => setAboutOpen(true)} />
       </section>
 
-      {/* Quiet logout */}
       <button
         type="button"
         onClick={() => setLogoutOpen(true)}
@@ -474,20 +479,28 @@ function Account() {
         <LogOut className="h-5 w-5" aria-hidden />
         {t("account.logout")}
       </button>
+      <p className="mt-1 text-center text-xs text-muted-foreground">{t("account.aboutVersion", { version: APP_VERSION })}</p>
 
-      {/* Delete account — required for Play Store policy */}
-      <button
-        type="button"
-        onClick={() => {
-          setDeleteConfirm(false);
-          setDeleteDone(false);
-          setDeleteOpen(true);
-        }}
-        className="mx-auto mt-2 flex min-h-11 items-center gap-1.5 text-sm font-medium text-destructive underline underline-offset-4 transition active:scale-[0.98]"
-      >
-        <Trash2 className="h-4 w-4" aria-hidden />
-        {t("account.deleteAccount")}
-      </button>
+      <SheetDrawer open={bizOpen} onOpenChange={setBizOpen}>
+        <div className="px-5 pb-8 pt-2">
+          <h2 className="text-lg font-bold text-foreground">{t("account2.business")}</h2>
+          <dl className="mt-3 divide-y divide-border text-sm">
+            {[
+              [t("account2.businessName"), customer?.businessName],
+              [t("account2.owner"), customer?.contactName ?? profile?.name],
+              [t("account2.type"), typeLabel],
+              [t("account2.gst"), customer?.gstin],
+              [t("account2.code"), customer?.customerCode],
+            ].map(([k, v]) => (
+              <div key={String(k)} className="flex justify-between gap-3 py-2.5">
+                <dt className="text-muted-foreground">{k}</dt>
+                <dd className="text-right font-semibold text-foreground">{v || "—"}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-3 text-xs text-muted-foreground">{t("account2.businessHint")}</p>
+        </div>
+      </SheetDrawer>
 
       <BottomNav />
 
@@ -603,6 +616,19 @@ function Account() {
                 </button>
               )}
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                setAboutOpen(false);
+                setDeleteConfirm(false);
+                setDeleteDone(false);
+                setDeleteOpen(true);
+              }}
+              className="flex min-h-11 items-center gap-1.5 text-sm font-medium text-destructive underline underline-offset-4"
+            >
+              <Trash2 className="h-4 w-4" aria-hidden />
+              {t("account.deleteAccount")}
+            </button>
             <p className="text-xs font-medium text-muted-foreground">
               {t("account.aboutVersion", { version: APP_VERSION })}
             </p>

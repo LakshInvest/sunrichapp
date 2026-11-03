@@ -1,3 +1,4 @@
+import { ownCustomerFilter } from "@/lib/my-customer";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
 import { useCallback, useEffect, useState } from "react";
@@ -55,6 +56,7 @@ function QueriesList() {
     const { data: qs, error } = await supabase
       .from("customer_queries")
       .select("id, subject, status, created_at, updated_at")
+      .eq("customer_id", await ownCustomerFilter())
       .order("created_at", { ascending: false });
     if (error) {
       setFailed(true);
@@ -175,7 +177,7 @@ function QueriesList() {
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3" data-kb-bar>
         <button
           type="button"
           onClick={() => navigate({ to: "/queries/ask", search: { topic: undefined, order: undefined, subject: undefined, message: undefined, product: undefined } })}

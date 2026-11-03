@@ -97,7 +97,7 @@ Or with the phone plugged in (USB debugging on): click the green ▶ Run button 
 
 ## Rebuild checklist (keyboard, app-settings, back button)
 1. `npm run build` then `npx cap sync android` — this copies the web build and the new plugin (`capacitor-native-settings`) into the Android project.
-2. Keyboard behaviour needs no code in the Android project: the app sets `resizeOnFullScreen: true` and `KeyboardResize.Body` from JavaScript (capacitor.config.ts / src/lib/native.ts). If the keyboard still hides the reply box, confirm AndroidManifest's main activity has `android:windowSoftInputMode="adjustResize"`.
+2. Keyboard behaviour needs no code in the Android project: only Android resizes the window. The app sets the Keyboard plugin to `resize: "none"` (capacitor.config.ts / src/lib/native.ts) so it never resizes a second time. Confirm AndroidManifest's main activity has `android:windowSoftInputMode="adjustResize"`.
 3. "Open app settings" (shown when location is permanently refused) uses `capacitor-native-settings` — nothing to configure in the Android project; the plugin opens the system App Details screen itself.
 4. Back button is handled in JavaScript (second press on Home within 2 s exits, otherwise the app goes back one screen). No Android-project change is needed.
 5. Build: Android Studio → Build → Build APK(s) → install `android\app\build\outputs\apk\debug\app-debug.apk`.
@@ -148,3 +148,11 @@ The repo has `assets/icon-only.png` (app icon), `assets/splash.png` and `assets/
 6. `npx cap sync android` — copies the new splash settings and the local "No internet — Retry" page (`public/offline.html`).
 7. Raise `versionCode`/`versionName` in `android/app/build.gradle`, then Android Studio → Build → Build APK(s). Uninstall the old app, install the new one.
 8. Check: tap the icon → navy screen with the logo only → Login/PIN/Home. Airplane mode → navy "No internet — Retry".
+
+## Prompt-35 rebuild (splash + UPI apps + map)
+1. `bun install` then `npx cap sync android` (adds @capacitor/app-launcher).
+2. `npx @capacitor/assets generate --android` — assets/splash.png is now logo-only; the app draws the tagline in its 2 s animation.
+3. AndroidManifest.xml, inside `<manifest>`, so the app can see installed UPI apps:
+   `<queries><intent><action android:name="android.intent.action.VIEW"/><data android:scheme="upi"/></intent></queries>`
+4. Android 12+: in `res/values-v31/styles.xml` set `windowSplashScreenBackground` to #0B2545 and `windowSplashScreenAnimatedIcon` to the logo, so the system splash is the same navy.
+5. Build, install, open an order that is out for delivery: if the map is blank, the small grey code under the pin is Google's reason.

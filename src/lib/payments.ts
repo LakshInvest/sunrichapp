@@ -1,3 +1,4 @@
+import { ownCustomerFilter } from "@/lib/my-customer";
 /** Checkout payment methods, payment proofs and dispatch-time helpers.
  *  Writes go through the existing SECURITY DEFINER RPCs only; reads are RLS-scoped. */
 import { supabase } from "@/integrations/supabase/client";
@@ -22,9 +23,19 @@ export type PaymentProof = {
 };
 
 /** Pre-selected method at checkout: credit when the customer has one and is not blocked, cash otherwise. */
-export function defaultPayMethod(quote: { credit_limit: number; credit_blocked: boolean } | null | undefined): PayMethod {
-  if (quote && quote.credit_limit > 0 && !quote.credit_blocked) return "credit";
-  return "cash";
+/** Checkout always starts on UPI; Credit is never preselected (Prompt-35). */
+export function defaultPayMethod(_quote?: unknown): PayMethod {
+  return "upi";
+}
+
+/** Credit can be chosen only when the customer has a limit, isn't blocked and the bill fits what's left. */
+export function creditChoice(
+  quote: { credit_limit: number; credit_available: number; credit_blocked: boolean } | null | undefined,
+  bill: number,
+): { shown: boolean; allowed: boolean; available: number } {
+  if (!quote || quote.credit_limit <= 0) return { shown: false, allowed: false, available: 0 };
+  const available = Math.max(0, quote.credit_available);
+  return { shown: true, allowed: !quote.credit_blocked && available >= bill, available };
 }
 
 /** UTR / UPI reference: exactly 12 digits. */
@@ -69,6 +80,7 @@ export async function fetchMyPaymentProofs(): Promise<PaymentProof[]> {
   const { data, error } = await supabase
     .from("payment_proofs")
     .select("id, order_id, amount, method, reference, paid_on, screenshot_path, status, reject_reason, created_at, orders(order_no)")
+    .eq("customer_id", await ownCustomerFilter())
     .order("created_at", { ascending: false })
     .limit(100);
   if (error) throw new Error(error.message);

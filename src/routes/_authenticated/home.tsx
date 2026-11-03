@@ -1,4 +1,6 @@
 import { sizedUrl } from "@/components/SmartImage";
+import { HeroCarousel } from "@/components/HeroCarousel";
+import { SmartCard } from "@/components/SmartCard";
 import { markFirstScreen } from "@/lib/native";
 import { useCallback, useEffect, useMemo, useRef, useState, type UIEvent } from "react";
 import { PageShell } from "@/components/PageShell";
@@ -17,6 +19,7 @@ import {
   LayoutGrid,
   MapPin,
   Milk,
+  Gem,
   Package,
   type LucideIcon,
 } from "lucide-react";
@@ -28,8 +31,7 @@ import { SmartImage } from "@/components/SmartImage";
 import { AddressSwitcher } from "@/components/AddressSwitcher";
 import { PayReminder } from "@/components/PayReminder";
 import { KhataPayShortcut } from "@/components/KhataPayShortcut";
-import { listMyAddresses, labelKey, mapAddressRow, type SavedAddress } from "@/lib/addresses";
-import { getHomeExtras, onHomeExtras, type HomeExtras } from "@/lib/catalogue";
+import { listMyAddresses, mapAddressRow, labelKey, type SavedAddress } from "@/lib/addresses";
 import { pickSelected, shortArea, useSelectedAddressId } from "@/lib/selected-address";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { ProductCard } from "@/components/catalog/ProductCard";
@@ -61,6 +63,8 @@ import {
   loadRecentSearches,
   loc,
   matchesSearch,
+  onHomeExtras,
+  getHomeExtras,
   readCatalogueCache,
   saveCartPrice,
   type CatalogData,
@@ -94,7 +98,7 @@ function Home() {
   // After Home shows, load the other main tabs' code (and orders data) in the background.
   useEffect(() => {
     const id = setTimeout(() => {
-      for (const to of ["/order", "/track", "/account", "/khata", "/cart"] as const) {
+      for (const to of ["/track", "/account", "/khata", "/cart"] as const) {
         void routerForPreload.preloadRoute({ to }).catch(() => undefined);
       }
       void swr("orders", fetchMyOrders).catch(() => undefined);
@@ -122,39 +126,36 @@ function Home() {
   const [addressOpen, setAddressOpen] = useState(false);
   const [addrList, setAddrList] = useState<SavedAddress[]>([]);
   const selectedId = useSelectedAddressId();
-  const [addrFull, setAddrFull] = useState(false);
   const loadAddresses = useCallback(async () => {
     try {
       setAddrList(await listMyAddresses());
-      setAddrFull(true);
     } catch {
       /* header falls back to the registered address */
     }
   }, []);
-  // The header only needs the default address, which get_home() returns.
-  // The full list loads when the switcher opens or another address is picked.
+  // Header uses get_home()'s default address; the full list loads only when
+  // the customer picked another address or opens the address sheet.
   useEffect(() => {
-    const useDefault = (x: HomeExtras) => {
-      if (addrFull) return;
-      if (selectedId && (x.defaultAddress?.["id"] as string | undefined) !== selectedId) {
-        void loadAddresses();
-        return;
-      }
-      setAddrList(x.defaultAddress ? [mapAddressRow(x.defaultAddress)] : []);
-    };
-    const x = getHomeExtras();
-    if (x) useDefault(x);
-    // Home served from cache (no get_home call): load the list directly.
-    const id = x ? undefined : setTimeout(() => !getHomeExtras() && void loadAddresses(), 2500);
-    const off = onHomeExtras(useDefault);
+    let got = false;
+    const off = onHomeExtras((x) => {
+      if (got) return;
+      got = true;
+      const def = x.defaultAddress ? mapAddressRow(x.defaultAddress) : null;
+      if (def && (!selectedId || selectedId === def.id)) setAddrList((cur) => (cur.length ? cur : [def]));
+      else if (selectedId) void loadAddresses();
+    });
+    const timer = setTimeout(() => {
+      if (!got) void loadAddresses();
+    }, 2500);
     return () => {
-      if (id) clearTimeout(id);
       off();
+      clearTimeout(timer);
     };
-  }, [loadAddresses, selectedId, addrFull]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadAddresses]);
   useEffect(() => {
-    if (addressOpen && !addrFull) void loadAddresses();
-  }, [addressOpen, addrFull, loadAddresses]);
+    if (addressOpen) void loadAddresses();
+  }, [addressOpen, loadAddresses]);
   const myReg = useServerFn(getMyRegistration);
 
   const load = useCallback(async (force = false) => {
@@ -171,7 +172,8 @@ function Home() {
   // Cache first, then refresh silently; a failure keeps the cached view.
   useEffect(() => {
     let active = true;
-    setLoading(true);
+    // Render the saved copy at once; only show skeletons when there's nothing saved.
+    if (!readCatalogueCache()) setLoading(true);
     load()
       .catch(() => undefined)
       .finally(() => {
@@ -241,6 +243,9 @@ function Home() {
   // Order again + rate last delivery (Tasks 5 & 6).
   const settings = useAppSettings();
   const [lastDelivered, setLastDelivered] = useState<OrderDto | null>(null);
+  const [outForDelivery, setOutForDelivery] = useState<OrderDto | null>(null);
+  const [homeExtras, setHomeExtrasState] = useState(() => getHomeExtras());
+  useEffect(() => onHomeExtras(setHomeExtrasState), []);
   const [rateOrder, setRateOrder] = useState<OrderDto | null>(null);
   useEffect(() => {
     let active = true;
@@ -250,6 +255,7 @@ function Home() {
         const done = list.filter((o) => o.status === "delivered" || o.status === "closed");
         if (!active) return;
         setLastDelivered(done[0] ?? null);
+        setOutForDelivery(list.find((o) => o.status === "dispatched") ?? null);
         const recent = done.slice(0, 5);
         const fb = await fetchMyFeedback(recent.map((o) => o.id));
         const skipped = skippedRatings();
@@ -319,7 +325,7 @@ function Home() {
     }
     if (linkType === "category" && linkValue) {
       const cat = activeCategories.find((c) => c.code === linkValue || c.id === linkValue);
-      void navigate({ to: "/order", search: { category: cat?.code ?? linkValue } });
+      setCategory(cat?.code ?? linkValue);
       return;
     }
     if (linkType === "product" && linkValue) {
@@ -351,7 +357,7 @@ function Home() {
 
     if (key === "categories") {
       return (
-        <div key="categories" className="no-scrollbar mt-5 flex gap-2 overflow-x-auto px-5">
+        <div key="categories" className="no-scrollbar sticky top-0 z-20 mt-1 flex gap-2 overflow-x-auto bg-background px-3 pb-2 pt-1">
           <button
             type="button"
             onClick={() => setCategory("all")}
@@ -366,7 +372,7 @@ function Home() {
             {t("home.categoryAll")}
           </button>
           {activeCategories.map((cat) => {
-            const Icon = CATEGORY_ICONS[cat.iconKey] ?? LayoutGrid;
+            const Icon = /premium/i.test(`${cat.code} ${loc(cat.name, "en")}`) ? Gem : (CATEGORY_ICONS[cat.iconKey] ?? LayoutGrid);
             const selected = category === cat.code;
             return (
               <button
@@ -389,7 +395,7 @@ function Home() {
       );
     }
 
-    if (key === "banners" && activeBanners.length > 0) {
+    if (key === "banners" && false) {
       return (
         <div key="banners" className="mt-5">
           <div
@@ -452,7 +458,7 @@ function Home() {
       );
     }
 
-    if (key === "favourites" && favourites.length > 0) {
+    if (key === "favourites" && false) {
       return (
         <div key="favourites" className="mt-6 px-5">
           <h2 className={`flex items-center gap-1.5 text-lg font-bold text-foreground ${deva}`}>
@@ -482,7 +488,7 @@ function Home() {
                       setQty(p.id, next);
                     }}
                     onDec={() => setQty(p.id, (quantities[p.id] ?? 0) - 1)}
-                    onToggleFavourite={() => void fav.toggle(p)}
+                  onSetQty={(n) => setQty(p.id, p.maxOrderQty != null ? Math.min(n, p.maxOrderQty) : n)}
                   />
                 </div>
               );
@@ -498,7 +504,7 @@ function Home() {
           <h2 className={`text-lg font-bold text-foreground ${deva}`}>{t("home.allProducts")}</h2>
 
 
-          <div className="mt-3 grid grid-cols-2 gap-3">
+          <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-6">
             {visibleProducts.map((product) => {
               const p = withFav(product);
               return (
@@ -520,7 +526,7 @@ function Home() {
                     setQty(p.id, Math.min((quantities[p.id] ?? 0) + 1, max));
                   }}
                   onDec={() => setQty(p.id, (quantities[p.id] ?? 0) - 1)}
-                  onToggleFavourite={() => void fav.toggle(p)}
+                  onSetQty={(n) => setQty(p.id, p.maxOrderQty != null ? Math.min(n, p.maxOrderQty) : n)}
                 />
               );
             })}
@@ -544,8 +550,6 @@ function Home() {
       onTouchEnd={pull.handlers.onTouchEnd}
       onTouchCancel={pull.handlers.onTouchCancel}
     >
-      <PayReminder />
-      <KhataPayShortcut />
 
       {pull.indicator && (
         <div
@@ -565,124 +569,53 @@ function Home() {
         <ErrorState message={loadError} onRetry={() => void load(true).catch(() => undefined)} />
       ) : (
         <>
-          {/* Hero */}
-          <div className="bg-hero relative px-5 pb-20 pt-6">
-            {hero?.backgroundImageUrl && (
-              <>
-                <img
-                  src={hero.backgroundImageUrl}
-                  alt=""
-                  aria-hidden
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 bg-primary/70" aria-hidden />
-              </>
-            )}
-            {loading && !hero?.backgroundImageUrl && <HeroSkeleton />}
-
-            {!loading && (
-              <>
-                {/* Soft rising bubbles */}
-                <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-                  <span className="animate-bubble absolute bottom-16 left-8 h-8 w-8 rounded-full bg-white/10" />
-                  <span
-                    className="animate-bubble absolute bottom-24 left-1/3 h-5 w-5 rounded-full bg-white/10"
-                    style={{ animationDelay: "1.2s" }}
-                  />
-                  <span
-                    className="animate-bubble absolute bottom-10 left-2/3 h-10 w-10 rounded-full bg-white/10"
-                    style={{ animationDelay: "2.4s" }}
-                  />
-                  <span
-                    className="animate-bubble absolute bottom-20 right-10 h-6 w-6 rounded-full bg-white/10"
-                    style={{ animationDelay: "0.6s" }}
-                  />
-                </div>
-
-                <div className="relative z-10 flex items-start justify-between">
-                  <button
-                    type="button"
-                    onClick={() => setAddressOpen(true)}
-                    aria-label={`${headerLabel}: ${areaLabel}`}
-                    className="flex min-h-11 min-w-0 max-w-[75%] items-start gap-1.5 text-left"
-                  >
-                    <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-white/80" />
-                    <span className="min-w-0">
-                      <span className="flex items-center gap-1 text-sm font-bold text-white">
-                        {headerLabel}
-                        <ChevronDown className="h-4 w-4" />
-                      </span>
-                      <span className={`block truncate text-xs text-white/70 ${deva}`}>{areaLabel}</span>
-                    </span>
-                  </button>
-
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => navigate({ to: "/notifications" })}
-                      aria-label={t("home.updatesBell")}
-                      className="relative flex h-10 w-10 items-center justify-center rounded-full transition active:scale-95"
-                    >
-                      <Bell className="h-5 w-5 text-white" />
-                      {orderUpdates && (
-                        <span
-                          aria-hidden
-                          className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent"
-                        />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <h1 className={`relative z-10 mt-6 max-w-[65%] text-3xl font-bold leading-tight text-white ${deva}`}>
-                  {heroGreeting}
-                </h1>
-                <p className={`relative z-10 mt-2.5 flex items-center gap-2 text-sm text-white/85 ${deva}`}>
-                  <span className="h-2 w-2 shrink-0 rounded-full bg-accent" aria-hidden />
-                  {heroDelivery}
-                </p>
-
-                {heroProductImage && (
-                <div aria-hidden className="absolute bottom-3 right-1 z-10 w-36">
-                  <div className="absolute inset-2 -z-10 rounded-full bg-secondary/50 blur-2xl" />
-                  <SmartImage
-                    src={heroProductImage}
-                    alt=""
-                    width={144}
-                    eager
-                    className="w-full rotate-[9deg] rounded-2xl object-cover drop-shadow-[0_16px_24px_rgba(11,37,69,0.45)]"
-                  />
-                </div>
+          {/* Hero = banner carousel with address + bell on top */}
+          <HeroCarousel
+            banners={activeBanners}
+            lang={lang}
+            onOpen={(b) => openBanner(b.linkType, b.linkValue)}
+            fallback={
+              <div className="bg-hero aspect-[3/2] w-full px-5 pt-24">
+                {!loading && (
+                  <>
+                    <h1 className={`max-w-[75%] text-3xl font-bold leading-tight text-primary-foreground ${deva}`}>{heroGreeting}</h1>
+                    <p className={`mt-2 text-sm text-primary-foreground/85 ${deva}`}>{heroDelivery}</p>
+                  </>
                 )}
-
-                <svg
-                  className="absolute inset-x-0 bottom-0 h-12 w-full text-white/10"
-                  viewBox="0 0 390 48"
-                  preserveAspectRatio="none"
-                  aria-hidden
+              </div>
+            }
+            overlay={
+              <div className="flex items-start justify-between">
+                <button
+                  type="button"
+                  onClick={() => setAddressOpen(true)}
+                  aria-label={`${headerLabel}: ${areaLabel}`}
+                  className="flex min-h-11 min-w-0 max-w-[75%] items-start gap-1.5 text-left"
                 >
-                  <path
-                    d="M0 26 C 70 46 140 8 225 16 C 300 23 345 38 390 20 L390 48 L0 48 Z"
-                    fill="currentColor"
-                  />
-                </svg>
-                <svg
-                  className="absolute inset-x-0 bottom-0 h-6 w-full"
-                  viewBox="0 0 390 24"
-                  preserveAspectRatio="none"
-                  aria-hidden
+                  <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary-foreground/90" />
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-1 text-sm font-bold text-primary-foreground">
+                      {headerLabel}
+                      <ChevronDown className="h-4 w-4" />
+                    </span>
+                    <span className={`block truncate text-xs text-primary-foreground/80 ${deva}`}>{areaLabel}</span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate({ to: "/notifications" })}
+                  aria-label={t("home.updatesBell")}
+                  className="relative flex h-10 w-10 items-center justify-center rounded-full"
                 >
-                  <path
-                    d="M0 12 C 80 24 180 2 280 10 C 330 14 360 20 390 12 L390 24 L0 24 Z"
-                    className="fill-background"
-                  />
-                </svg>
-              </>
-            )}
-          </div>
+                  <Bell className="h-5 w-5 text-primary-foreground" />
+                  {orderUpdates && <span aria-hidden className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent" />}
+                </button>
+              </div>
+            }
+          />
 
           {/* Content sheet sliding over the hero */}
-          <div className="relative z-10 -mt-4 rounded-t-3xl bg-background pb-44">
+          <div className="relative z-10 -mt-4 rounded-t-3xl bg-background pb-44 pt-4">
             {pending && (
               <div
                 role="status"
@@ -724,7 +657,7 @@ function Home() {
               </div>
             )}
 
-            <div className="relative z-30 -mt-7 px-5">
+            <div className="relative z-30 px-3">
               <SearchBox
                 value={search}
                 onChange={setSearch}
@@ -743,21 +676,18 @@ function Home() {
                 <RateOrderCard allowSkip orderId={rateOrder.id} orderNo={rateOrder.orderNo} onDone={() => setRateOrder(null)} />
               </div>
             )}
-            {lastDelivered && count === 0 && (
-              <button
-                type="button"
-                onClick={orderAgain}
-                className="mx-5 mb-4 flex min-h-14 w-[calc(100%-2.5rem)] items-center gap-3 rounded-xl border border-secondary/30 bg-card px-4 text-left shadow-sm transition active:scale-[0.98]"
-              >
-                <Repeat2 className="h-5 w-5 shrink-0 text-secondary" aria-hidden />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-bold text-foreground">{t("reorder.title")}</span>
-                  <span className="block truncate text-xs text-muted-foreground">
-                    {t("reorder.sub", { no: lastDelivered.orderNo, count: lastDelivered.lines.length })}
-                  </span>
-                </span>
-              </button>
-            )}
+            <SmartCard
+              overdue={Number((homeExtras?.khata?.["overdue"] as number | undefined) ?? 0)}
+              outForDelivery={outForDelivery}
+              lastDelivered={lastDelivered}
+              thumb={(pid) => {
+                const p = products.find((x) => x.id === pid);
+                return p?.imageUrl ?? p?.images[0] ?? null;
+              }}
+              onPay={() => navigate({ to: "/khata/pay" })}
+              onTrack={(id) => navigate({ to: "/track/$id", params: { id } })}
+              onReorder={orderAgain}
+            />
             </div>
 
             {showEmptyCatalog ? (

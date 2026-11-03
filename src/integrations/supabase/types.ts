@@ -6396,16 +6396,6 @@ export type Database = {
         Args: { p_id: string; p_note: string }
         Returns: undefined
       }
-      cc_set_stop_order: {
-        Args: {
-          p_est_km: number
-          p_est_minutes: number
-          p_method: string
-          p_stop_ids: string[]
-          p_trip_id: string
-        }
-        Returns: undefined
-      }
       check_pin: {
         Args: {
           p_device_id: string

@@ -1,3 +1,4 @@
+import { getMyCustomerId, ownCustomerFilter, NO_CUSTOMER } from "@/lib/my-customer";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -139,16 +140,7 @@ function mapOrder(r: any): OrderDto {
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 /** The signed-in customer's customers.id (null while unregistered). */
-export async function getMyCustomerId(): Promise<string | null> {
-  const { data: user } = await supabase.auth.getUser();
-  if (!user?.user) return null;
-  const { data: prof } = await supabase
-    .from("user_profiles")
-    .select("customer_id")
-    .eq("id", user.user.id)
-    .maybeSingle();
-  return (prof?.customer_id as string) ?? null;
-}
+export { getMyCustomerId } from "@/lib/my-customer";
 
 export type OrderGroup = "active" | "delivered" | "cancelled";
 
@@ -165,7 +157,12 @@ export function statusGroup(status: string): OrderGroup {
 /** All of my orders (RLS-scoped to me), newest first. */
 export async function fetchMyOrders(): Promise<OrderDto[]> {
   const mine = await getMyCustomerId();
-  const { data, error } = await supabase.from("orders").select(ORDER_SELECT).order("created_at", { ascending: false });
+  if (!mine) return [];
+  const { data, error } = await supabase
+    .from("orders")
+    .select(ORDER_SELECT)
+    .eq("customer_id", mine)
+    .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
   return ((data ?? []) as any[])
     .filter((r) => mine == null || r["customer_id"] === mine)
@@ -255,6 +252,7 @@ export async function hasOrderUpdates(): Promise<boolean> {
     const { data, error } = await supabase
       .from("orders")
       .select("customer_id, order_status_history(changed_at)")
+      .eq("customer_id", mine ?? NO_CUSTOMER)
       .limit(200);
     if (error) return false;
     // The bell reflects the customer's own orders; distributor-routed rows are filtered out.
@@ -498,6 +496,7 @@ export async function fetchMyDefaultDeliveryMode(): Promise<DeliveryMode> {
   const { data } = await supabase
     .from("customers")
     .select("default_delivery_mode, customer_types(default_delivery_mode)")
+    .eq("id", await ownCustomerFilter())
     .maybeSingle();
   const r = data as { default_delivery_mode: string | null; customer_types: { default_delivery_mode: string | null } | null } | null;
   return resolveDeliveryMode(r?.default_delivery_mode, r?.customer_types?.default_delivery_mode);

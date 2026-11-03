@@ -1,11 +1,12 @@
 import { readSwr, swr } from "@/lib/swr-cache";
-import { useCallback, useEffect, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { ArrowLeft, Clock, Download, FileText, IndianRupee, Loader2, Share2, XCircle } from "lucide-react";
 import en from "@/locales/en.json";
 import { PageShell } from "@/components/PageShell";
+import { BottomNav } from "@/components/BottomNav";
 import { KhataBalanceCard } from "@/components/KhataBalanceCard";
 import { SheetDrawer } from "@/components/SheetDrawer";
 import { EmptyState, ErrorState } from "@/components/catalog/states";
@@ -15,7 +16,7 @@ import { useOffline } from "@/hooks/use-offline";
 import { supabase } from "@/integrations/supabase/client";
 import { formatINR } from "@/lib/catalogue";
 import { istToday } from "@/lib/ist";
-import { dateLabel } from "@/lib/order-format";
+import { dateLabel, indDate } from "@/lib/order-format";
 import { getMyCustomerId } from "@/lib/orders";
 import { fetchAppInfo } from "@/lib/app-info";
 import { fetchOpenBills } from "@/lib/billing";
@@ -66,9 +67,12 @@ function KhataPage() {
   const [proofs, setProofs] = useState<KhataProof[]>(() => readSwr<KhataProof[]>("khata.proofs") ?? []);
   const [range, setRange] = useState<KhataRange>("last3");
   const [custom, setCustom] = useState(() => khataRange("thisMonth"));
-  const period = range === "custom" ? custom : khataRange(range);
+  const period = { from: "2015-01-01", to: khataRange("thisMonth").to };
+  void range; void setRange; void custom; void setCustom;
+  const [shown, setShown] = useState(30);
+  const moreRef = useRef<HTMLDivElement | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
-  const [rows, setRows] = useState<KhataEntry[] | null>(() => readSwr<KhataEntry[]>("khata.rows.last3"));
+  const [rows, setRows] = useState<KhataEntry[] | null>(() => readSwr<KhataEntry[]>("khata.rows.all"));
   const [rowsErr, setRowsErr] = useState<string | null>(null);
   const [stmtOpen, setStmtOpen] = useState(false);
 
@@ -80,7 +84,7 @@ function KhataPage() {
   useEffect(loadTop, [loadTop]);
 
   const loadRows = useCallback(() => {
-    const key = range === "last3" ? "khata.rows.last3" : null;
+    const key: string | null = "khata.rows.all";
     setRows(key ? readSwr<KhataEntry[]>(key) : null);
     setRowsErr(null);
     const get = () => fetchKhataEntries(period.from, period.to);
@@ -91,7 +95,16 @@ function KhataPage() {
   // Pending at the top; rejected ones from the last 30 days so the reason is seen.
   const cutoff = new Date(Date.now() - 30 * 864e5).toISOString();
   const topProofs = proofs.filter((p) => p.status === "pending" || (p.status === "rejected" && (p.reviewedAt ?? p.createdAt) > cutoff));
-  const list = rows ? filterEntries(passbookRows(rows), filter) : null;
+  const full = rows ? filterEntries(passbookRows(rows), filter) : null;
+  const list = full ? full.slice(0, shown) : null;
+  useEffect(() => setShown(30), [filter]);
+  useEffect(() => {
+    const el = moreRef.current;
+    if (!el || !full || shown >= full.length) return;
+    const io = new IntersectionObserver((es) => es[0]?.isIntersecting && setShown((n) => n + 30), { rootMargin: "300px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [full, shown]);
 
   const openEntry = (r: KhataEntry) => {
     if (r.kind !== "bill") return;
@@ -100,24 +113,9 @@ function KhataPage() {
   };
 
   return (
-    <PageShell className={`pb-28 ${deva}`} onRefresh={() => Promise.all([loadTop(), loadRows()])}>
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
-        <button
-          type="button"
-          onClick={() => navigate({ to: "/account" })}
-          aria-label={t("registration.back")}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
-        >
-          <ArrowLeft className="h-5 w-5" aria-hidden />
-        </button>
-        <h1 className="min-w-0 flex-1 truncate text-base font-bold">{t("khata.title")}</h1>
-        <button
-          type="button"
-          onClick={() => setStmtOpen(true)}
-          className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-secondary"
-        >
-          <FileText className="h-4 w-4" aria-hidden /> {t("khata.statement")}
-        </button>
+    <PageShell className={`pb-48 ${deva}`} onRefresh={() => Promise.all([loadTop(), loadRows()])}>
+      <header className="sticky top-0 z-20 flex items-center gap-2 bg-background/95 px-5 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md">
+        <h1 className="min-w-0 flex-1 truncate text-2xl font-bold text-primary">{t("khata.title")}</h1>
       </header>
 
       <div className="space-y-5 px-5 pt-5">
@@ -133,22 +131,6 @@ function KhataPage() {
 
         <section>
           <h2 className="mb-2 text-sm font-bold">{t("khata.passbook")}</h2>
-          <div role="group" aria-label={t("khata.passbook")} className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5">
-            {RANGES.map((k) => (
-              <button
-                key={k}
-                type="button"
-                aria-pressed={range === k}
-                onClick={() => setRange(k)}
-                className={`min-h-11 shrink-0 rounded-full border px-4 text-sm font-semibold ${
-                  range === k ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground"
-                }`}
-              >
-                {t(`khata.stmt.${k}`)}
-              </button>
-            ))}
-          </div>
-          {range === "custom" && <DateRange value={custom} onChange={setCustom} />}
           <div role="tablist" className="mt-3 grid grid-cols-3 gap-1 rounded-xl bg-muted p-1">
             {FILTERS.map((f) => (
               <button
@@ -175,56 +157,74 @@ function KhataPage() {
           ) : list.length === 0 ? (
             <EmptyState title={t("khata.noEntries")} body="" />
           ) : (
-            <ul className="mt-4 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-sm" data-testid="khata-entries">
-              {list.map((r, i) => {
-                const plus = r.debit > 0;
-                const amt = plus ? r.debit : r.credit;
-                return (
-                  <li key={`${r.refNo}-${r.date}-${i}`}>
-                    <button
-                      type="button"
-                      disabled={r.kind !== "bill"}
-                      onClick={() => openEntry(r)}
-                      className="flex w-full items-start gap-3 px-4 py-3 text-left disabled:cursor-default"
-                    >
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-semibold">{t(`khata.kind.${r.kind}`)}</span>
-                        <span className="block truncate text-xs text-muted-foreground">
-                          {dateLabel(r.date, lang)}
-                          {r.refNo ? ` · ${r.refNo}` : ""}
-                        </span>
-                      </span>
-                      <span className="shrink-0 text-right">
-                        <span className={`block text-sm font-bold ${plus ? "text-foreground" : "text-success"}`}>
-                          {plus ? "+" : "−"}
-                          {formatINR(amt)}
-                        </span>
-                        <span className="block text-[11px] text-muted-foreground">{r.balance < 0 ? t("khata.runningAdv", { amount: formatINR(-r.balance) }) : t("khata.runningBal", { amount: formatINR(r.balance) })}</span>
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="mt-4" data-testid="khata-entries">
+              <div className="grid grid-cols-[1fr_4.25rem_4.25rem_4.75rem] gap-1 px-1 pb-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                <span>{t("khata2.colDate")}</span>
+                <span className="text-right">{t("khata2.colBill")}</span>
+                <span className="text-right">{t("khata2.colPaid")}</span>
+                <span className="text-right">{t("khata2.colBalance")}</span>
+              </div>
+              {groupByDate(list).map(([day, items]) => (
+                <div key={day} className="border-t border-border/70">
+                  <p className="px-1 pt-2 text-xs font-semibold text-muted-foreground">{indDate(day, lang)}</p>
+                  <ul>
+                    {items.map((r, i) => (
+                      <li key={`${r.refNo}-${i}`}>
+                        <button
+                          type="button"
+                          disabled={r.kind !== "bill"}
+                          onClick={() => openEntry(r)}
+                          className="grid min-h-12 w-full grid-cols-[1fr_4.25rem_4.25rem_4.75rem] items-center gap-1 px-1 py-1.5 text-left text-xs disabled:cursor-default"
+                        >
+                          <span className="min-w-0">
+                            <span className="block truncate font-medium text-foreground">{t(`khata.kind.${r.kind}`)}</span>
+                            {r.refNo && <span className="block truncate text-[11px] text-muted-foreground">{r.refNo}</span>}
+                          </span>
+                          <span className="text-right font-semibold text-destructive">{r.debit > 0 ? formatINR(r.debit) : ""}</span>
+                          <span className="text-right font-semibold text-success">{r.credit > 0 ? formatINR(r.credit) : ""}</span>
+                          <span className={`text-right text-xs font-semibold ${r.balance < 0 ? "text-success" : "text-foreground"}`}>
+                            {r.balance < 0 ? `${formatINR(-r.balance)} ${t("khata2.advShort")}` : formatINR(r.balance)}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
           )}
+          {full && shown < full.length && <div ref={moreRef} className="h-10" aria-hidden />}
         </section>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 flex gap-2 border-t border-border bg-card p-3">
+        <Button type="button" variant="outline" onClick={() => setStmtOpen(true)} className="h-auto min-h-[52px] flex-1 rounded-xl text-base font-semibold">
+          <FileText className="h-5 w-5" aria-hidden /> {t("khata.statement")}
+        </Button>
         <Button
           type="button"
           disabled={offline}
           onClick={() => navigate({ to: "/khata/pay" })}
-          className="mx-auto flex h-auto min-h-[52px] w-full max-w-md rounded-xl text-base font-semibold"
+          className="flex h-auto min-h-[52px] flex-1 rounded-xl text-base font-semibold"
         >
           <IndianRupee className="h-5 w-5" aria-hidden /> {t("khata.payNow")}
         </Button>
         {offline && <p className="mt-1 text-center text-xs text-muted-foreground">{t("offline.hint")}</p>}
       </div>
 
+      <BottomNav />
       <StatementSheet open={stmtOpen} onOpenChange={setStmtOpen} />
     </PageShell>
   );
+}
+
+function groupByDate(rows: KhataEntry[]): [string, KhataEntry[]][] {
+  const m = new Map<string, KhataEntry[]>();
+  for (const r of rows) {
+    const k = (r.date ?? "").slice(0, 10);
+    m.set(k, [...(m.get(k) ?? []), r]);
+  }
+  return [...m.entries()];
 }
 
 function ProofRow({ p }: { p: KhataProof }) {
@@ -245,8 +245,8 @@ function ProofRow({ p }: { p: KhataProof }) {
             pending ? "bg-accent/20 text-accent-foreground" : "bg-destructive/10 text-destructive"
           }`}
         >
-          {pending ? <Clock className="h-3 w-3" aria-hidden /> : <XCircle className="h-3 w-3" aria-hidden />}
-          {pending ? t("khata.pendingTag") : t("khata.rejectedTag")}
+          {pending ? null : <XCircle className="h-3 w-3" aria-hidden />}
+          {pending ? `⏳ ${t("khata2.verifying")}` : t("khata.rejectedTag")}
         </span>
       </div>
       <span className="mt-0.5 block truncate text-xs text-muted-foreground">
@@ -256,7 +256,12 @@ function ProofRow({ p }: { p: KhataProof }) {
       {pending ? (
         <span className="mt-1 block text-xs text-muted-foreground">{t("khata.pendingNote")}</span>
       ) : (
-        p.rejectReason && <span className="mt-1 block text-xs font-medium text-destructive">{p.rejectReason}</span>
+        <>
+          <span className="mt-1 block text-xs font-medium text-destructive">✕ {t("khata2.rejected", { reason: p.rejectReason || t("khata2.noReason") })}</span>
+          <Link to="/khata/pay" className="mt-2 inline-flex min-h-10 items-center rounded-full border border-destructive/40 px-4 text-xs font-bold text-destructive">
+            {t("khata2.sendAgain")}
+          </Link>
+        </>
       )}
     </div>
   );

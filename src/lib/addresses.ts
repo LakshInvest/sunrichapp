@@ -1,3 +1,4 @@
+import { ownCustomerFilter } from "@/lib/my-customer";
 import { supabase } from "@/integrations/supabase/client";
 
 /** Saved delivery addresses: own rows via RLS, writes via save_my_address / delete_my_address. */
@@ -29,16 +30,22 @@ export async function listMyAddresses(): Promise<SavedAddress[]> {
   const { data, error } = await supabase
     .from("customer_addresses")
     .select("*")
+    .eq("customer_id", await ownCustomerFilter())
     .eq("is_active", true)
     .order("is_default", { ascending: false })
     .order("created_at");
   if (error) throw new Error(error.message);
-  return (data ?? []).map((r) => mapAddressRow(r));
+  return (data ?? []).map((r) => mapAddressRow(r as unknown as Record<string, unknown>));
 }
 
-/** Maps a customer_addresses row (also get_home's default_address) to a SavedAddress. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function mapAddressRow(r: any): SavedAddress {
+/** Maps a customer_addresses row (table or get_home().default_address) to SavedAddress. */
+type AddressRow = {
+  id: string; label: string; address_line1: string; address_line2: string | null; landmark: string | null;
+  city: string | null; state: string | null; pincode: string | null; latitude: number | null; longitude: number | null;
+  contact_name: string | null; contact_mobile: string | null; is_default: boolean;
+};
+export function mapAddressRow(row: Record<string, unknown>): SavedAddress {
+  const r = row as unknown as AddressRow;
   return {
     id: r.id,
     label: r.label,

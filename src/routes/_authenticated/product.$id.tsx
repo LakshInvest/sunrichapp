@@ -9,7 +9,9 @@ import { SmartImage } from "@/components/SmartImage";
 import { ImageViewer } from "@/components/ImageViewer";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ErrorState, EmptyState, GridSkeleton } from "@/components/catalog/states";
-import { PriceBlock } from "@/components/catalog/ProductCard";
+import { PriceBlock, QtyStepper } from "@/components/catalog/ProductCard";
+import { perUnit, rupees2 } from "@/lib/price-math";
+import { isBusinessType, useTypeCode } from "@/lib/customer-type";
 import { useRateLocked } from "@/lib/rate-lock";
 import { openPriceRequestChat } from "@/lib/price-request";
 import { useLang } from "@/hooks/use-lang";
@@ -50,6 +52,7 @@ function ProductDetail() {
   const fav = useFavourites();
   const deva = lang === "en" ? "" : "font-deva";
   const rateLocked = useRateLocked();
+  const business = isBusinessType(useTypeCode());
 
   const [data, setData] = useState<CatalogData | null>(() => readCatalogueCache());
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -152,8 +155,12 @@ function ProductDetail() {
     );
   }
 
-  const isFav = fav.isFav(product);
   const canOrder = product.canOrder;
+  const unit = perUnit(product);
+  const cartTotal = Object.entries(quantities).reduce((sum, [pid, q]) => {
+    const p = data?.products.find((x) => x.id === pid);
+    return p?.price != null ? sum + p.price * q : sum;
+  }, 0);
   const blocked = !canOrder;
 
   return (
@@ -170,19 +177,6 @@ function ProductDetail() {
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
         <p className="min-w-0 flex-1 truncate text-base font-bold text-foreground">{loc(product.name, lang)}</p>
-        <button
-          type="button"
-          onClick={() => void fav.toggle(product)}
-          aria-pressed={isFav}
-          aria-label={t(isFav ? "catalog.removeFavourite" : "catalog.addFavourite")}
-          className={`flex h-11 w-11 items-center justify-center rounded-xl transition active:scale-95 ${
-            isFav ? "text-destructive" : "text-muted-foreground"
-          }`}
-        >
-          <svg viewBox="0 0 24 24" className={`h-6 w-6 ${isFav ? "fill-destructive" : "fill-none"} stroke-current`} strokeWidth={1.8} aria-hidden>
-            <path d="M12 21s-7.5-4.6-10-9.3C.5 8 2.6 4 6.5 4c2.2 0 3.8 1.2 5.5 3.2C13.7 5.2 15.3 4 17.5 4 21.4 4 23.5 8 22 11.7 19.5 16.4 12 21 12 21Z" />
-          </svg>
-        </button>
       </header>
 
       {/* Gallery */}
@@ -231,7 +225,27 @@ function ProductDetail() {
           {packLine(product, volume, lang, t)}
         </p>
 
-        <PriceBlock product={product} size="detail" className="mt-4" />
+        {rateLocked || product.price === null ? (
+          <PriceBlock product={product} size="detail" className="mt-4" />
+        ) : (
+          <div className="mt-4 space-y-0.5" data-testid="product-price">
+            <p className="text-lg text-foreground">
+              <span className="text-2xl font-bold text-primary">{formatINR(product.price)}</span>
+              <span className="text-muted-foreground"> / {t("product2.pack")}</span>
+              {unit.rate != null && <span className="text-sm text-muted-foreground"> · {t("product2.perBottle", { amount: rupees2(unit.rate) })}</span>}
+            </p>
+            {unit.mrp != null ? (
+              <p className="text-sm text-muted-foreground">{t("product2.mrpPerBottle", { amount: rupees2(unit.mrp) })}</p>
+            ) : product.mrp != null && product.mrp > product.price ? (
+              <p className="text-sm text-muted-foreground">{t("catalog.mrp", { amount: formatINR(product.mrp) })}</p>
+            ) : null}
+            {unit.saving != null && (
+              <p className="text-sm font-semibold text-success">
+                {t(business ? "product2.margin" : "product2.save", { amount: formatINR(unit.saving) })}
+              </p>
+            )}
+          </div>
+        )}
 
         {product.description && (
           <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
@@ -239,33 +253,6 @@ function ProductDetail() {
           </p>
         )}
 
-        {/* Quantity (priced products only) */}
-        {product.price !== null && !rateLocked && (
-        <div className="mt-5 flex items-center justify-between rounded-2xl border border-border bg-card p-4">
-          <span className="text-sm font-semibold text-foreground">{t("product.quantity")}</span>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setQty(product.id, qty - 1)}
-              disabled={offline || qty <= 0}
-              aria-label={t("home.decreaseQty")}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background transition active:scale-90 disabled:opacity-40"
-            >
-              <Minus className="h-4 w-4" />
-            </button>
-            <span className="min-w-8 text-center text-lg font-bold">{qty}</span>
-            <button
-              type="button"
-              onClick={() => setQty(product.id, qty + 1)}
-              disabled={offline || (product.maxOrderQty != null && qty >= product.maxOrderQty)}
-              aria-label={t("home.increaseQty")}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background transition active:scale-90 disabled:opacity-40"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-        )}
         {(product.minOrderQty > 1 || product.maxOrderQty != null) && product.price !== null && !rateLocked && (
           <p className="mt-2 text-center text-xs text-muted-foreground">
             {t("product.qtyLimits", {
@@ -319,12 +306,6 @@ function ProductDetail() {
               🔒 {t("catalog.rateAfterApproval")}
             </p>
           ) : (<>
-          {product.price !== null && qty > 0 && (
-            <div className="min-w-0 shrink-0">
-              <p className="text-xs text-muted-foreground">{t("product.total")}</p>
-              <p className="text-lg font-bold text-primary">{formatINR(product.price * qty)}</p>
-            </div>
-          )}
           {product.price === null ? (
             <button
               type="button"
@@ -334,14 +315,25 @@ function ProductDetail() {
               {t("catalog.priceOnRequest")}
             </button>
           ) : qty > 0 ? (
-            <button
-              type="button"
-              onClick={() => navigate({ to: "/cart" })}
-              className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-secondary text-base font-semibold text-secondary-foreground shadow-md transition active:scale-[0.98]"
-            >
-              {t("cart.viewCart")}
-              <ChevronRight className="h-4 w-4" aria-hidden />
-            </button>
+            <>
+              <div className="w-32 shrink-0">
+                <QtyStepper
+                  className="h-12"
+                  qty={qty}
+                  onDec={() => setQty(product.id, qty - 1)}
+                  onInc={() => setQty(product.id, qty + 1)}
+                  onSet={(n) => setQty(product.id, product.maxOrderQty != null ? Math.min(n, product.maxOrderQty) : n)}
+                  max={product.maxOrderQty}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/cart" })}
+                className="flex min-h-12 flex-1 items-center justify-center gap-1 rounded-xl bg-secondary text-sm font-semibold text-secondary-foreground shadow-md transition active:scale-[0.98]"
+              >
+                {t("product2.viewCart", { amount: formatINR(cartTotal) })}
+              </button>
+            </>
           ) : (
             <button
               type="button"

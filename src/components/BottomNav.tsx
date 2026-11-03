@@ -1,17 +1,18 @@
-import { getHomeExtras } from "@/lib/catalogue";
+import { getHomeExtras, onHomeExtras } from "@/lib/catalogue";
+import { ownCustomerFilter } from "@/lib/my-customer";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
-import { Home, Inbox, Package, ShoppingBag, UserRound, type LucideIcon } from "lucide-react";
+import { BookOpen, Home, Inbox, Package, UserRound, type LucideIcon } from "lucide-react";
 import { hasOrderUpdates, useDistributorNav } from "@/lib/orders";
 import { supabase } from "@/integrations/supabase/client";
 
-type Tab = { to: "/home" | "/order" | "/track" | "/account" | "/inbox"; key: string; icon: LucideIcon };
+type Tab = { to: "/home" | "/khata" | "/track" | "/account" | "/inbox"; key: string; icon: LucideIcon };
 
 const TABS: Tab[] = [
   { to: "/home", key: "nav.home", icon: Home },
-  { to: "/order", key: "nav.order", icon: ShoppingBag },
   { to: "/track", key: "nav.track", icon: Package },
+  { to: "/khata", key: "nav.khata", icon: BookOpen },
   { to: "/inbox", key: "nav.inbox", icon: Inbox },
   { to: "/account", key: "nav.account", icon: UserRound },
 ];
@@ -34,20 +35,22 @@ export function BottomNav() {
   }, [pathname]);
 
   const [replied, setReplied] = useState(false);
+  // On Home the chat count comes from get_home(); other tabs ask directly.
   useEffect(() => {
+    if (pathname !== "/home") return;
+    return onHomeExtras((x) => setReplied(x.awaitingReply > 0));
+  }, [pathname]);
+  useEffect(() => {
+    if (pathname === "/home" && getHomeExtras()) return;
     let active = true;
-    // get_home() already returned the count (own chats only) moments ago.
-    const x = getHomeExtras();
-    if (x && Date.now() - x.at < 30_000) {
-      setReplied(x.awaitingReply > 0);
-      return () => {
-        active = false;
-      };
-    }
-    void supabase
-      .from("customer_queries")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "open")
+    void ownCustomerFilter()
+      .then((cid) =>
+        supabase
+          .from("customer_queries")
+          .select("id", { count: "exact", head: true })
+          .eq("customer_id", cid)
+          .eq("status", "open"),
+      )
       .then(({ count }) => active && setReplied((count ?? 0) > 0));
     return () => {
       active = false;
@@ -57,7 +60,7 @@ export function BottomNav() {
   const tabs: Tab[] = isDistributor ? TABS : TABS.filter((tab) => tab.to !== "/inbox");
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md">
+    <nav data-hide-on-type className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md">
       <div className="mx-auto flex max-w-md shadow-[0_-8px_24px_-16px_rgba(11,37,69,0.35)]">
         {tabs.map(({ to, key, icon: Icon }) => {
           const active = pathname === to || (to === "/track" && pathname.startsWith("/track/"));

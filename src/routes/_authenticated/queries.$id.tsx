@@ -1,3 +1,4 @@
+import { ownCustomerFilter } from "@/lib/my-customer";
 import { serverMessage } from "@/lib/form-errors";
 import { PageShell } from "@/components/PageShell";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -161,6 +162,7 @@ function Thread() {
       .from("customer_queries")
       .select("id, subject, status")
       .eq("id", id)
+      .eq("customer_id", await ownCustomerFilter())
       .maybeSingle();
     if (!q) {
       setMissing(true);

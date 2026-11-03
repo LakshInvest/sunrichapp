@@ -1,3 +1,7 @@
+import { LaunchSplash } from "@/components/LaunchSplash";
+import splashLogo from "@/assets/splash-logo.png.asset.json";
+import { clearMyCustomer } from "@/lib/my-customer";
+import { clearTypeCode } from "@/lib/customer-type";
 import { applyStatusBar } from "@/lib/status-bar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -105,6 +109,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" },
+      { rel: "preload", as: "image", href: splashLogo.url },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
       { rel: "apple-touch-icon", href: "/icon-192.png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
@@ -123,6 +128,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <LaunchSplash />
         {children}
         <Scripts />
       </body>
@@ -140,7 +146,7 @@ function RootComponent() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       if (event === "SIGNED_IN") void refreshPushToken();
-      if (event === "SIGNED_OUT") clearUserCaches();
+      if (event === "SIGNED_OUT") { clearUserCaches(); clearMyCustomer(); clearTypeCode(); }
       void router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });

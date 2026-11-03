@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { IndianRupee } from "lucide-react";
-import { formatINR, getHomeExtras, onHomeExtras } from "@/lib/catalogue";
-import { fetchKhataSummary } from "@/lib/khata";
+import { formatINR, onHomeExtras } from "@/lib/catalogue";
+import { fetchKhataSummary, mapKhataSummary } from "@/lib/khata";
 
 /** Home strip "₹X overdue · Pay" — only when the Khata shows an overdue amount. */
 export function KhataPayShortcut() {
@@ -11,20 +11,18 @@ export function KhataPayShortcut() {
   const navigate = useNavigate();
   const [overdue, setOverdue] = useState(0);
   useEffect(() => {
-    // Home's get_home() already carries the Khata summary; fetch only when
-    // Home was served from cache without a network call.
-    const pick = (k: Record<string, unknown> | null) => setOverdue(Number(k?.["overdue"] ?? 0) || 0);
-    const off = onHomeExtras((x) => pick(x.khata));
-    const x = getHomeExtras();
-    if (x) pick(x.khata);
-    const id = x
-      ? undefined
-      : setTimeout(() => {
-          if (!getHomeExtras()) fetchKhataSummary().then((s) => setOverdue(s.overdue), () => setOverdue(0));
-        }, 2500);
+    // Home's get_home() call carries the Khata summary; fetch only if it never arrives.
+    let got = false;
+    const off = onHomeExtras((x) => {
+      got = true;
+      setOverdue(x.khata ? mapKhataSummary(x.khata).overdue : 0);
+    });
+    const timer = setTimeout(() => {
+      if (!got) fetchKhataSummary().then((s) => setOverdue(s.overdue), () => setOverdue(0));
+    }, 2500);
     return () => {
-      if (id) clearTimeout(id);
       off();
+      clearTimeout(timer);
     };
   }, []);
   if (!(overdue > 0)) return null;

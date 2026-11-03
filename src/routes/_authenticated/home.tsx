@@ -169,7 +169,8 @@ function Home() {
   // Cache first, then refresh silently; a failure keeps the cached view.
   useEffect(() => {
     let active = true;
-    setLoading(true);
+    // Render the saved copy at once; only show skeletons when there's nothing saved.
+    if (!readCatalogueCache()) setLoading(true);
     load()
       .catch(() => undefined)
       .finally(() => {

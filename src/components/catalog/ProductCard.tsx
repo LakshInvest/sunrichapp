@@ -122,13 +122,13 @@ export function QtyStepper({
           value={draft}
           onChange={(e) => setDraft(e.target.value.replace(/\D/g, "").slice(0, 4))}
           onFocus={(e) => {
-            document.documentElement.dataset.typing = "1";
+            document.documentElement.dataset["typing"] = "1";
             const el = e.currentTarget;
             el.select();
             setTimeout(() => el.scrollIntoView({ block: "center", behavior: "smooth" }), 350);
           }}
           onBlur={() => {
-            delete document.documentElement.dataset.typing;
+            delete document.documentElement.dataset["typing"];
             commit();
           }}
           onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}

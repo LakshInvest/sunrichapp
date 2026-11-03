@@ -7,7 +7,7 @@ const UNIT = (s: string) => {
 };
 function volume(text: string): string | null {
   const m = text.match(/(\d+(?:\.\d+)?)\s*(ml|millilit(?:re|er)s?|l|ltr|lit(?:re|er)s?)\b/i);
-  return m ? `${m[1]} ${UNIT(m[2])}` : null;
+  return m ? `${m[1]} ${UNIT(m[2] ?? "")}` : null;
 }
 export function formatPack(label: string | null | undefined, units?: number | null, volumeMl?: number | null): string {
   const raw = (label ?? "").trim();

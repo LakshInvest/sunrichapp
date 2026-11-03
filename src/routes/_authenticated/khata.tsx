@@ -162,7 +162,7 @@ function KhataPage() {
             <EmptyState title={t("khata.noEntries")} body="" />
           ) : (
             <div className="mt-4" data-testid="khata-entries">
-              <div className="grid grid-cols-[1fr_5rem_5rem_5.5rem] gap-1 px-1 pb-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              <div className="grid grid-cols-[1fr_4.25rem_4.25rem_4.75rem] gap-1 px-1 pb-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
                 <span>{t("khata2.colDate")}</span>
                 <span className="text-right">{t("khata2.colBill")}</span>
                 <span className="text-right">{t("khata2.colPaid")}</span>
@@ -178,7 +178,7 @@ function KhataPage() {
                           type="button"
                           disabled={r.kind !== "bill"}
                           onClick={() => openEntry(r)}
-                          className="grid min-h-12 w-full grid-cols-[1fr_5rem_5rem_5.5rem] items-center gap-1 px-1 py-1.5 text-left text-sm disabled:cursor-default"
+                          className="grid min-h-12 w-full grid-cols-[1fr_4.25rem_4.25rem_4.75rem] items-center gap-1 px-1 py-1.5 text-left text-xs disabled:cursor-default"
                         >
                           <span className="min-w-0">
                             <span className="block truncate font-medium text-foreground">{t(`khata.kind.${r.kind}`)}</span>

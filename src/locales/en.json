@@ -1207,5 +1207,15 @@
     "margin": "Margin {{amount}}",
     "save": "Save {{amount}}",
     "viewCart": "View cart · {{amount}}"
+  },
+  "account2": {
+    "business": "Business details",
+    "businessName": "Shop / business",
+    "owner": "Owner",
+    "type": "Type",
+    "gst": "GSTIN",
+    "code": "Customer code",
+    "businessHint": "To change these, message Sunrich from Help & support.",
+    "logoutConfirm": "Are you sure you want to log out?"
   }
 }

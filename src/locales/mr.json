@@ -1207,5 +1207,15 @@
     "margin": "मार्जिन {{amount}}",
     "save": "बचत {{amount}}",
     "viewCart": "कार्ट पहा · {{amount}}"
+  },
+  "account2": {
+    "business": "व्यवसाय तपशील",
+    "businessName": "दुकान / व्यवसाय",
+    "owner": "मालक",
+    "type": "प्रकार",
+    "gst": "GSTIN",
+    "code": "ग्राहक कोड",
+    "businessHint": "बदलण्यासाठी Help & support मधून Sunrich ला मेसेज करा.",
+    "logoutConfirm": "नक्की लॉग आउट करायचे?"
   }
 }

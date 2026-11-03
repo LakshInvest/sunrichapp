@@ -52,6 +52,7 @@ function ProductDetail() {
   const fav = useFavourites();
   const deva = lang === "en" ? "" : "font-deva";
   const rateLocked = useRateLocked();
+  const business = isBusinessType(useTypeCode());
 
   const [data, setData] = useState<CatalogData | null>(() => readCatalogueCache());
   const [loadError, setLoadError] = useState<string | null>(null);

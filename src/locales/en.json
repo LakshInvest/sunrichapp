@@ -1199,5 +1199,13 @@
     "track": "Track",
     "reorder": "Reorder",
     "dismiss": "Hide"
+  },
+  "product2": {
+    "pack": "pack",
+    "perBottle": "{{amount}} per bottle",
+    "mrpPerBottle": "MRP {{amount}} per bottle",
+    "margin": "Margin {{amount}}",
+    "save": "Save {{amount}}",
+    "viewCart": "View cart · {{amount}}"
   }
 }

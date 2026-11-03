@@ -1199,5 +1199,13 @@
     "track": "ट्रॅक करा",
     "reorder": "पुन्हा ऑर्डर",
     "dismiss": "लपवा"
+  },
+  "product2": {
+    "pack": "पॅक",
+    "perBottle": "{{amount}} प्रति बाटली",
+    "mrpPerBottle": "MRP {{amount}} प्रति बाटली",
+    "margin": "मार्जिन {{amount}}",
+    "save": "बचत {{amount}}",
+    "viewCart": "कार्ट पहा · {{amount}}"
   }
 }

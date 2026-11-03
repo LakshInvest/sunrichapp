@@ -5,6 +5,7 @@ import { useRateLocked } from "@/lib/rate-lock";
 import { useRouter } from "@tanstack/react-router";
 import { SmartImage } from "@/components/SmartImage";
 import { isBusinessType, useTypeCode } from "@/lib/customer-type";
+import { formatPack, fixName } from "@/lib/pack-label";
 import { formatINR, loc, priceSave, type CatalogProduct } from "@/lib/catalogue";
 
 /** Price + struck MRP on one line. Shared by cards, the detail screen and the cart. */
@@ -120,10 +121,19 @@ export function QtyStepper({
           pattern="[0-9]*"
           value={draft}
           onChange={(e) => setDraft(e.target.value.replace(/\D/g, "").slice(0, 4))}
-          onBlur={commit}
+          onFocus={(e) => {
+            document.documentElement.dataset.typing = "1";
+            const el = e.currentTarget;
+            el.select();
+            setTimeout(() => el.scrollIntoView({ block: "center", behavior: "smooth" }), 350);
+          }}
+          onBlur={() => {
+            delete document.documentElement.dataset.typing;
+            commit();
+          }}
           onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
           aria-label={t("home.typeQty")}
-          className="h-full w-12 min-w-0 bg-transparent text-center text-sm font-bold text-primary-foreground caret-primary-foreground outline-none"
+          className="h-full w-12 min-w-0 bg-transparent text-center text-sm font-bold text-primary-foreground caret-transparent outline-none selection:bg-transparent"
         />
       ) : (
         <button
@@ -185,17 +195,18 @@ export function ProductCard({
   const prefetch = onPrefetch ?? (() => void router.preloadRoute({ to: "/product/$id", params: { id: product.id } }).catch(() => undefined));
   const blocked = !canOrder;
   const disabled = blocked || offline;
-  const name = loc(product.name, lang);
+  const name = fixName(loc(product.name, lang));
+  const pack = formatPack(loc(product.packLabel, lang), product.unitsPerSellUnit, product.volumeMl);
   const save = locked ? null : priceSave(product);
   const saveKey = isBusinessType(useTypeCode()) ? "product2.margin" : "catalog.save";
   return (
-    <div className="flex h-full flex-col">
-      <button type="button" onClick={onOpen} onPointerDown={prefetch} aria-label={name} className="block aspect-square w-full overflow-hidden rounded-2xl bg-muted/40">
-        <SmartImage width={180} src={product.imageUrl ?? product.images[0] ?? null} alt={name} className="h-full w-full object-contain p-3" />
+    <div className="flex h-full flex-col rounded-2xl bg-card p-2.5 shadow-[0_1px_8px_-2px_color-mix(in_oklab,var(--primary)_14%,transparent)]">
+      <button type="button" onClick={onOpen} onPointerDown={prefetch} aria-label={name} className="block aspect-square w-full overflow-hidden rounded-xl bg-card">
+        <SmartImage width={180} src={product.imageUrl ?? product.images[0] ?? null} alt={name} className="h-full w-full bg-card object-contain p-1 mix-blend-multiply" />
       </button>
       <button type="button" onClick={onOpen} className="mt-2 text-left">
         <p className="truncate text-sm font-bold leading-snug text-foreground">{name}</p>
-        <p className="truncate text-xs leading-tight text-muted-foreground">{loc(product.packLabel, lang) || "\u00a0"}</p>
+        <p className="truncate text-xs leading-tight text-muted-foreground">{pack || "\u00a0"}</p>
       </button>
       <div className="mt-1.5 flex min-h-9 flex-col justify-end">
         <PriceLine product={product} />
@@ -206,7 +217,7 @@ export function ProductCard({
           <div className="h-10" />
         ) : product.price === null ? (
           onPriceRequest ? (
-            <button type="button" onClick={onPriceRequest} className="flex h-10 w-full items-center justify-center rounded-full border border-primary/30 text-xs font-bold text-primary active:scale-95">
+            <button type="button" onClick={onPriceRequest} className="flex h-10 w-full items-center justify-center rounded-full bg-secondary/15 text-xs font-bold text-primary active:scale-95">
               {t("catalog.priceOnRequest")}
             </button>
           ) : <div className="h-10" />
@@ -216,7 +227,7 @@ export function ProductCard({
             onClick={onAdd}
             disabled={disabled}
             title={blocked ? t("cart.orderingAfterApproval") : offline ? t("offline.hint") : undefined}
-            className="flex h-10 w-full items-center justify-center gap-1 rounded-full border border-primary text-sm font-bold text-primary transition active:scale-95 disabled:opacity-50"
+            className="ml-auto flex h-10 items-center justify-center gap-1 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground shadow-sm transition active:scale-95 disabled:opacity-50"
           >
             <Plus className="h-4 w-4" aria-hidden />
             {t("home.addToCart")}

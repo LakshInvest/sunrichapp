@@ -67,9 +67,12 @@ function KhataPage() {
   const [proofs, setProofs] = useState<KhataProof[]>(() => readSwr<KhataProof[]>("khata.proofs") ?? []);
   const [range, setRange] = useState<KhataRange>("last3");
   const [custom, setCustom] = useState(() => khataRange("thisMonth"));
-  const period = range === "custom" ? custom : khataRange(range);
+  const period = { from: "2015-01-01", to: khataRange("thisMonth").to };
+  void range; void setRange; void custom; void setCustom;
+  const [shown, setShown] = useState(30);
+  const moreRef = useRef<HTMLDivElement | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
-  const [rows, setRows] = useState<KhataEntry[] | null>(() => readSwr<KhataEntry[]>("khata.rows.last3"));
+  const [rows, setRows] = useState<KhataEntry[] | null>(() => readSwr<KhataEntry[]>("khata.rows.all"));
   const [rowsErr, setRowsErr] = useState<string | null>(null);
   const [stmtOpen, setStmtOpen] = useState(false);
 
@@ -81,7 +84,7 @@ function KhataPage() {
   useEffect(loadTop, [loadTop]);
 
   const loadRows = useCallback(() => {
-    const key = range === "last3" ? "khata.rows.last3" : null;
+    const key: string | null = "khata.rows.all";
     setRows(key ? readSwr<KhataEntry[]>(key) : null);
     setRowsErr(null);
     const get = () => fetchKhataEntries(period.from, period.to);
@@ -92,7 +95,16 @@ function KhataPage() {
   // Pending at the top; rejected ones from the last 30 days so the reason is seen.
   const cutoff = new Date(Date.now() - 30 * 864e5).toISOString();
   const topProofs = proofs.filter((p) => p.status === "pending" || (p.status === "rejected" && (p.reviewedAt ?? p.createdAt) > cutoff));
-  const list = rows ? filterEntries(passbookRows(rows), filter) : null;
+  const full = rows ? filterEntries(passbookRows(rows), filter) : null;
+  const list = full ? full.slice(0, shown) : null;
+  useEffect(() => setShown(30), [filter]);
+  useEffect(() => {
+    const el = moreRef.current;
+    if (!el || !full || shown >= full.length) return;
+    const io = new IntersectionObserver((es) => es[0]?.isIntersecting && setShown((n) => n + 30), { rootMargin: "300px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [full, shown]);
 
   const openEntry = (r: KhataEntry) => {
     if (r.kind !== "bill") return;
@@ -102,8 +114,8 @@ function KhataPage() {
 
   return (
     <PageShell className={`pb-48 ${deva}`} onRefresh={() => Promise.all([loadTop(), loadRows()])}>
-      <header className="sticky top-0 z-20 flex items-center gap-2 bg-background/95 px-5 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
-        <h1 className="min-w-0 flex-1 truncate text-base font-bold">{t("khata.title")}</h1>
+      <header className="sticky top-0 z-20 flex items-center gap-2 bg-background/95 px-5 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md">
+        <h1 className="min-w-0 flex-1 truncate text-2xl font-bold text-primary">{t("khata.title")}</h1>
       </header>
 
       <div className="space-y-5 px-5 pt-5">
@@ -119,22 +131,6 @@ function KhataPage() {
 
         <section>
           <h2 className="mb-2 text-sm font-bold">{t("khata.passbook")}</h2>
-          <div role="group" aria-label={t("khata.passbook")} className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5">
-            {RANGES.map((k) => (
-              <button
-                key={k}
-                type="button"
-                aria-pressed={range === k}
-                onClick={() => setRange(k)}
-                className={`min-h-11 shrink-0 rounded-full border px-4 text-sm font-semibold ${
-                  range === k ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground"
-                }`}
-              >
-                {t(`khata.stmt.${k}`)}
-              </button>
-            ))}
-          </div>
-          {range === "custom" && <DateRange value={custom} onChange={setCustom} />}
           <div role="tablist" className="mt-3 grid grid-cols-3 gap-1 rounded-xl bg-muted p-1">
             {FILTERS.map((f) => (
               <button

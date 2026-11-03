@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { loc, sizedUrl, type CatalogBanner } from "@/lib/catalogue";
+import { loc, type CatalogBanner } from "@/lib/catalogue";
+import { sizedUrl } from "@/components/SmartImage";
 
 /**
  * Top-of-Home banner carousel (1080×720, 3:2). Auto-slides using each banner's own

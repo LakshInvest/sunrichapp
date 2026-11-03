@@ -496,7 +496,7 @@ function Home() {
           <h2 className={`text-lg font-bold text-foreground ${deva}`}>{t("home.allProducts")}</h2>
 
 
-          <div className="mt-3 grid grid-cols-2 gap-3">
+          <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-6">
             {visibleProducts.map((product) => {
               const p = withFav(product);
               return (

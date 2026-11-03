@@ -3,16 +3,16 @@ import { ownCustomerFilter } from "@/lib/my-customer";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
-import { Home, Inbox, Package, ShoppingBag, UserRound, type LucideIcon } from "lucide-react";
+import { BookOpen, Home, Inbox, Package, UserRound, type LucideIcon } from "lucide-react";
 import { hasOrderUpdates, useDistributorNav } from "@/lib/orders";
 import { supabase } from "@/integrations/supabase/client";
 
-type Tab = { to: "/home" | "/order" | "/track" | "/account" | "/inbox"; key: string; icon: LucideIcon };
+type Tab = { to: "/home" | "/khata" | "/track" | "/account" | "/inbox"; key: string; icon: LucideIcon };
 
 const TABS: Tab[] = [
   { to: "/home", key: "nav.home", icon: Home },
-  { to: "/order", key: "nav.order", icon: ShoppingBag },
   { to: "/track", key: "nav.track", icon: Package },
+  { to: "/khata", key: "nav.khata", icon: BookOpen },
   { to: "/inbox", key: "nav.inbox", icon: Inbox },
   { to: "/account", key: "nav.account", icon: UserRound },
 ];

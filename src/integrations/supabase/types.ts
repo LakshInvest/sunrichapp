@@ -196,7 +196,11 @@ export type Database = {
           min_order_value: number
           multiple_addresses: boolean
           pickup_hours: string | null
+          pickup_hours_hi: string | null
+          pickup_hours_mr: string | null
           plant_address: string | null
+          plant_address_hi: string | null
+          plant_address_mr: string | null
           play_store_url: string | null
           prices_include_gst: boolean
           privacy_md: string | null
@@ -236,7 +240,11 @@ export type Database = {
           min_order_value?: number
           multiple_addresses?: boolean
           pickup_hours?: string | null
+          pickup_hours_hi?: string | null
+          pickup_hours_mr?: string | null
           plant_address?: string | null
+          plant_address_hi?: string | null
+          plant_address_mr?: string | null
           play_store_url?: string | null
           prices_include_gst?: boolean
           privacy_md?: string | null
@@ -276,7 +284,11 @@ export type Database = {
           min_order_value?: number
           multiple_addresses?: boolean
           pickup_hours?: string | null
+          pickup_hours_hi?: string | null
+          pickup_hours_mr?: string | null
           plant_address?: string | null
+          plant_address_hi?: string | null
+          plant_address_mr?: string | null
           play_store_url?: string | null
           prices_include_gst?: boolean
           privacy_md?: string | null

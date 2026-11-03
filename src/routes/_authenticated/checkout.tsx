@@ -7,7 +7,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, CalendarDays, ChevronDown, Loader2, MapPin, Wallet } from "lucide-react";
 import { Banknote, FileCheck2, Landmark as LandmarkIcon, Smartphone as PhoneIcon } from "lucide-react";
-import { defaultPayMethod, setOrderPaymentMethod, type PayMethod } from "@/lib/payments";
+import { creditChoice, defaultPayMethod, setOrderPaymentMethod, type PayMethod } from "@/lib/payments";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SmartImage } from "@/components/SmartImage";
@@ -102,7 +102,11 @@ function Checkout() {
   useEffect(() => {
     fetchMyAdvance().then(setAdvance, () => setAdvance(0));
   }, []);
-  const [pay, setPay] = useState<PayMethod>("cash");
+  const [pay, setPay] = useState<PayMethod>("upi");
+  const [step, setStep] = useState<"mode" | "confirm">("mode");
+  const [dateOpen, setDateOpen] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false);
   const payTouched = useRef(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [placing, setPlacing] = useState(false);
@@ -262,7 +266,7 @@ function Checkout() {
   const addressLines = [addr.line1, addr.line2, addr.landmark, addr.city, addr.pincode].filter(Boolean);
 
   const place = async () => {
-    if (placingRef.current || offline || rows.length === 0 || shortfall > 0 || !day || noSlot) return;
+    if (placingRef.current || offline || rows.length === 0 || shortfall > 0 || !day || (pay === "credit" && !credit.allowed)) return;
     placingRef.current = true;
     setPlacing(true);
     setError(null);
@@ -278,7 +282,7 @@ function Checkout() {
           latitude: loc_?.lat ?? null,
           longitude: loc_?.lng ?? null,
           delivery_date: deliveryDate,
-          delivery_slot: pickup ? t("delivery.pickupSlot") : (slots.find((y) => y.code === slot)?.name ?? slotLabel),
+          delivery_slot: pickup ? t("delivery.pickupSlot") : "",
         },
         notesAllowed ? notes.trim() || null : null,
       );
@@ -303,7 +307,7 @@ function Checkout() {
       } catch (e) {
         console.warn("set_order_payment_method failed", e);
       }
-      sessionStorage.setItem("sunrich.lastOrder", JSON.stringify({ parts, deliveryDate, slot: slotLabel, payMethod: pay, pickup }));
+      sessionStorage.setItem("sunrich.lastOrder", JSON.stringify({ parts, deliveryDate, slot: "", payMethod: pay, pickup }));
       clear();
       await navigate({ to: "/order-success" });
     } catch (e) {
@@ -314,14 +318,12 @@ function Checkout() {
     }
   };
 
-  const creditAllowed = quote != null && quote.credit_limit > 0 && !quote.credit_blocked;
+  const bill = quote ? quote.items_total + quote.deposit_total : itemsTotal;
+  const credit = creditChoice(quote, bill);
   useEffect(() => {
-    if (!payTouched.current && quote) setPay(defaultPayMethod(quote));
-  }, [quote]);
-  const exceedsCredit =
-    quote != null &&
-    quote.credit_limit > 0 &&
-    (quote.credit_exceeds ?? quote.items_total + quote.deposit_total > quote.credit_available);
+    if (!payTouched.current) setPay(defaultPayMethod());
+    else if (pay === "credit" && !credit.allowed) setPay("upi");
+  }, [credit.allowed, pay]);
 
   const inputCls =
     "min-h-12 w-full rounded-xl border border-input bg-card px-4 text-base text-foreground outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30";
@@ -330,398 +332,248 @@ function Checkout() {
       active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground"
     }`;
 
+  const payable = quote ? advanceAtCheckout(bill, advance).payable : itemsTotal;
+  const dayObj = days.find((d) => d.iso === day);
+  const dayText = (d: (typeof days)[number]) =>
+    `${d.isToday ? t("checkout.today") : d.iso === days.find((x) => !x.isToday)?.iso && days[0]?.isToday ? t("checkout.tomorrow") : fmtDay(d.date).split(",")[0]}, ${fmtDay(d.date).replace(/^[^,]*,\s*/, "")}`;
+  const itemCount = rows.reduce((a, r) => a + r.qty, 0);
+  const oneLineAddr = addressLines.join(", ");
+  const Row = ({ icon, text, sub, onChange, right }: { icon: string; text: string; sub?: string; onChange?: () => void; right?: string }) => (
+    <div className="flex min-h-14 items-center gap-3 border-b border-border/60 py-3 last:border-0">
+      <span aria-hidden className="text-lg">{icon}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-semibold text-foreground">{text}</span>
+        {sub && <span className="block truncate text-xs text-muted-foreground">{sub}</span>}
+      </span>
+      {right && <span className="text-sm font-bold text-foreground">{right}</span>}
+      {onChange && (
+        <button type="button" onClick={onChange} className="min-h-11 px-2 text-sm font-semibold text-secondary">
+          {t("addresses.change")}
+        </button>
+      )}
+    </div>
+  );
+
   return (
-    <main className={`mx-auto min-h-screen max-w-md bg-background pb-16 ${deva}`}>
+    <main className={`mx-auto min-h-screen max-w-md bg-background pb-32 ${deva}`}>
       <OfflineBanner />
       {isDemo && (
         <p role="status" className="bg-accent px-5 py-1.5 text-center text-xs font-semibold text-accent-foreground">
           {t("demo.checkoutBanner")}
         </p>
       )}
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
+      <header className="sticky top-0 z-20 flex items-center gap-2 bg-background/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <button
           type="button"
-          onClick={() => navigate({ to: "/cart" })}
+          onClick={() => (step === "confirm" ? setStep("mode") : navigate({ to: "/cart" }))}
           aria-label={t("registration.back")}
           className="flex h-11 w-11 items-center justify-center rounded-xl text-foreground transition active:scale-95"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
-        <p className="min-w-0 flex-1 truncate text-base font-bold text-foreground">{t("checkout.title")}</p>
+        <p className="min-w-0 flex-1 truncate text-base font-bold text-foreground">
+          {step === "mode" ? t("checkout2.howTitle") : t("checkout2.confirmTitle")}
+        </p>
       </header>
 
-      <div className="px-5 pt-5">
-        {/* Delivery mode */}
-        <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-          <p className="text-sm font-bold text-foreground">{t("delivery.title")}</p>
-          <div className="mt-3 grid grid-cols-2 gap-2" role="group" aria-label={t("delivery.title")}>
-            {(["sunrich", "pickup"] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setMode(m)}
-                aria-pressed={mode === m}
-                className={`${chipCls(mode === m)} min-h-12`}
-              >
-                {t(`delivery.${m}`)}
-              </button>
-            ))}
-          </div>
-          {pickup && (
-            <div className="mt-3 space-y-3">
-              <div className="rounded-xl bg-secondary/10 px-3 py-2.5">
-                <p className="text-sm font-semibold text-foreground">{t("delivery.pickupFrom")}</p>
-                <a
-                  href={PLANT_MAP_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-1 inline-flex min-h-9 items-center gap-1 text-sm font-semibold text-secondary underline"
-                >
-                  <MapPin className="h-4 w-4" aria-hidden />
-                  {t("delivery.openMap")}
-                </a>
-              </div>
-              <label className="flex flex-col gap-1.5">
-                <span className="text-sm font-medium text-foreground">{t("delivery.vehicle")}</span>
-                <input
-                  value={vehicle}
-                  onChange={(e) => setVehicle(e.target.value.toUpperCase().slice(0, 15))}
-                  placeholder="MH24AB1234"
-                  className={inputCls}
-                />
-              </label>
-            </div>
-          )}
-        </section>
-
-        {!pickup && (
-          <>
-        {/* Delivery address */}
-        <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="flex items-center gap-2 text-sm font-bold text-foreground">
-              <MapPin className="h-4 w-4 text-secondary" aria-hidden />
-              {t("checkout.addressTitle")}
-            </p>
-            {useSaved ? (
-              <button type="button" onClick={() => setPickerOpen(true)} className="min-h-11 px-2 text-sm font-semibold text-secondary">
-                {t("addresses.change")}
-              </button>
+      {step === "mode" ? (
+        <div className="space-y-3 px-5 pt-4">
+          {(["sunrich", "pickup"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => {
+                setMode(m);
+                setStep("confirm");
+              }}
+              aria-pressed={mode === m}
+              className={`flex min-h-24 w-full items-start gap-4 rounded-2xl border-2 p-4 text-left transition active:scale-[0.99] ${
+                mode === m ? "border-primary bg-primary/5" : "border-border bg-card"
+              }`}
+            >
+              <span aria-hidden className="text-3xl">{m === "sunrich" ? "🚚" : "🏭"}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-base font-bold text-foreground">{t(m === "sunrich" ? "checkout2.sunrich" : "checkout2.pickup")}</span>
+                <span className="mt-1 block text-sm text-muted-foreground">
+                  {m === "sunrich" ? oneLineAddr || "—" : settings?.plantAddress ?? t("checkout2.plantDefault")}
+                </span>
+                {m === "pickup" && settings?.pickupHours && <span className="block text-xs text-muted-foreground">{settings.pickupHours}</span>}
+                {m === "pickup" && (
+                  <a href={PLANT_MAP_URL} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="mt-1 inline-flex min-h-9 items-center gap-1 text-xs font-semibold text-secondary">
+                    <MapPin className="h-3.5 w-3.5" aria-hidden /> {t("delivery.openMap")}
+                  </a>
+                )}
+              </span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="px-5 pt-2">
+          <div className="rounded-2xl bg-card px-4 shadow-sm">
+            {pickup ? (
+              <Row icon="🏭" text={t("checkout2.pickup")} sub={settings?.plantAddress ?? t("checkout2.plantDefault")} onChange={() => setStep("mode")} />
             ) : (
-              <button
-                type="button"
-                onClick={() => setEditingAddress((v) => !v)}
-                aria-expanded={editingAddress}
-                className="min-h-11 px-2 text-sm font-semibold text-secondary"
-              >
-                {editingAddress ? t("account.cancel") : t("account.edit")}
-              </button>
+              <Row
+                icon="🚚"
+                text={t("checkout2.sunrich")}
+                sub={oneLineAddr || "—"}
+                onChange={() => (useSaved ? setPickerOpen(true) : setNewAddrOpen(true))}
+              />
             )}
+            <Row icon="📅" text={dayObj ? dayText(dayObj) : "—"} onChange={() => setDateOpen(true)} />
+            <Row icon="💳" text={t(`checkout.payMethod.${pay}`)} onChange={() => setPayOpen(true)} />
+            <Row icon="🧾" text={t("checkout2.items", { count: itemCount })} right={quote ? formatINR(payable) : undefined} />
           </div>
-          {savedAddr && (
-            <span className="mt-2 inline-block rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
-              {t(labelKey(savedAddr.label))}
-            </span>
-          )}
-          <p className="mt-2 text-sm leading-relaxed text-foreground">{addressLines.join(", ") || "—"}</p>
-          {loc_?.lat != null && loc_?.lng != null ? (
-            <div className="mt-3">
-              <Suspense fallback={<div className="h-36 w-full animate-pulse rounded-xl bg-muted" />}>
-                <MapPreview lat={loc_.lat} lng={loc_.lng} />
-              </Suspense>
-            </div>
-          ) : (
-            <p className="mt-2 text-xs text-muted-foreground">{t("checkout.noPin")}</p>
-          )}
-          <p className="mt-2 text-xs text-muted-foreground">{t("checkout.addressNote")}</p>
 
-          {editingAddress && !useSaved && (
-            <div className="mt-4 space-y-3 border-t border-border pt-4">
-              <label className="flex flex-col gap-1.5">
-                <span className="text-sm font-medium text-foreground">{t("checkout.line1")}</span>
-                <input value={addr.line1} onChange={(e) => setAddr({ ...addr, line1: e.target.value })} className={inputCls} />
-              </label>
-              <label className="flex flex-col gap-1.5">
-                <span className="text-sm font-medium text-foreground">{t("checkout.line2")}</span>
-                <input value={addr.line2} onChange={(e) => setAddr({ ...addr, line2: e.target.value })} className={inputCls} />
-              </label>
-              <label className="flex flex-col gap-1.5">
-                <span className="text-sm font-medium text-foreground">{t("checkout.landmark")}</span>
-                <input value={addr.landmark} onChange={(e) => setAddr({ ...addr, landmark: e.target.value })} className={inputCls} />
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-sm font-medium text-foreground">{t("checkout.city")}</span>
-                  <input value={addr.city} onChange={(e) => setAddr({ ...addr, city: e.target.value })} className={inputCls} />
-                </label>
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-sm font-medium text-foreground">{t("checkout.pincode")}</span>
-                  <input value={addr.pincode} onChange={(e) => setAddr({ ...addr, pincode: e.target.value })} className={inputCls} inputMode="numeric" maxLength={6} />
-                </label>
-              </div>
-              <LocationPicker value={loc_ ?? DEFAULT_LOCATION} onChange={setLoc_} />
-            </div>
+          {quote && advanceAtCheckout(bill, advance).used > 0 && (
+            <p className="mt-2 text-right text-xs font-semibold text-success" data-testid="advance-used">
+              {t("khata.checkout.advanceUsed")} −{formatINR(advanceAtCheckout(bill, advance).used)}
+            </p>
           )}
-        </section>
 
-          </>
-        )}
-        {/* Delivery date & slot */}
-        <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
-          <p className="flex items-center gap-2 text-sm font-bold text-foreground">
-            <CalendarDays className="h-4 w-4 text-secondary" aria-hidden />
-            {pickup ? t("delivery.pickupDate") : t("checkout.whenTitle")}
-          </p>
-          <div className="no-scrollbar -mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1" role="group" aria-label={t("checkout.whenTitle")}>
-            {days.map((d, i) => (
-              <button
-                key={d.iso}
-                type="button"
-                disabled={d.closed}
-                onClick={() => setDay(d.iso)}
-                aria-pressed={day === d.iso}
-                className={`flex min-h-14 min-w-[4.75rem] shrink-0 flex-col items-center justify-center rounded-xl border px-2 text-xs font-semibold transition active:scale-95 disabled:opacity-45 ${
-                  day === d.iso ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground"
-                }`}
-              >
-                <span>{d.isToday ? t("checkout.today") : i <= 1 && days[0]?.isToday ? t("checkout.tomorrow") : fmtDay(d.date).split(",")[0]}</span>
-                <span className="font-normal">{d.closed ? t("checkout.closed") : fmtDay(d.date).replace(/^[^,]*,\s*/, "")}</span>
+          {pickup && (
+            <label className="mt-4 flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-foreground">{t("delivery.vehicle")}</span>
+              <input value={vehicle} onChange={(e) => setVehicle(e.target.value.toUpperCase().slice(0, 15))} placeholder="MH24AB1234" className={inputCls} />
+            </label>
+          )}
+
+          {rows.some((r) => r.product.isReturnable && (r.product.depositAmount ?? 0) > 0) && (
+            <section className="mt-4">
+              <p className="text-sm font-bold text-foreground">{t("checkout.newJarsTitle")}</p>
+              <ul className="mt-2 space-y-2">
+                {rows
+                  .filter((r) => r.product.isReturnable && (r.product.depositAmount ?? 0) > 0)
+                  .map(({ product, qty }) => {
+                    const count = newc[product.id] ?? 0;
+                    return (
+                      <li key={product.id} className="flex items-center gap-3">
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-semibold text-foreground">{loc(product.name, lang)}</span>
+                          <span className="text-xs text-muted-foreground">{t("checkout.jarDepositEach", { amount: formatINR(product.depositAmount ?? 0) })}</span>
+                        </span>
+                        <span className="flex items-center gap-1 rounded-full border border-border px-1">
+                          <button type="button" aria-label={t("checkout.fewerNewJars")} onClick={() => setNewc((p) => ({ ...p, [product.id]: Math.max(0, count - 1) }))} className="h-10 w-10 text-lg font-bold">−</button>
+                          <span className="min-w-5 text-center text-sm font-bold">{count}</span>
+                          <button type="button" aria-label={t("checkout.moreNewJars")} disabled={count >= qty} onClick={() => setNewc((p) => ({ ...p, [product.id]: Math.min(qty, count + 1) }))} className="h-10 w-10 text-lg font-bold disabled:opacity-40">+</button>
+                        </span>
+                      </li>
+                    );
+                  })}
+              </ul>
+            </section>
+          )}
+
+          {notesAllowed &&
+            (noteOpen || notes ? (
+              <textarea
+                autoFocus={noteOpen && !notes}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={2}
+                maxLength={500}
+                placeholder={t("checkout.notesPlaceholder")}
+                className="mt-4 w-full rounded-xl border border-input bg-card px-4 py-3 text-base text-foreground outline-none focus:border-secondary"
+              />
+            ) : (
+              <button type="button" onClick={() => setNoteOpen(true)} className="mt-3 min-h-11 text-sm font-semibold text-secondary">
+                + {t("checkout2.addNote")}
               </button>
             ))}
-          </div>
-          {pickup ? null : slots.length > 0 ? (
-            <div className="mt-3 grid grid-cols-2 gap-2" role="group" aria-label={t("checkout.slotLabel")}>
-              {slots.map((x) => (
-                <button
-                  key={x.code}
-                  type="button"
-                  disabled={x.disabled}
-                  onClick={() => setSlot(x.code)}
-                  aria-pressed={slot === x.code}
-                  className={`${chipCls(slot === x.code)} flex flex-col items-center justify-center py-1.5 disabled:opacity-45`}
-                >
-                  <span>{slotName(x, lang)}</span>
-                  <span className="text-[11px] font-normal opacity-80">{x.from}–{x.to}</span>
-                </button>
-              ))}
-            </div>
-          ) : (
-            !settings && <div className="mt-3 h-11 animate-pulse rounded-xl bg-muted" />
+
+          {quoteError && (
+            <p role="alert" className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{quoteError}</p>
           )}
-          {noSlot && <p className="mt-2 text-xs font-medium text-destructive">{t("checkout.noSlotToday")}</p>}
-        </section>
-
-        {/* New jars needed? */}
-        {rows.some((r) => r.product.isReturnable && (r.product.depositAmount ?? 0) > 0) && (
-          <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
-            <p className="text-sm font-bold text-foreground">{t("checkout.newJarsTitle")}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{t("checkout.newJarsHint")}</p>
-            <ul className="mt-3 space-y-3">
-              {rows
-                .filter((r) => r.product.isReturnable && (r.product.depositAmount ?? 0) > 0)
-                .map(({ product, qty }) => {
-                  const count = newc[product.id] ?? 0;
-                  const dep = product.depositAmount ?? 0;
-                  return (
-                    <li key={product.id} className="flex items-center gap-3">
-                      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-secondary/10">
-                        <SmartImage width={48}
-                          src={product.imageUrl ?? product.images[0] ?? null}
-                          alt={loc(product.name, lang)}
-                          className="h-12 w-12 object-cover"
-                          iconClassName="h-5 w-5 text-secondary/70"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-foreground">{loc(product.name, lang)}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {t("checkout.jarDepositEach", { amount: formatINR(dep) })}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 rounded-full border border-border bg-background px-1.5 py-1">
-                        <button
-                          type="button"
-                          onClick={() => setNewc((prev) => ({ ...prev, [product.id]: Math.max(0, count - 1) }))}
-                          aria-label={t("checkout.fewerNewJars")}
-                          className="flex h-9 w-9 items-center justify-center rounded-full text-lg font-bold text-foreground transition active:scale-90"
-                        >
-                          −
-                        </button>
-                        <span className="min-w-5 text-center text-sm font-bold">{count}</span>
-                        <button
-                          type="button"
-                          onClick={() => setNewc((prev) => ({ ...prev, [product.id]: Math.min(qty, count + 1) }))}
-                          disabled={count >= qty}
-                          aria-label={t("checkout.moreNewJars")}
-                          className="flex h-9 w-9 items-center justify-center rounded-full text-lg font-bold text-foreground transition active:scale-90 disabled:opacity-40"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </li>
-                  );
-                })}
-            </ul>
-          </section>
-        )}
-
-        {/* Bill */}
-        <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
-          <p className="text-sm font-bold text-foreground">{t("checkout.billTitle")}</p>
-          {quoteError ? (
-            <p role="alert" className="mt-3 rounded-xl bg-destructive/10 px-3 py-2 text-xs font-medium text-destructive">
-              {quoteError}
+          {shortfall > 0 && (
+            <p role="status" className="mt-4 rounded-xl bg-accent/15 px-4 py-3 text-center text-sm font-semibold text-foreground">
+              {t("cart.addMore", { amount: formatINR(shortfall) })}
             </p>
-          ) : quote ? (
-            <>
-              <ul className="mt-3 space-y-1.5">
-                {quote.lines.map((l) => (
-                  <li key={l.product_id} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="min-w-0 flex-1 truncate text-muted-foreground">
-                      {l.product_name} · {t("common.packs", { count: l.qty })}
-                    </span>
-                    <span className="font-medium text-foreground">{formatINR(l.line_total)}</span>
-                  </li>
-                ))}
-              </ul>
-              {quote.deposit_total > 0 && (
-                <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
-                  <span>{t("cart.jarDeposit")}</span>
-                  <span className="font-medium text-foreground">{formatINR(quote.deposit_total)}</span>
-                </div>
-              )}
-              <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
-                <span>{t("cart.delivery")}</span>
-                <span className="font-semibold text-secondary">{t("cart.free")}</span>
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground">{t("checkout.gstIncluded")}</p>
-              <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-base font-bold text-foreground">
-                <span>{t("cart.grandTotal")}</span>
-                <span className="text-primary">{formatINR(quote.items_total + quote.deposit_total)}</span>
-              </div>
-              {(() => {
-                const adv = advanceAtCheckout(quote.items_total + quote.deposit_total, advance);
-                if (adv.used <= 0) return null;
-                return (
-                  <>
-                    <div className="mt-2 flex items-center justify-between text-sm font-semibold text-success" data-testid="advance-used">
-                      <span>{t("khata.checkout.advanceUsed")}</span>
-                      <span>−{formatINR(adv.used)}</span>
-                    </div>
-                    <div className="mt-2 flex items-center justify-between border-t border-border pt-2 text-base font-bold text-foreground">
-                      <span>{t("khata.checkout.payable")}</span>
-                      <span className="text-primary">{formatINR(adv.payable)}</span>
-                    </div>
-                  </>
-                );
-              })()}
-            </>
-          ) : (
-            <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-              {t("checkout.quoting")}
-            </div>
           )}
-        </section>
+          {noPriceCount > 0 && <p className="mt-3 text-center text-xs text-muted-foreground">{t("checkout.priceOnRequestNote", { count: noPriceCount })}</p>}
+          {error && (
+            <p data-field-error role="alert" className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">{error}</p>
+          )}
+        </div>
+      )}
 
-        {/* Payment — "How will you pay?" */}
-        {quote && (
-          <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
-            <p className="text-sm font-bold text-foreground">{t("checkout.paymentTitle")}</p>
-            <div role="radiogroup" aria-label={t("checkout.paymentTitle")} className="mt-3 space-y-2">
-              {(["credit", "upi", "bank", "cash", "cheque"] as const)
-                .filter((m) => m !== "credit" || creditAllowed)
-                .map((m) => {
-                  const Icon = PAY_ICONS[m];
-                  const on = pay === m;
-                  return (
-                    <button
-                      key={m}
-                      type="button"
-                      role="radio"
-                      aria-checked={on}
-                      onClick={() => {
-                        payTouched.current = true;
-                        setPay(m);
-                      }}
-                      className={`flex min-h-16 w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition active:scale-[0.99] ${
-                        on ? "border-secondary bg-secondary/5" : "border-border bg-card"
-                      }`}
-                    >
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary/10">
-                        <Icon className="h-5 w-5 text-secondary" aria-hidden />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-semibold text-foreground">{t(`checkout.payMethod.${m}`)}</span>
-                        <span className="block text-xs text-muted-foreground">
-                          {m === "credit"
-                            ? t("checkout.paySub.credit", { amount: formatINR(quote.credit_available) })
-                            : t(`checkout.paySub.${m}`)}
-                        </span>
-                      </span>
-                      <span
-                        aria-hidden
-                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${on ? "border-secondary" : "border-border"}`}
-                      >
-                        {on && <span className="h-2.5 w-2.5 rounded-full bg-secondary" />}
-                      </span>
-                    </button>
-                  );
-                })}
-            </div>
-            {pay === "credit" && exceedsCredit && (
-              <p className="mt-3 rounded-lg bg-accent/15 px-2.5 py-1.5 text-xs font-medium text-accent-foreground">
-                {t("checkout.creditReview")}
-              </p>
-            )}
-          </section>
-        )}
+      {step === "confirm" && (
+        <div data-kb-bar className="fixed inset-x-0 bottom-0 z-30 bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md">
+          <button
+            type="button"
+            onClick={() => void place()}
+            disabled={placing || offline || rows.length === 0 || quote == null || shortfall > 0 || !day}
+            title={offline ? t("offline.hint") : undefined}
+            className="mx-auto flex min-h-14 w-full max-w-md items-center justify-center gap-2 rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98] disabled:opacity-50"
+          >
+            {placing && <Loader2 className="h-5 w-5 animate-spin" aria-hidden />}
+            {placing ? t("checkout.placing") : quote ? t("checkout2.place", { amount: formatINR(payable) }) : t("checkout.quoting")}
+          </button>
+          {offline && <p className="mt-1 text-center text-xs text-muted-foreground">{t("offline.hint")}</p>}
+        </div>
+      )}
 
-        {/* Notes */}
-        {notesAllowed && (
-        <label className="mt-4 flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-foreground">{t("checkout.notesLabel")}</span>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            rows={3}
-            maxLength={500}
-            placeholder={t("checkout.notesPlaceholder")}
-            className="rounded-xl border border-input bg-card px-4 py-3 text-base text-foreground outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/30"
-          />
-        </label>
-        )}
+      <SheetDrawer open={dateOpen} onOpenChange={setDateOpen}>
+        <div className="px-5 pb-8 pt-2">
+          <h2 className="text-lg font-bold text-foreground">{pickup ? t("delivery.pickupDate") : t("checkout.whenTitle")}</h2>
+          <ul className="mt-3 space-y-2">
+            {days.map((d) => (
+              <li key={d.iso}>
+                <button
+                  type="button"
+                  disabled={d.closed}
+                  onClick={() => {
+                    setDay(d.iso);
+                    setDateOpen(false);
+                  }}
+                  className={`flex min-h-12 w-full items-center justify-between rounded-xl border px-4 text-left text-sm font-semibold disabled:opacity-45 ${day === d.iso ? "border-primary bg-primary/5" : "border-border"}`}
+                >
+                  {dayText(d)}
+                  {d.closed ? <span className="text-xs font-normal">{t("checkout.closed")}</span> : day === d.iso ? <Check className="h-4 w-4 text-primary" aria-hidden /> : null}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </SheetDrawer>
 
-        {shortfall > 0 && (
-          <p role="status" className="mt-4 rounded-xl bg-accent/15 px-4 py-3 text-center text-sm font-semibold text-foreground">
-            {t("cart.addMore", { amount: formatINR(shortfall) })}
-          </p>
-        )}
-
-        {error && (
-          <p data-field-error role="alert" className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="button"
-          onClick={() => void place()}
-          disabled={placing || offline || rows.length === 0 || quote == null || shortfall > 0 || !day || noSlot}
-          title={offline ? t("offline.hint") : undefined}
-          className="mt-5 flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98] disabled:opacity-50"
-        >
-          {placing && <Loader2 className="h-5 w-5 animate-spin" aria-hidden />}
-          {placing ? t("checkout.placing") : t("checkout.placeOrder")}
-        </button>
-        {offline && <p className="mt-2 text-center text-xs text-muted-foreground">{t("offline.hint")}</p>}
-        {noPriceCount > 0 && (
-          <p className="mt-2 text-center text-xs text-muted-foreground">
-            {t("checkout.priceOnRequestNote", { count: noPriceCount })}
-          </p>
-        )}
-        <p className="mt-3 text-center text-xs text-muted-foreground">{t("checkout.termsNote")}</p>
-      </div>
+      <SheetDrawer open={payOpen} onOpenChange={setPayOpen}>
+        <div className="px-5 pb-8 pt-2">
+          <h2 className="text-lg font-bold text-foreground">{t("checkout.paymentTitle")}</h2>
+          <div role="radiogroup" aria-label={t("checkout.paymentTitle")} className="mt-3 space-y-2">
+            {(["upi", "bank", "cash", "cheque", "credit"] as const)
+              .filter((m) => m !== "credit" || credit.shown)
+              .map((m) => {
+                const Icon = PAY_ICONS[m];
+                const on = pay === m;
+                const blocked = m === "credit" && !credit.allowed;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    disabled={blocked}
+                    onClick={() => {
+                      payTouched.current = true;
+                      setPay(m);
+                      setPayOpen(false);
+                    }}
+                    className={`flex min-h-14 w-full items-center gap-3 rounded-xl border px-3 text-left disabled:opacity-60 ${on ? "border-primary bg-primary/5" : "border-border"}`}
+                  >
+                    <Icon className="h-5 w-5 shrink-0 text-secondary" aria-hidden />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-semibold text-foreground">{t(`checkout.payMethod.${m}`)}</span>
+                      {blocked && (
+                        <span className="block text-xs text-destructive">{t("checkout2.creditLow", { amount: formatINR(credit.available) })}</span>
+                      )}
+                    </span>
+                    {on && <Check className="h-4 w-4 text-primary" aria-hidden />}
+                  </button>
+                );
+              })}
+          </div>
+        </div>
+      </SheetDrawer>
 
       <SheetDrawer open={pickerOpen} onOpenChange={setPickerOpen}>
         <div className="max-h-[80vh] overflow-y-auto px-5 pb-8 pt-2">

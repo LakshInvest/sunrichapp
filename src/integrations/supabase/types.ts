@@ -3753,6 +3753,7 @@ export type Database = {
           source: string
           status: string
           submitted_by: string | null
+          upi_response: Json | null
         }
         Insert: {
           amount: number
@@ -3780,6 +3781,7 @@ export type Database = {
           source?: string
           status?: string
           submitted_by?: string | null
+          upi_response?: Json | null
         }
         Update: {
           amount?: number
@@ -3807,6 +3809,7 @@ export type Database = {
           source?: string
           status?: string
           submitted_by?: string | null
+          upi_response?: Json | null
         }
         Relationships: [
           {
@@ -6347,6 +6350,10 @@ export type Database = {
         Returns: string
       }
       ask_office_status: { Args: { p_alert_id: string }; Returns: Json }
+      attach_upi_response: {
+        Args: { p_proof_id: string; p_response: Json }
+        Returns: undefined
+      }
       auto_block_overdue_customers: { Args: never; Returns: number }
       bulk_approve_orders: { Args: { p_order_ids: string[] }; Returns: Json }
       bulk_update_plan_prices: {

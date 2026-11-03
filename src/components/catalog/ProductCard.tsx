@@ -4,6 +4,7 @@ import { Lock, Minus, Plus } from "lucide-react";
 import { useRateLocked } from "@/lib/rate-lock";
 import { useRouter } from "@tanstack/react-router";
 import { SmartImage } from "@/components/SmartImage";
+import { isBusinessType, useTypeCode } from "@/lib/customer-type";
 import { formatINR, loc, priceSave, type CatalogProduct } from "@/lib/catalogue";
 
 /** Price + struck MRP on one line. Shared by cards, the detail screen and the cart. */
@@ -45,6 +46,7 @@ export function PriceExtras({ product, size = "card" }: { product: CatalogProduc
   const { t } = useTranslation();
   const locked = useRateLocked();
   const save = priceSave(product);
+  const saveKey = isBusinessType(useTypeCode()) ? "product2.margin" : "catalog.save";
   const deposit = product.isReturnable && product.depositAmount != null && product.depositAmount > 0;
   if (locked || (save === null && !deposit)) return null;
   const small = size === "detail" ? "text-sm" : "text-[11px]";
@@ -52,7 +54,7 @@ export function PriceExtras({ product, size = "card" }: { product: CatalogProduc
     <div className="mt-1 space-y-0.5 leading-tight">
       {save !== null && (
         <p className={`whitespace-nowrap font-semibold text-success ${small}`}>
-          {t("catalog.save", { amount: formatINR(save) })}
+          {t(saveKey, { amount: formatINR(save) })}
         </p>
       )}
       {deposit && (
@@ -185,6 +187,7 @@ export function ProductCard({
   const disabled = blocked || offline;
   const name = loc(product.name, lang);
   const save = locked ? null : priceSave(product);
+  const saveKey = isBusinessType(useTypeCode()) ? "product2.margin" : "catalog.save";
   return (
     <div className="flex h-full flex-col">
       <button type="button" onClick={onOpen} onPointerDown={prefetch} aria-label={name} className="block aspect-square w-full overflow-hidden rounded-2xl bg-muted/40">
@@ -196,7 +199,7 @@ export function ProductCard({
       </button>
       <div className="mt-1.5 flex min-h-9 flex-col justify-end">
         <PriceLine product={product} />
-        <p className="h-4 text-[11px] font-semibold leading-4 text-success">{save !== null ? t("catalog.save", { amount: formatINR(save) }) : ""}</p>
+        <p className="h-4 text-[11px] font-semibold leading-4 text-success">{save !== null ? t(saveKey, { amount: formatINR(save) }) : ""}</p>
       </div>
       <div className="mt-auto pt-2">
         {locked ? (

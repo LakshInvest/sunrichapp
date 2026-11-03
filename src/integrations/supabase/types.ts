@@ -19,6 +19,7 @@ export type Database = {
           company_id: string
           created_at: string
           customer_type_ids: string[] | null
+          display_seconds: number
           end_at: string | null
           id: string
           image_url: string | null
@@ -42,6 +43,7 @@ export type Database = {
           company_id: string
           created_at?: string
           customer_type_ids?: string[] | null
+          display_seconds?: number
           end_at?: string | null
           id?: string
           image_url?: string | null
@@ -65,6 +67,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           customer_type_ids?: string[] | null
+          display_seconds?: number
           end_at?: string | null
           id?: string
           image_url?: string | null
@@ -192,6 +195,8 @@ export type Database = {
           min_app_version: string
           min_order_value: number
           multiple_addresses: boolean
+          pickup_hours: string | null
+          plant_address: string | null
           play_store_url: string | null
           prices_include_gst: boolean
           privacy_md: string | null
@@ -230,6 +235,8 @@ export type Database = {
           min_app_version?: string
           min_order_value?: number
           multiple_addresses?: boolean
+          pickup_hours?: string | null
+          plant_address?: string | null
           play_store_url?: string | null
           prices_include_gst?: boolean
           privacy_md?: string | null
@@ -268,6 +275,8 @@ export type Database = {
           min_app_version?: string
           min_order_value?: number
           multiple_addresses?: boolean
+          pickup_hours?: string | null
+          plant_address?: string | null
           play_store_url?: string | null
           prices_include_gst?: boolean
           privacy_md?: string | null
@@ -6778,6 +6787,14 @@ export type Database = {
         }[]
       }
       my_khata_summary: { Args: never; Returns: Json }
+      my_order_truck: {
+        Args: { p_order_id: string }
+        Returns: {
+          latitude: number
+          longitude: number
+          recorded_at: string
+        }[]
+      }
       my_permissions: {
         Args: never
         Returns: {

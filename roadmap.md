@@ -1,5 +1,10 @@
 # Prompt-19 roadmap — 15 tasks
 
+## Prompt-45 / Prompt-46 — UPI launch repair
+- [ ] Fix launch errors, two-second warning, WebView handoff and Android app-discovery fallback; preserve QR/UPI ID.
+- [ ] Add hidden Account version long-press diagnostic and copy.
+- [ ] Run UPI regression tests and available browser checks; request publication after security check.
+
 Constraint: existing DB tables/RPCs/buckets only. No schema/policy changes.
 
 - [x] 1. PIN save fix — auth flow order (verifyOtp → record_login → Set PIN), exact errors, user_devices read-back, PIN login stays on check_pin service role. Live test with minted session.

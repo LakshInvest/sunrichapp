@@ -357,7 +357,7 @@ function Home() {
 
     if (key === "categories") {
       return (
-        <div key="categories" className="no-scrollbar sticky top-0 z-20 mt-3 flex gap-2 overflow-x-auto bg-background px-5 py-2">
+        <div key="categories" className="no-scrollbar sticky top-0 z-20 mt-3 flex gap-2 overflow-x-auto bg-background px-5 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))]">
           <button
             type="button"
             onClick={() => setCategory("all")}

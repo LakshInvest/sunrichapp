@@ -1,3 +1,4 @@
+import { lineShort } from "@/lib/pack-label";
 import { planReorder } from "@/lib/feedback";
 import { readSwr, swr } from "@/lib/swr-cache";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -88,7 +89,7 @@ function MyOrders() {
     const group = statusGroup(o.status);
     const status = unpaid.has(o.id) && o.status === "approved" ? "placed" : o.status;
     const { steps, reached } = buildTimeline(o.status, o.history);
-    const summary = o.lines.map((l) => `${l.packLabel ?? l.productName} × ${l.qty}`).join(", ");
+    const summary = o.lines.map((l) => lineShort(l.packLabel, l.productName, l.qty)).join(", ");
     return (
       <li key={o.id} className="rounded-2xl bg-card p-4 shadow-sm">
         <button type="button" onClick={() => navigate({ to: "/track/$id", params: { id: o.id } })} className="w-full text-left">
@@ -101,10 +102,10 @@ function MyOrders() {
             )}
           </div>
           <div className="mt-2 flex items-center gap-3">
-            <div className="flex shrink-0 -space-x-3">
+            <div className="flex shrink-0 gap-1">
               {o.lines.slice(0, 3).map((l) => (
-                <span key={l.productId} className="h-11 w-11 overflow-hidden rounded-xl bg-muted ring-2 ring-card">
-                  <SmartImage width={44} src={thumb(l.productId)} alt="" className="h-11 w-11 object-contain p-1" />
+                <span key={l.productId} className="h-9 w-9 overflow-hidden rounded-lg border border-border bg-card">
+                  <SmartImage width={36} src={thumb(l.productId)} alt="" className="h-9 w-9 object-contain p-0.5" />
                 </span>
               ))}
             </div>
@@ -150,7 +151,7 @@ function MyOrders() {
 
   return (
     <PageShell>
-      <header className="sticky top-0 z-30 bg-background/95 px-5 pb-3 pt-[max(1.5rem,env(safe-area-inset-top))] backdrop-blur-md">
+      <header className="sticky top-0 z-30 bg-background/95 px-5 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md">
         <h1 className="text-2xl font-bold text-primary">{t("track.title")}</h1>
       </header>
 

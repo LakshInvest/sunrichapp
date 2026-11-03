@@ -343,7 +343,7 @@ function Account() {
   const notActive = customer?.status && customer.status !== "active";
 
   return (
-    <PageShell className={`px-5 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] ${deva}`}>
+    <PageShell className={`px-5 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] ${deva}`}>
       <h1 className="text-2xl font-bold text-primary">{t("account.title")}</h1>
 
       {/* Profile header card */}

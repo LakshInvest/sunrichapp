@@ -411,3 +411,6 @@
 @media (prefers-reduced-motion: reduce) {
   .launch-logo, .launch-wave, .launch-tagline { animation-duration: 1ms; animation-delay: 0s; }
 }
+
+/* Hide bottom bars while typing a quantity so the field stays visible. */
+html[data-typing] [data-hide-on-type] { display: none; }

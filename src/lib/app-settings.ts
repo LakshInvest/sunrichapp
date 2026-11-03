@@ -36,6 +36,8 @@ export type AppSettings = {
   feedbackEnabled: boolean;
   showJarBalance: boolean;
   multipleAddresses: boolean;
+  plantAddress: string | null;
+  pickupHours: string | null;
 };
 
 const KEY = "sunrich.appSettings.v1";
@@ -73,6 +75,8 @@ export function mapSettings(r: Record<string, unknown>): AppSettings {
     feedbackEnabled: Boolean(r["feedback_enabled"]),
     showJarBalance: Boolean(r["show_jar_balance"]),
     multipleAddresses: r["multiple_addresses"] !== false,
+    plantAddress: blank(r["plant_address"]),
+    pickupHours: blank(r["pickup_hours"]),
   };
 }
 

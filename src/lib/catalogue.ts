@@ -235,6 +235,7 @@ async function loadCatalogue(): Promise<CatalogData> {
       linkType: String(b["link_type"] ?? "none"),
       linkValue: (b["link_value"] as string) ?? null,
       sortOrder: num(b["sort_order"]) ?? 0,
+      displaySeconds: Math.min(30, Math.max(2, num(b["display_seconds"]) ?? 5)),
     }));
 
   const heroRow = heroRows as Record<string, unknown> | null;

@@ -1,4 +1,6 @@
 import { isNative } from "@/lib/native";
+import i18n from "i18next";
+import { toast } from "sonner";
 
 export type UpiParams = { pa: string; pn: string; amount: number; orderNo: string; ref?: string; note?: string };
 
@@ -100,6 +102,18 @@ type NativeUpi = {
   installed(o: { packages: string[] }): Promise<{ packages: string[] }>;
 };
 let pluginPromise: Promise<NativeUpi | null> | null = null;
+let lastUpiError = "";
+export const getLastUpiError = () => lastUpiError;
+function rememberError(error: unknown) {
+  lastUpiError = error instanceof Error ? error.message : String(error);
+}
+export function isAndroidUpi(): boolean {
+  return typeof navigator !== "undefined" && /Android/i.test(navigator.userAgent);
+}
+/** Discovery is advisory: Android package visibility may hide installed apps. */
+export function visibleUpiApps(found: UpiApp[], android = isAndroidUpi()): UpiApp[] {
+  return found.length > 0 ? found : android ? UPI_APPS.map((a) => a.id) : [];
+}
 /** The SunrichUpi native plugin, or null on web / an APK built before it was added. */
 function nativeUpi(): Promise<NativeUpi | null> {
   if (!isNative()) return Promise.resolve(null);
@@ -129,54 +143,121 @@ export async function openUpi(p: UpiParams, app?: UpiApp, orderId?: string | nul
   lastLaunch = { params: p, app, orderId };
   const query = upiQuery(p);
   const target = app ? UPI_APPS.find((a) => a.id === app) : undefined;
-  const plugin = await nativeUpi();
-  if (plugin) {
-    try {
+  let opened = false;
+  let warned = false;
+  const warn = (missingApp = false) => {
+    if (warned) return;
+    warned = true;
+    toast.error(String(i18n.t(missingApp ? "upi.appMissing" : "upi.launchError")));
+  };
+  const visibility = () => { if (document.visibilityState === "hidden") opened = true; };
+  document.addEventListener("visibilitychange", visibility);
+  let stopped = false;
+  let removeNativeListener = () => {};
+  if (isNative()) {
+    void import("@capacitor/app").then(async ({ App }) => {
+      const handle = await App.addListener("appStateChange", (state) => { if (!state.isActive) opened = true; });
+      if (stopped) void handle.remove();
+      else removeNativeListener = () => { void handle.remove(); };
+    }).catch(rememberError);
+  }
+  const timer = setTimeout(() => {
+    if (!opened) {
+      rememberError(new Error("UPI launch still pending after 2 seconds; no app-open event"));
+      warn();
+    }
+  }, 2000);
+  try {
+    const plugin = await nativeUpi();
+    if (plugin) {
       const res = await plugin.pay({ url: `upi://pay?${query}`, ...(target ? { package: target.pkg } : {}) });
-      if (res.noApp) return { kind: "noApp" };
+      if (res.noApp) {
+        rememberError(new Error(target ? `${target.label} package not installed: ${target.pkg}` : "No app handles upi://pay"));
+        warn(!!target);
+        return { kind: "noApp" };
+      }
       const outcome = outcomeOf(res.response);
       takeUpiReturn(); // the result replaces the generic resume prompt
       listeners.forEach((l) => l(orderId ?? null, outcome));
       return outcome;
-    } catch {
-      return { kind: "noApp" };
     }
-  }
-  if (orderId) markUpiLaunched(orderId);
-  const url = target ? `${target.scheme}?${query}` : `upi://pay?${query}`;
-  if (isNative()) {
-    try {
+    const url = target ? `${target.scheme}?${query}` : `upi://pay?${query}`;
+    if (isNative()) {
       const { AppLauncher } = await import("@capacitor/app-launcher");
-      const { completed } = await AppLauncher.openUrl({ url });
-      return completed ? { kind: "launched" } : { kind: "noApp" };
-    } catch {
-      return { kind: "noApp" };
+      const nativeUrl = target && isAndroidUpi()
+        ? `intent://pay?${query}#Intent;scheme=upi;package=${target.pkg};end`
+        : url;
+      const { completed } = await AppLauncher.openUrl({ url: nativeUrl });
+      if (!completed) {
+        rememberError(new Error("AppLauncher could not open UPI"));
+        warn(!!target);
+        return { kind: "noApp" };
+      }
+      if (orderId) markUpiLaunched(orderId);
+      return { kind: "launched" };
     }
+    if (orderId) markUpiLaunched(orderId);
+    if (isAndroidUpi() && /\bwv\b/i.test(navigator.userAgent)) {
+      window.location.href = url;
+    } else {
+      const a = document.createElement("a");
+      a.href = url;
+      a.rel = "noopener";
+      a.click();
+    }
+    return { kind: "launched" };
+  } catch (error) {
+    rememberError(error);
+    warn(!!target && /not installed|not found|no activity|no app/i.test(lastUpiError));
+    return { kind: "noApp" };
+  } finally {
+    clearTimeout(timer);
+    stopped = true;
+    removeNativeListener();
+    document.removeEventListener("visibilitychange", visibility);
   }
-  const a = document.createElement("a");
-  a.href = url;
-  a.rel = "noopener";
-  a.click();
-  return { kind: "launched" };
 }
 
 /** UPI apps installed on this phone (Android needs the <queries> entries in the manifest). */
 export async function installedUpiApps(): Promise<UpiApp[]> {
   if (!isNative()) return [];
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    const plugin = await nativeUpi();
-    if (plugin) {
-      const { packages } = await plugin.installed({ packages: UPI_APPS.map((a) => a.pkg) });
-      return UPI_APPS.filter((a) => packages.includes(a.pkg)).map((a) => a.id);
-    }
-    const { AppLauncher } = await import("@capacitor/app-launcher");
-    const res = await Promise.all(
-      UPI_APPS.map(async (a) => ((await AppLauncher.canOpenUrl({ url: a.pkg })).value ? a.id : null)),
-    );
-    return res.filter((x): x is UpiApp => x !== null);
-  } catch {
+    return await Promise.race([
+      (async () => {
+        const plugin = await nativeUpi();
+        if (plugin) {
+          const { packages } = await plugin.installed({ packages: UPI_APPS.map((a) => a.pkg) });
+          return UPI_APPS.filter((a) => packages.includes(a.pkg)).map((a) => a.id);
+        }
+        const { AppLauncher } = await import("@capacitor/app-launcher");
+        const res = await Promise.all(
+          UPI_APPS.map(async (a) => ((await AppLauncher.canOpenUrl({ url: a.pkg })).value ? a.id : null)),
+        );
+        return res.filter((x): x is UpiApp => x !== null);
+      })(),
+      new Promise<UpiApp[]>((_, reject) => { timer = setTimeout(() => reject(new Error("UPI app discovery timed out after 2 seconds")), 2000); }),
+    ]);
+  } catch (error) {
+    rememberError(error);
     return [];
+  } finally {
+    clearTimeout(timer);
   }
+}
+
+export async function getUpiDiagnostic() {
+  const { Capacitor } = await import("@capacitor/core");
+  const apps = await installedUpiApps();
+  return {
+    isNativePlatform: Capacitor.isNativePlatform(),
+    platform: Capacitor.getPlatform(),
+    pluginAvailable: Capacitor.isPluginAvailable("SunrichUpi"),
+    apps: apps.map((id) => UPI_APPS.find((app) => app.id === id)?.label ?? id).join(", ") || "—",
+    // Exclude callback tokens and query strings from copied diagnostics.
+    url: `${window.location.origin}${window.location.pathname}`,
+    error: getLastUpiError() || "—",
+  };
 }
 
 /** Calls back when the customer returns to the app (native resume or tab visible again). */

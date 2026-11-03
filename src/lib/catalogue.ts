@@ -66,6 +66,7 @@ export type CatalogBanner = {
   linkType: string;
   linkValue: string | null;
   sortOrder: number;
+  displaySeconds?: number;
 };
 
 export type CatalogHero = {

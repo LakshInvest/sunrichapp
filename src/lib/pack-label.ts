@@ -28,6 +28,8 @@ export function formatPack(label: string | null | undefined, units?: number | nu
 export const fixName = (s: string) => s.replace(/\bLiters?\b/g, (w) => (w.endsWith("s") ? "Litres" : "Litre"));
 /** Short order-line text: "500 ml × 1". */
 export function lineShort(packLabel: string | null, productName: string, qty: number): string {
+  const n = fixName(productName).trim();
+  if (n.length <= 12) return `${n} × ${qty}`;
   const v = volume(packLabel ?? "") ?? volume(productName);
-  return `${v ?? fixName(productName)} × ${qty}`;
+  return `${v ?? n} × ${qty}`;
 }

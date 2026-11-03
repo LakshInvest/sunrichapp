@@ -1,3 +1,4 @@
+import { formatPack } from "@/lib/pack-label";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
 import { useServerFn } from "@tanstack/react-start";
@@ -243,7 +244,7 @@ function Cart() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-bold text-foreground">{loc(product.name, lang)}</p>
                     <p className="text-xs text-muted-foreground">
-                      {loc(product.packLabel, lang)}
+                      {formatPack(loc(product.packLabel, lang), product.unitsPerSellUnit, product.volumeMl, product.sellUnit)}
                     </p>
                     {changed && (
                       <p className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-accent-foreground">

@@ -1225,5 +1225,19 @@
     "line1": "दुकान / घर नं., गल्ली",
     "landmark": "लँडमार्क (ऐच्छिक)",
     "someoneElse": "दुसऱ्या कोणाला डिलिव्हर करायचे?"
+  },
+  "packUnit": {
+    "packOf": "{{n}} चा पॅक",
+    "boxOf": "{{n}} चा बॉक्स",
+    "caseOf": "{{n}} चा केस",
+    "crateOf": "{{n}} चा क्रेट",
+    "cartonOf": "{{n}} चा कार्टन",
+    "one_jar": "1 जार",
+    "one_can": "1 कॅन",
+    "one_bottle": "1 बाटली",
+    "one_piece": "1 नग"
+  },
+  "orders": {
+    "moreItems": "+{{count}} आणखी"
   }
 }

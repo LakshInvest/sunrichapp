@@ -1225,5 +1225,19 @@
     "line1": "दुकान / घर नं., गली",
     "landmark": "लैंडमार्क (वैकल्पिक)",
     "someoneElse": "किसी और को डिलीवर करना है?"
+  },
+  "packUnit": {
+    "packOf": "{{n}} का पैक",
+    "boxOf": "{{n}} का बॉक्स",
+    "caseOf": "{{n}} का केस",
+    "crateOf": "{{n}} का क्रेट",
+    "cartonOf": "{{n}} का कार्टन",
+    "one_jar": "1 जार",
+    "one_can": "1 कैन",
+    "one_bottle": "1 बोतल",
+    "one_piece": "1 नग"
+  },
+  "orders": {
+    "moreItems": "+{{count}} और"
   }
 }

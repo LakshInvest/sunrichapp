@@ -89,7 +89,8 @@ function MyOrders() {
     const group = statusGroup(o.status);
     const status = unpaid.has(o.id) && o.status === "approved" ? "placed" : o.status;
     const { steps, reached } = buildTimeline(o.status, o.history);
-    const summary = o.lines.map((l) => lineShort(l.packLabel, l.productName, l.qty)).join(", ");
+    const shownLines = o.lines.slice(0, 4);
+    const summary = shownLines.map((l) => lineShort(l.packLabel, l.productName, l.qty)).join(", ") + (o.lines.length > 4 ? ` ${t("orders.moreItems", { count: o.lines.length - 4, defaultValue: `+${o.lines.length - 4} more` })}` : "");
     return (
       <li key={o.id} className="rounded-2xl bg-card p-4 shadow-sm">
         <button type="button" onClick={() => navigate({ to: "/track/$id", params: { id: o.id } })} className="w-full text-left">
@@ -109,7 +110,7 @@ function MyOrders() {
                 </span>
               ))}
             </div>
-            <p className="min-w-0 flex-1 truncate text-sm text-foreground">{summary}</p>
+            <p className="line-clamp-2 min-w-0 flex-1 text-sm text-foreground">{summary}</p>
             <p className="shrink-0 text-sm font-bold text-primary">{formatINR(o.grandTotal)}</p>
           </div>
           {group === "active" && (

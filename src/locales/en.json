@@ -1157,5 +1157,21 @@
     "returnTitle": "Payment done?",
     "returnYes": "Yes, enter UTR / screenshot",
     "returnNo": "Not yet"
+  },
+  "khata2": {
+    "yourBalance": "Your balance",
+    "overdue": "{{amount}} overdue",
+    "advance": "{{amount}} advance",
+    "advanceNote": "will be used on your next order automatically",
+    "allClear": "All clear ✓",
+    "colDate": "Date",
+    "colBill": "Bill",
+    "colPaid": "Paid",
+    "colBalance": "Balance",
+    "advShort": "adv",
+    "rejected": "Rejected: {{reason}}",
+    "noReason": "no reason given",
+    "sendAgain": "Send again",
+    "verifying": "Being verified"
   }
 }

@@ -1157,5 +1157,21 @@
     "returnTitle": "पेमेंट हो गया?",
     "returnYes": "हाँ, UTR / स्क्रीनशॉट डालें",
     "returnNo": "अभी नहीं"
+  },
+  "khata2": {
+    "yourBalance": "आपका बाकी",
+    "overdue": "{{amount}} ओवरड्यू",
+    "advance": "{{amount}} एडवांस",
+    "advanceNote": "अगले ऑर्डर में अपने आप कट जाएगा",
+    "allClear": "सब क्लियर ✓",
+    "colDate": "तारीख",
+    "colBill": "बिल",
+    "colPaid": "जमा",
+    "colBalance": "बाकी",
+    "advShort": "एडवांस",
+    "rejected": "रिजेक्ट: {{reason}}",
+    "noReason": "कारण नहीं बताया",
+    "sendAgain": "दोबारा भेजें",
+    "verifying": "वेरिफिकेशन में"
   }
 }

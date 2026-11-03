@@ -365,7 +365,7 @@ function OrderDetail() {
               <PayCard
                 method={order.paymentMethod === "bank" ? "bank" : "upi"}
                 info={payInfo}
-                amount={payInfo?.grandTotal ?? order.grandTotal}
+                amount={order.grandTotal}
                 orderNo={order.orderNo}
                 orderId={order.id}
                 hold={payHold}

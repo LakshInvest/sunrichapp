@@ -9,7 +9,7 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { PaymentProofSheet, PaymentStatusNote, type ProofTarget } from "@/components/PaymentProofSheet";
 import { PayCard } from "@/components/PayCard";
 import { UpiReturnSheet } from "@/components/UpiReturnSheet";
-import { dayAndDate } from "@/lib/order-format";
+import { actualOrderTotal, dayAndDate } from "@/lib/order-format";
 import { fetchMyOrders, type OrderDto } from "@/lib/orders";
 import { formatINR } from "@/lib/catalogue";
 import { useLang } from "@/hooks/use-lang";
@@ -113,7 +113,8 @@ function OrderSuccess() {
   const first = parts[0] ? live[parts[0].order_id] : undefined;
   const isPickup = first ? first.deliveryMode === "pickup" : pickup;
 
-  const total = parts.reduce((a, p) => a + p.grand_total, 0);
+  const partTotal = (p: Part) => actualOrderTotal(p.grand_total, live[p.order_id]?.grandTotal, info[p.order_id]?.grandTotal);
+  const total = parts.reduce((a, p) => a + partTotal(p), 0);
   const dateOnly = deliveryDate ? dayAndDate(deliveryDate, lang) : "";
   return (
     <main className={`mx-auto flex min-h-screen max-w-md flex-col bg-background px-5 pb-10 ${deva}`}>
@@ -147,13 +148,13 @@ function OrderSuccess() {
                 <PayCard
                   method={payMethod === "bank" ? "bank" : "upi"}
                   info={info[p.order_id] ?? null}
-                  amount={info[p.order_id]?.grandTotal ?? p.grand_total}
+                  amount={partTotal(p)}
                   orderNo={p.order_no}
                   orderId={p.order_id}
                   hold={holds[p.order_id]}
                   title={parts.length > 1 ? `${t("upi.payNow")} · ${p.order_no}` : undefined}
                   onPaid={() =>
-                    setProofFor({ orderId: p.order_id, orderNo: p.order_no, amount: p.grand_total, method: payMethod === "bank" ? "bank" : "upi" })
+                    setProofFor({ orderId: p.order_id, orderNo: p.order_no, amount: partTotal(p), method: payMethod === "bank" ? "bank" : "upi" })
                   }
                 />
               )}
@@ -175,7 +176,7 @@ function OrderSuccess() {
       <UpiReturnSheet
         onYes={(id, upi) => {
           const p = parts.find((x) => x.order_id === id);
-          if (p) setProofFor({ orderId: p.order_id, orderNo: p.order_no, amount: p.grand_total, method: "upi", ...upi });
+          if (p) setProofFor({ orderId: p.order_id, orderNo: p.order_no, amount: partTotal(p), method: "upi", ...upi });
         }}
       />
       <PaymentProofSheet

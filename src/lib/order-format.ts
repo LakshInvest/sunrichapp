@@ -13,6 +13,11 @@ import { istDayOf, istShiftDay, istToday, IST_TZ } from "@/lib/ist";
 
 const locale = (lang: string) => (lang === "en" ? "en-IN" : lang === "hi" ? "hi-IN" : "mr-IN");
 
+/** Persisted totals win over a stale placement response; never reprice old orders. */
+export function actualOrderTotal(placedTotal: number, liveTotal?: number | null, paymentTotal?: number | null): number {
+  return liveTotal ?? paymentTotal ?? placedTotal;
+}
+
 /** Which friendly word a date gets: today / tomorrow / yesterday, or a plain date.
  *  Days are compared in IST, so 1:30 AM IST counts as that IST day. */
 export function relativeDay(iso: string, now = new Date()): "today" | "tomorrow" | "yesterday" | null {

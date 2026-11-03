@@ -2632,6 +2632,8 @@ export type Database = {
           code: string
           company_id: string
           created_at: string
+          default_days: number[]
+          default_vehicle_id: string | null
           description: string | null
           id: string
           is_active: boolean
@@ -2643,6 +2645,8 @@ export type Database = {
           code: string
           company_id: string
           created_at?: string
+          default_days?: number[]
+          default_vehicle_id?: string | null
           description?: string | null
           id?: string
           is_active?: boolean
@@ -2654,6 +2658,8 @@ export type Database = {
           code?: string
           company_id?: string
           created_at?: string
+          default_days?: number[]
+          default_vehicle_id?: string | null
           description?: string | null
           id?: string
           is_active?: boolean
@@ -2667,6 +2673,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geo_routes_default_vehicle_id_fkey"
+            columns: ["default_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
           {

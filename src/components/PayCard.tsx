@@ -15,7 +15,7 @@ export function PayCard({
   amount,
   orderNo,
   orderId,
-  hold,
+  hold: _hold,
   title,
   onPaid,
 }: {

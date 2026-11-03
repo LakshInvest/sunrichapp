@@ -1,5 +1,10 @@
 # Prompt-19 roadmap — 15 tasks
 
+## Prompt-47 — native UPI proxy and pickup totals
+- [ ] Register UPI synchronously and audit other Capacitor proxy returns.
+- [ ] Correct pickup totals on success, detail and tracking; regression tests.
+- [ ] Verify available flows and request publication; real APK handoff needs a phone.
+
 ## Prompt-45 / Prompt-46 — UPI launch repair
 - [x] Fix launch errors, two-second warning, WebView handoff and Android app-discovery fallback; preserve QR/UPI ID.
 - [x] Add hidden Account version long-press diagnostic and copy; verified signed-in through QA PIN login.

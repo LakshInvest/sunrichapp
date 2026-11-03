@@ -1,4 +1,5 @@
 import { isNative } from "@/lib/native";
+import { Capacitor, registerPlugin } from "@capacitor/core";
 import i18n from "i18next";
 import { toast } from "sonner";
 
@@ -101,7 +102,9 @@ type NativeUpi = {
   pay(o: { url: string; package?: string }): Promise<{ response?: string | null; noApp?: boolean }>;
   installed(o: { packages: string[] }): Promise<{ packages: string[] }>;
 };
-let pluginPromise: Promise<NativeUpi | null> | null = null;
+// Register synchronously: Capacitor proxies expose `then` as a native method,
+// so returning one through a Promise would assimilate it and hang the bridge.
+const SunrichUpi = registerPlugin<NativeUpi>("SunrichUpi");
 let lastUpiError = "";
 export const getLastUpiError = () => lastUpiError;
 function rememberError(error: unknown) {
@@ -115,12 +118,8 @@ export function visibleUpiApps(found: UpiApp[], android = isAndroidUpi()): UpiAp
   return found.length > 0 ? found : android ? UPI_APPS.map((a) => a.id) : [];
 }
 /** The SunrichUpi native plugin, or null on web / an APK built before it was added. */
-function nativeUpi(): Promise<NativeUpi | null> {
-  if (!isNative()) return Promise.resolve(null);
-  pluginPromise ??= import("@capacitor/core").then(({ Capacitor, registerPlugin }) =>
-    Capacitor.isPluginAvailable("SunrichUpi") ? registerPlugin<NativeUpi>("SunrichUpi") : null,
-  );
-  return pluginPromise;
+function nativeUpi(): NativeUpi | null {
+  return isNative() && Capacitor.isPluginAvailable("SunrichUpi") ? SunrichUpi : null;
 }
 
 /** Last launch, so the "Payment failed" sheet can retry the same payment. */
@@ -175,7 +174,7 @@ export async function openUpi(p: UpiParams, app?: UpiApp, orderId?: string | nul
     if (keepWebWatchdog) cleanup();
   }, 2000);
   try {
-    const plugin = await nativeUpi();
+    const plugin = nativeUpi();
     if (plugin) {
       const res = await plugin.pay({ url: `upi://pay?${query}`, ...(target ? { package: target.pkg } : {}) });
       if (res.noApp) {
@@ -231,7 +230,7 @@ export async function installedUpiApps(): Promise<UpiApp[]> {
   try {
     return await Promise.race([
       (async () => {
-        const plugin = await nativeUpi();
+        const plugin = nativeUpi();
         if (plugin) {
           const { packages } = await plugin.installed({ packages: UPI_APPS.map((a) => a.pkg) });
           return UPI_APPS.filter((a) => packages.includes(a.pkg)).map((a) => a.id);
@@ -253,7 +252,6 @@ export async function installedUpiApps(): Promise<UpiApp[]> {
 }
 
 export async function getUpiDiagnostic() {
-  const { Capacitor } = await import("@capacitor/core");
   const apps = await installedUpiApps();
   return {
     isNativePlatform: Capacitor.isNativePlatform(),

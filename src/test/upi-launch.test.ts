@@ -3,12 +3,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   native: true, available: true,
   pay: vi.fn(), installed: vi.fn(), openUrl: vi.fn(), canOpenUrl: vi.fn(),
-  toast: vi.fn(), state: null as null | ((s: { isActive: boolean }) => void),
+  toast: vi.fn(), then: vi.fn(), state: null as null | ((s: { isActive: boolean }) => void),
 }));
 vi.mock("@/lib/native", () => ({ isNative: () => mocks.native }));
 vi.mock("@capacitor/core", () => ({
   Capacitor: { isNativePlatform: () => mocks.native, getPlatform: () => mocks.native ? "android" : "web", isPluginAvailable: () => mocks.available },
-  registerPlugin: () => ({ pay: mocks.pay, installed: mocks.installed }),
+  registerPlugin: () => new Proxy({ pay: mocks.pay, installed: mocks.installed }, {
+    get(target, key) {
+      if (key === "then") return mocks.then;
+      return Reflect.get(target, key);
+    },
+  }),
 }));
 vi.mock("@capacitor/app", () => ({ App: { addListener: vi.fn(async (_event, cb) => { mocks.state = cb; return { remove: vi.fn() }; }) } }));
 vi.mock("@capacitor/app-launcher", () => ({ AppLauncher: { openUrl: mocks.openUrl, canOpenUrl: mocks.canOpenUrl } }));
@@ -23,6 +28,24 @@ beforeEach(() => {
 afterEach(() => { vi.useRealTimers(); });
 
 describe("UPI launch repair", () => {
+  it("discovers installed apps without assimilating the native proxy", async () => {
+    mocks.installed.mockResolvedValue({ packages: ["com.phonepe.app"] });
+    const upi = await import("@/lib/upi");
+    const discovery = upi.installedUpiApps();
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(await discovery).toEqual(["phonepe"]);
+    expect(mocks.installed).toHaveBeenCalledTimes(1);
+    expect(mocks.then).not.toHaveBeenCalled();
+  });
+  it("calls pay directly without invoking a native then method", async () => {
+    mocks.pay.mockResolvedValue({ response: "Status=SUCCESS&ApprovalRefNo=412345678901" });
+    const upi = await import("@/lib/upi");
+    const payment = upi.openUpi(params);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(mocks.pay).toHaveBeenCalledTimes(1);
+    expect(mocks.then).not.toHaveBeenCalled();
+    expect((await payment).kind).toBe("success");
+  });
   it("records plugin pay errors and reports failure", async () => {
     mocks.pay.mockRejectedValue(new Error("bridge unavailable"));
     const upi = await import("@/lib/upi");

@@ -115,7 +115,7 @@ export function PayCard({
         {t("upi.paidEnterUtr")}
       </button>
       {/* One line only — "Sunrich sends the order once the payment is checked". */}
-      {method !== "bank" || hold ? <p className="mt-2 text-center text-xs text-muted-foreground">{t("success.checkNote")}</p> : null}
+      <p className="mt-2 text-center text-xs text-muted-foreground">{t("success.checkNote")}</p>
     </div>
   );
 }

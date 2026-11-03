@@ -24,7 +24,7 @@ const fmtDate = (iso: string | null) =>
   iso ? new Date(iso.length === 10 ? `${iso}T00:00:00` : iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: IST_TZ }) : "—";
 
 export function BrandedInvoice({ inv, firm, lang }: { inv: Invoice; firm: InvoiceFirm | null; lang: string }) {
-  const d = (firm?.design ?? {}) as Record<string, unknown>;
+  const d = parseDesign(firm?.designJson);
   const on = (k: string, def = true) => (d[k] === undefined ? def : Boolean(d[k]));
   const head = (d["headerColor"] as string) || "#0D3278";
   const accent = (d["accentColor"] as string) || "#0AAAED";
@@ -189,4 +189,13 @@ function Row({ k, v, bold }: { k: string; v: string; bold?: boolean }) {
       <dd className="font-semibold">{v}</dd>
     </div>
   );
+}
+
+function parseDesign(json: string | undefined): Record<string, unknown> {
+  try {
+    const v: unknown = JSON.parse(json ?? "{}");
+    return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+  } catch {
+    return {};
+  }
 }

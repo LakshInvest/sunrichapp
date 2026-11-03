@@ -20,7 +20,7 @@ export type InvoiceFirm = {
   signatureUrl: string | null;
   signatoryName: string | null;
   /** Command Center Settings → Invoice design (firms.invoice_design), passed through as-is. */
-  design: Record<string, unknown>;
+  designJson: string;
 };
 
 /**
@@ -72,6 +72,6 @@ export const getInvoiceFirm = createServerFn({ method: "POST" })
       bank: main ? { name: main.bank_name, accountName: main.account_name, accountNo: main.account_number, ifsc: main.ifsc, branch: main.branch } : null,
       signatureUrl: firm.signature_url,
       signatoryName: firm.signatory_name,
-      design: firm.invoice_design && typeof firm.invoice_design === "object" && !Array.isArray(firm.invoice_design) ? (firm.invoice_design as Record<string, unknown>) : {},
+      designJson: JSON.stringify(firm.invoice_design ?? {}),
     };
   });

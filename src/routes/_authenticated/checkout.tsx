@@ -248,7 +248,7 @@ function Checkout() {
         quoteMyOrder(linesPayload, mode === "pickup" ? "sunrich" : "pickup").catch(() => null),
       ]);
       setQuote(q);
-      setModeTotals({ [mode]: Number(q.grand_total ?? q.items_total), ...(other ? { [mode === "pickup" ? "sunrich" : "pickup"]: Number(other.grand_total ?? other.items_total) } : {}) });
+      setModeTotals({ [mode]: Number(q.items_total) + Number(q.deposit_total ?? 0), ...(other ? { [mode === "pickup" ? "sunrich" : "pickup"]: Number(other.items_total) + Number(other.deposit_total ?? 0) } : {}) });
       setQuoteError(null);
     } catch (e) {
       setQuoteError(serverMessage(e, t("checkout.errPlace")));

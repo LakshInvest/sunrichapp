@@ -357,7 +357,7 @@ function Home() {
 
     if (key === "categories") {
       return (
-        <div key="categories" className="no-scrollbar sticky top-0 z-20 mt-1 flex gap-2 overflow-x-auto bg-background px-3 pb-2 pt-1">
+        <div key="categories" className="no-scrollbar sticky top-0 z-20 mt-1 flex gap-2 overflow-x-auto bg-background px-3 pb-2 pt-[max(0.25rem,env(safe-area-inset-top))]">
           <button
             type="button"
             onClick={() => setCategory("all")}
@@ -500,11 +500,8 @@ function Home() {
 
     if (key === "popular") {
       return (
-        <div key="popular" className="mt-6 px-5">
-          <h2 className={`text-lg font-bold text-foreground ${deva}`}>{t("home.allProducts")}</h2>
-
-
-          <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-6">
+        <div key="popular" className="mt-3 px-3">
+          <div className="grid grid-cols-2 gap-2.5">
             {visibleProducts.map((product) => {
               const p = withFav(product);
               return (

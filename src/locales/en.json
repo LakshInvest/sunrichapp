@@ -1036,7 +1036,7 @@
     "filter": {
       "all": "All",
       "bills": "Bills",
-      "payments": "Payments"
+      "payments": "Jama"
     },
     "kind": {
       "bill": "Bill",
@@ -1225,5 +1225,19 @@
     "line1": "Shop / house no., street",
     "landmark": "Landmark (optional)",
     "someoneElse": "Deliver to someone else?"
+  },
+  "packUnit": {
+    "packOf": "Pack of {{n}}",
+    "boxOf": "Box of {{n}}",
+    "caseOf": "Case of {{n}}",
+    "crateOf": "Crate of {{n}}",
+    "cartonOf": "Carton of {{n}}",
+    "one_jar": "1 Jar",
+    "one_can": "1 Can",
+    "one_bottle": "1 Bottle",
+    "one_piece": "1 Piece"
+  },
+  "orders": {
+    "moreItems": "+{{count}} more"
   }
 }

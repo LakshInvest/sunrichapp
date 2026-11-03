@@ -111,7 +111,7 @@ export function QtyStepper({
     if (Number.isFinite(n) && n >= 0) onSet(n);
   };
   return (
-    <div className={`flex w-full items-center justify-between rounded-full bg-primary text-primary-foreground ${className}`}>
+    <div className={`flex ${compact ? "" : "w-full"} items-center justify-between rounded-full bg-primary text-primary-foreground ${className}`}>
       <button type="button" onClick={onDec} aria-label={t("home.decreaseQty")} className={`flex h-full ${compact ? "w-8" : "w-11"} shrink-0 items-center justify-center rounded-full active:scale-90`}>
         <Minus className="h-4 w-4" />
       </button>
@@ -142,7 +142,7 @@ export function QtyStepper({
           }}
           onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
           aria-label={t("home.typeQty")}
-          className="h-full w-full min-w-0 flex-1 bg-transparent text-center text-sm font-bold text-primary-foreground caret-transparent outline-none selection:bg-transparent"
+          size={1} className="h-full w-0 min-w-0 flex-1 bg-transparent text-center text-sm font-bold text-primary-foreground caret-transparent outline-none selection:bg-transparent"
         />
       ) : (
         <button

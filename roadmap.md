@@ -4,7 +4,7 @@
 - [x] Register UPI synchronously; whole-src audit found no other async plugin proxy returns.
 - [x] Success header/payment/proof share persisted totals; detail/tracking already use stored totals, payment now matches. 39 targeted tests pass (₹110 pickup / ₹120 delivery regression).
 - [x] Signed-in Account diagnostic Copy, Android fallback buttons/QR and real-order detail → success persisted-total read-back verified; no orders/payments created.
-- [ ] Request publication after checks.
+- [x] Publication requested for https://user.sunrich.in after checks; deployment completion unconfirmed.
 - [ ] Real installed-APK UPI handoff and reported pickup order — need a phone and the affected customer session.
 
 ## Prompt-45 / Prompt-46 — UPI launch repair

@@ -156,3 +156,46 @@ The repo has `assets/icon-only.png` (app icon), `assets/splash.png` and `assets/
    `<queries><intent><action android:name="android.intent.action.VIEW"/><data android:scheme="upi"/></intent></queries>`
 4. Android 12+: in `res/values-v31/styles.xml` set `windowSplashScreenBackground` to #0B2545 and `windowSplashScreenAnimatedIcon` to the logo, so the system splash is the same navy.
 5. Build, install, open an order that is out for delivery: if the map is blank, the small grey code under the pin is Google's reason.
+
+## UPI auto-UTR plugin (Prompt-44)
+
+The web app already calls a native plugin named `SunrichUpi`. Until it is in the APK, the app
+keeps the old flow (opens the UPI app, then asks "Payment done?").
+
+1. Copy `native/android/SunrichUpiPlugin.java` into
+   `android/app/src/main/java/com/sunrich/app/SunrichUpiPlugin.java`
+   (the folder that holds `MainActivity.java`; if your package is not `com.sunrich.app`,
+   change the first `package` line to match `MainActivity.java`).
+2. Open `MainActivity.java` and register the plugin before `super.onCreate`:
+   ```java
+   package com.sunrich.app;
+
+   import android.os.Bundle;
+   import com.getcapacitor.BridgeActivity;
+
+   public class MainActivity extends BridgeActivity {
+       @Override
+       public void onCreate(Bundle savedInstanceState) {
+           registerPlugin(SunrichUpiPlugin.class);
+           super.onCreate(savedInstanceState);
+       }
+   }
+   ```
+   (Keep any other `registerPlugin(...)` lines you already have.)
+3. In `android/app/src/main/AndroidManifest.xml`, inside `<manifest>` (outside `<application>`), add or replace the `<queries>` block:
+   ```xml
+   <queries>
+       <intent>
+           <action android:name="android.intent.action.VIEW" />
+           <data android:scheme="upi" />
+       </intent>
+       <package android:name="com.google.android.apps.nbu.paisa.user" />
+       <package android:name="com.phonepe.app" />
+       <package android:name="net.one97.paytm" />
+       <package android:name="in.org.npci.upiapp" />
+   </queries>
+   ```
+4. Run `npx cap sync android`, then in Android Studio: Build → Clean Project, then Build → Generate Signed Bundle / APK.
+5. Install on a phone with GPay/PhonePe/Paytm. Only the installed apps' buttons appear on the pay card.
+6. Run `database/20261104_upi_response.sql` once so the UPI reply is saved with the payment
+   (column `payment_proofs.upi_response`). Without it, payments still work; the reply just isn't saved.

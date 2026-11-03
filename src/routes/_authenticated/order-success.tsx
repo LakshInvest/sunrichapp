@@ -161,9 +161,6 @@ function OrderSuccess() {
           );
         })}
       </ul>
-      {(payMethod === "upi" || payMethod === "bank") && parts.length > 0 && (
-        <p className="mt-4 text-center text-sm text-muted-foreground">{t("success.checkNote")}</p>
-      )}
 
       <div className="mt-auto space-y-2 pt-8 text-center">
         <button
@@ -176,9 +173,9 @@ function OrderSuccess() {
         </button>
       </div>
       <UpiReturnSheet
-        onYes={(id) => {
+        onYes={(id, upi) => {
           const p = parts.find((x) => x.order_id === id);
-          if (p) setProofFor({ orderId: p.order_id, orderNo: p.order_no, amount: p.grand_total, method: "upi" });
+          if (p) setProofFor({ orderId: p.order_id, orderNo: p.order_no, amount: p.grand_total, method: "upi", ...upi });
         }}
       />
       <PaymentProofSheet

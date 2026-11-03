@@ -1,3 +1,4 @@
+import { upiLink as buildUpiLink } from "@/lib/upi";
 import { ownCustomerFilter } from "@/lib/my-customer";
 /** Khata (customer ledger & payments) — reads/writes through the Khata RPCs only. */
 import { supabase } from "@/integrations/supabase/client";
@@ -111,8 +112,7 @@ export function passbookRows(rows: KhataEntry[]): KhataEntry[] {
 
 /** UPI deep link for a payment amount. */
 export function upiPayLink(upiId: string, payee: string, amount: number, note: string): string {
-  const p = new URLSearchParams({ pa: upiId, pn: payee, am: amount.toFixed(2), cu: "INR", tn: note });
-  return `upi://pay?${p.toString()}`;
+  return buildUpiLink({ pa: upiId, pn: payee, amount, orderNo: note, note });
 }
 
 /* ---------- Reads ---------- */

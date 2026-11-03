@@ -1157,7 +1157,10 @@
     "noApp": "No UPI app found. Scan the QR or copy the UPI ID.",
     "returnTitle": "Payment done?",
     "returnYes": "Yes, enter UTR / screenshot",
-    "returnNo": "Not yet"
+    "returnNo": "Not yet",
+    "failedTitle": "Payment didn't go through, please try again",
+    "retry": "Pay again",
+    "paidAnyway": "I have paid — enter UTR"
   },
   "khata2": {
     "yourBalance": "Your balance",

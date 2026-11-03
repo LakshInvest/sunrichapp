@@ -490,9 +490,9 @@ function OrderDetail() {
       </div>
 
       <UpiReturnSheet
-        onYes={() =>
-          setPayTarget({ orderId: order.id, orderNo: order.orderNo, amount: order.grandTotal, method: order.paymentMethod === "bank" ? "bank" : "upi" })
-        }
+        onYes={(id, upi) => {
+          if (id === order.id) setPayTarget({ orderId: order.id, orderNo: order.orderNo, amount: order.grandTotal, method: "upi", ...upi });
+        }}
       />
 
       {/* Cancel reason sheet */}

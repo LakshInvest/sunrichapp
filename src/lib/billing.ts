@@ -1,3 +1,4 @@
+import { upiLink as buildUpiLink } from "@/lib/upi";
 import { ownCustomerFilter } from "@/lib/my-customer";
 /** Customer bills, receipts, statement and invoices — read via RLS / existing RPCs only. */
 import { supabase } from "@/integrations/supabase/client";
@@ -209,6 +210,5 @@ export async function fetchInvoiceIdForOrder(orderId: string): Promise<string | 
 
 /** upi://pay link for the balance. */
 export function upiLink(upiId: string, payee: string, amount: number, note: string): string {
-  const p = new URLSearchParams({ pa: upiId, pn: payee, am: amount.toFixed(2), cu: "INR", tn: note });
-  return `upi://pay?${p.toString()}`;
+  return buildUpiLink({ pa: upiId, pn: payee, amount, orderNo: note, note });
 }

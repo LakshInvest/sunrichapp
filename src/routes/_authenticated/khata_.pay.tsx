@@ -1,5 +1,6 @@
 import { toast } from "sonner";
-import { openUpi, upiRef } from "@/lib/upi";
+import { openUpi, type UpiResponse } from "@/lib/upi";
+import { attachUpiResponse } from "@/lib/payments";
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { istToday } from "@/lib/ist";
@@ -69,6 +70,7 @@ function PayPage() {
   const [other, setOther] = useState("");
   const [mode, setMode] = useState<Mode>("upi");
   const [ref, setRef] = useState("");
+  const [upiResp, setUpiResp] = useState<UpiResponse | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [cashTo, setCashTo] = useState<CashTo | null>(null);
   const [cashName, setCashName] = useState("");
@@ -138,7 +140,7 @@ function PayPage() {
         if (!prep.ok) throw new Error(t(prep.reason === "tooLarge" ? "registration.errFileTooLarge" : "registration.errFileType"));
         path = await uploadPaymentFile(prep.blob, file.name, prep.mime);
       }
-      await submitMyPayment({
+      const proofId = await submitMyPayment({
         amount,
         method: mode,
         reference: mode === "cash" || mode === "cheque" ? null : r || null,
@@ -150,6 +152,7 @@ function PayPage() {
         chequeBank: mode === "cheque" ? chequeBank : null,
         chequeDate: mode === "cheque" ? chequeDate : null,
       });
+      if (mode === "upi") void attachUpiResponse(proofId, upiResp);
       setStep(3);
     } catch (x) {
       setErrs({ submit: serverMessage(x, t("errors.generic")) });
@@ -295,9 +298,12 @@ function PayPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      void openUpi({ pa: info.upiId!, pn: info.payeeName ?? info.firmName, amount, orderNo: "Khata", ref: upiRef("KHATA") }).then(
-                        (ok) => ok || toast.error(t("upi.noApp")),
-                      )
+                      void openUpi({ pa: info.upiId!, pn: info.payeeName ?? info.firmName, amount, orderNo: "Khata", note: "Khata payment" }).then((res) => {
+                        if (res.kind === "noApp") toast.error(t("upi.noApp"));
+                        if (res.kind === "success" || res.kind === "failed" || (res.kind === "none" && res.response)) setUpiResp(res.response);
+                        if (res.kind === "success" && res.response.utr) setRef(res.response.utr);
+                        else if (res.kind === "failed") toast.error(t("upi.failedTitle"));
+                      })
                     }
                     className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-primary text-sm font-semibold text-primary"
                   >

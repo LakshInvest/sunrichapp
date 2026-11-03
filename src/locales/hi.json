@@ -1151,6 +1151,16 @@
     "pickupSave": "({{amount}} बचाओ)"
   },
   "upi": {
+    "launchError": "UPI ऐप नहीं खुला, QR स्कैन करके या UPI ID कॉपी करके पे करें",
+    "appMissing": "ये ऐप फ़ोन में नहीं है",
+    "copyId": "UPI ID कॉपी करें",
+    "diagnosticTitle": "UPI जाँच",
+    "diagnosticNative": "isNativePlatform",
+    "diagnosticPlatform": "platform",
+    "diagnosticPlugin": "SunrichUpi प्लगइन उपलब्ध",
+    "diagnosticApps": "मिले UPI ऐप",
+    "diagnosticUrl": "पेज URL",
+    "diagnosticError": "आखिरी UPI त्रुटि",
     "payNow": "अभी पे करें",
     "payAmount": "{{amount}} UPI ऐप से पे करें",
     "paidEnterUtr": "पे कर दिया? UTR डालें",

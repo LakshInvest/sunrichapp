@@ -1151,6 +1151,16 @@
     "pickupSave": "(save {{amount}})"
   },
   "upi": {
+    "launchError": "UPI app nahi khula, QR scan karke ya UPI ID copy karke pay karein",
+    "appMissing": "Ye app phone mein nahi hai",
+    "copyId": "Copy UPI ID",
+    "diagnosticTitle": "UPI diagnostic",
+    "diagnosticNative": "isNativePlatform",
+    "diagnosticPlatform": "platform",
+    "diagnosticPlugin": "SunrichUpi plugin available",
+    "diagnosticApps": "UPI apps found",
+    "diagnosticUrl": "page URL",
+    "diagnosticError": "last UPI error",
     "payNow": "Pay now",
     "payAmount": "Pay {{amount}} with UPI app",
     "paidEnterUtr": "Paid? Enter UTR",

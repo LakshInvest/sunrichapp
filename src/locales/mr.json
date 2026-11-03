@@ -1157,7 +1157,10 @@
     "noApp": "UPI ॲप सापडले नाही. QR स्कॅन करा किंवा UPI ID कॉपी करा.",
     "returnTitle": "पेमेंट झाले?",
     "returnYes": "हो, UTR / स्क्रीनशॉट टाका",
-    "returnNo": "अजून नाही"
+    "returnNo": "अजून नाही",
+    "failedTitle": "पेमेंट झाले नाही, पुन्हा प्रयत्न करा",
+    "retry": "पुन्हा पे करा",
+    "paidAnyway": "मी पे केले आहे — UTR टाका"
   },
   "khata2": {
     "yourBalance": "तुमची बाकी",

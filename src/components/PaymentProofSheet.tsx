@@ -7,7 +7,8 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { prepareUpload } from "@/lib/image-compress";
 import { scrollToFirstError, serverMessage } from "@/lib/form-errors";
 import { getMyCustomerId } from "@/lib/orders";
-import { submitPaymentProof, validUtr } from "@/lib/payments";
+import { attachUpiResponse, submitPaymentProof, validUtr } from "@/lib/payments";
+import type { UpiResponse } from "@/lib/upi";
 import { istToday } from "@/lib/ist";
 
 /** The order (or balance) a proof sheet is filled in for. */
@@ -16,6 +17,9 @@ export type ProofTarget = {
   orderNo?: string | null;
   amount: number;
   method: "upi" | "bank";
+  /** UTR read from the UPI app's reply (APK) — prefilled, customer just taps Submit. */
+  utr?: string | null | undefined;
+  upiResponse?: UpiResponse | null | undefined;
 };
 
 const today = () => istToday();
@@ -41,12 +45,12 @@ export function PaymentProofSheet({
 
   useEffect(() => {
     if (open) {
-      setRef("");
+      setRef(target?.utr ?? "");
       setDate(today());
       setFile(null);
       setErrs({});
     }
-  }, [open]);
+  }, [open, target?.utr]);
 
   if (!target) return null;
 
@@ -73,7 +77,7 @@ export function PaymentProofSheet({
         const { error } = await supabaseUpload(path, prep.blob, prep.mime);
         if (error) throw new Error(error.message);
       }
-      await submitPaymentProof({
+      const proofId = await submitPaymentProof({
         amount: target.amount,
         method: target.method,
         reference: r || null,
@@ -81,6 +85,7 @@ export function PaymentProofSheet({
         screenshotPath: path ?? null,
         orderId: target.orderId ?? null,
       });
+      void attachUpiResponse(proofId, target.upiResponse);
       toast.success(t("success.proofSent"));
       onOpenChange(false);
       onDone?.();

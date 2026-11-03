@@ -191,3 +191,17 @@ export function awaitingPayment(
 export function canChangePayMethod(status: string): boolean {
   return ["placed", "credit_hold", "approved"].includes(status);
 }
+
+/**
+ * Saves the UPI app's raw reply next to the proof so finance can see it. Info only — the
+ * proof stays "pending" until finance verifies it. Needs database/20261104_upi_response.sql;
+ * until then it fails quietly.
+ */
+export async function attachUpiResponse(proofId: string, response: import("@/lib/upi").UpiResponse | null | undefined): Promise<void> {
+  if (!response || !proofId) return;
+  const { error } = await supabase.rpc("attach_upi_response" as never, {
+    p_proof_id: proofId,
+    p_response: { status: response.status, txnId: response.txnId, utr: response.utr, responseCode: response.responseCode, raw: response.raw },
+  } as never);
+  if (error) console.warn("attach_upi_response", error.message);
+}

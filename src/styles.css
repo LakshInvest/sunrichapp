@@ -373,7 +373,8 @@
 
 /* Launch splash: logo box mirrors the native 2732² CENTER_CROP splash (logo 793×772 at
    x 971, y 868; image centre 1366). --s = one source pixel on screen. */
-.launch-splash { --s: calc(max(100vw, 100vh) / 2732); }
+/* Same navy as the native splash image + Capacitor backgroundColor, so the hand-off is invisible. */
+.launch-splash { --s: calc(max(100vw, 100vh) / 2732); background-color: #0b2545; }
 .launch-logo {
   position: absolute;
   left: 50%;

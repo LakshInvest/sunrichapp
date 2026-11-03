@@ -26,7 +26,7 @@ export function LaunchSplash() {
     <div
       aria-hidden
       data-testid="launch-splash"
-      className={`launch-splash fixed inset-0 z-[9999] overflow-hidden bg-primary transition-opacity duration-300 ${phase === "fade" ? "opacity-0" : "opacity-100"}`}
+      className={`launch-splash fixed inset-0 z-[9999] overflow-hidden transition-opacity duration-300 ${phase === "fade" ? "opacity-0" : "opacity-100"}`}
     >
       <img src={splashLogo.url} alt="" className="launch-logo" fetchPriority="high" decoding="sync" />
       <svg className="launch-wave" viewBox="0 0 200 20" preserveAspectRatio="none">

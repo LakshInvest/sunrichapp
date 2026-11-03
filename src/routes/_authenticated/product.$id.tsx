@@ -306,12 +306,6 @@ function ProductDetail() {
               🔒 {t("catalog.rateAfterApproval")}
             </p>
           ) : (<>
-          {product.price !== null && qty > 0 && (
-            <div className="min-w-0 shrink-0">
-              <p className="text-xs text-muted-foreground">{t("product.total")}</p>
-              <p className="text-lg font-bold text-primary">{formatINR(product.price * qty)}</p>
-            </div>
-          )}
           {product.price === null ? (
             <button
               type="button"

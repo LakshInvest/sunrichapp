@@ -127,7 +127,14 @@ export function QtyStepper({
             document.documentElement.dataset["typing"] = "1";
             const el = e.currentTarget;
             el.select();
-            setTimeout(() => el.scrollIntoView({ block: "center", behavior: "smooth" }), 350);
+            const lift = () => {
+              const vv = window.visualViewport;
+              const r = el.getBoundingClientRect();
+              const bottom = (vv ? vv.height + vv.offsetTop : window.innerHeight) - 12;
+              if (r.bottom > bottom || r.top < 64) window.scrollBy({ top: r.bottom - bottom, behavior: "smooth" });
+            };
+            setTimeout(lift, 300);
+            setTimeout(lift, 650);
           }}
           onBlur={() => {
             delete document.documentElement.dataset["typing"];

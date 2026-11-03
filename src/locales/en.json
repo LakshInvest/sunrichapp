@@ -1191,5 +1191,13 @@
     "packsTimes": "{{count}} packs × {{price}}",
     "total": "Total",
     "cancelLink": "Cancel order"
+  },
+  "smart": {
+    "overdue": "{{amount}} due",
+    "dispatched": "Your order is on the way",
+    "pay": "Pay now",
+    "track": "Track",
+    "reorder": "Reorder",
+    "dismiss": "Hide"
   }
 }

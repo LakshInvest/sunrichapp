@@ -1191,5 +1191,13 @@
     "packsTimes": "{{count}} पैक × {{price}}",
     "total": "कुल",
     "cancelLink": "ऑर्डर कैंसल करें"
+  },
+  "smart": {
+    "overdue": "{{amount}} बाकी",
+    "dispatched": "आपका ऑर्डर निकल चुका है",
+    "pay": "अभी पे करें",
+    "track": "ट्रैक करें",
+    "reorder": "फिर से ऑर्डर",
+    "dismiss": "छिपाएँ"
   }
 }

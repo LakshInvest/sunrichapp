@@ -92,7 +92,9 @@ export function QtyStepper({
   onSet,
   max,
   className = "h-10",
+  compact = false,
 }: {
+  compact?: boolean;
   qty: number;
   onInc: () => void;
   onDec: () => void;
@@ -110,7 +112,7 @@ export function QtyStepper({
   };
   return (
     <div className={`flex w-full items-center justify-between rounded-full bg-primary text-primary-foreground ${className}`}>
-      <button type="button" onClick={onDec} aria-label={t("home.decreaseQty")} className="flex h-full w-11 items-center justify-center rounded-full active:scale-90">
+      <button type="button" onClick={onDec} aria-label={t("home.decreaseQty")} className={`flex h-full ${compact ? "w-8" : "w-11"} shrink-0 items-center justify-center rounded-full active:scale-90`}>
         <Minus className="h-4 w-4" />
       </button>
       {editing ? (
@@ -133,7 +135,7 @@ export function QtyStepper({
           }}
           onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
           aria-label={t("home.typeQty")}
-          className="h-full w-12 min-w-0 bg-transparent text-center text-sm font-bold text-primary-foreground caret-transparent outline-none selection:bg-transparent"
+          className="h-full w-full min-w-0 flex-1 bg-transparent text-center text-sm font-bold text-primary-foreground caret-transparent outline-none selection:bg-transparent"
         />
       ) : (
         <button
@@ -143,7 +145,7 @@ export function QtyStepper({
             setEditing(true);
           }}
           aria-label={t("home.typeQty")}
-          className="h-full min-w-12 select-none bg-transparent text-center text-sm font-bold outline-none [-webkit-tap-highlight-color:transparent] focus:outline-none"
+          className="h-full min-w-0 flex-1 select-none bg-transparent text-center text-sm font-bold outline-none [-webkit-tap-highlight-color:transparent] focus:outline-none"
         >
           {qty}
         </button>
@@ -153,7 +155,7 @@ export function QtyStepper({
         onClick={onInc}
         disabled={max != null && qty >= max}
         aria-label={t("home.increaseQty")}
-        className="flex h-full w-11 items-center justify-center rounded-full active:scale-90 disabled:opacity-40"
+        className={`flex h-full ${compact ? "w-8" : "w-11"} shrink-0 items-center justify-center rounded-full active:scale-90 disabled:opacity-40`}
       >
         <Plus className="h-4 w-4" />
       </button>
@@ -207,8 +209,8 @@ export function ProductCard({
         <p className="truncate text-xs leading-tight text-muted-foreground">{pack || "\u00a0"}</p>
       </button>
       <div className="mt-1 flex h-10 items-center gap-2">
-        <div className="min-w-0 shrink">{!locked && product.price !== null && !(qty > 0) ? <PriceLine product={product} /> : null}</div>
-        <div className={qty > 0 && !locked && product.price !== null ? "flex-1" : "ml-auto"}>
+        <div className="min-w-0 shrink">{locked || product.price !== null ? <PriceLine product={product} /> : null}</div>
+        <div className="ml-auto shrink-0">
         {locked ? null : product.price === null ? (
           onPriceRequest ? (
             <button type="button" onClick={onPriceRequest} className="flex h-9 items-center justify-center rounded-full bg-secondary/15 px-3 text-xs font-bold text-primary active:scale-95">
@@ -227,7 +229,7 @@ export function ProductCard({
             {t("home.addToCart")}
           </button>
         ) : (
-          <QtyStepper className="h-9" qty={qty} onInc={onInc} onDec={onDec} onSet={(n) => (onSetQty ? onSetQty(n) : n === 0 && onDec())} max={product.maxOrderQty} />
+          <QtyStepper compact className="h-9 w-[100px]" qty={qty} onInc={onInc} onDec={onDec} onSet={(n) => (onSetQty ? onSetQty(n) : n === 0 && onDec())} max={product.maxOrderQty} />
         )}
         </div>
       </div>

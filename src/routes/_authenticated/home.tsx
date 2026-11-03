@@ -17,6 +17,7 @@ import {
   LayoutGrid,
   MapPin,
   Milk,
+  Gem,
   Package,
   type LucideIcon,
 } from "lucide-react";
@@ -94,7 +95,7 @@ function Home() {
   // After Home shows, load the other main tabs' code (and orders data) in the background.
   useEffect(() => {
     const id = setTimeout(() => {
-      for (const to of ["/order", "/track", "/account", "/khata", "/cart"] as const) {
+      for (const to of ["/track", "/account", "/khata", "/cart"] as const) {
         void routerForPreload.preloadRoute({ to }).catch(() => undefined);
       }
       void swr("orders", fetchMyOrders).catch(() => undefined);
@@ -316,7 +317,7 @@ function Home() {
     }
     if (linkType === "category" && linkValue) {
       const cat = activeCategories.find((c) => c.code === linkValue || c.id === linkValue);
-      void navigate({ to: "/order", search: { category: cat?.code ?? linkValue } });
+      setCategory(cat?.code ?? linkValue);
       return;
     }
     if (linkType === "product" && linkValue) {
@@ -348,7 +349,7 @@ function Home() {
 
     if (key === "categories") {
       return (
-        <div key="categories" className="no-scrollbar mt-5 flex gap-2 overflow-x-auto px-5">
+        <div key="categories" className="no-scrollbar sticky top-0 z-20 mt-3 flex gap-2 overflow-x-auto bg-background px-5 py-2">
           <button
             type="button"
             onClick={() => setCategory("all")}
@@ -363,7 +364,7 @@ function Home() {
             {t("home.categoryAll")}
           </button>
           {activeCategories.map((cat) => {
-            const Icon = CATEGORY_ICONS[cat.iconKey] ?? LayoutGrid;
+            const Icon = /premium/i.test(`${cat.code} ${loc(cat.name, "en")}`) ? Gem : (CATEGORY_ICONS[cat.iconKey] ?? LayoutGrid);
             const selected = category === cat.code;
             return (
               <button
@@ -449,7 +450,7 @@ function Home() {
       );
     }
 
-    if (key === "favourites" && favourites.length > 0) {
+    if (key === "favourites" && false) {
       return (
         <div key="favourites" className="mt-6 px-5">
           <h2 className={`flex items-center gap-1.5 text-lg font-bold text-foreground ${deva}`}>
@@ -479,7 +480,7 @@ function Home() {
                       setQty(p.id, next);
                     }}
                     onDec={() => setQty(p.id, (quantities[p.id] ?? 0) - 1)}
-                    onToggleFavourite={() => void fav.toggle(p)}
+                  onSetQty={(n) => setQty(p.id, p.maxOrderQty != null ? Math.min(n, p.maxOrderQty) : n)}
                   />
                 </div>
               );
@@ -495,7 +496,7 @@ function Home() {
           <h2 className={`text-lg font-bold text-foreground ${deva}`}>{t("home.allProducts")}</h2>
 
 
-          <div className="mt-3 grid grid-cols-2 gap-3">
+          <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-6">
             {visibleProducts.map((product) => {
               const p = withFav(product);
               return (
@@ -517,7 +518,7 @@ function Home() {
                     setQty(p.id, Math.min((quantities[p.id] ?? 0) + 1, max));
                   }}
                   onDec={() => setQty(p.id, (quantities[p.id] ?? 0) - 1)}
-                  onToggleFavourite={() => void fav.toggle(p)}
+                  onSetQty={(n) => setQty(p.id, p.maxOrderQty != null ? Math.min(n, p.maxOrderQty) : n)}
                 />
               );
             })}
@@ -635,7 +636,6 @@ function Home() {
                   {heroGreeting}
                 </h1>
                 <p className={`relative z-10 mt-2.5 flex items-center gap-2 text-sm text-white/85 ${deva}`}>
-                  <span className="h-2 w-2 shrink-0 rounded-full bg-accent" aria-hidden />
                   {heroDelivery}
                 </p>
 

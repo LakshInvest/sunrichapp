@@ -85,7 +85,8 @@
     "order": "Shop",
     "track": "Orders",
     "account": "Account",
-    "inbox": "Inbox"
+    "inbox": "Inbox",
+    "khata": "Khata"
   },
   "home": {
     "greeting": "Pure water, at your door",
@@ -113,7 +114,8 @@
     "metaDescription": "Order Sunrich packaged drinking water — jars, bottles and more, delivered to your door.",
     "needsAction": "Sunrich needs something from you",
     "open": "Open",
-    "updatesBell": "Order updates"
+    "updatesBell": "Order updates",
+    "typeQty": "Type quantity"
   },
   "catalog": {
     "priceOnRequest": "Price on request",

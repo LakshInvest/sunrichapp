@@ -85,7 +85,8 @@
     "order": "खरीदें",
     "track": "ऑर्डर",
     "account": "अकाउंट",
-    "inbox": "इनबॉक्स"
+    "inbox": "इनबॉक्स",
+    "khata": "खाता"
   },
   "home": {
     "greeting": "शुद्ध पानी, आपके द्वार पर",
@@ -113,7 +114,8 @@
     "metaDescription": "सनरिच पैकेज्ड पेयजल ऑर्डर करें — जार, बोतलें और बहुत कुछ, आपके द्वार तक।",
     "needsAction": "Sunrich को आपसे कुछ चाहिए",
     "open": "खोलें",
-    "updatesBell": "ऑर्डर अपडेट"
+    "updatesBell": "ऑर्डर अपडेट",
+    "typeQty": "मात्रा लिखें"
   },
   "catalog": {
     "priceOnRequest": "कीमत पूछें",

@@ -1,9 +1,11 @@
 # Prompt-19 roadmap — 15 tasks
 
 ## Prompt-47 — native UPI proxy and pickup totals
-- [ ] Register UPI synchronously and audit other Capacitor proxy returns.
-- [ ] Correct pickup totals on success, detail and tracking; regression tests.
-- [ ] Verify available flows and request publication; real APK handoff needs a phone.
+- [x] Register UPI synchronously; whole-src audit found no other async plugin proxy returns.
+- [x] Success header/payment/proof share persisted totals; detail/tracking already use stored totals, payment now matches. 39 targeted tests pass (₹110 pickup / ₹120 delivery regression).
+- [x] Signed-in Account diagnostic Copy, Android fallback buttons/QR and real-order detail → success persisted-total read-back verified; no orders/payments created.
+- [ ] Request publication after checks.
+- [ ] Real installed-APK UPI handoff and reported pickup order — need a phone and the affected customer session.
 
 ## Prompt-45 / Prompt-46 — UPI launch repair
 - [x] Fix launch errors, two-second warning, WebView handoff and Android app-discovery fallback; preserve QR/UPI ID.

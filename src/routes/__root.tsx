@@ -1,4 +1,5 @@
 import { clearMyCustomer } from "@/lib/my-customer";
+import { clearTypeCode } from "@/lib/customer-type";
 import { applyStatusBar } from "@/lib/status-bar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -141,7 +142,7 @@ function RootComponent() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       if (event === "SIGNED_IN") void refreshPushToken();
-      if (event === "SIGNED_OUT") { clearUserCaches(); clearMyCustomer(); }
+      if (event === "SIGNED_OUT") { clearUserCaches(); clearMyCustomer(); clearTypeCode(); }
       void router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });

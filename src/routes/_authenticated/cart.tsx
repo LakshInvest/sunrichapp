@@ -8,6 +8,8 @@ import { ArrowLeft, CircleAlert, Droplets, Minus, Plus } from "lucide-react";
 import en from "@/locales/en.json";
 import { SwipeToRemove } from "@/components/SwipeToRemove";
 import { SmartImage } from "@/components/SmartImage";
+import { QtyStepper } from "@/components/catalog/ProductCard";
+import { isBusinessType, useTypeCode } from "@/lib/customer-type";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { ErrorState, GridSkeleton } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
@@ -236,7 +238,7 @@ function Cart() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-bold text-foreground">{loc(product.name, lang)}</p>
                     <p className="text-xs text-muted-foreground">
-                      {[loc(product.packLabel, lang), t("common.packs", { count: qty })].filter(Boolean).join(" · ")}
+                      {loc(product.packLabel, lang)}
                     </p>
                     {changed && (
                       <p className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-accent-foreground">
@@ -248,9 +250,6 @@ function Cart() {
                       <span className={product.price === null ? "text-sm font-semibold text-destructive" : "text-base font-bold text-primary"}>
                         {product.price === null ? t("cart.priceNotAvailable") : formatINR(product.price * qty)}
                       </span>
-                      {product.price !== null && product.mrp !== null && product.mrp > product.price && (
-                        <span className="text-xs text-muted-foreground line-through">{formatINR(product.mrp * qty)}</span>
-                      )}
                     </p>
                     {product.isReturnable && product.depositAmount != null && product.depositAmount > 0 && (
                       <p className="text-[11px] text-muted-foreground">
@@ -277,37 +276,25 @@ function Cart() {
                       {t("cart.remove")}
                     </button>
                   ) : (
-                    <div className="flex items-center rounded-full bg-primary text-primary-foreground">
-                      <button
-                        type="button"
-                        onClick={() => setQty(product.id, qty - 1)}
-                        disabled={offline}
-                        aria-label={t("home.decreaseQty")}
-                        className="relative flex h-9 w-9 items-center justify-center rounded-full transition after:absolute after:-inset-y-1.5 after:-inset-x-1 after:content-[''] active:scale-90 disabled:opacity-40"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </button>
-                      <span className="min-w-4 text-center text-sm font-bold">{qty}</span>
-                      <button
-                        type="button"
-                        onClick={() => setQty(product.id, qty + 1)}
-                        disabled={offline || (product.maxOrderQty != null && qty >= product.maxOrderQty)}
-                        aria-label={t("home.increaseQty")}
-                        className="relative flex h-9 w-9 items-center justify-center rounded-full transition after:absolute after:-inset-y-1.5 after:-inset-x-1 after:content-[''] active:scale-90 disabled:opacity-40"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </button>
+                    <div className="w-28 shrink-0">
+                      <QtyStepper
+                        className="h-9"
+                        qty={qty}
+                        onDec={() => setQty(product.id, qty - 1)}
+                        onInc={() => setQty(product.id, qty + 1)}
+                        onSet={(n) => setQty(product.id, product.maxOrderQty != null ? Math.min(n, product.maxOrderQty) : n)}
+                        max={product.maxOrderQty}
+                      />
                     </div>
                   )}
                 </div>
                 </SwipeToRemove>
               ))}
             </ul>
-            {rows.length > 0 && <p className="mt-2 text-center text-[11px] text-muted-foreground">{t("cart.swipeHint")}</p>}
 
             {offline && <p className="mt-3 text-center text-xs text-muted-foreground">{t("offline.cartHint")}</p>}
 
-            <section className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-sm">
+            <section className="mt-5 rounded-2xl bg-card p-4 shadow-sm">
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>{t("cart.itemTotal")}</span>
                 <span className="font-medium text-foreground">{formatINR(itemTotal)}</span>
@@ -327,6 +314,11 @@ function Cart() {
                   <span>{t("cart.grandTotal")}</span>
                   <span className="text-primary">{formatINR(grandTotal)}</span>
                 </div>
+                {savings > 0 && (
+                  <p className="mt-2 text-sm font-semibold text-success" data-testid="cart-savings">
+                    {t(business ? "cart2.totalMargin" : "cart2.youSave", { amount: formatINR(savings) })}
+                  </p>
+                )}
               </div>
               {hasBulk && (
                 <p className="mt-3 rounded-xl bg-accent/15 px-3 py-2 text-xs font-medium text-accent-foreground">
@@ -351,25 +343,23 @@ function Cart() {
               </div>
             )}
 
-            {pending ? (
-              <button
-                type="button"
-                disabled
-                className="mt-5 flex min-h-14 w-full items-center justify-center rounded-xl bg-muted text-lg font-semibold text-muted-foreground"
-              >
-                {t("cart.orderingAfterApproval")}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => navigate({ to: "/checkout" })}
-                disabled={offline || shortfall > 0 || hasUnpriced}
-                title={hasUnpriced ? t("errors.noPrice") : offline ? t("offline.hint") : undefined}
-                className="mt-5 flex min-h-14 w-full items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {t("cart.proceed")}
-              </button>
-            )}
+            <div data-kb-bar className="fixed inset-x-0 bottom-0 z-30 bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md">
+              {pending ? (
+                <button type="button" disabled className="mx-auto flex min-h-14 w-full max-w-md items-center justify-center rounded-xl bg-muted text-lg font-semibold text-muted-foreground">
+                  {t("cart.orderingAfterApproval")}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => navigate({ to: "/checkout" })}
+                  disabled={offline || shortfall > 0 || hasUnpriced}
+                  title={hasUnpriced ? t("errors.noPrice") : offline ? t("offline.hint") : undefined}
+                  className="mx-auto flex min-h-14 w-full max-w-md items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {t("cart2.continue", { amount: formatINR(grandTotal) })}
+                </button>
+              )}
+            </div>
           </>
         )}
       </div>

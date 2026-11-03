@@ -4,7 +4,8 @@
 - [x] Fix launch errors, two-second warning, WebView handoff and Android app-discovery fallback; preserve QR/UPI ID.
 - [x] Add hidden Account version long-press diagnostic and copy; verified signed-in through QA PIN login.
 - [x] UPI regression tests (19 passing); signed-in diagnostic Copy and Android-UA Khata buttons/QR verified, no payment submitted; security check complete.
-- [ ] Request publication; actual installed-APK app handoff requires a phone check.
+- [x] Publication requested for https://user.sunrich.in; deployment completion not confirmed.
+- [ ] Actual installed-APK app handoff — requires a real phone; no orders/payments created during verification.
 
 Constraint: existing DB tables/RPCs/buckets only. No schema/policy changes.
 

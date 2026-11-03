@@ -5,7 +5,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { SlotText } from "@/components/SlotText";
 import { DeliveredLines, DeliveryOtpCard, PickupPass, ProofOfDelivery } from "@/components/OrderExtras";
-import { fetchDeliveryProof, showDeliveryOtp, type DeliveryProof } from "@/lib/delivery";
+import { fetchDeliveryProof, fetchTruckPosition, kmBetween, showDeliveryOtp, type DeliveryProof } from "@/lib/delivery";
 import { toast } from "sonner";
 import { ArrowLeft, Ban, FileText, HelpCircle, Loader2, Repeat2, Truck } from "lucide-react";
 import { fetchInvoiceIdForOrder } from "@/lib/billing";
@@ -51,7 +51,9 @@ import {
   type OrderDto,
 } from "@/lib/orders";
 import { DEFAULT_LOCATION } from "@/components/locationShared";
-import { dateLabel, statusChipClass } from "@/lib/order-format";
+import { indDateTime, shortDate, statusChipClass } from "@/lib/order-format";
+import { SmartImage } from "@/components/SmartImage";
+import { UpiReturnSheet } from "@/components/UpiReturnSheet";
 
 export const Route = createFileRoute("/_authenticated/track/$id")({
   head: () => ({
@@ -93,6 +95,7 @@ function OrderDetail() {
   const [payHold, setPayHold] = useState(false);
   const [payTarget, setPayTarget] = useState<ProofTarget | null>(null);
   const [payInfo, setPayInfo] = useState<FirmPayInfo | null>(null);
+  const [truck, setTruck] = useState<{ lat: number; lng: number } | null>(null);
   const [methodOpen, setMethodOpen] = useState(false);
   const [savingMethod, setSavingMethod] = useState(false);
   const { pay: wantPay } = Route.useSearch();
@@ -241,9 +244,25 @@ function OrderDetail() {
     }
   };
 
+  const truckKm = truck && order.deliveryLatitude != null && order.deliveryLongitude != null
+    ? kmBetween(truck, { lat: order.deliveryLatitude, lng: order.deliveryLongitude })
+    : null;
+  const hasExtraLines = order.depositTotal > 0;
+  const products = readCatalogueCache()?.products ?? [];
+  const thumb = (pid: string) => {
+    const p = products.find((x) => x.id === pid);
+    return p?.imageUrl ?? p?.images[0] ?? null;
+  };
+  const payState = payProof?.status === "verified" || order.paymentStatus === "paid"
+    ? "paid"
+    : payProof?.status === "pending"
+      ? "verifying"
+      : "unpaid";
+  const pickupOrder = order.deliveryMode === "pickup";
+
   return (
     <PageShell className={`pb-16 ${deva}`} onRefresh={load}>
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
+      <header className="sticky top-0 z-20 flex items-center gap-2 bg-background/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <button
           type="button"
           onClick={() => navigate({ to: "/track" })}
@@ -252,48 +271,55 @@ function OrderDetail() {
         >
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
-        <p className="min-w-0 flex-1 truncate text-base font-bold text-foreground">{order.orderNo}</p>
-        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${statusChipClass(shownStatus)}`}>
-          {t(`status.${shownStatus}`)}
+        <span className="min-w-0 flex-1">
+          <span className={`inline-block rounded-full px-2.5 py-1 text-[11px] font-bold ${statusChipClass(shownStatus)}`}>{t(`status.${shownStatus}`)}</span>
+          <span className="ml-2 text-xs text-muted-foreground">{order.orderNo}</span>
         </span>
+        <button
+          type="button"
+          aria-label={t("trackDetail.needHelp")}
+          onClick={() => navigate({ to: "/queries/ask", search: { topic: "order", order: order.orderNo, subject: undefined, message: undefined, product: undefined } })}
+          className="flex h-11 w-11 items-center justify-center rounded-xl text-foreground"
+        >
+          <HelpCircle className="h-5 w-5" aria-hidden />
+        </button>
       </header>
 
-      <div className="px-5 pt-5">
+      {!pickupOrder && !isCancelled && (
+        <div className="relative">
+          <MapPreview lat={mapLat} lng={mapLng} truck={truck} interactive address={addrLines.join(", ")} className="h-[45vh] min-h-56 w-full" />
+          {truckKm != null && (
+            <span className="absolute bottom-3 left-3 rounded-full bg-card px-3 py-1.5 text-sm font-bold text-foreground shadow-md" data-testid="truck-km">
+              🚚 {t("track2.kmAway", { km: truckKm < 1 ? truckKm.toFixed(1) : Math.round(truckKm) })}
+            </span>
+          )}
+        </div>
+      )}
+
+      <div className="space-y-4 px-5 pt-5">
         {/* Timeline */}
-        <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-          <p className="text-sm font-bold text-foreground">{t("trackDetail.timelineTitle")}</p>
+        <section>
           {isCancelled ? (
-            <p className="mt-3 rounded-xl bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
+            <p className="rounded-xl bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
               {t(`status.${order.status}`)}
               {cancelNote ? ` — ${cancelNote}` : ""}
             </p>
           ) : (
-            <ol className="mt-4">
+            <ol>
               {steps.map((step, i) => {
-                const current = i === reached;
+                const done = i < reached || (i === reached && !!step.time);
                 const isLast = i === steps.length - 1;
-                const time = step.time ? dateLabel(step.time, lang) : null;
                 return (
                   <li key={step.key} className="flex gap-3">
                     <div className="flex flex-col items-center">
-                      <span
-                        className={`flex h-6 w-6 items-center justify-center rounded-full border-2 ${
-                          i < reached || (current && step.time)
-                            ? "border-secondary bg-secondary"
-                            : current
-                              ? "animate-pulse border-secondary bg-background"
-                              : "border-border bg-background"
-                        }`}
-                      >
-                        {(i < reached || (current && step.time)) && <span className="h-2 w-2 rounded-full bg-white" />}
+                      <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${done ? "border-secondary bg-secondary" : i === reached ? "border-secondary bg-background" : "border-border bg-background"}`}>
+                        {done && <span className="h-1.5 w-1.5 rounded-full bg-background" />}
                       </span>
-                      {!isLast && <span className={`h-8 w-0.5 ${i < reached ? "bg-secondary" : "bg-border"}`} />}
+                      {!isLast && <span className={`h-7 w-0.5 ${i < reached ? "bg-secondary" : "bg-border"}`} />}
                     </div>
-                    <div className={isLast ? "pb-0" : "pb-2"}>
-                      <p className={`text-sm font-semibold ${current && !step.time ? "text-primary" : i < reached || step.time ? "text-foreground" : "text-muted-foreground"}`}>
-                        {t(`trackDetail.step.${step.key}`)}
-                      </p>
-                      {time && <p className="text-xs text-muted-foreground">{time}</p>}
+                    <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
+                      <p className={`text-sm font-semibold ${done || i === reached ? "text-foreground" : "text-muted-foreground"}`}>{t(`trackDetail.step.${step.key}`)}</p>
+                      {step.time && <p className="shrink-0 text-xs text-muted-foreground">{indDateTime(step.time, lang)}</p>}
                     </div>
                   </li>
                 );
@@ -301,101 +327,73 @@ function OrderDetail() {
             </ol>
           )}
           {order.status === "credit_hold" && (
-            <p className="mt-3 rounded-xl bg-accent/15 px-3 py-2 text-xs font-medium text-accent-foreground">
-              {t("delivery.creditHold")}
-            </p>
+            <p className="mt-3 rounded-xl bg-accent/15 px-3 py-2 text-xs font-medium text-accent-foreground">{t("delivery.creditHold")}</p>
           )}
-          {(() => {
-            const rl = releaseLine(order);
-            if (!rl) return null;
-            return (
-              <p className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-secondary" data-testid="dispatch-line">
-                <Truck className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                {t(`dispatch.${rl.key}`, { time: rl.time, date: rl.date ? dateLabel(rl.date, lang) : undefined })}
-              </p>
-            );
-          })()}
         </section>
 
-        {/* Payment: pay-now card while a UPI / bank payment is due, then method + status */}
-        {awaitingPayment(order, payProof?.status ?? null) && (
-          <div id="pay-now" className="mt-4 scroll-mt-4">
-            {payProof?.status === "rejected" && <PaymentStatusNote proof={payProof} />}
-            <div className="mt-2">
+        {/* Payment */}
+        <section id="pay-now" className="scroll-mt-4 rounded-2xl bg-card p-4 shadow-sm">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-bold text-foreground">
+              {t(`trackDetail.payMethod.${order.paymentMethod ?? (order.paymentMode === "credit" ? "credit" : "cash")}`, { defaultValue: order.paymentMethod ?? "" })}
+            </p>
+            <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${payState === "paid" ? "bg-success/15 text-success" : payState === "verifying" ? "bg-warning/20 text-warning-foreground" : "bg-muted text-muted-foreground"}`}>
+              {t(`track2.pay.${payState}`)}
+            </span>
+          </div>
+          {payProof?.status === "rejected" && <PaymentStatusNote proof={payProof} />}
+          {awaitingPayment(order, payProof?.status ?? null) && (
+            <div className="mt-3">
               <PayCard
                 method={order.paymentMethod === "bank" ? "bank" : "upi"}
                 info={payInfo}
                 amount={payInfo?.grandTotal ?? order.grandTotal}
                 orderNo={order.orderNo}
+                orderId={order.id}
                 hold={payHold}
-                title={t("pay.pendingTitle", { amount: formatINR(order.grandTotal) })}
                 onPaid={() =>
-                  setPayTarget({
-                    orderId: order.id,
-                    orderNo: order.orderNo,
-                    amount: order.grandTotal,
-                    method: order.paymentMethod === "bank" ? "bank" : "upi",
-                  })
+                  setPayTarget({ orderId: order.id, orderNo: order.orderNo, amount: order.grandTotal, method: order.paymentMethod === "bank" ? "bank" : "upi" })
                 }
               />
             </div>
-          </div>
-        )}
-        <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-sm font-bold text-foreground">{t("trackDetail.payMethodLabel")}</p>
-            <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-bold text-foreground">
-              {t(
-                `trackDetail.payMethod.${order.paymentMethod ?? (order.paymentMode === "credit" ? "credit" : "cash")}`,
-                { defaultValue: order.paymentMethod ?? "" },
-              )}
-            </span>
-          </div>
-          {payProof && payProof.status !== "rejected" && <PaymentStatusNote proof={payProof} />}
-          {!payProof && payHold && !awaitingPayment(order, null) && <PaymentStatusNote proof={null} hold />}
+          )}
           {canChangePayMethod(order.status) && payProof?.status !== "verified" && payProof?.status !== "pending" && (
-            <button
-              type="button"
-              disabled={offline}
-              onClick={() => setMethodOpen(true)}
-              className="mt-3 min-h-11 text-sm font-semibold text-secondary disabled:opacity-50"
-            >
+            <button type="button" disabled={offline} onClick={() => setMethodOpen(true)} className="mt-2 min-h-11 text-sm font-semibold text-secondary disabled:opacity-50">
               {t("pay.changeMethod")}
             </button>
           )}
         </section>
 
         {showDeliveryOtp(order.status, order.deliveryOtp) && <DeliveryOtpCard otp={order.deliveryOtp!} />}
-        {order.deliveryMode === "pickup" && !isCancelled && !isDelivered && (
+        {pickupOrder && !isCancelled && !isDelivered && (
           <PickupPass order={order} lang={lang} offline={offline} onChanged={() => void load()} />
         )}
 
-        {/* Lines */}
-        <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
-          <ul className="space-y-2.5">
+        {/* Items */}
+        <section className="rounded-2xl bg-card p-4 shadow-sm">
+          <ul className="space-y-3">
             {order.lines.map((l) => (
-              <li key={l.id} className="flex items-center justify-between gap-3 text-sm">
-                <span className="min-w-0 flex-1 truncate text-foreground">
-                  {l.productName} · {t("common.packs", { count: l.qty })}
-                  {l.packLabel ? <span className="text-muted-foreground"> · {l.packLabel}</span> : null}
+              <li key={l.id} className="flex items-center gap-3 text-sm">
+                <span className="h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-muted">
+                  <SmartImage width={44} src={thumb(l.productId)} alt="" className="h-11 w-11 object-contain p-1" />
                 </span>
-                <span className="font-medium text-foreground">{formatINR(l.lineTotal)}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-semibold text-foreground">{l.productName}</span>
+                  <span className="block text-xs text-muted-foreground">{t("track2.packsTimes", { count: l.qty, price: formatINR(l.unitPrice) })}</span>
+                </span>
+                <span className="font-semibold text-foreground">{formatINR(l.lineTotal)}</span>
               </li>
             ))}
           </ul>
           <div className="mt-3 space-y-1.5 border-t border-border pt-3 text-sm text-muted-foreground">
-            <div className="flex justify-between">
-              <span>{t("cart.itemTotal")}</span>
-              <span className="font-medium text-foreground">{formatINR(order.itemsTotal)}</span>
-            </div>
-            {order.depositTotal > 0 && (
-              <div className="flex justify-between">
-                <span>{t("cart.jarDeposit")}</span>
-                <span className="font-medium text-foreground">{formatINR(order.depositTotal)}</span>
-              </div>
+            {hasExtraLines && (
+              <>
+                <div className="flex justify-between"><span>{t("cart.itemTotal")}</span><span className="text-foreground">{formatINR(order.itemsTotal)}</span></div>
+                <div className="flex justify-between"><span>{t("cart.jarDeposit")}</span><span className="text-foreground">{formatINR(order.depositTotal)}</span></div>
+              </>
             )}
             <div className="flex justify-between text-base font-bold text-foreground">
-              <span>{t("cart.grandTotal")}</span>
+              <span>{t("track2.total")}</span>
               <span className="text-primary">{formatINR(order.grandTotal)}</span>
             </div>
           </div>
@@ -404,75 +402,35 @@ function OrderDetail() {
         {proof && <DeliveredLines order={order} proof={proof} />}
         {proof && <ProofOfDelivery proof={proof} />}
 
-        {/* Delivery mode */}
-        <section className="mt-4 flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm">
-          <div className="min-w-0 flex-1">
-            <p className="text-xs text-muted-foreground">{t("delivery.modeLabel")}</p>
-            <p className="text-sm font-bold text-foreground">{t(`delivery.${order.deliveryMode}`)}</p>
-            {order.deliveryMode === "pickup" && (
-              <p className="text-xs text-muted-foreground">
-                {t("delivery.pickupFrom")}
-                {order.pickupVehicleNo ? ` · ${t("delivery.vehicleShown", { no: order.pickupVehicleNo })}` : ""}
-              </p>
-            )}
-          </div>
-          {canChangeDeliveryMode(order.status) && (
-            <button
-              type="button"
-              onClick={() => void switchMode()}
-              disabled={offline || switching}
-              className="min-h-11 shrink-0 rounded-xl border border-border px-3 text-xs font-semibold text-secondary disabled:opacity-50"
-            >
-              {switching ? <Loader2 className="h-4 w-4 animate-spin" /> : t(order.deliveryMode === "pickup" ? "delivery.switchToSunrich" : "delivery.switchToPickup")}
+        {/* Delivery + address */}
+        <section className="rounded-2xl bg-card p-4 shadow-sm">
+          <p className="text-sm font-bold text-foreground">
+            {pickupOrder ? "🏭 " : "🚚 "}
+            {pickupOrder ? t("checkout2.pickup") : order.fulfillerCustomerId ? t("success.byDistributor") : t("checkout2.sunrich")}
+            {order.deliveryDate ? ` · ${shortDate(order.deliveryDate, lang)}` : ""}
+          </p>
+          {!pickupOrder && <p className="mt-1 text-sm text-muted-foreground">{addrLines.join(", ") || "—"}</p>}
+          {pickupOrder && order.pickupVehicleNo && <p className="mt-1 text-sm text-muted-foreground">{t("delivery.vehicleShown", { no: order.pickupVehicleNo })}</p>}
+          {!pickupOrder && (
+            <a href={googleMapsLink(mapLat, mapLng)} target="_blank" rel="noreferrer" className="mt-1 inline-flex min-h-10 items-center text-xs font-semibold text-secondary">
+              {t("location.openInMaps")}
+            </a>
+          )}
+          {order.notes && <p className="mt-2 text-xs text-muted-foreground">{t("checkout.notesLabel")}: {order.notes}</p>}
+          {canChangeDeliveryMode(order.status) && ["placed", "credit_hold"].includes(order.status) && (
+            <button type="button" onClick={() => void switchMode()} disabled={offline || switching} className="mt-1 block min-h-10 text-xs font-semibold text-secondary disabled:opacity-50">
+              {switching ? <Loader2 className="h-4 w-4 animate-spin" /> : t(pickupOrder ? "delivery.switchToSunrich" : "delivery.switchToPickup")}
             </button>
           )}
         </section>
 
-        {/* Delivery address + map */}
-        {order.deliveryMode !== "pickup" && (
-        <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
-          <p className="flex items-center gap-2 text-sm font-bold text-foreground">
-            <MapPin className="h-4 w-4 text-secondary" aria-hidden />
-            {t("checkout.addressTitle")}
-          </p>
-          <p className="mt-2 text-sm leading-relaxed text-foreground">{addrLines.join(", ") || "—"}</p>
-          <p className="mt-1.5 text-xs text-muted-foreground">
-            {t("success.deliveredBy", {
-              who: order.fulfillerCustomerId ? t("success.byDistributor") : t("success.bySunrich"),
-            })}
-            {order.deliveryDate ? ` · ${dateLabel(order.deliveryDate, lang)}` : ""}
-            <SlotText value={order.deliverySlot} />
-          </p>
-          <div className="mt-3">
-            <MapPreview lat={mapLat} lng={mapLng} address={addrLines.join(", ")} className="h-36 w-full overflow-hidden rounded-xl border border-border" />
-          </div>
-          <a
-            href={googleMapsLink(mapLat, mapLng)}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-2 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border px-3 text-xs font-semibold text-secondary"
-          >
-            {t("location.openInMaps")}
-          </a>
-          {order.notes && <p className="mt-3 text-xs text-muted-foreground">{t("checkout.notesLabel")}: {order.notes}</p>}
-        </section>
-        )}
-
-        {isDemo && (
-          <p className="mt-4 rounded-xl bg-accent/15 px-4 py-2.5 text-center text-xs font-semibold text-foreground">{t("demo.orderBadge")}</p>
-        )}
+        {isDemo && <p className="rounded-xl bg-accent/15 px-4 py-2.5 text-center text-xs font-semibold text-foreground">{t("demo.orderBadge")}</p>}
 
         {isDelivered && settings?.feedbackEnabled !== false && feedback === null && (
-          <div className="mt-4">
-            <RateOrderCard
-              orderId={order.id}
-              orderNo={order.orderNo}
-              onDone={(r) => setFeedback(r ? { orderId: order.id, rating: r, tags: [], comment: null } : null)}
-            />
-          </div>
+          <RateOrderCard orderId={order.id} orderNo={order.orderNo} onDone={(r) => setFeedback(r ? { orderId: order.id, rating: r, tags: [], comment: null } : null)} />
         )}
         {feedback && (
-          <p className="mt-4 flex items-center justify-center gap-1 text-sm text-muted-foreground">
+          <p className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
             {t("feedback.yourRating")}
             {[1, 2, 3, 4, 5].map((n) => (
               <Star key={n} className={`h-4 w-4 ${n <= feedback.rating ? "fill-accent text-accent" : ""}`} aria-hidden />
@@ -480,71 +438,44 @@ function OrderDetail() {
           </p>
         )}
 
-        {/* Actions */}
-        <div className="mt-4 grid gap-3">
-          {cancellable && (
-            <button
-              type="button"
-              onClick={() => setCancelOpen(true)}
-              disabled={offline}
-              title={offline ? t("offline.hint") : undefined}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-destructive/40 bg-destructive/5 text-base font-semibold text-destructive transition active:scale-[0.98] disabled:opacity-50"
-            >
-              <Ban className="h-5 w-5" aria-hidden />
-              {t("trackDetail.cancelOrder")}
+        <div className="grid gap-3">
+          {invoiceId && (
+            <button type="button" onClick={() => navigate({ to: "/invoice/$id", params: { id: invoiceId } })} className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-primary-foreground">
+              <FileText className="h-5 w-5" aria-hidden /> {t("invoice.view")}
+            </button>
+          )}
+          {isDelivered && order.lines.length > 0 && (
+            <button type="button" onClick={() => void reorder()} disabled={offline || reordering} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-primary text-base font-semibold text-primary disabled:opacity-50">
+              {reordering ? <Loader2 className="h-5 w-5 animate-spin" /> : <Repeat2 className="h-5 w-5" aria-hidden />}
+              {t("trackDetail.reorder")}
+            </button>
+          )}
+          {cancellable && !["processing", "dispatched"].includes(order.status) && (
+            <button type="button" onClick={() => setCancelOpen(true)} disabled={offline} className="min-h-11 text-sm font-semibold text-destructive disabled:opacity-50">
+              {t("track2.cancelLink")}
             </button>
           )}
           {pastCancel && (settings?.supportPhone || settings?.supportWhatsapp) && (
-            <div className="rounded-xl bg-muted/60 p-3 text-center">
-              <p className="text-xs text-muted-foreground">{t("trackDetail.cancelViaSupport")}</p>
-              <button
-                type="button"
-                onClick={() =>
-                  openExternal(
-                    settings.supportWhatsapp
-                      ? waLink(settings.supportWhatsapp, t("trackDetail.cancelWaMsg", { no: order.orderNo }))
-                      : `tel:${settings.supportPhone}`,
-                  )
-                }
-                className="mt-2 inline-flex min-h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground"
-              >
-                <Phone className="h-4 w-4 text-secondary" aria-hidden />
-                {t("support.title")}
-              </button>
-            </div>
-          )}
-          {invoiceId && (
             <button
               type="button"
-              onClick={() => navigate({ to: "/invoice/$id", params: { id: invoiceId } })}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-primary-foreground transition active:scale-[0.98]"
+              onClick={() =>
+                openExternal(
+                  settings.supportWhatsapp ? waLink(settings.supportWhatsapp, t("trackDetail.cancelWaMsg", { no: order.orderNo })) : `tel:${settings.supportPhone}`,
+                )
+              }
+              className="inline-flex min-h-11 items-center justify-center gap-2 text-xs font-semibold text-muted-foreground"
             >
-              <FileText className="h-5 w-5" aria-hidden />
-              {t("invoice.view")}
+              <Phone className="h-4 w-4" aria-hidden /> {t("trackDetail.cancelViaSupport")}
             </button>
           )}
-          {order.lines.length > 0 && (
-            <button
-              type="button"
-              onClick={() => void reorder()}
-              disabled={offline || reordering}
-              title={offline ? t("offline.hint") : undefined}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-card text-base font-semibold text-foreground transition active:scale-[0.98] disabled:opacity-50"
-            >
-              {reordering ? <Loader2 className="h-5 w-5 animate-spin" /> : <Repeat2 className="h-5 w-5 text-secondary" aria-hidden />}
-              {reordering ? t("trackDetail.reordering") : t("trackDetail.reorder")}
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => navigate({ to: "/queries/ask", search: { topic: "order", order: order.orderNo, subject: undefined, message: undefined, product: undefined } })}
-            className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-border bg-card text-base font-semibold text-foreground transition active:scale-[0.98]"
-          >
-            <HelpCircle className="h-5 w-5 text-secondary" aria-hidden />
-            {t("trackDetail.needHelp")}
-          </button>
         </div>
       </div>
+
+      <UpiReturnSheet
+        onYes={() =>
+          setPayTarget({ orderId: order.id, orderNo: order.orderNo, amount: order.grandTotal, method: order.paymentMethod === "bank" ? "bank" : "upi" })
+        }
+      />
 
       {/* Cancel reason sheet */}
       <SheetDrawer open={cancelOpen} onOpenChange={setCancelOpen}>

@@ -213,6 +213,8 @@ export type Database = {
           support_whatsapp: string | null
           terms_md: string | null
           terms_url: string | null
+          trip_overdue_hours: number
+          trip_overdue_time: string
           updated_at: string
           updated_by: string | null
           verify_new_customer_payment: boolean
@@ -257,6 +259,8 @@ export type Database = {
           support_whatsapp?: string | null
           terms_md?: string | null
           terms_url?: string | null
+          trip_overdue_hours?: number
+          trip_overdue_time?: string
           updated_at?: string
           updated_by?: string | null
           verify_new_customer_payment?: boolean
@@ -301,6 +305,8 @@ export type Database = {
           support_whatsapp?: string | null
           terms_md?: string | null
           terms_url?: string | null
+          trip_overdue_hours?: number
+          trip_overdue_time?: string
           updated_at?: string
           updated_by?: string | null
           verify_new_customer_payment?: boolean
@@ -4074,6 +4080,7 @@ export type Database = {
           pack_label: string | null
           pack_label_hi: string | null
           pack_label_mr: string | null
+          reorder_level: number | null
           sell_unit: Database["public"]["Enums"]["sell_unit"]
           sell_unit_id: string | null
           shelf_life_days: number | null
@@ -4117,6 +4124,7 @@ export type Database = {
           pack_label?: string | null
           pack_label_hi?: string | null
           pack_label_mr?: string | null
+          reorder_level?: number | null
           sell_unit?: Database["public"]["Enums"]["sell_unit"]
           sell_unit_id?: string | null
           shelf_life_days?: number | null
@@ -4160,6 +4168,7 @@ export type Database = {
           pack_label?: string | null
           pack_label_hi?: string | null
           pack_label_mr?: string | null
+          reorder_level?: number | null
           sell_unit?: Database["public"]["Enums"]["sell_unit"]
           sell_unit_id?: string | null
           shelf_life_days?: number | null
@@ -5367,6 +5376,8 @@ export type Database = {
           end_odometer: number | null
           end_odometer_photo_url: string | null
           ended_at: string | null
+          est_km: number | null
+          est_minutes: number | null
           fuel_amount: number | null
           fuel_litres: number | null
           gate_in_at: string | null
@@ -5383,6 +5394,8 @@ export type Database = {
           planned_by: string | null
           returns_received_at: string | null
           route_id: string | null
+          route_method: string | null
+          route_optimised_at: string | null
           settle_note: string | null
           settled_at: string | null
           settled_by: string | null
@@ -5409,6 +5422,8 @@ export type Database = {
           end_odometer?: number | null
           end_odometer_photo_url?: string | null
           ended_at?: string | null
+          est_km?: number | null
+          est_minutes?: number | null
           fuel_amount?: number | null
           fuel_litres?: number | null
           gate_in_at?: string | null
@@ -5425,6 +5440,8 @@ export type Database = {
           planned_by?: string | null
           returns_received_at?: string | null
           route_id?: string | null
+          route_method?: string | null
+          route_optimised_at?: string | null
           settle_note?: string | null
           settled_at?: string | null
           settled_by?: string | null
@@ -5451,6 +5468,8 @@ export type Database = {
           end_odometer?: number | null
           end_odometer_photo_url?: string | null
           ended_at?: string | null
+          est_km?: number | null
+          est_minutes?: number | null
           fuel_amount?: number | null
           fuel_litres?: number | null
           gate_in_at?: string | null
@@ -5467,6 +5486,8 @@ export type Database = {
           planned_by?: string | null
           returns_received_at?: string | null
           route_id?: string | null
+          route_method?: string | null
+          route_optimised_at?: string | null
           settle_note?: string | null
           settled_at?: string | null
           settled_by?: string | null
@@ -7258,6 +7279,27 @@ export type Database = {
         Returns: undefined
       }
       stock_available: {
+        Args: { p_product_id: string; p_unit_id: string }
+        Returns: number
+      }
+      stock_book: {
+        Args: { p_from: string; p_to: string; p_unit_id: string }
+        Returns: {
+          adjust: number
+          available: number
+          closing: number
+          dispatched: number
+          opening: number
+          product_id: string
+          product_name: string
+          production: number
+          reorder_level: number
+          reserved: number
+          returns: number
+          status: string
+        }[]
+      }
+      stock_reserved: {
         Args: { p_product_id: string; p_unit_id: string }
         Returns: number
       }

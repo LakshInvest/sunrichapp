@@ -12,3 +12,12 @@ describe("upiLink", () => {
     expect(u.searchParams.get("tr")).toBe("MFO262700070x1");
   });
 });
+
+import { kmBetween } from "@/lib/delivery";
+describe("kmBetween", () => {
+  it("Latur Ganj Golai to MIDC is a few km", () => {
+    const d = kmBetween({ lat: 18.4022, lng: 76.5842 }, { lat: 18.4319, lng: 76.5469 });
+    expect(d).toBeGreaterThan(4);
+    expect(d).toBeLessThan(6);
+  });
+});

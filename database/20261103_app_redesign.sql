@@ -57,9 +57,28 @@ begin
 end;
 $function$;
 
+-- 4) Live truck position for the customer's own order (Track screen). Returns only the latest
+--    ping of the trip that carries this order, and only while it is out for delivery.
+create or replace function public.my_order_truck(p_order_id uuid)
+returns table(latitude double precision, longitude double precision, recorded_at timestamptz)
+language sql stable security definer set search_path to 'public' as $$
+  select l.latitude::double precision, l.longitude::double precision, l.recorded_at
+  from public.orders o
+  join public.trip_stops s on s.order_id = o.id
+  join public.trip_locations l on l.trip_id = s.trip_id
+  where o.id = p_order_id
+    and o.customer_id = public.my_customer_id()
+    and o.status = 'dispatched'
+  order by l.recorded_at desc
+  limit 1
+$$;
+revoke all on function public.my_order_truck(uuid) from public, anon;
+grant execute on function public.my_order_truck(uuid) to authenticated;
+
 -- ROLLBACK (run only to undo):
 -- 1. Re-run the get_home() from database/20261102_speed.sql (the version without display_seconds).
 -- 2. alter table public.app_banners drop constraint if exists app_banners_display_seconds_chk;
 --    alter table public.app_banners drop column if exists display_seconds;
 -- 3. alter table public.app_settings drop column if exists plant_address;
+-- 4. drop function if exists public.my_order_truck(uuid);
 --    alter table public.app_settings drop column if exists pickup_hours;

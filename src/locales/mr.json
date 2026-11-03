@@ -493,7 +493,7 @@
     "byDistributor": "तुमचे डिस्ट्रिब्युटर",
     "trackOrder": "ऑर्डर ट्रॅक करा",
     "continueShopping": "अधिक खरेदी करा",
-    "payCredit": "पैसे: उधारीवर",
+    "payCredit": "तुमच्या खात्यात जोडले.",
     "payCash": "ऑर्डर आल्यावर डिलिव्हरी करणाऱ्याला रोख द्या.",
     "payCheque": "ऑर्डर आल्यावर डिलिव्हरी करणाऱ्याला धनादेश द्या.",
     "payUpiTitle": "UPI ने पैसे द्या",
@@ -525,7 +525,12 @@
     "notAccepted": "पेमेंट स्वीकारले नाही",
     "sendAgain": "पुन्हा पाठवा",
     "checking": "तुमचे पेमेंट तपासले जात आहे — खात्री झाल्यावर लगेच पाठवले जाईल",
-    "shotMissing": "स्क्रीनशॉट सध्या उघडले नाही."
+    "shotMissing": "स्क्रीनशॉट सध्या उघडले नाही.",
+    "done": "ऑर्डर झाला",
+    "deliveryOn": "{{date}} डिलिव्हरी",
+    "pickupOn": "{{date}} पिकअप",
+    "checkNote": "पेमेंट तपासताच Sunrich ऑर्डर पाठवेल.",
+    "payLater": "नंतर पे करेन"
   },
   "trackDetail": {
     "metaTitle": "सनरिच — ऑर्डर तपशील",
@@ -1126,5 +1131,31 @@
       "rejected": "{{amount}} चे पेमेंट स्वीकारले नाही: {{reason}}"
     },
     "runningAdv": "अ‍ॅडव्हान्स {{amount}}"
+  },
+  "cart2": {
+    "continue": "{{amount}} · पुढे →",
+    "youSave": "तुम्ही {{amount}} वाचवत आहात",
+    "totalMargin": "एकूण मार्जिन {{amount}}"
+  },
+  "checkout2": {
+    "howTitle": "ऑर्डर कसा घ्यायचा?",
+    "confirmTitle": "ऑर्डर पक्का करा",
+    "sunrich": "Sunrich डिलिव्हर करेल",
+    "pickup": "मी स्वतः घेईन",
+    "plantDefault": "Sunrich प्लांट, MIDC लातूर",
+    "items_one": "{{count}} आयटम",
+    "items_other": "{{count}} आयटम",
+    "addNote": "नोट जोडा",
+    "place": "ऑर्डर करा · {{amount}}",
+    "creditLow": "क्रेडिटमध्ये फक्त {{amount}} शिल्लक"
+  },
+  "upi": {
+    "payNow": "आता पे करा",
+    "payAmount": "{{amount}} UPI ॲपने पे करा",
+    "paidEnterUtr": "पे केले? UTR टाका",
+    "noApp": "UPI ॲप सापडले नाही. QR स्कॅन करा किंवा UPI ID कॉपी करा.",
+    "returnTitle": "पेमेंट झाले?",
+    "returnYes": "हो, UTR / स्क्रीनशॉट टाका",
+    "returnNo": "अजून नाही"
   }
 }

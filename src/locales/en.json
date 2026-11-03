@@ -493,7 +493,7 @@
     "byDistributor": "your distributor",
     "trackOrder": "Track order",
     "continueShopping": "Continue shopping",
-    "payCredit": "Payment: on credit",
+    "payCredit": "Added to your Khata.",
     "payCash": "Pay cash to the delivery person when the order arrives.",
     "payCheque": "Give the cheque to the delivery person when the order arrives.",
     "payUpiTitle": "Pay by UPI",
@@ -525,7 +525,12 @@
     "notAccepted": "Payment not accepted",
     "sendAgain": "Send again",
     "checking": "Checking your payment — we’ll dispatch as soon as it’s verified",
-    "shotMissing": "Could not open the screenshot right now."
+    "shotMissing": "Could not open the screenshot right now.",
+    "done": "Order placed",
+    "deliveryOn": "{{date}} delivery",
+    "pickupOn": "pickup {{date}}",
+    "checkNote": "Sunrich will send the order as soon as the payment is checked.",
+    "payLater": "I'll pay later"
   },
   "trackDetail": {
     "metaTitle": "Sunrich — Order detail",
@@ -1126,5 +1131,31 @@
       "rejected": "Payment of {{amount}} not accepted: {{reason}}"
     },
     "runningAdv": "Adv {{amount}}"
+  },
+  "cart2": {
+    "continue": "{{amount}} · Continue →",
+    "youSave": "You are saving {{amount}}",
+    "totalMargin": "Total margin {{amount}}"
+  },
+  "checkout2": {
+    "howTitle": "How do you want your order?",
+    "confirmTitle": "Confirm order",
+    "sunrich": "Sunrich delivers",
+    "pickup": "I'll pick it up",
+    "plantDefault": "Sunrich plant, MIDC Latur",
+    "items_one": "{{count}} item",
+    "items_other": "{{count}} items",
+    "addNote": "Add a note",
+    "place": "Place order · {{amount}}",
+    "creditLow": "Only {{amount}} left in credit"
+  },
+  "upi": {
+    "payNow": "Pay now",
+    "payAmount": "Pay {{amount}} with UPI app",
+    "paidEnterUtr": "Paid? Enter UTR",
+    "noApp": "No UPI app found. Scan the QR or copy the UPI ID.",
+    "returnTitle": "Payment done?",
+    "returnYes": "Yes, enter UTR / screenshot",
+    "returnNo": "Not yet"
   }
 }

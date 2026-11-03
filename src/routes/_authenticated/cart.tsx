@@ -164,12 +164,17 @@ function Cart() {
     0,
   );
   const grandTotal = itemTotal + jarDeposit;
+  const business = isBusinessType(useTypeCode());
+  const savings = rows.reduce((sum, r) => {
+    const { price, mrp } = r.product;
+    return price != null && mrp != null && mrp > price ? sum + (mrp - price) * r.qty : sum;
+  }, 0);
   const hasBulk = rows.some(
     (r) => r.product.bulkThresholdQty != null && r.qty >= (r.product.bulkThresholdQty ?? Infinity),
   );
 
   return (
-    <PageShell className={`${deva}`}>
+    <PageShell className={`pb-28 ${deva}`}>
       <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))]">
         <button
           type="button"

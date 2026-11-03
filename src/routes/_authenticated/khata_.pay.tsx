@@ -1,5 +1,6 @@
 import { toast } from "sonner";
-import { openUpi, type UpiResponse } from "@/lib/upi";
+import { installedUpiApps, visibleUpiApps, openUpi, upiLink, UPI_APPS, type UpiApp, type UpiResponse } from "@/lib/upi";
+import { QRCodeSVG } from "qrcode.react";
 import { attachUpiResponse } from "@/lib/payments";
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -80,6 +81,13 @@ function PayPage() {
   const [paidOn, setPaidOn] = useState(today);
   const [errs, setErrs] = useState<Record<string, string>>({});
   const [sending, setSending] = useState(false);
+  const [upiApps, setUpiApps] = useState<UpiApp[]>([]);
+  useEffect(() => {
+    let active = true;
+    setUpiApps(visibleUpiApps([]));
+    void installedUpiApps().then((apps) => { if (active) setUpiApps(visibleUpiApps(apps)); });
+    return () => { active = false; };
+  }, []);
 
   const load = () => {
     setErr(null);
@@ -102,6 +110,13 @@ function PayPage() {
     return Number(other) || 0;
   }, [choice, choices.full, choices.overdue, other]);
   const extra = sum && amount > Math.max(0, sum.balance) ? amount - Math.max(0, sum.balance) : 0;
+  const launchUpi = async (app?: UpiApp) => {
+    if (!info?.upiId) return;
+    const res = await openUpi({ pa: info.upiId, pn: info.payeeName ?? info.firmName, amount, orderNo: "Khata", note: "Khata payment" }, app);
+    if (res.kind === "success" || res.kind === "failed" || (res.kind === "none" && res.response)) setUpiResp(res.response);
+    if (res.kind === "success" && res.response.utr) setRef(res.response.utr);
+    else if (res.kind === "failed") toast.error(t("upi.failedTitle"));
+  };
 
   const next = () => {
     if (!validPayAmount(amount)) {
@@ -288,27 +303,22 @@ function PayPage() {
                 <div className="h-24 animate-pulse rounded-xl bg-muted" />
               ) : info?.upiId ? (
                 <>
-                  {info.qrUrl && (
-                    <div className="flex flex-col items-center gap-1">
-                      <img src={info.qrUrl} alt={t("khata.pay.scanQr")} className="h-44 w-44 rounded-xl border border-border bg-white object-contain p-2" />
-                      <span className="text-xs text-muted-foreground">{t("khata.pay.scanQr")}</span>
-                    </div>
-                  )}
-                  <CopyRow label={t("khata.pay.upiId")} value={info.upiId} />
-                  <button
+                  <Button
                     type="button"
-                    onClick={() =>
-                      void openUpi({ pa: info.upiId!, pn: info.payeeName ?? info.firmName, amount, orderNo: "Khata", note: "Khata payment" }).then((res) => {
-                        if (res.kind === "noApp") toast.error(t("upi.noApp"));
-                        if (res.kind === "success" || res.kind === "failed" || (res.kind === "none" && res.response)) setUpiResp(res.response);
-                        if (res.kind === "success" && res.response.utr) setRef(res.response.utr);
-                        else if (res.kind === "failed") toast.error(t("upi.failedTitle"));
-                      })
-                    }
-                    className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-primary text-sm font-semibold text-primary"
+                    onClick={() => void launchUpi()}
+                    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold"
                   >
                     <Smartphone className="h-4 w-4" aria-hidden /> {t("khata.pay.payWithUpi")}
-                  </button>
+                  </Button>
+                  {upiApps.length > 0 && <div className="flex gap-2">
+                    {UPI_APPS.filter((app) => upiApps.includes(app.id)).map((app) => <Button variant="outline" key={app.id} className="min-h-11 min-w-0 flex-1 px-1 text-xs" onClick={() => void launchUpi(app.id)}>{app.label}</Button>)}
+                  </div>}
+                  <CopyRow label={t("khata.pay.upiId")} value={info.upiId} />
+                  <div className="flex flex-col items-center gap-1">
+                    {info.qrUrl ? <img src={info.qrUrl} alt={t("khata.pay.scanQr")} className="h-44 w-44 rounded-xl border border-border bg-qr object-contain p-2" />
+                      : <div className="rounded-xl bg-qr p-2"><QRCodeSVG size={160} value={upiLink({ pa: info.upiId, pn: info.payeeName ?? info.firmName, amount, orderNo: "Khata", note: "Khata payment" })} aria-label={t("pay.qrAlt")} /></div>}
+                    <span className="text-xs text-muted-foreground">{t("khata.pay.scanQr")}</span>
+                  </div>
                 </>
               ) : (
                 <p className="text-sm text-muted-foreground">{t("khata.pay.noUpi")}</p>

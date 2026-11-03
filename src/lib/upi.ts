@@ -154,6 +154,12 @@ export async function openUpi(p: UpiParams, app?: UpiApp, orderId?: string | nul
   document.addEventListener("visibilitychange", visibility);
   let stopped = false;
   let removeNativeListener = () => {};
+  let keepWebWatchdog = false;
+  const cleanup = () => {
+    stopped = true;
+    removeNativeListener();
+    document.removeEventListener("visibilitychange", visibility);
+  };
   if (isNative()) {
     void import("@capacitor/app").then(async ({ App }) => {
       const handle = await App.addListener("appStateChange", (state) => { if (!state.isActive) opened = true; });
@@ -166,6 +172,7 @@ export async function openUpi(p: UpiParams, app?: UpiApp, orderId?: string | nul
       rememberError(new Error("UPI launch still pending after 2 seconds; no app-open event"));
       warn();
     }
+    if (keepWebWatchdog) cleanup();
   }, 2000);
   try {
     const plugin = await nativeUpi();
@@ -184,10 +191,8 @@ export async function openUpi(p: UpiParams, app?: UpiApp, orderId?: string | nul
     const url = target ? `${target.scheme}?${query}` : `upi://pay?${query}`;
     if (isNative()) {
       const { AppLauncher } = await import("@capacitor/app-launcher");
-      const nativeUrl = target && isAndroidUpi()
-        ? `intent://pay?${query}#Intent;scheme=upi;package=${target.pkg};end`
-        : url;
-      const { completed } = await AppLauncher.openUrl({ url: nativeUrl });
+      // AppLauncher parses a URI, not Intent.parseUri; use the app's scheme.
+      const { completed } = await AppLauncher.openUrl({ url });
       if (!completed) {
         rememberError(new Error("AppLauncher could not open UPI"));
         warn(!!target);
@@ -205,16 +210,17 @@ export async function openUpi(p: UpiParams, app?: UpiApp, orderId?: string | nul
       a.rel = "noopener";
       a.click();
     }
+    keepWebWatchdog = true;
     return { kind: "launched" };
   } catch (error) {
     rememberError(error);
     warn(!!target && /not installed|not found|no activity|no app/i.test(lastUpiError));
     return { kind: "noApp" };
   } finally {
-    clearTimeout(timer);
-    stopped = true;
-    removeNativeListener();
-    document.removeEventListener("visibilitychange", visibility);
+    if (!keepWebWatchdog) {
+      clearTimeout(timer);
+      cleanup();
+    }
   }
 }
 

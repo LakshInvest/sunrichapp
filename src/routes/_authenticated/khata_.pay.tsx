@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { openUpi, upiRef } from "@/lib/upi";
+import { openUpi } from "@/lib/upi";
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { istToday } from "@/lib/ist";
@@ -295,9 +295,11 @@ function PayPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      void openUpi({ pa: info.upiId!, pn: info.payeeName ?? info.firmName, amount, orderNo: "Khata", ref: upiRef("KHATA") }).then(
-                        (ok) => ok || toast.error(t("upi.noApp")),
-                      )
+                      void openUpi({ pa: info.upiId!, pn: info.payeeName ?? info.firmName, amount, orderNo: "Khata", note: "Khata payment" }).then((res) => {
+                        if (res.kind === "noApp") toast.error(t("upi.noApp"));
+                        else if (res.kind === "success" && res.response.utr) setRef(res.response.utr);
+                        else if (res.kind === "failed") toast.error(t("upi.failedTitle"));
+                      })
                     }
                     className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-primary text-sm font-semibold text-primary"
                   >

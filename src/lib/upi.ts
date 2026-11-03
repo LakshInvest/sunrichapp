@@ -1,6 +1,6 @@
 import { isNative } from "@/lib/native";
 
-export type UpiParams = { pa: string; pn: string; amount: number; orderNo: string; ref?: string };
+export type UpiParams = { pa: string; pn: string; amount: number; orderNo: string; ref?: string; note?: string };
 
 /** Encodes a value but keeps "@" plain — some UPI apps can't read "%40" in pa. */
 const enc = (v: string) => encodeURIComponent(v).replace(/%40/g, "@");
@@ -9,8 +9,8 @@ const enc = (v: string) => encodeURIComponent(v).replace(/%40/g, "@");
  * UPI deep-link query: pa (plain @), pn, am (2 decimals), cu=INR, tn="Order <no>".
  * No "tr": it is for gateway merchants and some apps reject it with a plain merchant ID.
  */
-export function upiQuery({ pa, pn, amount, orderNo }: UpiParams): string {
-  const note = /^order\b/i.test(orderNo) ? orderNo : `Order ${orderNo}`;
+export function upiQuery({ pa, pn, amount, orderNo, note: tn }: UpiParams): string {
+  const note = tn ?? `Order ${orderNo}`;
   return [`pa=${enc(pa.trim())}`, `pn=${enc(pn)}`, `am=${amount.toFixed(2)}`, "cu=INR", `tn=${enc(note)}`].join("&");
 }
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { installedUpiApps, markUpiLaunched, openUpi, upiLink, upiRef, UPI_APPS, type UpiApp } from "@/lib/upi";
+import { installedUpiApps, openUpi, upiLink, UPI_APPS, type UpiApp } from "@/lib/upi";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import { Copy, Smartphone } from "lucide-react";
@@ -31,8 +31,7 @@ export function PayCard({
   const { t } = useTranslation();
   const payee = info?.payeeName || info?.firmName || "";
   const upiId = info?.upiId ?? "";
-  const [ref] = useState(() => upiRef(orderNo));
-  const params = { pa: upiId, pn: payee, amount, orderNo, ref };
+  const params = { pa: upiId, pn: payee, amount, orderNo };
   const link = upiLink(params);
   const hasDetails = method === "upi" ? !!upiId || !!info?.qrUrl : !!info?.bank;
   const [apps, setApps] = useState<UpiApp[]>([]);
@@ -41,9 +40,8 @@ export function PayCard({
   }, [method]);
 
   const launch = async (app?: UpiApp) => {
-    if (orderId) markUpiLaunched(orderId);
-    const ok = await openUpi(params, app);
-    if (!ok) toast.error(t("upi.noApp"));
+    const res = await openUpi(params, app, orderId);
+    if (res.kind === "noApp") toast.error(t("upi.noApp"));
   };
 
   const copy = async (v: string) => {
@@ -116,7 +114,8 @@ export function PayCard({
       >
         {t("upi.paidEnterUtr")}
       </button>
-      {hold && <p className="mt-2 text-center text-xs text-muted-foreground">{t("pay.holdNote")}</p>}
+      {/* One line only — "Sunrich sends the order once the payment is checked". */}
+      {(hold ?? true) && <p className="mt-2 text-center text-xs text-muted-foreground">{t("success.checkNote")}</p>}
     </div>
   );
 }

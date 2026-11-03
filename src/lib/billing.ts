@@ -210,5 +210,5 @@ export async function fetchInvoiceIdForOrder(orderId: string): Promise<string | 
 
 /** upi://pay link for the balance. */
 export function upiLink(upiId: string, payee: string, amount: number, note: string): string {
-  return buildUpiLink({ pa: upiId, pn: payee, amount, orderNo: note });
+  return buildUpiLink({ pa: upiId, pn: payee, amount, orderNo: note, note });
 }

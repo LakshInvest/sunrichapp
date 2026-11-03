@@ -112,7 +112,7 @@ export function passbookRows(rows: KhataEntry[]): KhataEntry[] {
 
 /** UPI deep link for a payment amount. */
 export function upiPayLink(upiId: string, payee: string, amount: number, note: string): string {
-  return buildUpiLink({ pa: upiId, pn: payee, amount, orderNo: note });
+  return buildUpiLink({ pa: upiId, pn: payee, amount, orderNo: note, note });
 }
 
 /* ---------- Reads ---------- */

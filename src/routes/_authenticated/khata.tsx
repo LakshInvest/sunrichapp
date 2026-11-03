@@ -1,5 +1,5 @@
 import { readSwr, swr } from "@/lib/swr-cache";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -193,6 +193,7 @@ function KhataPage() {
               ))}
             </div>
           )}
+          {full && shown < full.length && <div ref={moreRef} className="h-10" aria-hidden />}
         </section>
       </div>
 

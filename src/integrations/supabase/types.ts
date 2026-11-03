@@ -179,6 +179,7 @@ export type Database = {
           allow_order_notes: boolean
           closed_weekdays: number[]
           company_id: string
+          default_gst_rate: number
           delivery_days_ahead: number
           delivery_slots: Json
           feedback_enabled: boolean
@@ -216,6 +217,7 @@ export type Database = {
           allow_order_notes?: boolean
           closed_weekdays?: number[]
           company_id: string
+          default_gst_rate?: number
           delivery_days_ahead?: number
           delivery_slots?: Json
           feedback_enabled?: boolean
@@ -253,6 +255,7 @@ export type Database = {
           allow_order_notes?: boolean
           closed_weekdays?: number[]
           company_id?: string
+          default_gst_rate?: number
           delivery_days_ahead?: number
           delivery_slots?: Json
           feedback_enabled?: boolean
@@ -414,6 +417,99 @@ export type Database = {
           },
         ]
       }
+      cash_book_openings: {
+        Row: {
+          amount: number
+          as_of: string
+          company_id: string
+          created_at: string
+          set_by: string | null
+        }
+        Insert: {
+          amount: number
+          as_of: string
+          company_id: string
+          created_at?: string
+          set_by?: string | null
+        }
+        Update: {
+          amount?: number
+          as_of?: string
+          company_id?: string
+          created_at?: string
+          set_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_book_openings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cash_deposits: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          company_id: string
+          created_at: string
+          deposit_date: string
+          deposited_by: string | null
+          firm_id: string | null
+          id: string
+          note: string | null
+          slip_path: string | null
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          company_id: string
+          created_at?: string
+          deposit_date?: string
+          deposited_by?: string | null
+          firm_id?: string | null
+          id?: string
+          note?: string | null
+          slip_path?: string | null
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          company_id?: string
+          created_at?: string
+          deposit_date?: string
+          deposited_by?: string | null
+          firm_id?: string | null
+          id?: string
+          note?: string | null
+          slip_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_deposits_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "firm_bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_deposits_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_deposits_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cash_handovers: {
         Row: {
           amount: number
@@ -424,7 +520,10 @@ export type Database = {
           from_user_id: string
           handover_date: string
           id: string
+          mismatch_at: string | null
+          mismatch_reason: string | null
           note: string | null
+          received_amount: number | null
           to_user_id: string
           trip_id: string | null
         }
@@ -437,7 +536,10 @@ export type Database = {
           from_user_id: string
           handover_date?: string
           id?: string
+          mismatch_at?: string | null
+          mismatch_reason?: string | null
           note?: string | null
+          received_amount?: number | null
           to_user_id: string
           trip_id?: string | null
         }
@@ -450,7 +552,10 @@ export type Database = {
           from_user_id?: string
           handover_date?: string
           id?: string
+          mismatch_at?: string | null
+          mismatch_reason?: string | null
           note?: string | null
+          received_amount?: number | null
           to_user_id?: string
           trip_id?: string | null
         }
@@ -691,6 +796,7 @@ export type Database = {
           note_type: string
           order_id: string | null
           reason: string
+          reject_reason: string | null
           status: string
           stop_id: string | null
           tax_amount: number
@@ -714,6 +820,7 @@ export type Database = {
           note_type: string
           order_id?: string | null
           reason: string
+          reject_reason?: string | null
           status?: string
           stop_id?: string | null
           tax_amount?: number
@@ -737,6 +844,7 @@ export type Database = {
           note_type?: string
           order_id?: string | null
           reason?: string
+          reject_reason?: string | null
           status?: string
           stop_id?: string | null
           tax_amount?: number
@@ -1600,6 +1708,7 @@ export type Database = {
           expense_types: string[]
           expenses_enabled: boolean
           failed_reasons: string[]
+          gate_pass_print: boolean
           location_at_each_stop: boolean
           location_interval_minutes: number
           location_tracking_enabled: boolean
@@ -1620,7 +1729,10 @@ export type Database = {
           updated_at: string
           updated_by: string | null
           vehicle_check_enabled: boolean
+          vehicle_check_every_days: number
+          vehicle_check_frequency: string
           vehicle_check_items: string[]
+          visitor_alert_hours: number
           visitor_photo: string
         }
         Insert: {
@@ -1644,6 +1756,7 @@ export type Database = {
           expense_types?: string[]
           expenses_enabled?: boolean
           failed_reasons?: string[]
+          gate_pass_print?: boolean
           location_at_each_stop?: boolean
           location_interval_minutes?: number
           location_tracking_enabled?: boolean
@@ -1664,7 +1777,10 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           vehicle_check_enabled?: boolean
+          vehicle_check_every_days?: number
+          vehicle_check_frequency?: string
           vehicle_check_items?: string[]
+          visitor_alert_hours?: number
           visitor_photo?: string
         }
         Update: {
@@ -1688,6 +1804,7 @@ export type Database = {
           expense_types?: string[]
           expenses_enabled?: boolean
           failed_reasons?: string[]
+          gate_pass_print?: boolean
           location_at_each_stop?: boolean
           location_interval_minutes?: number
           location_tracking_enabled?: boolean
@@ -1708,7 +1825,10 @@ export type Database = {
           updated_at?: string
           updated_by?: string | null
           vehicle_check_enabled?: boolean
+          vehicle_check_every_days?: number
+          vehicle_check_frequency?: string
           vehicle_check_items?: string[]
+          visitor_alert_hours?: number
           visitor_photo?: string
         }
         Relationships: [
@@ -1773,7 +1893,7 @@ export type Database = {
             foreignKeyName: "dispatch_schedules_zone_id_fkey"
             columns: ["zone_id"]
             isOneToOne: false
-            referencedRelation: "geo_areas"
+            referencedRelation: "geo_zones"
             referencedColumns: ["id"]
           },
         ]
@@ -2022,6 +2142,7 @@ export type Database = {
           fssai_number: string | null
           gstin: string | null
           id: string
+          invoice_design: Json
           invoice_terms: string | null
           is_active: boolean
           latitude: number | null
@@ -2063,6 +2184,7 @@ export type Database = {
           fssai_number?: string | null
           gstin?: string | null
           id?: string
+          invoice_design?: Json
           invoice_terms?: string | null
           is_active?: boolean
           latitude?: number | null
@@ -2104,6 +2226,7 @@ export type Database = {
           fssai_number?: string | null
           gstin?: string | null
           id?: string
+          invoice_design?: Json
           invoice_terms?: string | null
           is_active?: boolean
           latitude?: number | null
@@ -2271,6 +2394,7 @@ export type Database = {
           problem_type: string
           raised_at: string
           raised_by: string
+          resolve_note: string | null
           resolved_at: string | null
           resolved_by: string | null
           updated_at: string
@@ -2284,6 +2408,7 @@ export type Database = {
           problem_type: string
           raised_at?: string
           raised_by?: string
+          resolve_note?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           updated_at?: string
@@ -2297,6 +2422,7 @@ export type Database = {
           problem_type?: string
           raised_at?: string
           raised_by?: string
+          resolve_note?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           updated_at?: string
@@ -3004,6 +3130,7 @@ export type Database = {
       }
       material_passes: {
         Row: {
+          approved_by_name: string | null
           company_id: string
           created_at: string
           direction: string
@@ -3015,12 +3142,16 @@ export type Database = {
           party: string | null
           pass_no: string
           qr_token: string
+          quantity: string | null
+          reason: string | null
           scanned_at: string | null
           scanned_by: string | null
           updated_at: string
+          valid_till: string | null
           vehicle_no: string | null
         }
         Insert: {
+          approved_by_name?: string | null
           company_id?: string
           created_at?: string
           direction?: string
@@ -3032,12 +3163,16 @@ export type Database = {
           party?: string | null
           pass_no: string
           qr_token?: string
+          quantity?: string | null
+          reason?: string | null
           scanned_at?: string | null
           scanned_by?: string | null
           updated_at?: string
+          valid_till?: string | null
           vehicle_no?: string | null
         }
         Update: {
+          approved_by_name?: string | null
           company_id?: string
           created_at?: string
           direction?: string
@@ -3049,9 +3184,12 @@ export type Database = {
           party?: string | null
           pass_no?: string
           qr_token?: string
+          quantity?: string | null
+          reason?: string | null
           scanned_at?: string | null
           scanned_by?: string | null
           updated_at?: string
+          valid_till?: string | null
           vehicle_no?: string | null
         }
         Relationships: []
@@ -4217,17 +4355,25 @@ export type Database = {
         Row: {
           amount: number
           bank_account_id: string | null
+          bank_charges: number | null
+          bounce_charge_note_id: string | null
+          bounce_reason: string | null
+          bounced_on: string | null
           cancel_reason: string | null
           cheque_bank: string | null
           cheque_date: string | null
           cheque_no: string | null
           cheque_photo_url: string | null
           cheque_status: string | null
+          cleared_on: string | null
           collected_by: string | null
           company_id: string
           created_at: string
           created_by: string | null
           customer_id: string
+          deposit_bank_account_id: string | null
+          deposit_slip_path: string | null
+          deposited_on: string | null
           firm_id: string
           id: string
           mode: string
@@ -4244,17 +4390,25 @@ export type Database = {
         Insert: {
           amount: number
           bank_account_id?: string | null
+          bank_charges?: number | null
+          bounce_charge_note_id?: string | null
+          bounce_reason?: string | null
+          bounced_on?: string | null
           cancel_reason?: string | null
           cheque_bank?: string | null
           cheque_date?: string | null
           cheque_no?: string | null
           cheque_photo_url?: string | null
           cheque_status?: string | null
+          cleared_on?: string | null
           collected_by?: string | null
           company_id: string
           created_at?: string
           created_by?: string | null
           customer_id: string
+          deposit_bank_account_id?: string | null
+          deposit_slip_path?: string | null
+          deposited_on?: string | null
           firm_id: string
           id?: string
           mode: string
@@ -4271,17 +4425,25 @@ export type Database = {
         Update: {
           amount?: number
           bank_account_id?: string | null
+          bank_charges?: number | null
+          bounce_charge_note_id?: string | null
+          bounce_reason?: string | null
+          bounced_on?: string | null
           cancel_reason?: string | null
           cheque_bank?: string | null
           cheque_date?: string | null
           cheque_no?: string | null
           cheque_photo_url?: string | null
           cheque_status?: string | null
+          cleared_on?: string | null
           collected_by?: string | null
           company_id?: string
           created_at?: string
           created_by?: string | null
           customer_id?: string
+          deposit_bank_account_id?: string | null
+          deposit_slip_path?: string | null
+          deposited_on?: string | null
           firm_id?: string
           id?: string
           mode?: string
@@ -4304,6 +4466,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "receipts_bounce_charge_note_id_fkey"
+            columns: ["bounce_charge_note_id"]
+            isOneToOne: false
+            referencedRelation: "credit_debit_notes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "receipts_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
@@ -4315,6 +4484,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_deposit_bank_account_id_fkey"
+            columns: ["deposit_bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "firm_bank_accounts"
             referencedColumns: ["id"]
           },
           {
@@ -5161,6 +5337,7 @@ export type Database = {
           fuel_litres: number | null
           gate_in_at: string | null
           gate_in_by: string | null
+          gate_in_manual: boolean
           gate_out_at: string | null
           gate_out_by: string | null
           helper_user_ids: string[]
@@ -5202,6 +5379,7 @@ export type Database = {
           fuel_litres?: number | null
           gate_in_at?: string | null
           gate_in_by?: string | null
+          gate_in_manual?: boolean
           gate_out_at?: string | null
           gate_out_by?: string | null
           helper_user_ids?: string[]
@@ -5243,6 +5421,7 @@ export type Database = {
           fuel_litres?: number | null
           gate_in_at?: string | null
           gate_in_by?: string | null
+          gate_in_manual?: boolean
           gate_out_at?: string | null
           gate_out_by?: string | null
           helper_user_ids?: string[]
@@ -5317,6 +5496,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           daily_capacity: number | null
+          display_name: string | null
           firm_id: string
           id: string
           is_active: boolean
@@ -5341,6 +5521,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           daily_capacity?: number | null
+          display_name?: string | null
           firm_id: string
           id?: string
           is_active?: boolean
@@ -5365,6 +5546,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           daily_capacity?: number | null
+          display_name?: string | null
           firm_id?: string
           id?: string
           is_active?: boolean
@@ -5859,6 +6041,50 @@ export type Database = {
         Args: { p_allocations: Json; p_receipt_id: string }
         Returns: undefined
       }
+      _cheque_row: {
+        Args: { p_receipt_id: string }
+        Returns: {
+          amount: number
+          bank_account_id: string | null
+          bank_charges: number | null
+          bounce_charge_note_id: string | null
+          bounce_reason: string | null
+          bounced_on: string | null
+          cancel_reason: string | null
+          cheque_bank: string | null
+          cheque_date: string | null
+          cheque_no: string | null
+          cheque_photo_url: string | null
+          cheque_status: string | null
+          cleared_on: string | null
+          collected_by: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          deposit_bank_account_id: string | null
+          deposit_slip_path: string | null
+          deposited_on: string | null
+          firm_id: string
+          id: string
+          mode: string
+          notes: string | null
+          proof_name: string | null
+          proof_path: string | null
+          receipt_date: string
+          receipt_no: string
+          reference: string | null
+          source: string
+          status: string
+          trip_collection_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "receipts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       _create_orders: {
         Args: {
           p_customer_id: string
@@ -6027,6 +6253,10 @@ export type Database = {
         Args: { p_alert_id: string; p_approve: boolean; p_note?: string }
         Returns: undefined
       }
+      apply_customer_advances: {
+        Args: { p_customer_id: string; p_firm_id: string }
+        Returns: number
+      }
       approve_customer: { Args: { p_customer_id: string }; Returns: undefined }
       approve_order: {
         Args: { p_note?: string; p_order_id: string }
@@ -6066,6 +6296,51 @@ export type Database = {
         Args: { p_reason: string; p_trip_id: string }
         Returns: undefined
       }
+      cash_deposit: {
+        Args: {
+          p_amount: number
+          p_bank_account_id: string
+          p_date?: string
+          p_note?: string
+          p_slip_path?: string
+        }
+        Returns: string
+      }
+      cashier_list: {
+        Args: never
+        Returns: {
+          full_name: string
+          id: string
+        }[]
+      }
+      cc_cash_mismatch: {
+        Args: { p_id: string; p_reason: string; p_received: number }
+        Returns: undefined
+      }
+      cc_create_material_pass: {
+        Args: {
+          p_approved_by: string
+          p_items: string
+          p_party: string
+          p_quantity: string
+          p_reason: string
+          p_valid_till: string
+          p_vehicle_no: string
+        }
+        Returns: Json
+      }
+      cc_move_stops: {
+        Args: { p_stop_ids: string[]; p_to_trip_id: string }
+        Returns: number
+      }
+      cc_reject_credit_note: {
+        Args: { p_note_id: string; p_reason: string }
+        Returns: undefined
+      }
+      cc_resolve_gate_problem: {
+        Args: { p_id: string; p_note: string }
+        Returns: undefined
+      }
       check_pin: {
         Args: {
           p_device_id: string
@@ -6090,6 +6365,28 @@ export type Database = {
           out_result: string
           out_user_id: string
         }[]
+      }
+      cheque_bounce: {
+        Args: {
+          p_charges?: number
+          p_date?: string
+          p_reason: string
+          p_receipt_id: string
+        }
+        Returns: string
+      }
+      cheque_cleared: {
+        Args: { p_date?: string; p_receipt_id: string }
+        Returns: undefined
+      }
+      cheque_deposit: {
+        Args: {
+          p_bank_account_id: string
+          p_date?: string
+          p_receipt_id: string
+          p_slip_path?: string
+        }
+        Returns: undefined
       }
       close_query: { Args: { p_query_id: string }; Returns: undefined }
       confirm_cash_handover: { Args: { p_id: string }; Returns: undefined }
@@ -6218,6 +6515,14 @@ export type Database = {
         Args: { p_reason?: string; p_user_id: string }
         Returns: number
       }
+      free_stock: {
+        Args: {
+          p_company_id: string
+          p_exclude_order?: string
+          p_product_id: string
+        }
+        Returns: number
+      }
       gate_change_guard: {
         Args: { p_mobile: string; p_pin: string; p_selfie: string }
         Returns: Json
@@ -6229,6 +6534,7 @@ export type Database = {
         Args: {
           p_fuel_amount?: number
           p_fuel_litres?: number
+          p_manual?: boolean
           p_odometer?: number
           p_trip_id: string
         }
@@ -6267,6 +6573,17 @@ export type Database = {
         Returns: {
           full_name: string
           id: string
+        }[]
+      }
+      gate_vehicles_out: {
+        Args: never
+        Returns: {
+          driver: string
+          ended: boolean
+          gate_out_at: string
+          reg_no: string
+          trip_id: string
+          trip_no: string
         }[]
       }
       geo_find_shape: {
@@ -6316,6 +6633,17 @@ export type Database = {
         Returns: undefined
       }
       my_approval_limit: { Args: never; Returns: number }
+      my_cash_to_confirm: {
+        Args: never
+        Returns: {
+          amount: number
+          created_at: string
+          from_name: string
+          id: string
+          note: string
+          trip_no: string
+        }[]
+      }
       my_catalogue: {
         Args: never
         Returns: {
@@ -6379,6 +6707,7 @@ export type Database = {
           expense_types: string[]
           expenses_enabled: boolean
           failed_reasons: string[]
+          gate_pass_print: boolean
           location_at_each_stop: boolean
           location_interval_minutes: number
           location_tracking_enabled: boolean
@@ -6399,7 +6728,10 @@ export type Database = {
           updated_at: string
           updated_by: string | null
           vehicle_check_enabled: boolean
+          vehicle_check_every_days: number
+          vehicle_check_frequency: string
           vehicle_check_items: string[]
+          visitor_alert_hours: number
           visitor_photo: string
         }
         SetofOptions: {
@@ -6455,6 +6787,26 @@ export type Database = {
         Returns: string
       }
       order_payment_hold: { Args: { p_order_id: string }; Returns: boolean }
+      order_stock_shortage: {
+        Args: { p_order_id: string }
+        Returns: {
+          free: number
+          needed: number
+          product_id: string
+          product_name: string
+        }[]
+      }
+      payment_reference_used: {
+        Args: { p_exclude_proof?: string; p_reference: string }
+        Returns: {
+          amount: number
+          customer_name: string
+          kind: string
+          on_date: string
+          ref_no: string
+          status: string
+        }[]
+      }
       pending_ask_office: {
         Args: never
         Returns: {
@@ -6751,6 +7103,10 @@ export type Database = {
         Returns: undefined
       }
       scope_ok: { Args: { p_id: string; p_type: string }; Returns: boolean }
+      set_cash_opening: {
+        Args: { p_amount: number; p_as_of: string }
+        Returns: undefined
+      }
       set_cheque_status: {
         Args: { p_note?: string; p_receipt_id: string; p_status: string }
         Returns: undefined

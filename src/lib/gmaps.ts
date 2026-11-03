@@ -145,6 +145,30 @@ export async function reverseGeocode(lat: number, lng: number): Promise<string> 
   }
 }
 
+/** Pin → area, city, pincode (and the full line) for the map-first address form. */
+export async function reverseGeocodeParts(
+  lat: number,
+  lng: number,
+): Promise<{ full: string; area: string; city: string; pincode: string; state: string }> {
+  const empty = { full: "", area: "", city: "", pincode: "", state: "" };
+  try {
+    const maps = await loadGoogleMaps();
+    const res = await new maps.Geocoder().geocode({ location: { lat, lng }, region: "in" });
+    const r = res.results?.[0];
+    if (!r) return empty;
+    const get = (type: string) => r.address_components.find((c) => c.types.includes(type))?.long_name ?? "";
+    return {
+      full: r.formatted_address ?? "",
+      area: get("sublocality_level_1") || get("sublocality") || get("neighborhood") || get("route"),
+      city: get("locality") || get("administrative_area_level_3") || get("administrative_area_level_2"),
+      pincode: get("postal_code"),
+      state: get("administrative_area_level_1"),
+    };
+  } catch {
+    return empty;
+  }
+}
+
 /** URL for a browser-loaded Static Maps preview image (<img src>). */
 export async function staticMapUrl(lat: number, lng: number, zoom = 16): Promise<string> {
   const key = await mapsBrowserKey();

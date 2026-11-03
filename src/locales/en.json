@@ -1217,5 +1217,13 @@
     "code": "Customer code",
     "businessHint": "To change these, message Sunrich from Help & support.",
     "logoutConfirm": "Are you sure you want to log out?"
+  },
+  "address2": {
+    "moveMap": "Move the pin to your shop or home",
+    "confirmPin": "This location is correct",
+    "changePin": "Change location",
+    "line1": "Shop / house no., street",
+    "landmark": "Landmark (optional)",
+    "someoneElse": "Deliver to someone else?"
   }
 }

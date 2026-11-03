@@ -338,7 +338,7 @@ function Checkout() {
     `${d.isToday ? t("checkout.today") : d.iso === days.find((x) => !x.isToday)?.iso && days[0]?.isToday ? t("checkout.tomorrow") : fmtDay(d.date).split(",")[0]}, ${fmtDay(d.date).replace(/^[^,]*,\s*/, "")}`;
   const itemCount = rows.reduce((a, r) => a + r.qty, 0);
   const oneLineAddr = addressLines.join(", ");
-  const Row = ({ icon, text, sub, onChange, right }: { icon: string; text: string; sub?: string; onChange?: () => void; right?: string }) => (
+  const Row = ({ icon, text, sub, onChange, right }: { icon: string; text: string; sub?: string; onChange?: () => void; right?: string | undefined }) => (
     <div className="flex min-h-14 items-center gap-3 border-b border-border/60 py-3 last:border-0">
       <span aria-hidden className="text-lg">{icon}</span>
       <span className="min-w-0 flex-1">

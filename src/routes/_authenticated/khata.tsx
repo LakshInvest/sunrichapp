@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Clock, Download, FileText, IndianRupee, Loader2, Share2, XCircle } from "lucide-react";
 import en from "@/locales/en.json";
 import { PageShell } from "@/components/PageShell";
+import { BottomNav } from "@/components/BottomNav";
 import { KhataBalanceCard } from "@/components/KhataBalanceCard";
 import { SheetDrawer } from "@/components/SheetDrawer";
 import { EmptyState, ErrorState } from "@/components/catalog/states";
@@ -100,16 +101,8 @@ function KhataPage() {
   };
 
   return (
-    <PageShell className={`pb-28 ${deva}`} onRefresh={() => Promise.all([loadTop(), loadRows()])}>
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
-        <button
-          type="button"
-          onClick={() => navigate({ to: "/account" })}
-          aria-label={t("registration.back")}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
-        >
-          <ArrowLeft className="h-5 w-5" aria-hidden />
-        </button>
+    <PageShell className={`pb-48 ${deva}`} onRefresh={() => Promise.all([loadTop(), loadRows()])}>
+      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-5 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <h1 className="min-w-0 flex-1 truncate text-base font-bold">{t("khata.title")}</h1>
         <button
           type="button"
@@ -210,18 +203,22 @@ function KhataPage() {
         </section>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 flex gap-2 border-t border-border bg-card p-3">
+        <Button type="button" variant="outline" onClick={() => setStmtOpen(true)} className="h-auto min-h-[52px] flex-1 rounded-xl text-base font-semibold">
+          <FileText className="h-5 w-5" aria-hidden /> {t("khata.statement")}
+        </Button>
         <Button
           type="button"
           disabled={offline}
           onClick={() => navigate({ to: "/khata/pay" })}
-          className="mx-auto flex h-auto min-h-[52px] w-full max-w-md rounded-xl text-base font-semibold"
+          className="flex h-auto min-h-[52px] flex-1 rounded-xl text-base font-semibold"
         >
           <IndianRupee className="h-5 w-5" aria-hidden /> {t("khata.payNow")}
         </Button>
         {offline && <p className="mt-1 text-center text-xs text-muted-foreground">{t("offline.hint")}</p>}
       </div>
 
+      <BottomNav />
       <StatementSheet open={stmtOpen} onOpenChange={setStmtOpen} />
     </PageShell>
   );

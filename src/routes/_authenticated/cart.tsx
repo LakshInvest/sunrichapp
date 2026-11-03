@@ -311,10 +311,6 @@ function Cart() {
                   <span className="font-medium text-foreground">{formatINR(jarDeposit)}</span>
                 </div>
               )}
-              <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
-                <span>{t("cart.delivery")}</span>
-                <span className="font-semibold text-secondary">{t("cart.free")}</span>
-              </div>
               <div className="mt-3 border-t border-border pt-3">
                 <div className="flex items-center justify-between text-base font-bold text-foreground">
                   <span>{t("cart.grandTotal")}</span>

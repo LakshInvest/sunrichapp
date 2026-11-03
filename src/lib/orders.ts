@@ -304,8 +304,8 @@ export type QuoteResult = {
  * limit), while quote_my_order reports the firm-less limit. Re-read credit per
  * firm so checkout shows what the server will actually do.
  */
-export async function quoteMyOrder(lines: QuoteLine[]): Promise<QuoteResult> {
-  const { data, error } = await supabase.rpc("quote_my_order", { p_lines: lines });
+export async function quoteMyOrder(lines: QuoteLine[], mode?: "sunrich" | "pickup"): Promise<QuoteResult> {
+  const { data, error } = await supabase.rpc("quote_my_order", { p_lines: lines, ...(mode ? { p_mode: mode } : {}) });
   if (error) throw new Error(error.message);
   const q = data as QuoteResult;
   try {

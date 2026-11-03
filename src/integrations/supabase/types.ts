@@ -183,6 +183,7 @@ export type Database = {
           closed_weekdays: number[]
           company_id: string
           default_gst_rate: number
+          delivery_charge_per_pack: number
           delivery_days_ahead: number
           delivery_slots: Json
           feedback_enabled: boolean
@@ -229,6 +230,7 @@ export type Database = {
           closed_weekdays?: number[]
           company_id: string
           default_gst_rate?: number
+          delivery_charge_per_pack?: number
           delivery_days_ahead?: number
           delivery_slots?: Json
           feedback_enabled?: boolean
@@ -275,6 +277,7 @@ export type Database = {
           closed_weekdays?: number[]
           company_id?: string
           default_gst_rate?: number
+          delivery_charge_per_pack?: number
           delivery_days_ahead?: number
           delivery_slots?: Json
           feedback_enabled?: boolean
@@ -1395,6 +1398,7 @@ export type Database = {
           default_credit_limit: number
           default_delivery_mode: string
           default_price_plan_id: string | null
+          delivery_charge_per_pack: number | null
           description: string | null
           description_hi: string | null
           description_mr: string | null
@@ -1423,6 +1427,7 @@ export type Database = {
           default_credit_limit?: number
           default_delivery_mode?: string
           default_price_plan_id?: string | null
+          delivery_charge_per_pack?: number | null
           description?: string | null
           description_hi?: string | null
           description_mr?: string | null
@@ -1451,6 +1456,7 @@ export type Database = {
           default_credit_limit?: number
           default_delivery_mode?: string
           default_price_plan_id?: string | null
+          delivery_charge_per_pack?: number | null
           description?: string | null
           description_hi?: string | null
           description_mr?: string | null
@@ -3278,6 +3284,7 @@ export type Database = {
       }
       order_lines: {
         Row: {
+          delivery_charge_per_pack: number
           deposit_per_unit: number
           deposit_total: number
           gst_rate: number
@@ -3298,6 +3305,7 @@ export type Database = {
           unit_price: number
         }
         Insert: {
+          delivery_charge_per_pack?: number
           deposit_per_unit?: number
           deposit_total?: number
           gst_rate?: number
@@ -3318,6 +3326,7 @@ export type Database = {
           unit_price: number
         }
         Update: {
+          delivery_charge_per_pack?: number
           deposit_per_unit?: number
           deposit_total?: number
           gst_rate?: number
@@ -6199,10 +6208,20 @@ export type Database = {
           ref_id: string
         }[]
       }
-      _price_lines: {
-        Args: { p_customer_id: string; p_lines: Json; p_office: boolean }
-        Returns: Json
-      }
+      _price_lines:
+        | {
+            Args: { p_customer_id: string; p_lines: Json; p_office: boolean }
+            Returns: Json
+          }
+        | {
+            Args: {
+              p_customer_id: string
+              p_lines: Json
+              p_mode: string
+              p_office: boolean
+            }
+            Returns: Json
+          }
       _receipt_alloc_snapshot: { Args: { p_receipt_id: string }; Returns: Json }
       _refresh_invoice_paid: {
         Args: { p_invoice_id: string }
@@ -6532,6 +6551,10 @@ export type Database = {
         Args: { p_approve: boolean; p_note_id: string }
         Returns: string
       }
+      default_delivery_mode: {
+        Args: { p_customer_id: string }
+        Returns: string
+      }
       delete_my_address: { Args: { p_id: string }; Returns: undefined }
       deliver_stop: {
         Args: {
@@ -6541,6 +6564,10 @@ export type Database = {
           p_stop_id: string
         }
         Returns: string
+      }
+      delivery_charge_per_pack: {
+        Args: { p_customer_id: string }
+        Returns: number
       }
       distributor_mark_delivered: {
         Args: { p_delivered: boolean; p_order_id: string; p_reason?: string }
@@ -6718,6 +6745,9 @@ export type Database = {
           category_code: string
           category_id: string
           code: string
+          default_delivery_mode: string
+          delivered_price: number
+          delivery_charge_per_pack: number
           deposit_amount: number
           description: string
           description_hi: string
@@ -6738,6 +6768,7 @@ export type Database = {
           pack_label: string
           pack_label_hi: string
           pack_label_mr: string
+          pickup_price: number
           price: number
           sell_unit: string
           sort_order: number
@@ -6944,6 +6975,8 @@ export type Database = {
         Args: { p_customer_id: string; p_on?: string }
         Returns: {
           code: string
+          delivered_price: number
+          delivery_charge_per_pack: number
           mrp: number
           name: string
           plan_name: string
@@ -6953,7 +6986,10 @@ export type Database = {
         }[]
       }
       public_app_info: { Args: never; Returns: Json }
-      quote_my_order: { Args: { p_lines: Json }; Returns: Json }
+      quote_my_order: {
+        Args: { p_lines: Json; p_mode?: string }
+        Returns: Json
+      }
       raise_trip_alert: {
         Args: {
           p_latitude?: number

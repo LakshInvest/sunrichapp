@@ -1147,7 +1147,8 @@
     "items_other": "{{count}} items",
     "addNote": "Add a note",
     "place": "Place order · {{amount}}",
-    "creditLow": "Only {{amount}} left in credit"
+    "creditLow": "Only {{amount}} left in credit",
+    "pickupSave": "(save {{amount}})"
   },
   "upi": {
     "payNow": "Pay now",

@@ -418,3 +418,8 @@
 
 /* Hide bottom bars while typing a quantity so the field stays visible. */
 html[data-typing] [data-hide-on-type] { display: none; }
+
+@media print {
+  @page { size: A4; margin: 10mm; }
+  .invoice-a4 { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

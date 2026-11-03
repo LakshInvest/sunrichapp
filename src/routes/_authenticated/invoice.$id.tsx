@@ -5,17 +5,16 @@ import { useTranslation } from "react-i18next";
 import { ArrowLeft, Download, Loader2, MessageCircle, Share2 } from "lucide-react";
 import { openExternal } from "@/lib/native";
 import { serverMessage } from "@/lib/form-errors";
-import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ErrorState, EmptyState, SlowNotice } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
 import { formatINR } from "@/lib/catalogue";
-import { fetchInvoice, upiLink, type Invoice } from "@/lib/billing";
+import { fetchInvoice, type Invoice } from "@/lib/billing";
 import { getInvoiceFirm, type InvoiceFirm } from "@/lib/invoice.functions";
 import { IST_TZ } from "@/lib/ist";
-import { amountInWords } from "@/lib/amount-words";
+import { BrandedInvoice } from "@/components/BrandedInvoice";
 
 export const Route = createFileRoute("/_authenticated/invoice/$id")({
   head: () => ({
@@ -103,12 +102,10 @@ function InvoiceScreen() {
     }
   };
 
-  const gstTotal = inv ? inv.cgst + inv.sgst + inv.igst : 0;
-
   return (
-    <main className={`mx-auto min-h-screen max-w-md bg-background pb-16 ${deva}`}>
+    <main className={`mx-auto min-h-screen max-w-md bg-background pb-16 print:max-w-none print:pb-0 ${deva}`}>
       <OfflineBanner />
-      <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
+      <header className="print:hidden sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <button
           type="button"
           onClick={() => router.history.back()}
@@ -145,7 +142,7 @@ function InvoiceScreen() {
           </button>
         </div>
       )}
-      <div className="px-4 pt-4">
+      <div className="px-3 pt-4 print:p-0">
         {error ? (
           <ErrorState message={error} onRetry={() => void load()} />
         ) : inv === undefined ? (
@@ -160,102 +157,9 @@ function InvoiceScreen() {
         ) : inv === null ? (
           <EmptyState title={t("invoice.notFound")} body={t("invoice.notFoundBody")} />
         ) : (
-          <article className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-            <div className="border-b border-border pb-3">
-              <p className="text-base font-bold text-primary">{firm?.legalName ?? "Sunrich"}</p>
-              {firm?.address && <p className="mt-0.5 text-xs text-muted-foreground">{firm.address}</p>}
-              {firm?.gstin && <p className="mt-0.5 text-xs font-semibold text-foreground">GSTIN {firm.gstin}</p>}
-            </div>
-            <div className="grid grid-cols-2 gap-3 border-b border-border py-3 text-xs">
-              <div>
-                <p className="text-muted-foreground">{t("invoice.no")}</p>
-                <p className="font-bold text-foreground break-all">{inv.invoiceNo}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-muted-foreground">{t("invoice.date")}</p>
-                <p className="font-bold text-foreground">{fmtDate(inv.invoiceDate)}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="text-muted-foreground">{t("invoice.billedTo")}</p>
-                <p className="font-semibold text-foreground">{inv.businessName ?? inv.customerName}</p>
-                {inv.billingAddress && <p className="text-muted-foreground">{inv.billingAddress}</p>}
-                {inv.customerGstin && <p className="text-foreground">GSTIN {inv.customerGstin}</p>}
-              </div>
-            </div>
-
-            <ul className="divide-y divide-border">
-              {inv.lines.map((l) => (
-                <li key={l.id} className="py-2.5 text-xs">
-                  <div className="flex justify-between gap-3">
-                    <p className="min-w-0 flex-1 text-sm font-semibold text-foreground">{l.description}</p>
-                    <p className="text-sm font-bold text-foreground">{formatINR(l.total)}</p>
-                  </div>
-                  <p className="mt-0.5 text-muted-foreground">
-                    {l.qty} × {formatINR(l.rate)} · {t("invoice.gst")} {l.gstRate}% ({formatINR(l.tax)})
-                    {l.hsn ? ` · HSN ${l.hsn}` : ""}
-                  </p>
-                </li>
-              ))}
-            </ul>
-
-            <dl className="space-y-1.5 border-t border-border pt-3 text-sm">
-              <Row label={t("invoice.taxable")} value={formatINR(inv.taxable)} />
-              {inv.isInterstate ? (
-                <Row label="IGST" value={formatINR(inv.igst)} />
-              ) : (
-                <>
-                  <Row label="CGST" value={formatINR(inv.cgst)} />
-                  <Row label="SGST" value={formatINR(inv.sgst)} />
-                </>
-              )}
-              {gstTotal === 0 && <Row label={t("invoice.gst")} value={formatINR(0)} />}
-              {inv.deposit > 0 && <Row label={t("invoice.deposit")} value={formatINR(inv.deposit)} />}
-              {inv.roundOff !== 0 && <Row label={t("invoice.roundOff")} value={formatINR(inv.roundOff)} />}
-              <div className="flex justify-between border-t border-border pt-2 text-base font-bold text-primary">
-                <dt>{t("invoice.total")}</dt>
-                <dd>{formatINR(inv.grandTotal)}</dd>
-              </div>
-              {inv.paid > 0 && <Row label={t("invoice.paid")} value={formatINR(inv.paid)} />}
-            </dl>
-            <p className="mt-2 text-[11px] italic text-muted-foreground">{amountInWords(inv.grandTotal)}</p>
-
-            {inv.balance > 0 ? (
-              <div className="mt-4 flex flex-col items-center gap-2 rounded-2xl bg-primary/5 p-4 text-center">
-                <p className="text-sm text-muted-foreground">{t("invoice.balanceDue")}</p>
-                <p className="text-2xl font-bold text-primary">{formatINR(inv.balance)}</p>
-                {firm?.upiId ? (
-                  <>
-                    <div className="rounded-xl bg-card p-3">
-                      <QRCodeSVG
-                        value={upiLink(firm.upiId, firm.payeeName ?? firm.legalName, inv.balance, inv.invoiceNo)}
-                        size={168}
-                        aria-label={t("invoice.scanToPay")}
-                      />
-                    </div>
-                    <p className="text-xs font-semibold text-foreground">{t("invoice.scanToPay")}</p>
-                    <p className="break-all text-xs text-muted-foreground">{firm.upiId}</p>
-                  </>
-                ) : (
-                  <p className="text-xs text-muted-foreground">{t("invoice.noUpi")}</p>
-                )}
-              </div>
-            ) : (
-              <p className="mt-4 rounded-xl bg-success/10 px-3 py-2 text-center text-sm font-bold text-success">
-                {t("invoice.fullyPaid")}
-              </p>
-            )}
-          </article>
+          <BrandedInvoice inv={inv} firm={firm} lang={lang} />
         )}
       </div>
     </main>
-  );
-}
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between gap-3">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-semibold text-foreground">{value}</dd>
-    </div>
   );
 }

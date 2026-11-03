@@ -1147,7 +1147,8 @@
     "items_other": "{{count}} आयटम",
     "addNote": "नोट जोडा",
     "place": "ऑर्डर करा · {{amount}}",
-    "creditLow": "क्रेडिटमध्ये फक्त {{amount}} शिल्लक"
+    "creditLow": "क्रेडिटमध्ये फक्त {{amount}} शिल्लक",
+    "pickupSave": "({{amount}} वाचवा)"
   },
   "upi": {
     "payNow": "आता पे करा",

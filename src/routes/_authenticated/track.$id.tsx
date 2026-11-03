@@ -130,6 +130,23 @@ function OrderDetail() {
     }
   }, [id]);
 
+  // Live truck position while out for delivery (refreshes every 30 s).
+  const orderStatus = order?.status;
+  useEffect(() => {
+    if (orderStatus !== "dispatched") {
+      setTruck(null);
+      return;
+    }
+    let on = true;
+    const tick = () => void fetchTruckPosition(id).then((p) => on && setTruck(p ? { lat: p.lat, lng: p.lng } : null));
+    tick();
+    const t = setInterval(tick, 30_000);
+    return () => {
+      on = false;
+      clearInterval(t);
+    };
+  }, [id, orderStatus]);
+
   useEffect(() => {
     void load();
     const timer = setInterval(() => void load(), 60_000);

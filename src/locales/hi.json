@@ -1180,5 +1180,16 @@
     "reorder": "फिर से ऑर्डर",
     "invoice": "इनवॉइस",
     "startShopping": "खरीदारी शुरू करें"
+  },
+  "track2": {
+    "kmAway": "{{km}} किमी दूर",
+    "pay": {
+      "unpaid": "बाकी",
+      "verifying": "वेरिफिकेशन में",
+      "paid": "पेड ✓"
+    },
+    "packsTimes": "{{count}} पैक × {{price}}",
+    "total": "कुल",
+    "cancelLink": "ऑर्डर कैंसल करें"
   }
 }

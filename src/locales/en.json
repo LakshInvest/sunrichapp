@@ -1180,5 +1180,16 @@
     "reorder": "Reorder",
     "invoice": "Invoice",
     "startShopping": "Start shopping"
+  },
+  "track2": {
+    "kmAway": "{{km}} km away",
+    "pay": {
+      "unpaid": "Unpaid",
+      "verifying": "Being verified",
+      "paid": "Paid ✓"
+    },
+    "packsTimes": "{{count}} packs × {{price}}",
+    "total": "Total",
+    "cancelLink": "Cancel order"
   }
 }

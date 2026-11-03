@@ -148,3 +148,11 @@ The repo has `assets/icon-only.png` (app icon), `assets/splash.png` and `assets/
 6. `npx cap sync android` — copies the new splash settings and the local "No internet — Retry" page (`public/offline.html`).
 7. Raise `versionCode`/`versionName` in `android/app/build.gradle`, then Android Studio → Build → Build APK(s). Uninstall the old app, install the new one.
 8. Check: tap the icon → navy screen with the logo only → Login/PIN/Home. Airplane mode → navy "No internet — Retry".
+
+## Prompt-35 rebuild (splash + UPI apps + map)
+1. `bun install` then `npx cap sync android` (adds @capacitor/app-launcher).
+2. `npx @capacitor/assets generate --android` — assets/splash.png is now logo-only; the app draws the tagline in its 2 s animation.
+3. AndroidManifest.xml, inside `<manifest>`, so the app can see installed UPI apps:
+   `<queries><intent><action android:name="android.intent.action.VIEW"/><data android:scheme="upi"/></intent></queries>`
+4. Android 12+: in `res/values-v31/styles.xml` set `windowSplashScreenBackground` to #0B2545 and `windowSplashScreenAnimatedIcon` to the logo, so the system splash is the same navy.
+5. Build, install, open an order that is out for delivery: if the map is blank, the small grey code under the pin is Google's reason.

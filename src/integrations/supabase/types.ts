@@ -6396,6 +6396,16 @@ export type Database = {
         Args: { p_id: string; p_note: string }
         Returns: undefined
       }
+      cc_set_stop_order: {
+        Args: {
+          p_est_km: number
+          p_est_minutes: number
+          p_method: string
+          p_stop_ids: string[]
+          p_trip_id: string
+        }
+        Returns: undefined
+      }
       check_pin: {
         Args: {
           p_device_id: string
@@ -7339,6 +7349,16 @@ export type Database = {
         Returns: Json
       }
       toggle_favourite: { Args: { p_product_id: string }; Returns: boolean }
+      transfer_stock: {
+        Args: {
+          p_from_unit: string
+          p_note?: string
+          p_product_id: string
+          p_qty: number
+          p_to_unit: string
+        }
+        Returns: undefined
+      }
       trip_return_expected: {
         Args: { p_trip_id: string }
         Returns: {

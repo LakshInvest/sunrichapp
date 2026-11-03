@@ -1,3 +1,4 @@
+import { formatPack } from "@/lib/pack-label";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { serverMessage } from "@/lib/form-errors";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -361,8 +362,6 @@ function packLine(
   lang: Parameters<typeof loc>[1],
   t: TFunction,
 ): string {
-  if (product.unitsPerSellUnit && product.unitsPerSellUnit > 1 && volume) {
-    return t("product.packOf", { units: product.unitsPerSellUnit, size: volume });
-  }
-  return loc(product.packLabel, lang) || volume || "";
+  void volume; void t;
+  return formatPack(loc(product.packLabel, lang), product.unitsPerSellUnit, product.volumeMl, (product as { sellUnit?: string | null }).sellUnit);
 }

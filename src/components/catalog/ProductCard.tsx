@@ -92,7 +92,9 @@ export function QtyStepper({
   onSet,
   max,
   className = "h-10",
+  compact = false,
 }: {
+  compact?: boolean;
   qty: number;
   onInc: () => void;
   onDec: () => void;
@@ -109,8 +111,8 @@ export function QtyStepper({
     if (Number.isFinite(n) && n >= 0) onSet(n);
   };
   return (
-    <div className={`flex w-full items-center justify-between rounded-full bg-primary text-primary-foreground ${className}`}>
-      <button type="button" onClick={onDec} aria-label={t("home.decreaseQty")} className="flex h-full w-11 items-center justify-center rounded-full active:scale-90">
+    <div className={`flex ${compact ? "" : "w-full"} items-center justify-between rounded-full bg-primary text-primary-foreground ${className}`}>
+      <button type="button" onClick={onDec} aria-label={t("home.decreaseQty")} className={`flex h-full ${compact ? "w-8" : "w-11"} shrink-0 items-center justify-center rounded-full active:scale-90`}>
         <Minus className="h-4 w-4" />
       </button>
       {editing ? (
@@ -125,7 +127,14 @@ export function QtyStepper({
             document.documentElement.dataset["typing"] = "1";
             const el = e.currentTarget;
             el.select();
-            setTimeout(() => el.scrollIntoView({ block: "center", behavior: "smooth" }), 350);
+            const lift = () => {
+              const vv = window.visualViewport;
+              const r = el.getBoundingClientRect();
+              const bottom = (vv ? vv.height + vv.offsetTop : window.innerHeight) - 12;
+              if (r.bottom > bottom || r.top < 64) window.scrollBy({ top: r.bottom - bottom, behavior: "smooth" });
+            };
+            setTimeout(lift, 300);
+            setTimeout(lift, 650);
           }}
           onBlur={() => {
             delete document.documentElement.dataset["typing"];
@@ -133,7 +142,7 @@ export function QtyStepper({
           }}
           onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
           aria-label={t("home.typeQty")}
-          className="h-full w-12 min-w-0 bg-transparent text-center text-sm font-bold text-primary-foreground caret-transparent outline-none selection:bg-transparent"
+          size={1} className="h-full w-0 min-w-0 flex-1 bg-transparent text-center text-sm font-bold text-primary-foreground caret-transparent outline-none selection:bg-transparent"
         />
       ) : (
         <button
@@ -143,7 +152,7 @@ export function QtyStepper({
             setEditing(true);
           }}
           aria-label={t("home.typeQty")}
-          className="h-full min-w-12 select-none bg-transparent text-center text-sm font-bold outline-none [-webkit-tap-highlight-color:transparent] focus:outline-none"
+          className="h-full min-w-0 flex-1 select-none bg-transparent text-center text-sm font-bold outline-none [-webkit-tap-highlight-color:transparent] focus:outline-none"
         >
           {qty}
         </button>
@@ -153,7 +162,7 @@ export function QtyStepper({
         onClick={onInc}
         disabled={max != null && qty >= max}
         aria-label={t("home.increaseQty")}
-        className="flex h-full w-11 items-center justify-center rounded-full active:scale-90 disabled:opacity-40"
+        className={`flex h-full ${compact ? "w-8" : "w-11"} shrink-0 items-center justify-center rounded-full active:scale-90 disabled:opacity-40`}
       >
         <Plus className="h-4 w-4" />
       </button>
@@ -196,45 +205,40 @@ export function ProductCard({
   const blocked = !canOrder;
   const disabled = blocked || offline;
   const name = fixName(loc(product.name, lang));
-  const pack = formatPack(loc(product.packLabel, lang), product.unitsPerSellUnit, product.volumeMl);
-  const save = locked ? null : priceSave(product);
-  const saveKey = isBusinessType(useTypeCode()) ? "product2.margin" : "catalog.save";
+  const pack = formatPack(loc(product.packLabel, lang), product.unitsPerSellUnit, product.volumeMl, product.sellUnit);
   return (
-    <div className="flex h-full flex-col rounded-2xl bg-card p-2.5 shadow-[0_1px_8px_-2px_color-mix(in_oklab,var(--primary)_14%,transparent)]">
+    <div className="flex h-full flex-col rounded-2xl bg-card p-2 shadow-[0_1px_8px_-2px_color-mix(in_oklab,var(--primary)_14%,transparent)]">
       <button type="button" onClick={onOpen} onPointerDown={prefetch} aria-label={name} className="block aspect-square w-full overflow-hidden rounded-xl bg-card">
-        <SmartImage width={180} src={product.imageUrl ?? product.images[0] ?? null} alt={name} className="h-full w-full bg-card object-contain p-1 mix-blend-multiply" />
+        <SmartImage width={180} src={product.imageUrl ?? product.images[0] ?? null} alt={name} className="h-full w-full bg-card object-contain mix-blend-multiply" />
       </button>
-      <button type="button" onClick={onOpen} className="mt-2 text-left">
+      <button type="button" onClick={onOpen} className="mt-1 text-left">
         <p className="truncate text-sm font-bold leading-snug text-foreground">{name}</p>
         <p className="truncate text-xs leading-tight text-muted-foreground">{pack || "\u00a0"}</p>
       </button>
-      <div className="mt-1.5 flex min-h-9 flex-col justify-end">
-        <PriceLine product={product} />
-        <p className="h-4 text-[11px] font-semibold leading-4 text-success">{save !== null ? t(saveKey, { amount: formatINR(save) }) : ""}</p>
-      </div>
-      <div className="mt-auto pt-2">
-        {locked ? (
-          <div className="h-10" />
-        ) : product.price === null ? (
+      <div className="mt-1 flex h-10 items-center gap-2">
+        <div className="min-w-0 shrink">{locked || product.price !== null ? <PriceLine product={product} /> : null}</div>
+        <div className="ml-auto shrink-0">
+        {locked ? null : product.price === null ? (
           onPriceRequest ? (
-            <button type="button" onClick={onPriceRequest} className="flex h-10 w-full items-center justify-center rounded-full bg-secondary/15 text-xs font-bold text-primary active:scale-95">
+            <button type="button" onClick={onPriceRequest} className="flex h-9 items-center justify-center rounded-full bg-secondary/15 px-3 text-xs font-bold text-primary active:scale-95">
               {t("catalog.priceOnRequest")}
             </button>
-          ) : <div className="h-10" />
+          ) : null
         ) : qty === 0 ? (
           <button
             type="button"
             onClick={onAdd}
             disabled={disabled}
             title={blocked ? t("cart.orderingAfterApproval") : offline ? t("offline.hint") : undefined}
-            className="ml-auto flex h-10 items-center justify-center gap-1 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground shadow-sm transition active:scale-95 disabled:opacity-50"
+            className="flex h-9 items-center justify-center gap-0.5 rounded-full bg-primary px-3 text-sm font-bold text-primary-foreground shadow-sm transition active:scale-95 disabled:opacity-50"
           >
             <Plus className="h-4 w-4" aria-hidden />
             {t("home.addToCart")}
           </button>
         ) : (
-          <QtyStepper qty={qty} onInc={onInc} onDec={onDec} onSet={(n) => (onSetQty ? onSetQty(n) : n === 0 && onDec())} max={product.maxOrderQty} />
+          <QtyStepper compact className="h-9 w-[100px]" qty={qty} onInc={onInc} onDec={onDec} onSet={(n) => (onSetQty ? onSetQty(n) : n === 0 && onDec())} max={product.maxOrderQty} />
         )}
+        </div>
       </div>
     </div>
   );

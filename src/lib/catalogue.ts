@@ -36,7 +36,11 @@ export type CatalogProduct = {
   imageUrl: string | null;
   images: string[];
   mrp: number | null;
+  /** Rate for the customer's default delivery mode (delivered = pickup + charge per pack). */
   price: number | null;
+  pickupPrice: number | null;
+  deliveredPrice: number | null;
+  defaultMode: "sunrich" | "pickup";
   depositAmount: number | null;
   gstRate: number | null;
   minOrderQty: number;
@@ -94,6 +98,17 @@ const CACHE_KEY = "sunrich.catalogue.v1";
 
 type RawProduct = Record<string, unknown>;
 
+/** Pick the rate for the default mode; unpriced (price null) stays null. */
+export function modePrices(r: Record<string, unknown>): { price: number | null; pickupPrice: number | null; deliveredPrice: number | null; defaultMode: "sunrich" | "pickup" } {
+  const n = (v: unknown) => (v === null || v === undefined || v === "" || Number.isNaN(Number(v)) ? null : Number(v));
+  const base = n(r['price']);
+  const defaultMode = r['default_delivery_mode'] === "pickup" ? "pickup" : "sunrich";
+  if (base === null) return { price: null, pickupPrice: null, deliveredPrice: null, defaultMode };
+  const pickupPrice = n(r['pickup_price']) ?? base;
+  const deliveredPrice = n(r['delivered_price']) ?? pickupPrice + (n(r['delivery_charge_per_pack']) ?? 0);
+  return { price: defaultMode === "pickup" ? pickupPrice : deliveredPrice, pickupPrice, deliveredPrice, defaultMode };
+}
+
 function asLoc(v: unknown): Loc {
   const o = (v ?? {}) as Record<string, unknown>;
   return { en: String(o["en"] ?? ""), hi: (o["hi"] as string) ?? null, mr: (o["mr"] as string) ?? null };
@@ -121,7 +136,7 @@ function mapProduct(r: RawProduct): CatalogProduct {
     imageUrl: (r['image_url'] as string) ?? null,
     images: Array.isArray(r['images']) ? (r['images'] as string[]).filter((u): u is string => typeof u === "string") : [],
     mrp: num(r['mrp']),
-    price: num(r['price']),
+    ...modePrices(r),
     depositAmount: num(r['deposit_amount']),
     gstRate: num(r['gst_rate']),
     minOrderQty: Math.max(1, num(r['min_order_qty']) ?? 1),

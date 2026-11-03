@@ -1,3 +1,4 @@
+import { formatPack } from "@/lib/pack-label";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
 import { useServerFn } from "@tanstack/react-start";
@@ -243,7 +244,7 @@ function Cart() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-bold text-foreground">{loc(product.name, lang)}</p>
                     <p className="text-xs text-muted-foreground">
-                      {loc(product.packLabel, lang)}
+                      {formatPack(loc(product.packLabel, lang), product.unitsPerSellUnit, product.volumeMl, product.sellUnit)}
                     </p>
                     {changed && (
                       <p className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-accent-foreground">
@@ -310,10 +311,6 @@ function Cart() {
                   <span className="font-medium text-foreground">{formatINR(jarDeposit)}</span>
                 </div>
               )}
-              <div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
-                <span>{t("cart.delivery")}</span>
-                <span className="font-semibold text-secondary">{t("cart.free")}</span>
-              </div>
               <div className="mt-3 border-t border-border pt-3">
                 <div className="flex items-center justify-between text-base font-bold text-foreground">
                   <span>{t("cart.grandTotal")}</span>

@@ -1,3 +1,4 @@
+import { lineShort } from "@/lib/pack-label";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { X } from "lucide-react";
@@ -48,7 +49,7 @@ export function SmartCard({
         {pick.kind === "dispatched" && t("smart.dispatched")}
         {pick.kind === "reorder" && lastDelivered && (
           <span className="block truncate">
-            {lastDelivered.lines.map((l) => `${l.packLabel ?? l.productName} × ${l.qty}`).join(", ")} · {formatINR(lastDelivered.grandTotal)}
+            {lastDelivered.lines.map((l) => lineShort(l.packLabel, l.productName, l.qty)).join(", ")} · {formatINR(lastDelivered.grandTotal)}
           </span>
         )}
       </p>

@@ -9,7 +9,7 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { PaymentProofSheet, PaymentStatusNote, type ProofTarget } from "@/components/PaymentProofSheet";
 import { PayCard } from "@/components/PayCard";
 import { UpiReturnSheet } from "@/components/UpiReturnSheet";
-import { relativeDayLabel } from "@/lib/order-format";
+import { dayAndDate } from "@/lib/order-format";
 import { fetchMyOrders, type OrderDto } from "@/lib/orders";
 import { formatINR } from "@/lib/catalogue";
 import { useLang } from "@/hooks/use-lang";
@@ -114,7 +114,7 @@ function OrderSuccess() {
   const isPickup = first ? first.deliveryMode === "pickup" : pickup;
 
   const total = parts.reduce((a, p) => a + p.grand_total, 0);
-  const dateOnly = deliveryDate ? relativeDayLabel(deliveryDate, lang, t) : "";
+  const dateOnly = deliveryDate ? dayAndDate(deliveryDate, lang) : "";
   return (
     <main className={`mx-auto flex min-h-screen max-w-md flex-col bg-background px-5 pb-10 ${deva}`}>
       <OfflineBanner />

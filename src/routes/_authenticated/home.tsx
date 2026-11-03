@@ -550,8 +550,6 @@ function Home() {
       onTouchEnd={pull.handlers.onTouchEnd}
       onTouchCancel={pull.handlers.onTouchCancel}
     >
-      <PayReminder />
-      <KhataPayShortcut />
 
       {pull.indicator && (
         <div

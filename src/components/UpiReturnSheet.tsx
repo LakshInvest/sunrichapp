@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 import { XCircle } from "lucide-react";
 import { SheetDrawer } from "@/components/SheetDrawer";
 import { getLastUpiLaunch, onAppReturn, onUpiOutcome, openUpi, takeUpiReturn, type UpiResponse } from "@/lib/upi";
@@ -46,8 +45,7 @@ export function UpiReturnSheet({ onYes }: { onYes: (orderId: string, upi?: UpiPr
     const last = getLastUpiLaunch();
     setState(null);
     if (!last) return;
-    const res = await openUpi(last.params, last.app, last.orderId);
-    if (res.kind === "noApp") toast.error(t("upi.noApp"));
+    await openUpi(last.params, last.app, last.orderId);
   };
 
   return (

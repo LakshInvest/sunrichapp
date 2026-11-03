@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { installedUpiApps, openUpi, upiLink, UPI_APPS, type UpiApp } from "@/lib/upi";
+import { installedUpiApps, visibleUpiApps, openUpi, upiLink, UPI_APPS, type UpiApp } from "@/lib/upi";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import { Copy, Smartphone } from "lucide-react";
 import { formatINR } from "@/lib/catalogue";
 import type { FirmPayInfo } from "@/lib/payments.functions";
 import { CopyRow } from "@/components/PaymentProofSheet";
+import { Button } from "@/components/ui/button";
 
 /** UPI or bank-transfer "pay now" card, shared by order success, order detail and Khata. */
 export function PayCard({
@@ -36,12 +37,16 @@ export function PayCard({
   const hasDetails = method === "upi" ? !!upiId || !!info?.qrUrl : !!info?.bank;
   const [apps, setApps] = useState<UpiApp[]>([]);
   useEffect(() => {
-    if (method === "upi") void installedUpiApps().then(setApps);
+    let active = true;
+    if (method === "upi") {
+      setApps(visibleUpiApps([]));
+      void installedUpiApps().then((found) => { if (active) setApps(visibleUpiApps(found)); });
+    }
+    return () => { active = false; };
   }, [method]);
 
   const launch = async (app?: UpiApp) => {
-    const res = await openUpi(params, app, orderId);
-    if (res.kind === "noApp") toast.error(t("upi.noApp"));
+    await openUpi(params, app, orderId);
   };
 
   const copy = async (v: string) => {
@@ -62,29 +67,29 @@ export function PayCard({
       ) : method === "upi" ? (
         <>
           {upiId && (
-            <button
+            <Button
               type="button"
               onClick={() => void launch()}
               className="mt-3 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-primary-foreground transition active:scale-[0.98]"
             >
               <Smartphone className="h-4 w-4" aria-hidden /> {t("upi.payAmount", { amount: formatINR(amount) })}
-            </button>
+            </Button>
           )}
           {upiId && apps.length > 0 && (
             <div className="mt-2 flex gap-2">
               {UPI_APPS.filter((a) => apps.includes(a.id)).map((a) => (
-                <button key={a.id} type="button" onClick={() => void launch(a.id)} className="min-h-11 flex-1 rounded-xl border border-border text-sm font-semibold text-foreground active:scale-95">
+                <Button variant="outline" key={a.id} type="button" onClick={() => void launch(a.id)} className="min-h-11 flex-1 rounded-xl border border-border text-sm font-semibold text-foreground active:scale-95">
                   {a.label}
-                </button>
+                </Button>
               ))}
             </div>
           )}
           {upiId && (
             <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-muted px-3 py-1">
               <span className="min-w-0 truncate font-mono text-sm font-semibold text-foreground">{upiId}</span>
-              <button type="button" onClick={() => void copy(upiId)} className="flex min-h-11 shrink-0 items-center gap-1 px-2 text-sm font-semibold text-secondary">
+              <Button variant="ghost" type="button" aria-label={t("upi.copyId")} onClick={() => void copy(upiId)} className="flex min-h-11 shrink-0 items-center gap-1 px-2 text-sm font-semibold text-secondary">
                 <Copy className="h-4 w-4" aria-hidden /> {t("success.copy")}
-              </button>
+              </Button>
             </div>
           )}
           <div className="mt-4 flex flex-col items-center">
@@ -100,20 +105,20 @@ export function PayCard({
         </>
       ) : (
         <div className="mt-3 rounded-xl bg-muted px-3">
-          <CopyRow label={t("success.accountName")} value={info!.bank!.accountName} />
-          <CopyRow label={t("success.bankName")} value={info!.bank!.bankName} />
-          <CopyRow label={t("success.accountNo")} value={info!.bank!.accountNumber} />
-          <CopyRow label={t("success.ifsc")} value={info!.bank!.ifsc} />
+          <CopyRow label={t("success.accountName")} value={info?.bank?.accountName ?? ""} />
+          <CopyRow label={t("success.bankName")} value={info?.bank?.bankName ?? ""} />
+          <CopyRow label={t("success.accountNo")} value={info?.bank?.accountNumber ?? ""} />
+          <CopyRow label={t("success.ifsc")} value={info?.bank?.ifsc ?? ""} />
         </div>
       )}
 
-      <button
+      <Button variant="outline"
         type="button"
         onClick={onPaid}
         className="mt-3 flex min-h-12 w-full items-center justify-center rounded-xl border border-primary/30 text-sm font-semibold text-primary transition active:scale-[0.98]"
       >
         {t("upi.paidEnterUtr")}
-      </button>
+      </Button>
       {/* One line only — "Sunrich sends the order once the payment is checked". */}
       <p className="mt-2 text-center text-xs text-muted-foreground">{t("success.checkNote")}</p>
     </div>

@@ -26,8 +26,17 @@ import {
   type OrderDto,
 } from "@/lib/orders";
 import { fetchOrdersAwaitingPayment } from "@/lib/pay-reminder";
+import en from "@/locales/en.json";
 
 export const Route = createFileRoute("/_authenticated/track/")({
+  head: () => ({ meta: [
+    { title: en.track.metaTitle },
+    { name: "description", content: en.track.metaDescription },
+    { property: "og:title", content: en.track.metaTitle },
+    { property: "og:description", content: en.track.metaDescription },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: MyOrders,
 });
 

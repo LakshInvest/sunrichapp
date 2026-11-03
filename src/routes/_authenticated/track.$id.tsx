@@ -1,3 +1,4 @@
+import { formatPack, fixName } from "@/lib/pack-label";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { PageShell } from "@/components/PageShell";
 import { serverMessage } from "@/lib/form-errors";
@@ -395,8 +396,8 @@ function OrderDetail() {
                   <SmartImage width={44} src={thumb(l.productId)} alt="" className="h-11 w-11 object-contain p-1" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate font-semibold text-foreground">{l.productName}</span>
-                  <span className="block text-xs text-muted-foreground">{t("track2.packsTimes", { count: l.qty, price: formatINR(l.unitPrice) })}</span>
+                  <span className="block truncate font-semibold text-foreground">{fixName(l.productName)}</span>
+                  <span className="block text-xs text-muted-foreground">{formatPack(l.packLabel)} · {t("track2.packsTimes", { count: l.qty, price: formatINR(l.unitPrice) })}</span>
                 </span>
                 <span className="font-semibold text-foreground">{formatINR(l.lineTotal)}</span>
               </li>

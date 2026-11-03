@@ -97,6 +97,7 @@ function Checkout() {
   const [newc, setNewc] = useState<Record<string, number>>({});
   const [notes, setNotes] = useState("");
   const [quote, setQuote] = useState<QuoteResult | null>(null);
+  const [modeTotals, setModeTotals] = useState<Partial<Record<DeliveryMode, number>>>({});
   // Khata advance: shown as "Advance used" and spent on the bill when it is issued.
   const [advance, setAdvance] = useState(0);
   useEffect(() => {
@@ -242,14 +243,18 @@ function Checkout() {
   const refreshQuote = useCallback(async () => {
     if (offline || rows.length === 0) return;
     try {
-      const q = await quoteMyOrder(linesPayload);
+      const [q, other] = await Promise.all([
+        quoteMyOrder(linesPayload, mode),
+        quoteMyOrder(linesPayload, mode === "pickup" ? "sunrich" : "pickup").catch(() => null),
+      ]);
       setQuote(q);
+      setModeTotals({ [mode]: Number(q.grand_total ?? q.items_total), ...(other ? { [mode === "pickup" ? "sunrich" : "pickup"]: Number(other.grand_total ?? other.items_total) } : {}) });
       setQuoteError(null);
     } catch (e) {
       setQuoteError(serverMessage(e, t("checkout.errPlace")));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [offline, JSON.stringify(linesPayload)]);
+  }, [offline, mode, JSON.stringify(linesPayload)]);
 
   useEffect(() => {
     const id = setTimeout(() => void refreshQuote(), 350);
@@ -257,7 +262,7 @@ function Checkout() {
   }, [refreshQuote]);
 
   const deliveryDate = day ?? isoDaysFromToday(1);
-  const itemsTotal = rows.reduce((a, r) => a + (r.product.price ?? 0) * r.qty, 0);
+  const itemsTotal = rows.reduce((a, r) => a + ((mode === "pickup" ? r.product.pickupPrice : r.product.deliveredPrice) ?? 0) * r.qty, 0);
   const shortfall = minOrderShortfall(quote?.items_total ?? itemsTotal, settings?.minOrderValue ?? 0);
   const notesAllowed = settings?.allowOrderNotes ?? true;
   const pickup = mode === "pickup";
@@ -393,7 +398,13 @@ function Checkout() {
             >
               <span aria-hidden className="text-3xl">{m === "sunrich" ? "🚚" : "🏭"}</span>
               <span className="min-w-0 flex-1">
-                <span className="block text-base font-bold text-foreground">{t(m === "sunrich" ? "checkout2.sunrich" : "checkout2.pickup")}</span>
+                <span className="block text-base font-bold text-foreground">
+                  {t(m === "sunrich" ? "checkout2.sunrich" : "checkout2.pickup")}
+                  {modeTotals[m] != null && <> · {formatINR(modeTotals[m]!)}</>}
+                </span>
+                {m === "pickup" && modeTotals.pickup != null && modeTotals.sunrich != null && modeTotals.sunrich > modeTotals.pickup && (
+                  <span className="mt-0.5 block text-sm font-semibold text-success">{t("checkout2.pickupSave", { amount: formatINR(modeTotals.sunrich - modeTotals.pickup) })}</span>
+                )}
                 <span className="mt-1 block text-sm text-muted-foreground">
                   {m === "sunrich" ? oneLineAddr || "—" : settings?.plantAddress ?? t("checkout2.plantDefault")}
                 </span>

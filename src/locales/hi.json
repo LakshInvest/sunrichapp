@@ -1147,7 +1147,8 @@
     "items_other": "{{count}} आइटम",
     "addNote": "नोट जोड़ें",
     "place": "ऑर्डर करें · {{amount}}",
-    "creditLow": "क्रेडिट में सिर्फ़ {{amount}} बचे हैं"
+    "creditLow": "क्रेडिट में सिर्फ़ {{amount}} बचे हैं",
+    "pickupSave": "({{amount}} बचाओ)"
   },
   "upi": {
     "payNow": "अभी पे करें",

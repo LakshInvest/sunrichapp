@@ -1173,5 +1173,12 @@
     "noReason": "कारण दिले नाही",
     "sendAgain": "पुन्हा पाठवा",
     "verifying": "पडताळणीत"
+  },
+  "orders2": {
+    "active": "सुरू असलेले",
+    "past": "आधीचे",
+    "reorder": "पुन्हा ऑर्डर",
+    "invoice": "इनव्हॉइस",
+    "startShopping": "खरेदी सुरू करा"
   }
 }

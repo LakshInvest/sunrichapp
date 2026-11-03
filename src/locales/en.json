@@ -1173,5 +1173,12 @@
     "noReason": "no reason given",
     "sendAgain": "Send again",
     "verifying": "Being verified"
+  },
+  "orders2": {
+    "active": "In progress",
+    "past": "Earlier",
+    "reorder": "Reorder",
+    "invoice": "Invoice",
+    "startShopping": "Start shopping"
   }
 }

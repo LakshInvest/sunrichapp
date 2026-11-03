@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { BellRing, Truck } from "lucide-react";
+import { BellRing } from "lucide-react";
 import { SheetDrawer } from "@/components/SheetDrawer";
 import { acceptPush, declinePush, shouldOfferPush } from "@/lib/push";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { PaymentProofSheet, PaymentStatusNote, type ProofTarget } from "@/components/PaymentProofSheet";
-import { PayCard, PayChip } from "@/components/PayCard";
-import { dayAndDate } from "@/lib/order-format";
+import { PayCard } from "@/components/PayCard";
+import { UpiReturnSheet } from "@/components/UpiReturnSheet";
+import { relativeDayLabel } from "@/lib/order-format";
 import { fetchMyOrders, type OrderDto } from "@/lib/orders";
 import { formatINR } from "@/lib/catalogue";
 import { useLang } from "@/hooks/use-lang";
-import { fetchMyPaymentProofs, fetchPaymentHold, paymentChip, releaseLine, successStatusKey, type PayMethod, type PaymentProof } from "@/lib/payments";
+import { fetchMyPaymentProofs, fetchPaymentHold, type PayMethod, type PaymentProof } from "@/lib/payments";
 import { getFirmPaymentInfo, type FirmPayInfo } from "@/lib/payments.functions";
 
 export const Route = createFileRoute("/_authenticated/order-success")({
@@ -111,67 +112,46 @@ function OrderSuccess() {
 
   const first = parts[0] ? live[parts[0].order_id] : undefined;
   const isPickup = first ? first.deliveryMode === "pickup" : pickup;
-  const rl = first ? releaseLine(first) : null;
-  const deliveryLine = rl && rl.key !== "dispatchingNow"
-    ? t(`dispatch.${rl.key}`, { time: rl.time, date: rl.date ? dayAndDate(rl.date, lang) : undefined })
-    : deliveryDate
-      ? `${dayAndDate(deliveryDate, lang)}${slot && !isPickup ? ` · ${slot}` : ""}`
-      : "";
 
+  const total = parts.reduce((a, p) => a + p.grand_total, 0);
+  const dateOnly = deliveryDate ? relativeDayLabel(deliveryDate, lang, t) : "";
   return (
     <main className={`mx-auto flex min-h-screen max-w-md flex-col bg-background px-5 pb-10 ${deva}`}>
       <OfflineBanner />
-      <div className="flex flex-col items-center pt-10 text-center">
-        <svg viewBox="0 0 96 96" className="h-20 w-20 shrink-0 overflow-visible" role="img" aria-label={t("success.title")}>
+      <div className="flex flex-col items-center pt-12 text-center">
+        <svg viewBox="0 0 96 96" className="h-16 w-16 shrink-0 overflow-visible" role="img" aria-label={t("success.title")}>
           <circle className="animate-check-ring" cx="48" cy="48" r="42" fill="none" stroke="var(--secondary)" strokeWidth="5" strokeLinecap="round" strokeDasharray="264" strokeDashoffset="264" />
           <path className="animate-check-mark" d="M32 50 L44 62 L66 38" fill="none" stroke="var(--primary)" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="60" strokeDashoffset="60" />
         </svg>
-        <h1 className="mt-4 text-2xl font-bold text-primary">{t("success.title")}</h1>
+        <h1 className="mt-4 text-2xl font-bold text-primary">{t("success.done")}</h1>
         {parts.length > 0 && (
-          <p className="mt-1 text-sm font-semibold text-muted-foreground">{parts.map((p) => p.order_no).join(" · ")}</p>
+          <p className="mt-1 text-base font-semibold text-foreground" data-testid="delivery-line">
+            {formatINR(total)}
+            {dateOnly ? ` · ${t(isPickup ? "success.pickupOn" : "success.deliveryOn", { date: dateOnly })}` : ""}
+          </p>
         )}
+        {parts.length > 0 && <p className="mt-1 text-xs text-muted-foreground">{parts.map((p) => p.order_no).join(" · ")}</p>}
       </div>
 
       <ul className="mt-6 w-full space-y-4">
         {parts.map((p) => {
           const proof = proofs.find((x) => x.orderId === p.order_id) ?? null;
-          const status = live[p.order_id]?.status ?? p.status;
-          const chip = paymentChip(payMethod, proof?.status ?? null);
           const showCard = (payMethod === "upi" || payMethod === "bank") && (!proof || proof.status === "rejected");
           return (
             <li key={p.order_id} className="space-y-3">
-              <div className="rounded-2xl border border-border bg-card p-4 text-left shadow-sm">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-secondary/15 px-2.5 py-1 text-[11px] font-bold text-primary" data-testid="order-chip">
-                    {t(successStatusKey(status, payMethod, proof?.status ?? null))}
-                  </span>
-                  <PayChip k={chip.key} tone={chip.tone} />
-                  <span className="ml-auto text-base font-bold text-primary">{formatINR(p.grand_total)}</span>
-                </div>
-                {deliveryLine && (
-                  <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-foreground" data-testid="delivery-line">
-                    <Truck className="h-4 w-4 shrink-0 text-secondary" aria-hidden />
-                    {deliveryLine}
-                  </p>
-                )}
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {isPickup
-                    ? t("pay.pickupFromPlant")
-                    : p.fulfilled_by === "distributor"
-                      ? t("pay.deliveryByDistributor")
-                      : t("pay.deliveryBySunrich")}
-                </p>
-                {proof && <PaymentStatusNote proof={proof} />}
-                {payMethod === "cash" && <p className="mt-3 text-sm text-muted-foreground">{t("success.payCash")}</p>}
-                {payMethod === "cheque" && <p className="mt-3 text-sm text-muted-foreground">{t("success.payCheque")}</p>}
-              </div>
+              {proof && <PaymentStatusNote proof={proof} />}
+              {payMethod === "cash" && <p className="text-center text-sm text-muted-foreground">{t("success.payCash")}</p>}
+              {payMethod === "cheque" && <p className="text-center text-sm text-muted-foreground">{t("success.payCheque")}</p>}
+              {payMethod === "credit" && <p className="text-center text-sm text-muted-foreground">{t("success.payCredit")}</p>}
               {showCard && (
                 <PayCard
                   method={payMethod === "bank" ? "bank" : "upi"}
                   info={info[p.order_id] ?? null}
                   amount={info[p.order_id]?.grandTotal ?? p.grand_total}
                   orderNo={p.order_no}
+                  orderId={p.order_id}
                   hold={holds[p.order_id]}
+                  title={parts.length > 1 ? `${t("upi.payNow")} · ${p.order_no}` : undefined}
                   onPaid={() =>
                     setProofFor({ orderId: p.order_id, orderNo: p.order_no, amount: p.grand_total, method: payMethod === "bank" ? "bank" : "upi" })
                   }
@@ -181,24 +161,26 @@ function OrderSuccess() {
           );
         })}
       </ul>
+      {(payMethod === "upi" || payMethod === "bank") && parts.length > 0 && (
+        <p className="mt-4 text-center text-sm text-muted-foreground">{t("success.checkNote")}</p>
+      )}
 
-      <div className="mt-auto space-y-3 pt-8">
+      <div className="mt-auto space-y-2 pt-8 text-center">
         <button
           type="button"
           onClick={() => navigate({ to: "/track/$id", params: { id: parts[0]?.order_id ?? "" } })}
           disabled={parts.length === 0}
-          className="flex min-h-[52px] w-full items-center justify-center rounded-xl bg-primary text-base font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98] disabled:opacity-50"
+          className="min-h-11 text-sm font-semibold text-secondary disabled:opacity-50"
         >
-          {t("pay.viewOrder")}
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate({ to: "/home" })}
-          className="flex min-h-[52px] w-full items-center justify-center rounded-xl border border-border bg-card text-base font-semibold text-foreground transition active:scale-[0.98]"
-        >
-          {t("success.continueShopping")}
+          {payMethod === "upi" || payMethod === "bank" ? t("success.payLater") : t("pay.viewOrder")} →
         </button>
       </div>
+      <UpiReturnSheet
+        onYes={(id) => {
+          const p = parts.find((x) => x.order_id === id);
+          if (p) setProofFor({ orderId: p.order_id, orderNo: p.order_no, amount: p.grand_total, method: "upi" });
+        }}
+      />
       <PaymentProofSheet
         open={proofFor != null}
         onOpenChange={(o) => {

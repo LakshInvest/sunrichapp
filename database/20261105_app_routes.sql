@@ -270,7 +270,7 @@ as $$
 declare
   ids uuid[] := '{}'; la float8[] := '{}'; ln float8[] := '{}'; nocoord uuid[]; done uuid[];
   n int; r int[] := '{}'; vis boolean[]; cur int; best int; bd float8; d float8;
-  i int; k int; a int; b int; c int; e int; improved boolean; km float8 := 0; seq int := 0; s record; guard int := 0;
+  i int; k int; a int; b int; c int; e int; improved boolean; km float8 := 0; v_n int := 0; v_sid uuid; s record; guard int := 0;
 begin
   select coalesce(array_agg(id order by seq), '{}') into done from public.trip_stops where trip_id = p_trip_id and status <> 'pending';
   select array_agg(st.id order by st.seq) into nocoord
@@ -321,9 +321,9 @@ begin
     for i in 1 .. n loop km := km + public._hav_km(la[cur], ln[cur], la[r[i]], ln[r[i]]); cur := r[i]; end loop;
     km := km + public._hav_km(la[cur], ln[cur], la[1], ln[1]);
   end if;
-  foreach s.id in array coalesce(done, '{}') loop seq := seq + 1; update public.trip_stops set seq = seq where id = s.id; end loop;
-  for i in 1 .. n loop seq := seq + 1; update public.trip_stops set seq = seq where id = ids[r[i] - 1]; end loop;
-  foreach s.id in array coalesce(nocoord, '{}') loop seq := seq + 1; update public.trip_stops set seq = seq where id = s.id; end loop;
+  foreach v_sid in array coalesce(done, '{}') loop v_n := v_n + 1; update public.trip_stops set seq = v_n where id = v_sid; end loop;
+  for i in 1 .. n loop v_n := v_n + 1; update public.trip_stops set seq = v_n where id = ids[r[i] - 1]; end loop;
+  foreach v_sid in array coalesce(nocoord, '{}') loop v_n := v_n + 1; update public.trip_stops set seq = v_n where id = v_sid; end loop;
   update public.trips
      set est_km = round((km * 1.3)::numeric, 1),
          est_minutes = round(km * 1.3 / 25 * 60 + 5 * (n + coalesce(array_length(nocoord, 1), 0)))::int,

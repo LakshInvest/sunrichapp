@@ -32,7 +32,7 @@ export function LaunchSplash() {
       <svg className="launch-wave" viewBox="0 0 200 20" preserveAspectRatio="none">
         <path d="M0 10 Q 25 0 50 10 T 100 10 T 150 10 T 200 10" fill="none" stroke="var(--secondary)" strokeWidth="3" strokeLinecap="round" />
       </svg>
-      <p className="launch-tagline font-deva">शुद्ध पियो शुद्ध जियो</p>
+      <p className="launch-tagline font-deva">शुद्ध पियो, खूब जियो</p>
     </div>
   );
 }

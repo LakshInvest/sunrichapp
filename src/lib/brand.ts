@@ -16,7 +16,7 @@ export type Brand = {
 const FALLBACK: Brand = {
   logoLight: logoNavyAsset.url,
   logoDark: logoWhiteAsset.url,
-  tagline: "Shudh Piyo, Shudh Jiyo",
+  tagline: "Shudh Piyo, Khoob Jiyo",
   primary: "#0D3278",
   accent: "#0AAAED",
 };

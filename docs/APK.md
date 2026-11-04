@@ -113,7 +113,7 @@ The shell now loads `https://user.sunrich.in`; `allowNavigation` covers `user.su
 7. Check: the app opens inside itself (no browser), login works, and an `https://user.sunrich.in/order/<id>` link opens the order in the app.
 
 ## Branded launch (navy splash, no white screen)
-The repo has `assets/icon-only.png` (app icon), `assets/splash.png` and `assets/splash-dark.png` (2732×2732, navy #0B2545, logo + "शुद्ध पियो शुद्ध जियो").
+The repo has `assets/icon-only.png` (app icon), `assets/splash.png` and `assets/splash-dark.png` (2732×2732, navy #0B2545, logo + "शुद्ध पियो, खूब जियो").
 
 1. `git pull` then `npm install` (adds `@capacitor/assets`).
 2. Generate the Android icons and splash images (run in the project folder):

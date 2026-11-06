@@ -116,7 +116,11 @@
     "open": "Open",
     "updatesBell": "Order updates",
     "typeQty": "Type quantity",
-    "noAreaTitle": "Delivery will start in your area soon – pickup is available"
+    "noAreaTitle": "Delivery will start in your area soon – pickup is available",
+    "noAreaShort": "Delivery coming soon to your area · Pickup available",
+    "pickupSheetTitle": "Pickup point",
+    "pickupAddress": "Address",
+    "pickupHours": "Pickup hours"
   },
   "catalog": {
     "priceOnRequest": "Price on request",

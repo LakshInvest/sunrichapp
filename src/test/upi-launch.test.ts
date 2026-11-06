@@ -17,7 +17,7 @@ vi.mock("@capacitor/core", () => ({
 }));
 vi.mock("@capacitor/app", () => ({ App: { addListener: vi.fn(async (_event, cb) => { mocks.state = cb; return { remove: vi.fn() }; }) } }));
 vi.mock("@capacitor/app-launcher", () => ({ AppLauncher: { openUrl: mocks.openUrl, canOpenUrl: mocks.canOpenUrl } }));
-vi.mock("sonner", () => ({ toast: { error: mocks.toast } }));
+vi.mock("@/components/MessageCard", () => ({ showMessage: (o: { textKey?: string }) => mocks.toast(o.textKey) }));
 vi.mock("i18next", () => ({ default: { t: (key: string) => key } }));
 const params = { pa: "Q507766276@ybl", pn: "Sunrich", amount: 10, orderNo: "QA" };
 beforeEach(() => {

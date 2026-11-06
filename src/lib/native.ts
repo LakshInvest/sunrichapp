@@ -179,6 +179,15 @@ export async function locateDevice(): Promise<LocateResult> {
 export async function pickPhoto(source: "camera" | "photos" = "camera"): Promise<File | null> {
   if (!isNative()) return null;
   const { Camera, CameraResultType, CameraSource } = await import("@capacitor/camera");
+  if (source === "camera") {
+    const { requestPermission } = await import("@/lib/permissions");
+    const perm = await requestPermission("camera");
+    if (perm === "denied") {
+      const { showMessage } = await import("@/components/MessageCard");
+      showMessage({ kind: "camera", buttonKey: "permissions.settings", onAction: () => void openAppSettings() });
+      return null;
+    }
+  }
   try {
     const photo = await Camera.getPhoto({
       quality: 80,

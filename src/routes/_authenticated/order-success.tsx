@@ -3,7 +3,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { BellRing } from "lucide-react";
 import { SheetDrawer } from "@/components/SheetDrawer";
-import { acceptPush, declinePush, shouldOfferPush } from "@/lib/push";
+import { acceptPush, declinePush } from "@/lib/push";
+import { checkPermission, openAppSettings } from "@/lib/permissions";
+import { isNative } from "@/lib/native";
 import en from "@/locales/en.json";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { PaymentProofSheet, PaymentStatusNote, type ProofTarget } from "@/components/PaymentProofSheet";
@@ -56,8 +58,17 @@ function OrderSuccess() {
   const [proofFor, setProofFor] = useState<ProofTarget | null>(null);
 
   const [pushOpen, setPushOpen] = useState(false);
+  const [pushDenied, setPushDenied] = useState(false);
+  // Notifications are asked again only here (after an order), when not yet allowed.
   useEffect(() => {
-    if (shouldOfferPush()) setTimeout(() => setPushOpen(true), 1200);
+    if (!isNative()) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    void checkPermission("notifications").then((p) => {
+      if (p === "granted" || p === "unavailable") return;
+      setPushDenied(p === "denied");
+      timer = setTimeout(() => setPushOpen(true), 1200);
+    });
+    return () => clearTimeout(timer);
   }, []);
 
   const loadProofs = () => {
@@ -196,8 +207,8 @@ function OrderSuccess() {
             <button type="button" className="min-h-12 rounded-xl border border-border font-semibold" onClick={() => { declinePush(); setPushOpen(false); }}>
               {t("push.no")}
             </button>
-            <button type="button" className="min-h-12 rounded-xl bg-primary font-semibold text-primary-foreground" onClick={() => { setPushOpen(false); void acceptPush(); }}>
-              {t("push.yes")}
+            <button type="button" className="min-h-12 rounded-xl bg-primary font-semibold text-primary-foreground" onClick={() => { setPushOpen(false); void (pushDenied ? openAppSettings() : acceptPush()); }}>
+              {pushDenied ? t("permissions.settings") : t("push.yes")}
             </button>
           </div>
         </div>

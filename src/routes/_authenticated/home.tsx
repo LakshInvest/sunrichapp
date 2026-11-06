@@ -49,7 +49,8 @@ import { fetchMyFeedback, planReorder, skippedRatings } from "@/lib/feedback";
 import { RateOrderCard } from "@/components/RateOrderCard";
 import { useAppSettings } from "@/lib/app-settings";
 import { toast } from "sonner";
-import { Repeat2, Store } from "lucide-react";
+import { Repeat2, Store, ChevronRight } from "lucide-react";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { pickupInfo } from "@/lib/catalogue";
 import { getDocumentRequirements, getMyRegistration, type RegistrationDto } from "@/lib/registration.functions";
 import { writeGate } from "@/lib/gate-cache";
@@ -119,6 +120,7 @@ function Home() {
   const [search, setSearch] = useState("");
   const [recents, setRecents] = useState<string[]>(() => loadRecentSearches());
   const [category, setCategory] = useState("all");
+  const [pickupSheet, setPickupSheet] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
   const [reg, setReg] = useState<RegistrationDto | null>(null);
@@ -358,7 +360,7 @@ function Home() {
 
     if (key === "categories") {
       const tiles = [
-        { id: "all", code: "all", name: t("home.categoryAll"), imageUrl: null as string | null, Icon: LayoutGrid },
+        { id: "all", code: "all", name: t("home.categoryAll"), imageUrl: (settings?.allCategoryImageUrl ?? null) as string | null, Icon: LayoutGrid },
         ...activeCategories.map((cat) => ({
           id: cat.id,
           code: cat.code,
@@ -369,7 +371,7 @@ function Home() {
       ];
       const tints = ["bg-secondary/15", "bg-primary/10", "bg-accent/20", "bg-success/15"];
       return (
-        <div key="categories" className="no-scrollbar sticky top-0 z-20 mt-1 flex gap-3 overflow-x-auto bg-background px-3 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
+        <div key="categories" className="no-scrollbar sticky top-0 z-20 flex gap-2 overflow-x-auto bg-background px-3 pb-3 pt-[max(0.25rem,env(safe-area-inset-top))]">
           {tiles.map(({ id, code, name, imageUrl, Icon }, i) => {
             const selected = category === code;
             return (
@@ -378,28 +380,29 @@ function Home() {
                 type="button"
                 onClick={() => setCategory(code)}
                 aria-pressed={selected}
-                className="flex w-[72px] shrink-0 flex-col items-center gap-1.5 text-center transition active:scale-95"
+                className="flex w-[60px] shrink-0 flex-col items-center gap-1 text-center transition active:scale-95"
               >
                 <span
-                  className={`relative flex h-[68px] w-[68px] items-center justify-center overflow-hidden rounded-2xl ${tints[i % tints.length]} ${
-                    selected ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
+                  className={`relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl ${tints[i % tints.length]} ${
+                    selected ? "ring-1 ring-primary" : ""
                   }`}
                 >
-                  <Icon className="h-7 w-7 text-primary/70" aria-hidden />
+                  <Icon className={`h-7 w-7 text-primary/70 ${imageUrl ? "hidden" : ""}`} aria-hidden />
                   {imageUrl && (
                     <img
                       src={imageUrl}
                       alt=""
                       loading="lazy"
                       decoding="async"
-                      className="absolute inset-0 h-full w-full object-contain p-1.5"
+                      className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 object-contain"
                       onError={(e) => {
                         e.currentTarget.hidden = true;
+                        e.currentTarget.previousElementSibling?.classList.remove("hidden");
                       }}
                     />
                   )}
                 </span>
-                <span className={`line-clamp-2 text-xs leading-tight text-foreground ${selected ? "font-bold" : "font-medium"}`}>{name}</span>
+                <span className={`line-clamp-2 text-[12px] leading-tight text-foreground ${selected ? "font-bold" : "font-medium"}`}>{name}</span>
               </button>
             );
           })}
@@ -666,20 +669,35 @@ function Home() {
               </div>
             )}
 
-            {homeExtras?.defaultAreaId === null && (
-              <div className="mx-3 mb-3 flex items-start gap-3 rounded-xl border border-secondary/25 bg-secondary/10 p-3">
-                <Store className="mt-0.5 h-5 w-5 shrink-0 text-secondary" aria-hidden />
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">{t("home.noAreaTitle")}</p>
-                  {(pickupInfo(homeExtras, lang).address ?? settings?.plantAddress) && (
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {pickupInfo(homeExtras, lang).address ?? settings?.plantAddress}
-                      {(pickupInfo(homeExtras, lang).hours ?? settings?.pickupHours) ? ` · ${pickupInfo(homeExtras, lang).hours ?? settings?.pickupHours}` : ""}
-                    </p>
-                  )}
-                </div>
-              </div>
+            {!loading && homeExtras?.defaultAreaId === null && (
+              <button
+                type="button"
+                onClick={() => setPickupSheet(true)}
+                className="mx-3 mb-2 flex w-[calc(100%-1.5rem)] items-center gap-2 rounded-[12px] bg-secondary/10 px-3 py-2 text-left"
+              >
+                <Store className="h-4 w-4 shrink-0 text-secondary" aria-hidden />
+                <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">{t("home.noAreaShort")}</span>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+              </button>
             )}
+            <Sheet open={pickupSheet} onOpenChange={setPickupSheet}>
+              <SheetContent side="bottom" className="rounded-t-2xl">
+                <SheetHeader>
+                  <SheetTitle>{t("home.pickupSheetTitle")}</SheetTitle>
+                  <SheetDescription>{t("home.noAreaTitle")}</SheetDescription>
+                </SheetHeader>
+                <div className="mt-4 space-y-3 pb-[env(safe-area-inset-bottom)] text-sm">
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t("home.pickupAddress")}</p>
+                    <p className="font-medium text-foreground">{pickupInfo(homeExtras, lang).address ?? settings?.plantAddress ?? "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t("home.pickupHours")}</p>
+                    <p className="font-medium text-foreground">{pickupInfo(homeExtras, lang).hours ?? settings?.pickupHours ?? "—"}</p>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
 
             <div className="relative z-30 px-3">
               <SearchBox
@@ -694,7 +712,7 @@ function Home() {
               />
             </div>
 
-            <div className="mt-4 empty:hidden">
+            <div className="mt-3 empty:hidden">
             {settings?.feedbackEnabled !== false && rateOrder && (
               <div className="mx-5 mb-4">
                 <RateOrderCard allowSkip orderId={rateOrder.id} orderNo={rateOrder.orderNo} onDone={() => setRateOrder(null)} />

@@ -178,6 +178,7 @@ export type Database = {
           about_text: string | null
           about_text_hi: string | null
           about_text_mr: string | null
+          all_category_image_url: string | null
           allow_cancel_before: string
           allow_order_notes: boolean
           auto_plan_last_date: string | null
@@ -231,6 +232,7 @@ export type Database = {
           about_text?: string | null
           about_text_hi?: string | null
           about_text_mr?: string | null
+          all_category_image_url?: string | null
           allow_cancel_before?: string
           allow_order_notes?: boolean
           auto_plan_last_date?: string | null
@@ -284,6 +286,7 @@ export type Database = {
           about_text?: string | null
           about_text_hi?: string | null
           about_text_mr?: string | null
+          all_category_image_url?: string | null
           allow_cancel_before?: string
           allow_order_notes?: boolean
           auto_plan_last_date?: string | null

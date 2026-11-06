@@ -40,6 +40,7 @@ export type AppSettings = {
   pickupHours: string | null;
   launchImageUrl: string | null;
   loginImageUrl: string | null;
+  allCategoryImageUrl: string | null;
 };
 
 const KEY = "sunrich.appSettings.v1";
@@ -81,6 +82,7 @@ export function mapSettings(r: Record<string, unknown>): AppSettings {
     pickupHours: blank(r["pickup_hours"]),
     launchImageUrl: blank(r["launch_image_url"]),
     loginImageUrl: blank(r["login_image_url"]),
+    allCategoryImageUrl: blank(r["all_category_image_url"]),
   };
 }
 

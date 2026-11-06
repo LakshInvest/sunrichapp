@@ -32,6 +32,5 @@ Subdirectories `src/lib/` and `src/routes/` have their own `AGENTS.md`; read the
 - Speed caches (service worker, gate cache, SWR copies): see `src/lib/AGENTS.md`. Checkout prices always come from the server quote. Why: instant opens on slow 4G.
 - UPI launches/errors stay in `src/lib/upi.ts`; register proxies synchronously, never return them through Promises (native `then` hangs). Discovery returns actual apps, Android UI supplies fallbacks; last launch error stays in memory (no customer-facing diagnostic). Why: consistent safe recovery.
 
-- Permissions: one intro screen after first login (`PermissionsIntro`, state in `sunrich.permissions.v1`, never cleared on logout); later asks are contextual only (camera in `pickPhoto`, notifications after an order) and a permanent denial offers Open settings. Why: ask once with reasons, never nag.
-- Important problems (no delivery, payment not done, out of stock, dues hold, offline, camera off) use `showMessage()` (`MessageCard`); small confirmations stay toasts; foreground push uses `showInAppPush()`. Why: consistent clear messages.
-- Product page reads `my_product` extras (`src/lib/product-extras.ts`) on top of the catalogue; share link `https://user.sunrich.in/p/<id>` → `/p/$id` → `/product/$id`. Why: richer details without changing prices.
+- Permissions: one-time intro (`PermissionsIntro`), then contextual asks only. Big problems use `showMessage()`; foreground push `showInAppPush()`. Why: no nagging, clear messages.
+- Product extras via `my_product` (`product-extras.ts`); share `/p/$id`. Why: details without price changes.

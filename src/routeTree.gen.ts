@@ -35,6 +35,7 @@ import { Route as AuthenticatedSupportRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedTrackRouteImport } from './routes/_authenticated/track'
 import { Route as AuthenticatedUnderReviewRouteImport } from './routes/_authenticated/under-review'
 import { Route as OrderIdRouteImport } from './routes/order.$id'
+import { Route as PIdRouteImport } from './routes/p.$id'
 import { Route as AuthenticatedInvoiceIdRouteImport } from './routes/_authenticated/invoice.$id'
 import { Route as AuthenticatedKhataPayRouteImport } from './routes/_authenticated/khata_.pay'
 import { Route as AuthenticatedProductIdRouteImport } from './routes/_authenticated/product.$id'
@@ -177,6 +178,11 @@ const OrderIdRoute = OrderIdRouteImport.update({
   path: '/order/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PIdRoute = PIdRouteImport.update({
+  id: '/p/$id',
+  path: '/p/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedInvoiceIdRoute = AuthenticatedInvoiceIdRouteImport.update({
   id: '/invoice/$id',
   path: '/invoice/$id',
@@ -245,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/track': typeof AuthenticatedTrackRouteWithChildren
   '/under-review': typeof AuthenticatedUnderReviewRoute
   '/order/$id': typeof OrderIdRoute
+  '/p/$id': typeof PIdRoute
   '/invoice/$id': typeof AuthenticatedInvoiceIdRoute
   '/khata/pay': typeof AuthenticatedKhataPayRoute
   '/product/$id': typeof AuthenticatedProductIdRoute
@@ -278,6 +285,7 @@ export interface FileRoutesByTo {
   '/support': typeof AuthenticatedSupportRoute
   '/under-review': typeof AuthenticatedUnderReviewRoute
   '/order/$id': typeof OrderIdRoute
+  '/p/$id': typeof PIdRoute
   '/invoice/$id': typeof AuthenticatedInvoiceIdRoute
   '/khata/pay': typeof AuthenticatedKhataPayRoute
   '/product/$id': typeof AuthenticatedProductIdRoute
@@ -315,6 +323,7 @@ export interface FileRoutesById {
   '/_authenticated/track': typeof AuthenticatedTrackRouteWithChildren
   '/_authenticated/under-review': typeof AuthenticatedUnderReviewRoute
   '/order/$id': typeof OrderIdRoute
+  '/p/$id': typeof PIdRoute
   '/_authenticated/invoice/$id': typeof AuthenticatedInvoiceIdRoute
   '/_authenticated/khata_/pay': typeof AuthenticatedKhataPayRoute
   '/_authenticated/product/$id': typeof AuthenticatedProductIdRoute
@@ -352,6 +361,7 @@ export interface FileRouteTypes {
     | '/track'
     | '/under-review'
     | '/order/$id'
+    | '/p/$id'
     | '/invoice/$id'
     | '/khata/pay'
     | '/product/$id'
@@ -385,6 +395,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/under-review'
     | '/order/$id'
+    | '/p/$id'
     | '/invoice/$id'
     | '/khata/pay'
     | '/product/$id'
@@ -421,6 +432,7 @@ export interface FileRouteTypes {
     | '/_authenticated/track'
     | '/_authenticated/under-review'
     | '/order/$id'
+    | '/p/$id'
     | '/_authenticated/invoice/$id'
     | '/_authenticated/khata_/pay'
     | '/_authenticated/product/$id'
@@ -439,6 +451,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   OrderIdRoute: typeof OrderIdRoute
+  PIdRoute: typeof PIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -625,6 +638,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/$id': {
+      id: '/p/$id'
+      path: '/p/$id'
+      fullPath: '/p/$id'
+      preLoaderRoute: typeof PIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/invoice/$id': {
       id: '/_authenticated/invoice/$id'
       path: '/invoice/$id'
@@ -773,6 +793,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   OrderIdRoute: OrderIdRoute,
+  PIdRoute: PIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

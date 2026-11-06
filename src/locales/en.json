@@ -1277,5 +1277,12 @@
     "offlineText": "Check your connection and try again.",
     "cameraTitle": "Camera is off",
     "cameraText": "Turn on camera for Sunrich in settings."
+  },
+  "product3": {
+    "share": "Share",
+    "inclGst": "(incl. GST)",
+    "tab_desc": "Description",
+    "tab_delivery": "Delivery",
+    "tab_faq": "FAQs"
   }
 }

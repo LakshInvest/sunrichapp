@@ -387,16 +387,17 @@ function Home() {
                     selected ? "ring-1 ring-primary" : ""
                   }`}
                 >
-                  <Icon className="h-7 w-7 text-primary/70" aria-hidden={true} />
+                  <Icon className={`h-7 w-7 text-primary/70 ${imageUrl ? "hidden" : ""}`} aria-hidden />
                   {imageUrl && (
                     <img
                       src={imageUrl}
                       alt=""
                       loading="lazy"
                       decoding="async"
-                      className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 bg-inherit object-contain"
+                      className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 object-contain"
                       onError={(e) => {
                         e.currentTarget.hidden = true;
+                        e.currentTarget.previousElementSibling?.classList.remove("hidden");
                       }}
                     />
                   )}

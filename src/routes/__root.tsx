@@ -1,4 +1,4 @@
-import { LaunchSplash } from "@/components/LaunchSplash";
+import { LaunchFrame, LAUNCH_SCRIPT } from "@/components/LaunchFrame";
 import splashLogo from "@/assets/splash-logo.png.asset.json";
 import { clearMyCustomer } from "@/lib/my-customer";
 import { clearTypeCode } from "@/lib/customer-type";
@@ -123,12 +123,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: LAUNCH_SCRIPT }} />
       </head>
       <body>
-        <LaunchSplash />
+        <LaunchFrame />
         {children}
         <Scripts />
       </body>

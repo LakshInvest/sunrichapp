@@ -42,6 +42,7 @@ function hideSplashNow() {
 export function markFirstScreen() {
   firstScreenShown = true;
   if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event("sunrich:first-screen"));
   requestAnimationFrame(() => hideSplashNow());
 }
 

@@ -375,46 +375,23 @@
   }
 }
 
-/* Launch splash: logo box mirrors the native 2732² CENTER_CROP splash (logo 793×772 at
-   x 971, y 868; image centre 1366). --s = one source pixel on screen. */
-/* Same navy as the native splash image + Capacitor backgroundColor, so the hand-off is invisible. */
-.launch-splash { --s: calc(max(100vw, 100vh) / 2732); background-color: #0b2545; }
-.launch-logo {
-  position: absolute;
-  left: 50%;
-  top: calc(50% - var(--s) * 498);
-  width: calc(var(--s) * 794);
-  height: calc(var(--s) * 772);
-  transform: translateX(-50%);
-  animation: launch-grow 0.4s ease-out 0.1s both;
+/* Static launch frame: brand image (cached URL set inline before paint) or navy + logo. No animation. */
+.launch-frame {
+  position: fixed;
+  inset: 0;
+  background-color: #0b2545;
+  background-image: var(--launch-img, none);
+  background-size: cover;
+  background-position: center;
 }
-.launch-wave {
-  position: absolute;
-  left: 50%;
-  top: calc(50% + var(--s) * 300);
-  width: calc(var(--s) * 794);
-  height: calc(var(--s) * 60);
-  transform: translateX(-50%);
-  clip-path: inset(0 100% 0 0);
-  animation: launch-wave 0.9s ease-in-out 0.45s forwards;
-}
-.launch-tagline {
-  position: absolute;
-  inset-inline: 0;
-  top: calc(50% + var(--s) * 380);
-  text-align: center;
-  font-weight: 600;
-  font-size: max(18px, calc(var(--s) * 92));
-  color: var(--primary-foreground);
-  opacity: 0;
-  animation: launch-fade 0.5s ease-out 1s forwards;
-}
-@keyframes launch-grow { from { transform: translateX(-50%) scale(1); } to { transform: translateX(-50%) scale(1.06); } }
-@keyframes launch-wave { to { clip-path: inset(0 0 0 0); } }
-@keyframes launch-fade { to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) {
-  .launch-logo, .launch-wave, .launch-tagline { animation-duration: 1ms; animation-delay: 0s; }
-}
+.launch-frame img { position: absolute; left: 50%; top: 50%; width: min(52vw, 240px); transform: translate(-50%, -55%); }
+html[data-launch-img] .launch-frame img { display: none; }
+
+/* Login: brand photo top ~45%, white card slides up over it. */
+.auth-brand { height: 45svh; min-height: 220px; }
+.auth-login-card { animation: auth-card-enter 320ms ease-out both; }
+@keyframes auth-card-enter { from { transform: translateY(32px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .auth-login-card { animation: none; } }
 
 /* Hide bottom bars while typing a quantity so the field stays visible. */
 html[data-typing] [data-hide-on-type] { display: none; }

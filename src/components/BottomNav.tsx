@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { BookOpen, Home, Inbox, Package, UserRound, type LucideIcon } from "lucide-react";
 import { hasOrderUpdates, useDistributorNav } from "@/lib/orders";
 import { supabase } from "@/integrations/supabase/client";
+import { useCart } from "@/hooks/use-cart";
 
 type Tab = { to: "/home" | "/khata" | "/track" | "/account" | "/inbox"; key: string; icon: LucideIcon };
 
@@ -21,6 +22,7 @@ export function BottomNav() {
   const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { isDistributor, newCount } = useDistributorNav();
+  const { count: cartCount } = useCart();
   const [ordersChanged, setOrdersChanged] = useState(false);
   useEffect(() => {
     if (pathname.startsWith("/track")) {
@@ -70,21 +72,29 @@ export function BottomNav() {
               to={to}
               aria-current={active ? "page" : undefined}
               aria-label={to === "/account" && replied ? `${t(key)} · ${t("queries.chipOpen")}` : undefined}
-              className={`relative flex min-h-16 flex-1 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors ${
-                active ? "text-primary" : "text-muted-foreground"
+              className={`relative flex min-h-16 flex-1 flex-col items-center justify-center gap-0.5 text-xs transition-colors ${
+                active ? "font-bold text-secondary" : "font-medium text-muted-foreground"
               }`}
             >
-              {active && (
-                <span
-                  aria-hidden
-                  className="absolute top-0 h-1 w-8 rounded-full bg-secondary"
-                />
-              )}
-              <span className="relative">
+              <span
+                className={`relative flex h-8 w-14 items-center justify-center rounded-full transition-all ${
+                  active ? "-translate-y-0.5 bg-secondary/15 shadow-sm" : ""
+                }`}
+              >
                 <Icon
-                  className={`transition-transform ${active ? "h-7 w-7" : "h-6 w-6"}`}
+                  className="h-6 w-6"
+                  fill={active ? "currentColor" : "none"}
+                  fillOpacity={active ? 0.2 : 0}
                   strokeWidth={active ? 2.4 : 1.8}
                 />
+                {to === "/home" && cartCount > 0 && (
+                  <span
+                    aria-label={`${t("home.cart")}: ${cartCount}`}
+                    className="absolute -top-1 right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-card bg-accent px-1 text-[10px] font-bold text-accent-foreground"
+                  >
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </span>
+                )}
                 {to === "/track" && ordersChanged && (
                   <span aria-hidden className="absolute -right-1 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-card bg-destructive" />
                 )}
@@ -94,7 +104,7 @@ export function BottomNav() {
                 {to === "/inbox" && newCount > 0 && (
                   <span
                     aria-hidden
-                    className="absolute -right-2.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-white"
+                    className="absolute -right-2.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground"
                   >
                     {newCount > 9 ? "9+" : newCount}
                   </span>

@@ -185,7 +185,24 @@ export function arrangeCatalogue<T extends { categories: CatalogCategory[]; prod
 }
 
 /** Extra Home values returned by get_home() (Khata, default address, chats awaiting the customer). */
-export type HomeExtras = { khata: Record<string, unknown> | null; defaultAddress: Record<string, unknown> | null; awaitingReply: number };
+export type HomeExtras = {
+  khata: Record<string, unknown> | null;
+  defaultAddress: Record<string, unknown> | null;
+  awaitingReply: number;
+  /** undefined = not sent (old cache); null = default address has no delivery area. */
+  defaultAreaId?: string | null;
+  pickup?: Record<string, unknown> | null;
+};
+/** Pickup address/hours from get_home().pickup in the given language (null when absent). */
+export function pickupInfo(x: HomeExtras | null | undefined, lang: string): { address: string | null; hours: string | null } {
+  const p = x?.pickup;
+  if (!p) return { address: null, hours: null };
+  const pick = (k: string) => {
+    const v = (lang === "hi" || lang === "mr" ? p[`${k}_${lang}`] : null) ?? p[k];
+    return typeof v === "string" && v.trim() ? v : null;
+  };
+  return { address: pick("address"), hours: pick("hours") };
+}
 // Saved copy from the last open, so Home's Khata strip and address show instantly on a cold open.
 let homeExtras: HomeExtras | null = readSwr<HomeExtras>("homeExtras");
 const extrasListeners = new Set<(x: HomeExtras) => void>();
@@ -233,6 +250,12 @@ async function loadCatalogue(): Promise<CatalogData> {
     khata: (h["khata"] as Record<string, unknown> | null) ?? null,
     defaultAddress: (h["default_address"] as Record<string, unknown> | null) ?? null,
     awaitingReply: Number(h["awaiting_reply"] ?? 0),
+    ...("pickup" in h
+      ? {
+          defaultAreaId: typeof h["default_area_id"] === "string" ? (h["default_area_id"] as string) : null,
+          pickup: (h["pickup"] as Record<string, unknown> | null) ?? null,
+        }
+      : {}),
   });
 
   const banners: CatalogBanner[] = (arr("banners") as Record<string, unknown>[])

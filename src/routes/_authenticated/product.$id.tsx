@@ -4,7 +4,9 @@ import { serverMessage } from "@/lib/form-errors";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { ArrowLeft, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
+import { ArrowLeft, Share2 } from "lucide-react";
+import { fetchProductExtras, parseProductExtras, productShareUrl } from "@/lib/product-extras";
+import { shareLink } from "@/lib/native";
 import en from "@/locales/en.json";
 import { SmartImage } from "@/components/SmartImage";
 import { ImageViewer } from "@/components/ImageViewer";
@@ -61,6 +63,19 @@ function ProductDetail() {
   const [slide, setSlide] = useState(0);
   const [viewer, setViewer] = useState<string | null>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
+  const [extrasRaw, setExtrasRaw] = useState<unknown>(null);
+  const [tab, setTab] = useState<"desc" | "delivery" | "faq">("desc");
+  useEffect(() => {
+    let live = true;
+    setExtrasRaw(null);
+    fetchProductExtras(id)
+      .then((r) => live && setExtrasRaw(r))
+      .catch(() => undefined); // page still works from the catalogue
+    return () => {
+      live = false;
+    };
+  }, [id]);
+  const extras = useMemo(() => parseProductExtras(extrasRaw, lang), [extrasRaw, lang]);
 
   const load = useCallback(async (force = false) => {
     try {
@@ -90,11 +105,11 @@ function ProductDetail() {
 
   const gallery = useMemo(() => {
     if (!product) return [];
-    const urls = [product.imageUrl, ...product.images].filter(
+    const urls = [...extras.images.map((i) => i.url), product.imageUrl, ...product.images].filter(
       (u, i, arr): u is string => typeof u === "string" && u !== "" && arr.indexOf(u) === i,
     );
     return urls.length > 0 ? urls : [];
-  }, [product]);
+  }, [product, extras]);
 
   const similar = useMemo(
     () =>
@@ -116,6 +131,10 @@ function ProductDetail() {
     const el = galleryRef.current;
     if (!el || gallery.length === 0) return;
     setSlide(Math.round(el.scrollLeft / el.clientWidth));
+  };
+  const goSlide = (i: number) => {
+    const el = galleryRef.current;
+    if (el) el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
   };
 
   const addToCart = () => {
@@ -178,9 +197,21 @@ function ProductDetail() {
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
         <p className="min-w-0 flex-1 truncate text-base font-bold text-foreground">{loc(product.name, lang)}</p>
+        <button
+          type="button"
+          onClick={() => void shareLink({ title: loc(product.name, lang), text: loc(product.name, lang), url: productShareUrl(product.id) })}
+          aria-label={t("product3.share")}
+          className="flex h-11 w-11 items-center justify-center rounded-xl text-foreground transition active:scale-95"
+        >
+          <Share2 className="h-5 w-5" aria-hidden />
+        </button>
       </header>
 
       {/* Gallery */}
+      <div className="relative">
+      <span className="pointer-events-none absolute left-3 top-3 z-10 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow">
+        {packLine(product, volume, lang, t)}
+      </span>
       <div
         ref={galleryRef}
         className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto bg-secondary/10"
@@ -209,13 +240,26 @@ function ProductDetail() {
         )}
       </div>
       {gallery.length > 1 && (
-        <div className="flex justify-center gap-1.5 py-2.5">
+        <div className="pointer-events-none absolute inset-x-0 bottom-2 flex justify-center gap-1.5">
           {gallery.map((url, i) => (
-            <span
+            <span key={url} aria-hidden className={`h-1.5 rounded-full shadow transition-all ${i === slide ? "w-4 bg-primary" : "w-1.5 bg-card"}`} />
+          ))}
+        </div>
+      )}
+      </div>
+      {gallery.length > 1 && (
+        <div className="no-scrollbar flex gap-2 overflow-x-auto px-5 pt-3">
+          {gallery.map((url, i) => (
+            <button
               key={url}
-              aria-hidden
-              className={`h-1.5 rounded-full transition-all ${i === slide ? "w-4 bg-primary" : "w-1.5 bg-primary/25"}`}
-            />
+              type="button"
+              onClick={() => goSlide(i)}
+              aria-label={`${t("product.viewImage")} ${i + 1}`}
+              aria-current={i === slide}
+              className={`h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 ${i === slide ? "border-primary" : "border-transparent opacity-70"}`}
+            >
+              <SmartImage src={url} width={80} alt="" className="h-full w-full object-cover" />
+            </button>
           ))}
         </div>
       )}
@@ -233,6 +277,7 @@ function ProductDetail() {
             <p className="text-lg text-foreground">
               <span className="text-2xl font-bold text-primary">{formatINR(product.price)}</span>
               <span className="text-muted-foreground"> / {t("product2.pack")}</span>
+              <span className="text-xs text-muted-foreground"> {t("product3.inclGst")}</span>
               {unit.rate != null && <span className="text-sm text-muted-foreground"> · {t("product2.perBottle", { amount: rupees2(unit.rate) })}</span>}
             </p>
             {unit.mrp != null ? (
@@ -248,11 +293,17 @@ function ProductDetail() {
           </div>
         )}
 
-        {product.description && (
-          <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
-            {loc(product.description, lang)}
-          </p>
-        )}
+        {extras.highlights.length > 0 && <Highlights items={extras.highlights} />}
+
+        <InfoTabs
+          tab={tab}
+          setTab={setTab}
+          sections={{
+            desc: product.description ? loc(product.description, lang) : null,
+            delivery: extras.delivery,
+            faq: extras.faqs.length > 0 ? extras.faqs : null,
+          }}
+        />
 
         {(product.minOrderQty > 1 || product.maxOrderQty != null) && product.price !== null && !rateLocked && (
           <p className="mt-2 text-center text-xs text-muted-foreground">
@@ -352,6 +403,95 @@ function ProductDetail() {
 
       {viewer && <ImageViewer src={viewer} alt={loc(product.name, lang)} onClose={() => setViewer(null)} />}
     </main>
+  );
+}
+
+/** Highlight chips that drift slowly; stop while touched/focused and for reduced motion. */
+function Highlights({ items }: { items: string[] }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const paused = useRef(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let raf = 0;
+    let last = 0;
+    const step = (ts: number) => {
+      if (!paused.current && last && el.scrollWidth > el.clientWidth) {
+        el.scrollLeft += (ts - last) * 0.03;
+        if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 1) el.scrollLeft = 0;
+      }
+      last = ts;
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [items]);
+  const stop = () => (paused.current = true);
+  const go = () => (paused.current = false);
+  return (
+    <div
+      ref={ref}
+      onPointerDown={stop}
+      onPointerUp={go}
+      onPointerLeave={go}
+      onFocus={stop}
+      onBlur={go}
+      className="no-scrollbar mt-4 flex gap-2 overflow-x-auto"
+    >
+      {items.map((h, i) => (
+        <span key={i} tabIndex={0} className="shrink-0 rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1.5 text-xs font-semibold text-foreground">
+          ✓ {h}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+type TabKey = "desc" | "delivery" | "faq";
+function InfoTabs({
+  tab,
+  setTab,
+  sections,
+}: {
+  tab: TabKey;
+  setTab: (t: TabKey) => void;
+  sections: { desc: string | null; delivery: string | null; faq: { q: string; a: string }[] | null };
+}) {
+  const { t } = useTranslation();
+  const keys = (["desc", "delivery", "faq"] as const).filter((k) => sections[k]);
+  if (keys.length === 0) return null;
+  const active: TabKey = keys.includes(tab) ? tab : keys[0]!;
+  return (
+    <section className="mt-5">
+      <div role="tablist" className="flex gap-1 rounded-xl bg-muted p-1">
+        {keys.map((k) => (
+          <button
+            key={k}
+            type="button"
+            role="tab"
+            aria-selected={active === k}
+            onClick={() => setTab(k)}
+            className={`min-h-11 flex-1 rounded-lg text-sm font-semibold ${active === k ? "bg-card text-primary shadow-sm" : "text-muted-foreground"}`}
+          >
+            {t(`product3.tab_${k}`)}
+          </button>
+        ))}
+      </div>
+      <div role="tabpanel" className="pt-3 text-sm leading-relaxed text-muted-foreground">
+        {active === "faq" ? (
+          <div className="space-y-2">
+            {sections.faq!.map((f, i) => (
+              <details key={i} className="rounded-xl border border-border bg-card px-3 py-2">
+                <summary className="min-h-9 cursor-pointer py-1 font-semibold text-foreground">{f.q}</summary>
+                <p className="whitespace-pre-wrap pb-1">{f.a}</p>
+              </details>
+            ))}
+          </div>
+        ) : (
+          <p className="whitespace-pre-wrap">{active === "desc" ? sections.desc : sections.delivery}</p>
+        )}
+      </div>
+    </section>
   );
 }
 

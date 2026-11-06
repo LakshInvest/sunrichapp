@@ -115,7 +115,8 @@
     "needsAction": "Sunrich को आपसे कुछ चाहिए",
     "open": "खोलें",
     "updatesBell": "ऑर्डर अपडेट",
-    "typeQty": "मात्रा लिखें"
+    "typeQty": "मात्रा लिखें",
+    "noAreaTitle": "आपके एरिया में डिलीवरी जल्द शुरू होगी – पिकअप उपलब्ध है"
   },
   "catalog": {
     "priceOnRequest": "कीमत पूछें",
@@ -947,7 +948,9 @@
     "title": "ऑर्डर अपडेट पाएँ?",
     "body": "ऑर्डर मंज़ूर होने, रास्ते में होने और डिलीवर होने पर हम बताएँगे।",
     "yes": "हाँ, बताएँ",
-    "no": "अभी नहीं"
+    "no": "अभी नहीं",
+    "foregroundTitle": "सनरिच की सूचना",
+    "foregroundBody": "देखने के लिए टैप करें।"
   },
   "pod": {
     "otpTitle": "डिलीवरी कोड",
@@ -1154,13 +1157,6 @@
     "launchError": "UPI ऐप नहीं खुला, QR स्कैन करके या UPI ID कॉपी करके पे करें",
     "appMissing": "ये ऐप फ़ोन में नहीं है",
     "copyId": "UPI ID कॉपी करें",
-    "diagnosticTitle": "UPI जाँच",
-    "diagnosticNative": "isNativePlatform",
-    "diagnosticPlatform": "platform",
-    "diagnosticPlugin": "SunrichUpi प्लगइन उपलब्ध",
-    "diagnosticApps": "मिले UPI ऐप",
-    "diagnosticUrl": "पेज URL",
-    "diagnosticError": "आखिरी UPI त्रुटि",
     "payNow": "अभी पे करें",
     "payAmount": "{{amount}} UPI ऐप से पे करें",
     "paidEnterUtr": "पे कर दिया? UTR डालें",
@@ -1253,5 +1249,40 @@
   },
   "orders": {
     "moreItems": "+{{count}} और"
+  },
+  "permissions": {
+    "title": "सनरिच को ये चाहिए",
+    "subtitle": "एक बार अनुमति दें, ताकि सब आसानी से चले।",
+    "notifications": "सूचनाएँ",
+    "notificationsReason": "ऑर्डर और पेमेंट की जानकारी",
+    "location": "लोकेशन",
+    "locationReason": "सही पता और डिलीवरी",
+    "camera": "कैमरा",
+    "cameraReason": "पेमेंट स्क्रीनशॉट या फोटो",
+    "allow": "अनुमति दें",
+    "later": "बाद में",
+    "settings": "सेटिंग्स खोलें"
+  },
+  "messages": {
+    "ok": "ठीक है",
+    "deliveryTitle": "यहाँ डिलीवरी उपलब्ध नहीं",
+    "deliveryText": "हमारे प्लांट से पिकअप उपलब्ध है।",
+    "paymentTitle": "पेमेंट नहीं हुआ",
+    "paymentText": "कोई पैसा नहीं कटा। कृपया फिर से कोशिश करें।",
+    "stockTitle": "स्टॉक में नहीं है",
+    "stockText": "अभी कोई दूसरा सामान चुनें।",
+    "holdTitle": "खाता रोका गया है",
+    "holdText": "फिर से ऑर्डर करने के लिए बकाया चुकाएँ।",
+    "offlineTitle": "इंटरनेट नहीं है",
+    "offlineText": "कनेक्शन जाँचें और फिर कोशिश करें।",
+    "cameraTitle": "कैमरा बंद है",
+    "cameraText": "सेटिंग्स में सनरिच के लिए कैमरा चालू करें।"
+  },
+  "product3": {
+    "share": "शेयर करें",
+    "inclGst": "(GST सहित)",
+    "tab_desc": "विवरण",
+    "tab_delivery": "डिलीवरी",
+    "tab_faq": "सवाल-जवाब"
   }
 }

@@ -25,6 +25,7 @@ import {
 } from "@/lib/otp.functions";
 import { getMyRegistration } from "@/lib/registration.functions";
 import { useBrand } from "@/lib/brand";
+import { useAppSettings } from "@/lib/app-settings";
 import { cn } from "@/lib/utils";
 import {
   getDeviceId,
@@ -358,6 +359,18 @@ function Login() {
   const { lang } = useLang();
   const navigate = useNavigate();
   const brand = useBrand(lang);
+  // Login photo from Command Center (cached from the last settings read; works signed out).
+  const appSettings = useAppSettings();
+  const [loginImage, setLoginImage] = useState<string | null>(null);
+  useEffect(() => {
+    let cached: string | null = null;
+    try {
+      cached = localStorage.getItem("sunrich.loginImg");
+    } catch {
+      /* storage unavailable */
+    }
+    setLoginImage(appSettings?.loginImageUrl ?? cached);
+  }, [appSettings?.loginImageUrl]);
   const send = useServerFn(sendOtp);
   const verify = useServerFn(verifyOtp);
   const pinCheck = useServerFn(pinLogin);
@@ -752,28 +765,40 @@ function Login() {
 
   return (
     <main className={cn("relative flex min-h-dvh flex-col bg-primary", font)}>
-      <WaveBackdrop />
+      {!loginImage && <WaveBackdrop />}
 
-      <div className="relative z-10 flex items-start justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))]">
+      <div className="absolute inset-x-0 top-0 z-20 flex items-start justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <OfflineBanner />
         <div className="ml-auto">
           <LangPill />
         </div>
       </div>
 
-      {/* Brand block */}
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-6 pb-10 [@media(max-height:700px)]:gap-2 [@media(max-height:700px)]:pb-4">
-        <div className="animate-in fade-in duration-500">
-          <Logo variant="white" />
-        </div>
-        <p className="text-center text-sm font-medium tracking-wide text-white/75">
-          {brand.tagline}
-        </p>
+      {/* Brand photo (top ~45%), or the navy logo block when no photo is set */}
+      <div className="auth-brand relative z-10 flex shrink-0 flex-col items-center justify-center gap-4 overflow-hidden px-6 pb-8">
+        {loginImage ? (
+          <img
+            src={loginImage}
+            alt=""
+            fetchPriority="high"
+            className="absolute inset-0 h-full w-full object-cover"
+            onError={() => setLoginImage(null)}
+          />
+        ) : (
+          <>
+            <div className="animate-in fade-in duration-500">
+              <Logo variant="white" />
+            </div>
+            <p className="text-center text-sm font-medium tracking-wide text-white/75">
+              {brand.tagline}
+            </p>
+          </>
+        )}
       </div>
 
-      {/* Bottom sheet with the login steps */}
+      {/* White card slides up over the photo with the login steps */}
       <section
-        className="relative z-10 rounded-t-[28px] bg-card px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-2 shadow-card"
+        className="auth-login-card relative z-10 -mt-7 flex-1 rounded-t-[28px] bg-card px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-2 shadow-card"
         aria-label={t("auth.title")}
       >
         <ProgressLine step={step} />

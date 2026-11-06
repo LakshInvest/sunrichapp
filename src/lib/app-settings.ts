@@ -38,6 +38,8 @@ export type AppSettings = {
   multipleAddresses: boolean;
   plantAddress: string | null;
   pickupHours: string | null;
+  launchImageUrl: string | null;
+  loginImageUrl: string | null;
 };
 
 const KEY = "sunrich.appSettings.v1";
@@ -77,6 +79,8 @@ export function mapSettings(r: Record<string, unknown>): AppSettings {
     multipleAddresses: r["multiple_addresses"] !== false,
     plantAddress: blank(r["plant_address"]),
     pickupHours: blank(r["pickup_hours"]),
+    launchImageUrl: blank(r["launch_image_url"]),
+    loginImageUrl: blank(r["login_image_url"]),
   };
 }
 
@@ -103,6 +107,11 @@ export function refreshAppSettings(): Promise<AppSettings | null> {
       const s = mapSettings(data as Record<string, unknown>);
       try {
         localStorage.setItem(KEY, JSON.stringify(s));
+        // Read before JS loads (inline script in the page shell) and on the signed-out login.
+        for (const [k, v] of [["sunrich.launchImg", s.launchImageUrl], ["sunrich.loginImg", s.loginImageUrl]] as const) {
+          if (v) localStorage.setItem(k, v);
+          else localStorage.removeItem(k);
+        }
       } catch {
         /* best effort */
       }

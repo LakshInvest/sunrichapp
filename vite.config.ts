@@ -64,8 +64,17 @@ export default defineConfig({
             },
             {
               urlPattern: ({ url }) => url.origin === "https://fonts.gstatic.com" || url.origin === "https://fonts.googleapis.com",
-              handler: "StaleWhileRevalidate",
-              options: { cacheName: "sunrich-fonts", expiration: { maxEntries: 20 } },
+              handler: "CacheFirst",
+              options: {
+                cacheName: "sunrich-fonts",
+                expiration: { maxEntries: 30, maxAgeSeconds: 365 * 24 * 3600 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+            {
+              // Data always comes from the network (never a stale price or balance).
+              urlPattern: ({ url }) => url.pathname.startsWith("/rest/v1/") || url.pathname.startsWith("/auth/v1/"),
+              handler: "NetworkOnly",
             },
           ],
         },

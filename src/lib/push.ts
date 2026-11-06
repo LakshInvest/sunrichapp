@@ -62,6 +62,11 @@ function regFlag(v: boolean | null): boolean {
   return false;
 }
 
+function openPushUrl(data: unknown) {
+  const url = (data as Record<string, unknown> | undefined)?.["url"];
+  if (typeof url === "string" && url.startsWith("/") && !url.startsWith("//")) window.location.assign(url);
+}
+
 async function register() {
   if (regFlag(null)) {
     console.warn("[push] skipped: last registration crashed (google-services.json missing?)");
@@ -86,8 +91,17 @@ async function register() {
       console.warn("[push] registration failed, continuing without push", e);
     });
     await PushNotifications.addListener("pushNotificationActionPerformed", (a) => {
-      const url = (a.notification.data as Record<string, string> | undefined)?.["url"];
-      if (url && url.startsWith("/")) window.location.assign(url);
+      openPushUrl(a.notification.data);
+    });
+    // Arrived while the app is open: show our own card at the top; tap opens the screen.
+    await PushNotifications.addListener("pushNotificationReceived", (n) => {
+      void import("@/components/InAppPush").then(({ showInAppPush }) =>
+        showInAppPush({
+          title: n.title || i18n.t("push.foregroundTitle"),
+          body: n.body || i18n.t("push.foregroundBody"),
+          onOpen: () => openPushUrl(n.data),
+        }),
+      );
     });
   }
   regFlag(true);

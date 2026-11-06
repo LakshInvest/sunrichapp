@@ -1,4 +1,4 @@
-import { LaunchSplash } from "@/components/LaunchSplash";
+import { LaunchFrame, LAUNCH_SCRIPT } from "@/components/LaunchFrame";
 import splashLogo from "@/assets/splash-logo.png.asset.json";
 import { clearMyCustomer } from "@/lib/my-customer";
 import { clearTypeCode } from "@/lib/customer-type";
@@ -26,6 +26,8 @@ import { registerServiceWorker } from "@/lib/sw-register";
 import { clearGate } from "@/lib/gate-cache";
 import { clearUserCaches } from "@/lib/swr-cache";
 import { AppGate } from "@/components/AppGate";
+import { MessageCardHost, showMessage } from "@/components/MessageCard";
+import { InAppPushHost } from "@/components/InAppPush";
 import { refreshPushToken } from "@/lib/push";
 
 function NotFoundComponent() {
@@ -123,12 +125,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: LAUNCH_SCRIPT }} />
       </head>
       <body>
-        <LaunchSplash />
+        <LaunchFrame />
         {children}
         <Scripts />
       </body>
@@ -184,6 +187,13 @@ function RootComponent() {
   // Keyboard-safe sizing (--app-h / --kb) + focused field kept in view.
   useEffect(() => installViewportVars(), []);
 
+  // Lost internet: one clear card per drop (the small offline banners stay on screens).
+  useEffect(() => {
+    const off = () => showMessage({ kind: "offline" });
+    window.addEventListener("offline", off);
+    return () => window.removeEventListener("offline", off);
+  }, []);
+
   // Offline/speed cache (published site only).
   useEffect(() => registerServiceWorker(), []);
 
@@ -192,6 +202,8 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <AppGate />
+      <MessageCardHost />
+      <InAppPushHost />
       {askExit && (
         <div role="alertdialog" aria-modal className="fixed inset-0 z-[80] flex items-center justify-center bg-primary/60 px-6 backdrop-blur-sm">
           <div className="w-full max-w-xs rounded-2xl bg-card p-5 text-center shadow-xl">

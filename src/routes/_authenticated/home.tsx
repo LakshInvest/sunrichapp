@@ -49,7 +49,8 @@ import { fetchMyFeedback, planReorder, skippedRatings } from "@/lib/feedback";
 import { RateOrderCard } from "@/components/RateOrderCard";
 import { useAppSettings } from "@/lib/app-settings";
 import { toast } from "sonner";
-import { Repeat2 } from "lucide-react";
+import { Repeat2, Store } from "lucide-react";
+import { pickupInfo } from "@/lib/catalogue";
 import { getDocumentRequirements, getMyRegistration, type RegistrationDto } from "@/lib/registration.functions";
 import { writeGate } from "@/lib/gate-cache";
 import { swr } from "@/lib/swr-cache";
@@ -356,38 +357,49 @@ function Home() {
     }
 
     if (key === "categories") {
+      const tiles = [
+        { id: "all", code: "all", name: t("home.categoryAll"), imageUrl: null as string | null, Icon: LayoutGrid },
+        ...activeCategories.map((cat) => ({
+          id: cat.id,
+          code: cat.code,
+          name: loc(cat.name, lang),
+          imageUrl: cat.imageUrl ?? null,
+          Icon: /premium/i.test(`${cat.code} ${loc(cat.name, "en")}`) ? Gem : (CATEGORY_ICONS[cat.iconKey] ?? LayoutGrid),
+        })),
+      ];
+      const tints = ["bg-secondary/15", "bg-primary/10", "bg-accent/20", "bg-success/15"];
       return (
-        <div key="categories" className="no-scrollbar sticky top-0 z-20 mt-1 flex gap-2 overflow-x-auto bg-background px-3 pb-2 pt-[max(0.25rem,env(safe-area-inset-top))]">
-          <button
-            type="button"
-            onClick={() => setCategory("all")}
-            aria-pressed={category === "all"}
-            className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition active:scale-95 ${
-              category === "all"
-                ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/20"
-                : "border-border bg-card text-foreground"
-            }`}
-          >
-            <LayoutGrid className="h-4 w-4" aria-hidden />
-            {t("home.categoryAll")}
-          </button>
-          {activeCategories.map((cat) => {
-            const Icon = /premium/i.test(`${cat.code} ${loc(cat.name, "en")}`) ? Gem : (CATEGORY_ICONS[cat.iconKey] ?? LayoutGrid);
-            const selected = category === cat.code;
+        <div key="categories" className="no-scrollbar sticky top-0 z-20 mt-1 flex gap-3 overflow-x-auto bg-background px-3 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))]">
+          {tiles.map(({ id, code, name, imageUrl, Icon }, i) => {
+            const selected = category === code;
             return (
               <button
-                key={cat.id}
+                key={id}
                 type="button"
-                onClick={() => setCategory(cat.code)}
+                onClick={() => setCategory(code)}
                 aria-pressed={selected}
-                className={`flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition active:scale-95 ${
-                  selected
-                    ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/20"
-                    : "border-border bg-card text-foreground"
-                }`}
+                className="flex w-[72px] shrink-0 flex-col items-center gap-1.5 text-center transition active:scale-95"
               >
-                <Icon className="h-4 w-4" aria-hidden />
-                {loc(cat.name, lang)}
+                <span
+                  className={`relative flex h-[68px] w-[68px] items-center justify-center overflow-hidden rounded-2xl ${tints[i % tints.length]} ${
+                    selected ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
+                  }`}
+                >
+                  <Icon className="h-7 w-7 text-primary/70" aria-hidden />
+                  {imageUrl && (
+                    <img
+                      src={imageUrl}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      className="absolute inset-0 h-full w-full object-contain p-1.5"
+                      onError={(e) => {
+                        e.currentTarget.hidden = true;
+                      }}
+                    />
+                  )}
+                </span>
+                <span className={`line-clamp-2 text-xs leading-tight text-foreground ${selected ? "font-bold" : "font-medium"}`}>{name}</span>
               </button>
             );
           })}
@@ -649,6 +661,21 @@ function Home() {
                     >
                       {t("banner.whatsapp")}
                     </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {homeExtras?.defaultAreaId === null && (
+              <div className="mx-3 mb-3 flex items-start gap-3 rounded-xl border border-secondary/25 bg-secondary/10 p-3">
+                <Store className="mt-0.5 h-5 w-5 shrink-0 text-secondary" aria-hidden />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground">{t("home.noAreaTitle")}</p>
+                  {(pickupInfo(homeExtras, lang).address ?? settings?.plantAddress) && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {pickupInfo(homeExtras, lang).address ?? settings?.plantAddress}
+                      {(pickupInfo(homeExtras, lang).hours ?? settings?.pickupHours) ? ` · ${pickupInfo(homeExtras, lang).hours ?? settings?.pickupHours}` : ""}
+                    </p>
                   )}
                 </div>
               </div>

@@ -42,6 +42,7 @@ function hideSplashNow() {
 export function markFirstScreen() {
   firstScreenShown = true;
   if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event("sunrich:first-screen"));
   requestAnimationFrame(() => hideSplashNow());
 }
 
@@ -71,6 +72,8 @@ export async function initNative(opts: {
   const urlOpen = await App.addListener("appUrlOpen", ({ url }) => {
     const m = /^(?:sunrich:\/\/order\/|https:\/\/[^/]+\/order\/)([A-Za-z0-9_-]+)/.exec(url);
     if (m && opts.openPath) opts.openPath(`/track/${m[1]}`);
+    const pm = /^(?:sunrich:\/\/p\/|https:\/\/[^/]+\/p\/)([A-Za-z0-9_-]+)/.exec(url);
+    if (pm && opts.openPath) opts.openPath(`/product/${pm[1]}`);
   });
 
   let lastBack = 0;
@@ -178,6 +181,15 @@ export async function locateDevice(): Promise<LocateResult> {
 export async function pickPhoto(source: "camera" | "photos" = "camera"): Promise<File | null> {
   if (!isNative()) return null;
   const { Camera, CameraResultType, CameraSource } = await import("@capacitor/camera");
+  if (source === "camera") {
+    const { requestPermission } = await import("@/lib/permissions");
+    const perm = await requestPermission("camera");
+    if (perm === "denied") {
+      const { showMessage } = await import("@/components/MessageCard");
+      showMessage({ kind: "camera", buttonKey: "permissions.settings", onAction: () => void openAppSettings() });
+      return null;
+    }
+  }
   try {
     const photo = await Camera.getPhoto({
       quality: 80,

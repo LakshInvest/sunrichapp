@@ -1,4 +1,5 @@
 import { AppLoader } from "@/components/AppLoader";
+import { PermissionsIntro } from "@/components/PermissionsIntro";
 import { Outlet, redirect, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -93,5 +94,10 @@ function Gate() {
     };
   }, [navigate, queryClient]);
 
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <PermissionsIntro />
+    </>
+  );
 }

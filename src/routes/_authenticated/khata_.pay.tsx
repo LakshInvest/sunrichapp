@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import { showMessage } from "@/components/MessageCard";
 import { installedUpiApps, visibleUpiApps, openUpi, upiLink, UPI_APPS, type UpiApp, type UpiResponse } from "@/lib/upi";
 import { QRCodeSVG } from "qrcode.react";
 import { attachUpiResponse } from "@/lib/payments";
@@ -115,7 +116,7 @@ function PayPage() {
     const res = await openUpi({ pa: info.upiId, pn: info.payeeName ?? info.firmName, amount, orderNo: "Khata", note: "Khata payment" }, app);
     if (res.kind === "success" || res.kind === "failed" || (res.kind === "none" && res.response)) setUpiResp(res.response);
     if (res.kind === "success" && res.response.utr) setRef(res.response.utr);
-    else if (res.kind === "failed") toast.error(t("upi.failedTitle"));
+    else if (res.kind === "failed") showMessage({ kind: "payment" });
   };
 
   const next = () => {

@@ -72,6 +72,8 @@ export async function initNative(opts: {
   const urlOpen = await App.addListener("appUrlOpen", ({ url }) => {
     const m = /^(?:sunrich:\/\/order\/|https:\/\/[^/]+\/order\/)([A-Za-z0-9_-]+)/.exec(url);
     if (m && opts.openPath) opts.openPath(`/track/${m[1]}`);
+    const pm = /^(?:sunrich:\/\/p\/|https:\/\/[^/]+\/p\/)([A-Za-z0-9_-]+)/.exec(url);
+    if (pm && opts.openPath) opts.openPath(`/product/${pm[1]}`);
   });
 
   let lastBack = 0;

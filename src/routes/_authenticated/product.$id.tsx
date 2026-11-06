@@ -460,7 +460,7 @@ function InfoTabs({
   const { t } = useTranslation();
   const keys = (["desc", "delivery", "faq"] as const).filter((k) => sections[k]);
   if (keys.length === 0) return null;
-  const active = keys.includes(tab) ? tab : keys[0];
+  const active: TabKey = keys.includes(tab) ? tab : keys[0]!;
   return (
     <section className="mt-5">
       <div role="tablist" className="flex gap-1 rounded-xl bg-muted p-1">
@@ -488,7 +488,7 @@ function InfoTabs({
             ))}
           </div>
         ) : (
-          <p className="whitespace-pre-wrap">{sections[active]}</p>
+          <p className="whitespace-pre-wrap">{active === "desc" ? sections.desc : sections.delivery}</p>
         )}
       </div>
     </section>

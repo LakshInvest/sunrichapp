@@ -948,7 +948,9 @@
     "title": "Get order updates?",
     "body": "We will tell you when your order is approved, on the way and delivered.",
     "yes": "Yes, notify me",
-    "no": "Not now"
+    "no": "Not now",
+    "foregroundTitle": "Sunrich update",
+    "foregroundBody": "Tap to see the update."
   },
   "pod": {
     "otpTitle": "Delivery code",
@@ -1247,5 +1249,33 @@
   },
   "orders": {
     "moreItems": "+{{count}} more"
+  },
+  "permissions": {
+    "title": "Sunrich ko ye chahiye",
+    "subtitle": "Allow once, so everything works smoothly.",
+    "notifications": "Notifications",
+    "notificationsReason": "Order and payment updates",
+    "location": "Location",
+    "locationReason": "Correct address and delivery",
+    "camera": "Camera",
+    "cameraReason": "Payment screenshot or photo",
+    "allow": "Allow",
+    "later": "Baad mein",
+    "settings": "Open settings"
+  },
+  "messages": {
+    "ok": "OK",
+    "deliveryTitle": "Delivery not available here",
+    "deliveryText": "Pickup from our plant is available.",
+    "paymentTitle": "Payment not done",
+    "paymentText": "No money was taken. Please try again.",
+    "stockTitle": "Out of stock",
+    "stockText": "Please choose another item for now.",
+    "holdTitle": "Account on hold",
+    "holdText": "Please clear pending dues to order again.",
+    "offlineTitle": "No internet",
+    "offlineText": "Check your connection and try again.",
+    "cameraTitle": "Camera is off",
+    "cameraText": "Turn on camera for Sunrich in settings."
   }
 }

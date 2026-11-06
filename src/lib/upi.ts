@@ -1,7 +1,7 @@
 import { isNative } from "@/lib/native";
 import { Capacitor, registerPlugin } from "@capacitor/core";
 import i18n from "i18next";
-import { toast } from "sonner";
+import { showMessage } from "@/components/MessageCard";
 
 export type UpiParams = { pa: string; pn: string; amount: number; orderNo: string; ref?: string; note?: string };
 
@@ -147,7 +147,7 @@ export async function openUpi(p: UpiParams, app?: UpiApp, orderId?: string | nul
   const warn = (missingApp = false) => {
     if (warned) return;
     warned = true;
-    toast.error(String(i18n.t(missingApp ? "upi.appMissing" : "upi.launchError")));
+    showMessage({ kind: "payment", textKey: missingApp ? "upi.appMissing" : "upi.launchError" });
   };
   const visibility = () => { if (document.visibilityState === "hidden") opened = true; };
   document.addEventListener("visibilitychange", visibility);

@@ -42,6 +42,7 @@ import { addressText, labelKey, listMyAddresses, setMyOrderAddress, type SavedAd
 import { deliveryDays, minOrderShortfall, slotName, slotsFor, useAppSettings } from "@/lib/app-settings";
 import { Check, Plus } from "lucide-react";
 import { getHomeExtras, onHomeExtras, pickupInfo } from "@/lib/catalogue";
+import { showMessage } from "@/components/MessageCard";
 
 const PAY_ICONS = { credit: Wallet, upi: PhoneIcon, bank: LandmarkIcon, cash: Banknote, cheque: FileCheck2 } as const;
 
@@ -327,6 +328,10 @@ function Checkout() {
       clear();
       await navigate({ to: "/order-success" });
     } catch (e) {
+      // Known business stops get the clear centred card; anything else stays inline.
+      const raw = e instanceof Error ? e.message : String(e ?? "");
+      const kind = /stock/i.test(raw) ? "stock" : /credit|overdue|dues|on hold|blocked/i.test(raw) ? "hold" : /area|deliver(y)? not|not serviceable/i.test(raw) ? "delivery" : null;
+      if (kind) showMessage({ kind });
       setError(serverMessage(e, t("checkout.errPlace")));
     } finally {
       placingRef.current = false;

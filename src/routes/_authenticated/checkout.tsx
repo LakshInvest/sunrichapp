@@ -73,7 +73,6 @@ function Checkout() {
   const { quantities, clear } = useCart();
   const myReg = useServerFn(getMyRegistration);
   const deva = lang === "en" ? "" : "font-deva";
-  const pickupAtRef = { lang };
 
   const [data, setData] = useState<CatalogData | null>(() => readCatalogueCache());
   const [reg, setReg] = useState<RegistrationDto | null>(null);
@@ -96,7 +95,7 @@ function Checkout() {
   const [vehicle, setVehicle] = useState("");
   const [homeX, setHomeX] = useState(() => getHomeExtras());
   useEffect(() => onHomeExtras(setHomeX), []);
-  const pickupAt = pickupInfo(homeX, pickupAtRef.lang);
+  const pickupAt = pickupInfo(homeX, lang);
   useEffect(() => {
     void fetchMyDefaultDeliveryMode().then((m) => {
       setDefaultMode(m);

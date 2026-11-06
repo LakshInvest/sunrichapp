@@ -41,6 +41,7 @@ import { readSelectedAddressId, setSelectedAddressId } from "@/lib/selected-addr
 import { addressText, labelKey, listMyAddresses, setMyOrderAddress, type SavedAddress } from "@/lib/addresses";
 import { deliveryDays, minOrderShortfall, slotName, slotsFor, useAppSettings } from "@/lib/app-settings";
 import { Check, Plus } from "lucide-react";
+import { getHomeExtras, onHomeExtras, pickupInfo } from "@/lib/catalogue";
 
 const PAY_ICONS = { credit: Wallet, upi: PhoneIcon, bank: LandmarkIcon, cash: Banknote, cheque: FileCheck2 } as const;
 
@@ -72,6 +73,7 @@ function Checkout() {
   const { quantities, clear } = useCart();
   const myReg = useServerFn(getMyRegistration);
   const deva = lang === "en" ? "" : "font-deva";
+  const pickupAtRef = { lang };
 
   const [data, setData] = useState<CatalogData | null>(() => readCatalogueCache());
   const [reg, setReg] = useState<RegistrationDto | null>(null);
@@ -94,6 +96,7 @@ function Checkout() {
   const [vehicle, setVehicle] = useState("");
   const [homeX, setHomeX] = useState(() => getHomeExtras());
   useEffect(() => onHomeExtras(setHomeX), []);
+  const pickupAt = pickupInfo(homeX, pickupAtRef.lang);
   useEffect(() => {
     void fetchMyDefaultDeliveryMode().then((m) => {
       setDefaultMode(m);
@@ -415,9 +418,9 @@ function Checkout() {
                   <span className="mt-0.5 block text-sm font-semibold text-success">{t("checkout2.pickupSave", { amount: formatINR(modeTotals.sunrich - modeTotals.pickup) })}</span>
                 )}
                 <span className="mt-1 block text-sm text-muted-foreground">
-                  {m === "sunrich" ? oneLineAddr || "—" : settings?.plantAddress ?? t("checkout2.plantDefault")}
+                  {m === "sunrich" ? oneLineAddr || "—" : (pickupAt.address ?? settings?.plantAddress ?? t("checkout2.plantDefault"))}
                 </span>
-                {m === "pickup" && settings?.pickupHours && <span className="block text-xs text-muted-foreground">{settings.pickupHours}</span>}
+                {m === "pickup" && (pickupAt.hours ?? settings?.pickupHours) && <span className="block text-xs text-muted-foreground">{pickupAt.hours ?? settings?.pickupHours}</span>}
                 {m === "pickup" && (
                   <a href={PLANT_MAP_URL} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="mt-1 inline-flex min-h-9 items-center gap-1 text-xs font-semibold text-secondary">
                     <MapPin className="h-3.5 w-3.5" aria-hidden /> {t("delivery.openMap")}
@@ -431,7 +434,7 @@ function Checkout() {
         <div className="px-5 pt-2">
           <div className="rounded-2xl bg-card px-4 shadow-sm">
             {pickup ? (
-              <Row icon="🏭" text={t("checkout2.pickup")} sub={settings?.plantAddress ?? t("checkout2.plantDefault")} onChange={() => setStep("mode")} />
+              <Row icon="🏭" text={t("checkout2.pickup")} sub={(pickupAt.address ?? settings?.plantAddress ?? t("checkout2.plantDefault"))} onChange={() => setStep("mode")} />
             ) : (
               <Row
                 icon="🚚"

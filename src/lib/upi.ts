@@ -251,19 +251,6 @@ export async function installedUpiApps(): Promise<UpiApp[]> {
   }
 }
 
-export async function getUpiDiagnostic() {
-  const apps = await installedUpiApps();
-  return {
-    isNativePlatform: Capacitor.isNativePlatform(),
-    platform: Capacitor.getPlatform(),
-    pluginAvailable: Capacitor.isPluginAvailable("SunrichUpi"),
-    apps: apps.map((id) => UPI_APPS.find((app) => app.id === id)?.label ?? id).join(", ") || "—",
-    // Exclude callback tokens and query strings from copied diagnostics.
-    url: `${window.location.origin}${window.location.pathname}`,
-    error: getLastUpiError() || "—",
-  };
-}
-
 /** Calls back when the customer returns to the app (native resume or tab visible again). */
 export function onAppReturn(cb: () => void): () => void {
   let off = () => undefined as void;

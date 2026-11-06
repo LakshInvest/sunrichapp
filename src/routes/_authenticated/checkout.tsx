@@ -83,13 +83,22 @@ function Checkout() {
   const [savedId, setSavedId] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [newAddrOpen, setNewAddrOpen] = useState(false);
-  const [mode, setMode] = useState<DeliveryMode>("sunrich");
+  const noArea = () => getHomeExtras()?.defaultAreaId === null;
+  const [mode, setModeRaw] = useState<DeliveryMode>(() => (noArea() ? "pickup" : "sunrich"));
+  const modeTouched = useRef(false);
+  const setMode = (m: DeliveryMode) => {
+    modeTouched.current = true;
+    setModeRaw(m);
+  };
   const [defaultMode, setDefaultMode] = useState<DeliveryMode>("sunrich");
   const [vehicle, setVehicle] = useState("");
+  const [homeX, setHomeX] = useState(() => getHomeExtras());
+  useEffect(() => onHomeExtras(setHomeX), []);
   useEffect(() => {
     void fetchMyDefaultDeliveryMode().then((m) => {
       setDefaultMode(m);
-      setMode(m);
+      // No delivery area yet: pickup is the default, never a surprise at the end.
+      if (!modeTouched.current) setModeRaw(noArea() ? "pickup" : m);
     });
   }, []);
   const [day, setDay] = useState<string | null>(null);

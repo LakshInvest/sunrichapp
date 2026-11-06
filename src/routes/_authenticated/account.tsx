@@ -1,7 +1,6 @@
 import { ownCustomerFilter } from "@/lib/my-customer";
 import { serverMessage } from "@/lib/form-errors";
 import { PageShell } from "@/components/PageShell";
-import { UpiDiagnostic } from "@/components/UpiDiagnostic";
 import { useIsDemo } from "@/hooks/use-demo";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -480,7 +479,6 @@ function Account() {
         <LogOut className="h-5 w-5" aria-hidden />
         {t("account.logout")}
       </button>
-      <UpiDiagnostic />
 
       <SheetDrawer open={bizOpen} onOpenChange={setBizOpen}>
         <div className="px-5 pb-8 pt-2">

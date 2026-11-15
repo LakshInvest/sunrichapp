@@ -230,45 +230,48 @@ export const verifyOtp = createServerFn({ method: "POST" })
       return left <= 0 ? { ok: false, code: "tooMany" } : { ok: false, code: "wrong", left };
     }
 
-    await supabaseAdmin.from("otp_requests").update({ consumed_at: new Date().toISOString() }).eq("id", row.id);
+    // The OTP is consumed only after the sign-in link exists (see below), so a
+    // failure after a correct code lets the customer retry the same code.
 
     // Resolve the account; new numbers get one created on the fly.
     let uid: string | null = profile?.id ?? null;
     if (!uid) {
-      const email = `${m10}@app.sunrich.local`;
-      // No `phone` on the auth user: a staff account may already hold it.
-      const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password: randomPassword(),
-        email_confirm: true,
-      });
-      if (createErr || !created.user) {
+      // Try the normal customer email, then an alternate one: a staff user can
+      // hold the first as an old identity (seen for a staff+customer number).
+      let list: { id: string; email?: string }[] | null = null;
+      for (const email of [`${m10}@app.sunrich.local`, `${m10}.c@app.sunrich.local`]) {
+        // No `phone` on the auth user: a staff account may already hold it.
+        const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+          email,
+          password: randomPassword(),
+          email_confirm: true,
+        });
+        if (created?.user && !createErr) {
+          if (!(await createCustomerProfile(supabaseAdmin, created.user.id, m10, mobile, true))) return { ok: false, code: "generic" };
+          uid = created.user.id;
+          break;
+        }
         if (!/already|exists|registered/i.test(createErr?.message ?? "")) {
           console.error("auth user create failed", createErr?.message);
           return { ok: false, code: "generic" };
         }
         // Email taken: reuse that auth user only when it is a customer.
-        const { data: list } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-        const existing = list?.users.find((x) => x.email?.toLowerCase() === email);
-        if (!existing) return { ok: false, code: "generic" };
+        if (!list) list = (await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 })).data?.users ?? [];
+        const existing = list.find((x) => x.email?.toLowerCase() === email);
+        if (!existing) {
+          console.warn("customer email held by another identity", email);
+          continue;
+        }
         const { data: prof } = await supabaseAdmin
           .from("user_profiles")
           .select("id, user_type, is_active")
           .eq("id", existing.id)
           .maybeSingle();
-        if (prof && prof.user_type !== "customer") return { ok: false, code: "generic" };
+        if (prof && prof.user_type !== "customer") continue;
         if (prof && !prof.is_active) return { ok: false, code: "blocked" };
+        if (!prof && !(await createCustomerProfile(supabaseAdmin, existing.id, m10, mobile, false))) return { ok: false, code: "generic" };
         uid = existing.id;
-        if (prof) {
-          // Profile exists already; skip creation.
-        } else {
-          const r = await createCustomerProfile(supabaseAdmin, uid, m10, mobile, false);
-          if (!r) return { ok: false, code: "generic" };
-        }
-      } else {
-        uid = created.user.id;
-        const r = await createCustomerProfile(supabaseAdmin, uid, m10, mobile, true);
-        if (!r) return { ok: false, code: "generic" };
+        break;
       }
     }
     if (!uid) return { ok: false, code: "generic" };
@@ -281,6 +284,7 @@ export const verifyOtp = createServerFn({ method: "POST" })
       console.error("generateLink failed", error?.message);
       return { ok: false, code: "generic" };
     }
+    await supabaseAdmin.from("otp_requests").update({ consumed_at: new Date().toISOString() }).eq("id", row.id);
     // Trusted-device decision happens here, on the server, so the client can skip Set PIN.
     let trusted = false;
     if (data.deviceId) {
@@ -361,7 +365,6 @@ export const pinInfo = createServerFn({ method: "POST" })
     if (!profile || !profile.is_active) return { hasPin: false };
     const lock = await pinLock(supabaseAdmin, profile.id);
     if (lock.none) return { hasPin: false };
-    if (!(await trustedDeviceFor(supabaseAdmin, profile.id, ""))) return { hasPin: false };
     return lock.lockedMinutes ? { hasPin: true, lockMinutes: lock.lockedMinutes } : { hasPin: true };
   });
 

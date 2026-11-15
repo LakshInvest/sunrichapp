@@ -401,6 +401,9 @@ function Login() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const submitting = useRef(false);
+  const pendingToken = useRef<{ ok: true; tokenHash?: string; trusted?: boolean } | null>(null);
+  const [retryCode, setRetryCode] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(0);
   const [shaking, setShaking] = useState(false);
   const [forcePin, setForcePin] = useState(false);
@@ -578,11 +581,12 @@ function Login() {
   };
 
   const submitCode = async (code: string) => {
-    if (busy) return;
+    if (busy || submitting.current) return;
+    submitting.current = true;
     setError(null);
     setBusy(true);
     try {
-      const r = await verify({ data: { mobile, code, deviceId } });
+      const r = pendingToken.current ?? (await verify({ data: { mobile, code, deviceId } }));
       if (!r.ok || !r.tokenHash) {
         setError(r.ok ? t("auth.errors.generic") : errText(r));
         setDigits(Array(6).fill(""));
@@ -592,15 +596,21 @@ function Login() {
       sessionStorage.setItem(AUTH_FLOW_KEY, "1");
       const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: r.tokenHash, type: "magiclink" });
       if (vErr) {
-        setError(t("auth.errors.generic"));
+        console.error("session exchange failed", vErr.message);
+        pendingToken.current = r;
+        setRetryCode(code);
+        setError(t("auth.errors.loginFailed"));
         return;
       }
+      pendingToken.current = null;
+      setRetryCode(null);
       setOtpOk(true);
       await new Promise((res) => setTimeout(res, 500));
       await afterOtpSession(r.trusted);
     } catch {
       setError(t("auth.errors.generic"));
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   };
@@ -808,13 +818,13 @@ function Login() {
       {/* White card slides up over the photo with the login steps */}
       <section
         data-kb-bar
-        className="auth-login-card relative z-10 -mt-7 shrink-0 rounded-t-[28px] bg-card px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 shadow-card"
+        className="auth-login-card relative z-10 -mt-7 shrink-0 rounded-t-[28px] bg-card px-6 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 shadow-card"
         aria-label={t("auth.title")}
       >
         <ProgressLine step={step} />
         <div key={step} className="animate-in fade-in slide-in-from-bottom-3 duration-300">
           {step === "welcome" && lastMobile && (
-            <div className="flex flex-col gap-3 py-2">
+            <div className="flex flex-col gap-3 py-1">
               <div>
                 <h1 className="text-center text-xl font-bold text-primary">
                   {loginText(texts, "pin_title", lang) ??
@@ -882,7 +892,7 @@ function Login() {
           )}
 
           {step === "mobile" && (
-            <form onSubmit={onMobileSubmit} className="flex flex-col gap-3 py-2" noValidate>
+            <form onSubmit={onMobileSubmit} className="flex flex-col gap-3 py-1" noValidate>
               <div>
                 <h1 className="text-center text-xl font-bold text-primary">{loginText(texts, "login_title", lang) ?? t("auth.title")}</h1>
                 <p className="mt-1 text-center text-sm text-muted-foreground">{loginText(texts, "login_subtitle", lang) ?? t("auth.subtitle")}</p>
@@ -929,7 +939,7 @@ function Login() {
           )}
 
           {step === "code" && (
-            <div className="flex flex-col gap-3 py-2">
+            <div className="flex flex-col gap-3 py-1">
               <div>
                 <h1 className="text-center text-xl font-bold text-primary">{loginText(texts, "otp_title", lang) ?? t("auth.codeTitle")}</h1>
                 <p className="mt-2 text-center text-sm text-muted-foreground">
@@ -965,6 +975,15 @@ function Login() {
                   />
                 ))}
               </div>
+              {retryCode && !busy && !otpOk && (
+                <button
+                  type="button"
+                  onClick={() => void submitCode(retryCode)}
+                  className="min-h-11 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground active:scale-[0.98]"
+                >
+                  {t("auth.retry")}
+                </button>
+              )}
               {busy && !otpOk && (
                 <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <BottleLoader className="h-6 w-6 text-secondary" /> {t("auth.verifying")}
@@ -995,7 +1014,7 @@ function Login() {
           )}
 
           {step === "setpin" && (
-            <div className="flex flex-col gap-3 py-2">
+            <div className="flex flex-col gap-3 py-1">
               <div>
                 <h1 className="text-center text-xl font-bold text-primary">
                   {pinPhase === "enter" ? t("auth.pin.setPinTitle") : t("auth.pin.confirmTitle")}

@@ -49,7 +49,8 @@
       "provider": "Could not send OTP. Please try again.",
       "blocked": "Your account is blocked. Please contact Sunrich.",
       "ipLimit": "Too many OTP requests from your network. Please try again later.",
-      "notSent": "OTP was not sent. Please try again after 30 seconds."
+      "notSent": "OTP was not sent. Please try again after 30 seconds.",
+      "loginFailed": "Login didn't work, please try again"
     },
     "metaTitle": "Sunrich — Log in",
     "metaDescription": "Log in to your Sunrich account to order packaged drinking water.",
@@ -80,7 +81,8 @@
     },
     "otpSentToast": "OTP sent to WhatsApp {{mobile}}",
     "secureNote": "Secure login",
-    "clipboardFill": "Use code {{code}} from clipboard"
+    "clipboardFill": "Use code {{code}} from clipboard",
+    "retry": "Try again"
   },
   "nav": {
     "home": "Home",

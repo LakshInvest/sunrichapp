@@ -181,6 +181,7 @@ export type Database = {
           all_category_image_url: string | null
           allow_cancel_before: string
           allow_order_notes: boolean
+          app_logo_url: string | null
           auto_plan_last_date: string | null
           closed_weekdays: number[]
           company_id: string
@@ -195,16 +196,31 @@ export type Database = {
           latest_app_version: string
           launch_image_url: string | null
           login_image_url: string | null
+          login_subtitle: string | null
+          login_subtitle_hi: string | null
+          login_subtitle_mr: string | null
           login_tagline: string | null
           login_tagline_hi: string | null
           login_tagline_mr: string | null
+          login_title: string | null
+          login_title_hi: string | null
+          login_title_mr: string | null
           maintenance_message: string | null
           min_app_version: string
           min_order_value: number
           multiple_addresses: boolean
+          otp_subtitle: string | null
+          otp_subtitle_hi: string | null
+          otp_subtitle_mr: string | null
+          otp_title: string | null
+          otp_title_hi: string | null
+          otp_title_mr: string | null
           pickup_hours: string | null
           pickup_hours_hi: string | null
           pickup_hours_mr: string | null
+          pin_title: string | null
+          pin_title_hi: string | null
+          pin_title_mr: string | null
           plan_time: string
           plant_address: string | null
           plant_address_hi: string | null
@@ -235,6 +251,7 @@ export type Database = {
           all_category_image_url?: string | null
           allow_cancel_before?: string
           allow_order_notes?: boolean
+          app_logo_url?: string | null
           auto_plan_last_date?: string | null
           closed_weekdays?: number[]
           company_id: string
@@ -249,16 +266,31 @@ export type Database = {
           latest_app_version?: string
           launch_image_url?: string | null
           login_image_url?: string | null
+          login_subtitle?: string | null
+          login_subtitle_hi?: string | null
+          login_subtitle_mr?: string | null
           login_tagline?: string | null
           login_tagline_hi?: string | null
           login_tagline_mr?: string | null
+          login_title?: string | null
+          login_title_hi?: string | null
+          login_title_mr?: string | null
           maintenance_message?: string | null
           min_app_version?: string
           min_order_value?: number
           multiple_addresses?: boolean
+          otp_subtitle?: string | null
+          otp_subtitle_hi?: string | null
+          otp_subtitle_mr?: string | null
+          otp_title?: string | null
+          otp_title_hi?: string | null
+          otp_title_mr?: string | null
           pickup_hours?: string | null
           pickup_hours_hi?: string | null
           pickup_hours_mr?: string | null
+          pin_title?: string | null
+          pin_title_hi?: string | null
+          pin_title_mr?: string | null
           plan_time?: string
           plant_address?: string | null
           plant_address_hi?: string | null
@@ -289,6 +321,7 @@ export type Database = {
           all_category_image_url?: string | null
           allow_cancel_before?: string
           allow_order_notes?: boolean
+          app_logo_url?: string | null
           auto_plan_last_date?: string | null
           closed_weekdays?: number[]
           company_id?: string
@@ -303,16 +336,31 @@ export type Database = {
           latest_app_version?: string
           launch_image_url?: string | null
           login_image_url?: string | null
+          login_subtitle?: string | null
+          login_subtitle_hi?: string | null
+          login_subtitle_mr?: string | null
           login_tagline?: string | null
           login_tagline_hi?: string | null
           login_tagline_mr?: string | null
+          login_title?: string | null
+          login_title_hi?: string | null
+          login_title_mr?: string | null
           maintenance_message?: string | null
           min_app_version?: string
           min_order_value?: number
           multiple_addresses?: boolean
+          otp_subtitle?: string | null
+          otp_subtitle_hi?: string | null
+          otp_subtitle_mr?: string | null
+          otp_title?: string | null
+          otp_title_hi?: string | null
+          otp_title_mr?: string | null
           pickup_hours?: string | null
           pickup_hours_hi?: string | null
           pickup_hours_mr?: string | null
+          pin_title?: string | null
+          pin_title_hi?: string | null
+          pin_title_mr?: string | null
           plan_time?: string
           plant_address?: string | null
           plant_address_hi?: string | null

@@ -1,3 +1,4 @@
+import { HeroCarousel } from "@/components/HeroCarousel";
 import { sizedUrl } from "@/components/SmartImage";
 import { SmartCard } from "@/components/SmartCard";
 import { markFirstScreen } from "@/lib/native";
@@ -539,7 +540,38 @@ function Home() {
         <ErrorState message={loadError} onRetry={() => void load(true).catch(() => undefined)} />
       ) : (
         <>
-          {/* Hero: one photo (Command Center app_hero), 4:3, location chip + bell on top */}
+          {activeBanners.length > 0 ? (
+            <HeroCarousel banners={activeBanners} lang={lang} onOpen={(b) => openBanner(b.linkType, b.linkValue)} fallback={null}
+              overlay={
+              <div className="flex items-start justify-between">
+                <button
+                  type="button"
+                  onClick={() => setAddressOpen(true)}
+                  aria-label={`${headerLabel}: ${areaLabel}`}
+                  className="flex min-h-11 min-w-0 max-w-[75%] items-start gap-1.5 text-left"
+                >
+                  <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary-foreground/90" />
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-1 text-sm font-bold text-primary-foreground">
+                      {headerLabel}
+                      <ChevronDown className="h-4 w-4" />
+                    </span>
+                    <span className={`block truncate text-xs text-primary-foreground/80 ${deva}`}>{areaLabel}</span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate({ to: "/notifications" })}
+                  aria-label={t("home.updatesBell")}
+                  className="relative flex h-10 w-10 items-center justify-center rounded-full"
+                >
+                  <Bell className="h-5 w-5 text-primary-foreground" />
+                  {orderUpdates && <span aria-hidden className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent" />}
+                </button>
+              </div>
+              }
+            />
+          ) : (
           <div className="relative aspect-[4/3] w-full overflow-hidden bg-hero">
             {hero?.backgroundImageUrl && (
               <img src={sizedUrl(hero.backgroundImageUrl, 1080)} alt="" fetchPriority="high" decoding="async"
@@ -576,6 +608,7 @@ function Home() {
               </div>
             </div>
           </div>
+          )}
 
           {/* Content sheet sliding over the hero */}
           <div className="relative z-10 bg-background pb-44">

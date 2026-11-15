@@ -789,7 +789,7 @@ function Login() {
             <img
               src="/launch-logo.webp"
               alt={`Sunrich – ${brand.tagline}`}
-              className="w-[40vw] max-w-[220px] rounded-2xl animate-in fade-in duration-500"
+              className="w-[40vw] max-w-[220px] rounded-[22%] shadow-[0_12px_32px_-8px_rgb(0_0_0/0.45)] animate-in fade-in duration-500"
               draggable={false}
             />
           </>

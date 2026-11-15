@@ -120,7 +120,9 @@
     "noAreaShort": "आपके एरिया में डिलीवरी जल्द · पिकअप उपलब्ध",
     "pickupSheetTitle": "पिकअप पॉइंट",
     "pickupAddress": "पता",
-    "pickupHours": "पिकअप का समय"
+    "pickupHours": "पिकअप का समय",
+    "popularProducts": "लोकप्रिय उत्पाद",
+    "categoryEmpty": "इस श्रेणी में अभी कोई उत्पाद नहीं"
   },
   "catalog": {
     "priceOnRequest": "कीमत पूछें",

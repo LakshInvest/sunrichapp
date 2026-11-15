@@ -120,7 +120,9 @@
     "noAreaShort": "तुमच्या भागात डिलिव्हरी लवकरच · पिकअप उपलब्ध",
     "pickupSheetTitle": "पिकअप पॉइंट",
     "pickupAddress": "पत्ता",
-    "pickupHours": "पिकअपची वेळ"
+    "pickupHours": "पिकअपची वेळ",
+    "popularProducts": "लोकप्रिय उत्पादने",
+    "categoryEmpty": "या श्रेणीत अजून उत्पादने नाहीत"
   },
   "catalog": {
     "priceOnRequest": "किंमत विचारा",

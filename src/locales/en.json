@@ -120,7 +120,9 @@
     "noAreaShort": "Delivery coming soon to your area · Pickup available",
     "pickupSheetTitle": "Pickup point",
     "pickupAddress": "Address",
-    "pickupHours": "Pickup hours"
+    "pickupHours": "Pickup hours",
+    "popularProducts": "Popular products",
+    "categoryEmpty": "No products in this category yet"
   },
   "catalog": {
     "priceOnRequest": "Price on request",

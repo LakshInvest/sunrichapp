@@ -18,6 +18,9 @@ export function cacheBrandPhotos(p: BrandPhotos): void {
         img.src = v;
       } else localStorage.removeItem(k);
     }
+    // Hero photo fallback: keep the bottle/hand (right side) in view.
+    if (!p.launch && p.hero) localStorage.setItem("sunrich.launchPos", "70% center");
+    else localStorage.removeItem("sunrich.launchPos");
   } catch {
     /* best effort */
   }

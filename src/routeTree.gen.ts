@@ -36,6 +36,7 @@ import { Route as AuthenticatedTrackRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedUnderReviewRouteImport } from './routes/_authenticated/under-review'
 import { Route as OrderIdRouteImport } from './routes/order.$id'
 import { Route as PIdRouteImport } from './routes/p.$id'
+import { Route as AuthenticatedCategoryCodeRouteImport } from './routes/_authenticated/category.$code'
 import { Route as AuthenticatedInvoiceIdRouteImport } from './routes/_authenticated/invoice.$id'
 import { Route as AuthenticatedKhataPayRouteImport } from './routes/_authenticated/khata_.pay'
 import { Route as AuthenticatedProductIdRouteImport } from './routes/_authenticated/product.$id'
@@ -183,6 +184,12 @@ const PIdRoute = PIdRouteImport.update({
   path: '/p/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCategoryCodeRoute =
+  AuthenticatedCategoryCodeRouteImport.update({
+    id: '/category/$code',
+    path: '/category/$code',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedInvoiceIdRoute = AuthenticatedInvoiceIdRouteImport.update({
   id: '/invoice/$id',
   path: '/invoice/$id',
@@ -252,6 +259,7 @@ export interface FileRoutesByFullPath {
   '/under-review': typeof AuthenticatedUnderReviewRoute
   '/order/$id': typeof OrderIdRoute
   '/p/$id': typeof PIdRoute
+  '/category/$code': typeof AuthenticatedCategoryCodeRoute
   '/invoice/$id': typeof AuthenticatedInvoiceIdRoute
   '/khata/pay': typeof AuthenticatedKhataPayRoute
   '/product/$id': typeof AuthenticatedProductIdRoute
@@ -286,6 +294,7 @@ export interface FileRoutesByTo {
   '/under-review': typeof AuthenticatedUnderReviewRoute
   '/order/$id': typeof OrderIdRoute
   '/p/$id': typeof PIdRoute
+  '/category/$code': typeof AuthenticatedCategoryCodeRoute
   '/invoice/$id': typeof AuthenticatedInvoiceIdRoute
   '/khata/pay': typeof AuthenticatedKhataPayRoute
   '/product/$id': typeof AuthenticatedProductIdRoute
@@ -324,6 +333,7 @@ export interface FileRoutesById {
   '/_authenticated/under-review': typeof AuthenticatedUnderReviewRoute
   '/order/$id': typeof OrderIdRoute
   '/p/$id': typeof PIdRoute
+  '/_authenticated/category/$code': typeof AuthenticatedCategoryCodeRoute
   '/_authenticated/invoice/$id': typeof AuthenticatedInvoiceIdRoute
   '/_authenticated/khata_/pay': typeof AuthenticatedKhataPayRoute
   '/_authenticated/product/$id': typeof AuthenticatedProductIdRoute
@@ -362,6 +372,7 @@ export interface FileRouteTypes {
     | '/under-review'
     | '/order/$id'
     | '/p/$id'
+    | '/category/$code'
     | '/invoice/$id'
     | '/khata/pay'
     | '/product/$id'
@@ -396,6 +407,7 @@ export interface FileRouteTypes {
     | '/under-review'
     | '/order/$id'
     | '/p/$id'
+    | '/category/$code'
     | '/invoice/$id'
     | '/khata/pay'
     | '/product/$id'
@@ -433,6 +445,7 @@ export interface FileRouteTypes {
     | '/_authenticated/under-review'
     | '/order/$id'
     | '/p/$id'
+    | '/_authenticated/category/$code'
     | '/_authenticated/invoice/$id'
     | '/_authenticated/khata_/pay'
     | '/_authenticated/product/$id'
@@ -645,6 +658,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/category/$code': {
+      id: '/_authenticated/category/$code'
+      path: '/category/$code'
+      fullPath: '/category/$code'
+      preLoaderRoute: typeof AuthenticatedCategoryCodeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/invoice/$id': {
       id: '/_authenticated/invoice/$id'
       path: '/invoice/$id'
@@ -752,6 +772,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSupportRoute: typeof AuthenticatedSupportRoute
   AuthenticatedTrackRoute: typeof AuthenticatedTrackRouteWithChildren
   AuthenticatedUnderReviewRoute: typeof AuthenticatedUnderReviewRoute
+  AuthenticatedCategoryCodeRoute: typeof AuthenticatedCategoryCodeRoute
   AuthenticatedInvoiceIdRoute: typeof AuthenticatedInvoiceIdRoute
   AuthenticatedKhataPayRoute: typeof AuthenticatedKhataPayRoute
   AuthenticatedProductIdRoute: typeof AuthenticatedProductIdRoute
@@ -777,6 +798,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSupportRoute: AuthenticatedSupportRoute,
   AuthenticatedTrackRoute: AuthenticatedTrackRouteWithChildren,
   AuthenticatedUnderReviewRoute: AuthenticatedUnderReviewRoute,
+  AuthenticatedCategoryCodeRoute: AuthenticatedCategoryCodeRoute,
   AuthenticatedInvoiceIdRoute: AuthenticatedInvoiceIdRoute,
   AuthenticatedKhataPayRoute: AuthenticatedKhataPayRoute,
   AuthenticatedProductIdRoute: AuthenticatedProductIdRoute,

@@ -34,6 +34,7 @@ import { KhataPayShortcut } from "@/components/KhataPayShortcut";
 import { listMyAddresses, mapAddressRow, labelKey, type SavedAddress } from "@/lib/addresses";
 import { pickSelected, shortArea, useSelectedAddressId } from "@/lib/selected-address";
 import { ClearCartDialog } from "@/components/ClearCartDialog";
+import { CategoryTiles } from "@/components/catalog/CategoryTiles";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { openPriceRequestChat } from "@/lib/price-request";
 import { SearchBox } from "@/components/catalog/SearchBox";
@@ -119,7 +120,6 @@ function Home() {
   const [loading, setLoading] = useState(!readCatalogueCache());
   const [search, setSearch] = useState("");
   const [recents, setRecents] = useState<string[]>(() => loadRecentSearches());
-  const [category, setCategory] = useState("all");
   const [pickupSheet, setPickupSheet] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
@@ -301,9 +301,8 @@ function Home() {
   const visibleProducts = useMemo(
     () =>
       products
-        .filter((p) => category === "all" || p.categoryCode === category)
         .filter((p) => matchesSearch(p, search)),
-    [products, category, search],
+    [products, search],
   );
 
   const total = useMemo(
@@ -328,7 +327,7 @@ function Home() {
     }
     if (linkType === "category" && linkValue) {
       const cat = activeCategories.find((c) => c.code === linkValue || c.id === linkValue);
-      setCategory(cat?.code ?? linkValue);
+      void navigate({ to: "/category/$code", params: { code: cat?.code ?? linkValue } });
       return;
     }
     if (linkType === "product" && linkValue) {
@@ -359,57 +358,15 @@ function Home() {
     }
 
     if (key === "categories") {
-      const tiles = [
-        { id: "all", code: "all", name: t("home.categoryAll"), imageUrl: (settings?.allCategoryImageUrl ?? null) as string | null, Icon: LayoutGrid },
-        ...activeCategories.map((cat) => ({
-          id: cat.id,
-          code: cat.code,
-          name: loc(cat.name, lang),
-          imageUrl: cat.imageUrl ?? null,
-          Icon: /premium/i.test(`${cat.code} ${loc(cat.name, "en")}`) ? Gem : (CATEGORY_ICONS[cat.iconKey] ?? LayoutGrid),
-        })),
-      ];
-      const tints = ["bg-secondary/15", "bg-primary/10", "bg-accent/20", "bg-success/15"];
+      const tiles = activeCategories.map((cat) => ({
+        id: cat.id,
+        code: cat.code,
+        name: loc(cat.name, lang),
+        imageUrl: cat.imageUrl ?? null,
+        fallbackImage: products.find((p) => p.categoryCode === cat.code && (p.imageUrl || p.images[0]))?.imageUrl ?? products.find((p) => p.categoryCode === cat.code)?.images[0] ?? null,
+      }));
       return (
-        <div key="categories" className="no-scrollbar sticky top-0 z-20 flex gap-2 overflow-x-auto bg-background px-3 pb-3 pt-[max(0.25rem,env(safe-area-inset-top))]">
-          {tiles.map(({ id, code, name, imageUrl, Icon }, i) => {
-            const selected = category === code;
-            return (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setCategory(code)}
-                aria-pressed={selected}
-                className="flex w-[60px] shrink-0 flex-col items-center gap-1 text-center transition active:scale-95"
-              >
-                <span
-                  className={`relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl ${imageUrl ? "bg-card" : tints[i % tints.length]} ${
-                    selected ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
-                  }`}
-                >
-                  <Icon className={`h-7 w-7 text-primary/70 ${imageUrl ? "hidden" : ""}`} aria-hidden />
-                  {imageUrl && (
-                    <img
-                      src={imageUrl}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      className="absolute inset-0 h-full w-full rounded-xl object-cover"
-                      onError={(e) => {
-                        e.currentTarget.hidden = true;
-                        const box = e.currentTarget.parentElement;
-                        box?.classList.remove("bg-card");
-                        box?.classList.add(tints[i % tints.length]!);
-                        e.currentTarget.previousElementSibling?.classList.remove("hidden");
-                      }}
-                    />
-                  )}
-                </span>
-                <span className={`line-clamp-2 text-[12px] leading-tight text-foreground ${selected ? "font-bold" : "font-medium"}`}>{name}</span>
-              </button>
-            );
-          })}
-        </div>
+        <CategoryTiles key="categories" tiles={tiles} onOpen={(code) => void navigate({ to: "/category/$code", params: { code } })} />
       );
     }
 
@@ -519,6 +476,7 @@ function Home() {
     if (key === "popular") {
       return (
         <div key="popular" className="mt-3 px-3">
+          <h2 className={`mb-2 text-base font-bold text-foreground ${deva}`}>{t("home.popularProducts")}</h2>
           <div className="grid grid-cols-2 gap-2.5">
             {visibleProducts.map((product) => {
               const p = withFav(product);

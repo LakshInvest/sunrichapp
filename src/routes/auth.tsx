@@ -1,3 +1,4 @@
+import logoWhite from "@/assets/brand/sunrich-logo-white.png.asset.json";
 import { markFirstScreen } from "@/lib/native";
 import { AppLoader } from "@/components/AppLoader";
 import { BottleLoader } from "@/components/BottleLoader";
@@ -800,8 +801,8 @@ function Login() {
         )}
         <div aria-hidden className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-foreground/60 to-transparent" />
         <div aria-hidden className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-foreground/45 to-transparent" />
-        <div className="absolute left-5 top-[calc(env(safe-area-inset-top)+0.75rem)] text-primary-foreground drop-shadow">
-          <p className="text-[28px] font-extrabold leading-none tracking-[0.16em]">SUNRICH</p>
+        <div className="absolute inset-x-0 top-[calc(env(safe-area-inset-top)+4rem)] flex flex-col items-center text-primary-foreground drop-shadow">
+          <img src={logoWhite.url} alt="Sunrich" className="h-auto w-[45vw] max-w-[220px]" />
           <p className="mt-1.5 font-deva text-[15px] font-semibold">शुद्ध पियो, खूब जियो</p>
         </div>
       </div>

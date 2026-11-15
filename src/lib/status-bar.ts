@@ -21,6 +21,9 @@ export async function applyStatusBar(pathname: string): Promise<void> {
   if (!isNative()) return;
   const { StatusBar, Style } = await import("@capacitor/status-bar");
   // Style.Dark = light icons (for dark backgrounds); Style.Light = dark icons.
-  await StatusBar.setBackgroundColor({ color }).catch(() => undefined);
+  // Photo screens draw under a transparent bar (content pads by the safe-area inset);
+  // light screens get a solid pearl bar with dark icons.
+  await StatusBar.setOverlaysWebView({ overlay: dark }).catch(() => undefined);
+  await StatusBar.setBackgroundColor({ color: dark ? "#00000000" : color }).catch(() => undefined);
   await StatusBar.setStyle({ style: dark ? Style.Dark : Style.Light }).catch(() => undefined);
 }

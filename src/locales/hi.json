@@ -535,7 +535,8 @@
     "deliveryOn": "{{date}} डिलीवरी",
     "pickupOn": "{{date}} पिकअप",
     "checkNote": "पेमेंट चेक होते ही Sunrich ऑर्डर भेजेगा।",
-    "payLater": "बाद में पे करूँगा"
+    "payLater": "बाद में पे करूँगा",
+    "utrHelp": "12 अंक"
   },
   "trackDetail": {
     "metaTitle": "सनरिच — ऑर्डर विवरण",
@@ -567,7 +568,9 @@
       "upi": "UPI",
       "bank": "बैंक ट्रांसफर",
       "cheque": "डिलीवरी पर चेक"
-    }
+    },
+    "cancelLocked": "ऑर्डर कन्फर्म हो चुका है – कैंसल के लिए Sunrich से बात करें",
+    "talkToUs": "बात करें"
   },
   "payments": {
     "title": "भुगतान व खाता",

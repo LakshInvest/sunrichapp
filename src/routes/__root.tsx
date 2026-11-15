@@ -1,5 +1,4 @@
 import { LaunchFrame, LAUNCH_SCRIPT } from "@/components/LaunchFrame";
-import splashLogo from "@/assets/splash-logo.png.asset.json";
 import { clearMyCustomer } from "@/lib/my-customer";
 import { clearTypeCode } from "@/lib/customer-type";
 import { applyStatusBar } from "@/lib/status-bar";
@@ -111,7 +110,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" },
-      { rel: "preload", as: "image", href: splashLogo.url },
+      { rel: "preload", as: "image", href: "/launch-logo.webp" },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
       { rel: "apple-touch-icon", href: "/icon-192.png" },
       { rel: "manifest", href: "/manifest.webmanifest" },
@@ -228,7 +227,7 @@ function RootComponent() {
           </div>
         </div>
       )}
-      <Toaster position="top-center" />
+      <Toaster position="top-center" offset={{ top: "calc(env(safe-area-inset-top) + 8px)" }} mobileOffset={{ top: "calc(env(safe-area-inset-top) + 8px)" }} />
     </QueryClientProvider>
   );
 }

@@ -332,12 +332,16 @@ function PayPage() {
                 {t("khata.pay.utr")}
                 <input
                   inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={12}
+                  autoComplete="off"
                   value={ref}
                   onChange={(e) => setRef(e.target.value.replace(/\D/g, "").slice(0, 12))}
                   className={field(errs["ref"])}
                   aria-invalid={!!errs["ref"]}
                   data-testid="pay-utr"
                 />
+                <span className="mt-1 block text-xs font-normal text-muted-foreground">{t("success.utrHelp")} · {ref.length}/12</span>
               </label>
               {err_("ref")}
             </section>

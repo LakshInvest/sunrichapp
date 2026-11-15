@@ -92,25 +92,47 @@ export async function newSessionToken(): Promise<google.maps.places.Autocomplete
   return new maps.places.AutocompleteSessionToken();
 }
 
-/** Address search via the new Places autocomplete, biased to our area. */
+/** Latur fallback when neither the device nor the serving plant location is known. */
+export const LATUR = { lat: 18.4088, lng: 76.5604 };
+export const NEAR_RADIUS_M = 30_000;
+const FAR_M = 300_000;
+
+export type NearPrediction = { pred: google.maps.places.PlacePrediction; distanceMeters: number | null };
+
+/** Nearest first; results over 300 km are hidden unless nothing closer exists. */
+export function sortNearest<T extends { distanceMeters: number | null }>(list: T[]): T[] {
+  const sorted = [...list].sort((a, b) => (a.distanceMeters ?? Infinity) - (b.distanceMeters ?? Infinity));
+  const near = sorted.filter((x) => x.distanceMeters == null || x.distanceMeters <= FAR_M);
+  return near.length ? near : sorted;
+}
+
+/** "850 m" / "2.3 km". */
+export function formatDistance(m: number | null): string {
+  if (m == null) return "";
+  return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(m < 10_000 ? 1 : 0)} km`;
+}
+
+/** Address search via the new Places autocomplete, biased and measured from `origin`. */
 export async function autocompletePlaces(
   input: string,
   token: google.maps.places.AutocompleteSessionToken,
-): Promise<google.maps.places.PlacePrediction[]> {
+  origin: { lat: number; lng: number } = LATUR,
+): Promise<NearPrediction[]> {
   const maps = await loadGoogleMaps();
   const res = await maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
     input,
     sessionToken: token,
-    locationBias: {
-      center: { lat: SEARCH_BIAS.lat, lng: SEARCH_BIAS.lng },
-      radius: SEARCH_BIAS.radius,
-    } as google.maps.CircleLiteral,
+    locationBias: { center: origin, radius: NEAR_RADIUS_M } as google.maps.CircleLiteral,
+    origin,
+    includedRegionCodes: ["in"],
     language: i18n.language,
     region: "in",
   });
-  return res.suggestions
+  const list = res.suggestions
     .map((s) => s.placePrediction)
-    .filter((p): p is google.maps.places.PlacePrediction => p != null);
+    .filter((p): p is google.maps.places.PlacePrediction => p != null)
+    .map((pred) => ({ pred, distanceMeters: typeof pred.distanceMeters === "number" ? pred.distanceMeters : null }));
+  return sortNearest(list);
 }
 
 function spanText(v: google.maps.places.FormattableText | null | undefined): string {

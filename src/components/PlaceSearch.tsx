@@ -3,10 +3,25 @@ import { useTranslation } from "react-i18next";
 import { Loader2, MapPin, Search } from "lucide-react";
 import {
   autocompletePlaces,
+  formatDistance,
+  LATUR,
   newSessionToken,
+  type NearPrediction,
   placeDetails,
 } from "@/lib/gmaps";
 import type { PlaceDetails } from "@/lib/maps";
+import { locateDevice } from "@/lib/native";
+import { getHomeExtras } from "@/lib/catalogue";
+
+/** Device location, else the serving plant (get_home().pickup), else Latur. Asked once per search box. */
+async function searchOrigin(): Promise<{ lat: number; lng: number }> {
+  const r = await locateDevice();
+  if (r.ok) return { lat: r.lat, lng: r.lng };
+  const p = getHomeExtras()?.pickup;
+  const lat = Number(p?.["latitude"]);
+  const lng = Number(p?.["longitude"]);
+  return Number.isFinite(lat) && Number.isFinite(lng) && (lat || lng) ? { lat, lng } : LATUR;
+}
 
 type Pred = google.maps.places.PlacePrediction;
 
@@ -23,13 +38,14 @@ export function PlaceSearch({
 }) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
-  const [items, setItems] = useState<Pred[]>([]);
+  const [items, setItems] = useState<NearPrediction[]>([]);
   const [open, setOpen] = useState(false);
   const [searching, setSearching] = useState(false);
   const [picking, setPicking] = useState(false);
   const [error, setError] = useState(false);
   const tokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
   const seqRef = useRef(0);
+  const originRef = useRef<Promise<{ lat: number; lng: number }> | null>(null);
 
   const ensureToken = async () => (tokenRef.current ??= await newSessionToken());
 
@@ -45,7 +61,8 @@ export function PlaceSearch({
       const seq = ++seqRef.current;
       try {
         const token = await ensureToken();
-        const preds = await autocompletePlaces(query.trim(), token);
+        originRef.current ??= searchOrigin();
+        const preds = await autocompletePlaces(query.trim(), token, await originRef.current);
         if (seq !== seqRef.current) return;
         setError(false);
         setItems(preds);
@@ -102,7 +119,7 @@ export function PlaceSearch({
           aria-label={t("location.search")}
           className="absolute inset-x-0 top-full z-20 mt-1 max-h-64 overflow-y-auto rounded-xl border border-border bg-card shadow-lg"
         >
-          {items.map((p) => (
+          {items.map(({ pred: p, distanceMeters }) => (
             <li key={p.placeId}>
               <button
                 type="button"
@@ -112,10 +129,13 @@ export function PlaceSearch({
                 className="flex w-full items-start gap-2.5 px-3 py-3 text-left transition hover:bg-muted"
               >
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-secondary" aria-hidden />
-                <span className="min-w-0">
+                <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-semibold text-foreground">{span(p)}</span>
                   {sec(p) && <span className="block truncate text-xs text-muted-foreground">{sec(p)}</span>}
                 </span>
+                {distanceMeters != null && (
+                  <span className="shrink-0 pt-0.5 text-xs font-medium text-muted-foreground">{formatDistance(distanceMeters)}</span>
+                )}
               </button>
             </li>
           ))}

@@ -384,7 +384,7 @@
   background-size: cover;
   background-position: center;
 }
-.launch-frame img { position: absolute; left: 50%; top: 50%; width: min(52vw, 240px); transform: translate(-50%, -55%); }
+.launch-frame img { position: absolute; left: 50%; top: 50%; width: min(40vw, 240px); border-radius: 16px; transform: translate(-50%, -50%); }
 html[data-launch-img] .launch-frame img { display: none; }
 
 /* Login: brand photo top ~45%, white card slides up over it. */

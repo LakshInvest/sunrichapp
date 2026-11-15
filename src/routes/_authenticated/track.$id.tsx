@@ -37,14 +37,13 @@ import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
 import { formatINR, readCatalogueCache, fetchCatalogue } from "@/lib/catalogue";
-import { canCustomerCancel, useAppSettings, waLink } from "@/lib/app-settings";
+import { canCustomerCancel, useAppSettings } from "@/lib/app-settings";
 import { canChangeDeliveryMode, setOrderDeliveryMode } from "@/lib/orders";
 import { fetchMyFeedback, planReorder, type OrderFeedback } from "@/lib/feedback";
 import { googleMapsLink } from "@/lib/maps";
 import { RateOrderCard } from "@/components/RateOrderCard";
 import { useIsDemo } from "@/hooks/use-demo";
-import { openExternal } from "@/lib/native";
-import { Phone, Star } from "lucide-react";
+import { MessageCircle, Star } from "lucide-react";
 import {
   buildTimeline,
   cancelMyOrder,
@@ -200,7 +199,7 @@ function OrderDetail() {
   const payPending = ["upi", "bank"].includes(order.paymentMethod ?? "") && payProof?.status !== "verified" && order.paymentStatus !== "paid";
   const shownStatus = order.status === "approved" && payPending ? "placed" : order.status;
   const cancellable = canCustomerCancel(order.status, settings?.allowCancelBefore ?? "approved");
-  const pastCancel = !cancellable && ["approved", "processing", "dispatched"].includes(order.status);
+  const pastCancel = !cancellable && ["placed", "credit_hold", "approved", "processing", "dispatched"].includes(order.status);
   const isDelivered = order.status === "delivered" || order.status === "closed";
   const isCancelled = order.status === "cancelled" || order.status === "rejected";
   const cancelNote = order.status === "cancelled" ? order.cancelReason : order.status === "rejected" ? order.holdReason : null;
@@ -468,23 +467,22 @@ function OrderDetail() {
               {t("trackDetail.reorder")}
             </button>
           )}
-          {cancellable && !["processing", "dispatched"].includes(order.status) && (
+          {cancellable && (
             <button type="button" onClick={() => setCancelOpen(true)} disabled={offline} className="min-h-11 text-sm font-semibold text-destructive disabled:opacity-50">
               {t("track2.cancelLink")}
             </button>
           )}
-          {pastCancel && (settings?.supportPhone || settings?.supportWhatsapp) && (
-            <button
-              type="button"
-              onClick={() =>
-                openExternal(
-                  settings.supportWhatsapp ? waLink(settings.supportWhatsapp, t("trackDetail.cancelWaMsg", { no: order.orderNo })) : `tel:${settings.supportPhone}`,
-                )
-              }
-              className="inline-flex min-h-11 items-center justify-center gap-2 text-xs font-semibold text-muted-foreground"
-            >
-              <Phone className="h-4 w-4" aria-hidden /> {t("trackDetail.cancelViaSupport")}
-            </button>
+          {pastCancel && (
+            <div className="flex items-center gap-3 rounded-xl bg-muted px-3 py-2">
+              <p className="min-w-0 flex-1 text-xs text-muted-foreground">{t("trackDetail.cancelLocked")}</p>
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/queries/ask", search: { topic: "order", order: order.orderNo, subject: undefined, message: undefined, product: undefined } })}
+                className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-card px-3 text-sm font-semibold text-primary shadow-sm"
+              >
+                <MessageCircle className="h-4 w-4" aria-hidden /> {t("trackDetail.talkToUs")}
+              </button>
+            </div>
           )}
         </div>
       </div>

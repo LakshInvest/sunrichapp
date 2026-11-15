@@ -786,12 +786,12 @@ function Login() {
           />
         ) : (
           <>
-            <div className="animate-in fade-in duration-500">
-              <Logo variant="white" />
-            </div>
-            <p className="text-center text-sm font-medium tracking-wide text-white/75">
-              {brand.tagline}
-            </p>
+            <img
+              src="/launch-logo.webp"
+              alt={`Sunrich – ${brand.tagline}`}
+              className="w-[40vw] max-w-[220px] rounded-2xl animate-in fade-in duration-500"
+              draggable={false}
+            />
           </>
         )}
       </div>

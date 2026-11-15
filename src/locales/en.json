@@ -535,7 +535,8 @@
     "deliveryOn": "{{date}} delivery",
     "pickupOn": "pickup {{date}}",
     "checkNote": "Sunrich will send the order as soon as the payment is checked.",
-    "payLater": "I'll pay later"
+    "payLater": "I'll pay later",
+    "utrHelp": "12 digits"
   },
   "trackDetail": {
     "metaTitle": "Sunrich — Order detail",
@@ -567,7 +568,9 @@
       "upi": "UPI",
       "bank": "Bank transfer",
       "cheque": "Cheque on delivery"
-    }
+    },
+    "cancelLocked": "Order confirmed – to cancel, please talk to Sunrich",
+    "talkToUs": "Talk to us"
   },
   "payments": {
     "title": "Payments & ledger",

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import splashLogo from "@/assets/splash-logo.png.asset.json";
 
 /** Inline, runs before first paint: shows the last saved brand image (no JS bundle needed). */
 export const LAUNCH_SCRIPT = `try{var u=localStorage.getItem("sunrich.launchImg");if(u&&/^https:\\/\\//.test(u)){var d=document.documentElement;d.style.setProperty("--launch-img","url("+JSON.stringify(u)+")");d.setAttribute("data-launch-img","")}}catch(e){}`;
@@ -8,7 +7,7 @@ export const LAUNCH_SCRIPT = `try{var u=localStorage.getItem("sunrich.launchImg"
 export function LaunchArt() {
   return (
     <div aria-hidden className="launch-frame">
-      <img src={splashLogo.url} alt="" fetchPriority="high" />
+      <img src="/launch-logo.webp" alt="" fetchPriority="high" />
     </div>
   );
 }

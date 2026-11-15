@@ -451,8 +451,10 @@ function Account() {
         <MenuItem icon={LifeBuoy} label={t("support.title")} badge={openCount} onClick={() => navigate({ to: "/queries" })} />
         <Separator />
         <div className="flex min-h-14 items-center gap-3 px-4">
-          <Languages className="h-5 w-5 shrink-0 text-secondary" aria-hidden />
-          <span className="min-w-0 flex-1 text-sm font-semibold text-foreground">{t("account.language")}</span>
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary/10">
+            <Languages className="h-5 w-5 text-secondary" aria-hidden />
+          </span>
+          <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-foreground">{t("account.language")}</span>
           <div role="group" aria-label={t("account.language")} className="flex rounded-full bg-muted p-0.5">
             {(["en", "hi", "mr"] as const).map((l) => (
               <button

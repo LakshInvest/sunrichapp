@@ -54,6 +54,7 @@ export function PaymentProofSheet({
 
   if (!target) return null;
 
+  const canSubmit = ref.length === 12 || (ref.length === 0 && !!file);
   const submit = async () => {
     const e: Partial<Record<"ref" | "date", string>> = {};
     const r = ref.trim();
@@ -99,7 +100,8 @@ export function PaymentProofSheet({
   const field = "mt-1 min-h-12 w-full rounded-xl border bg-card px-3 text-foreground";
   return (
     <SheetDrawer open={open} onOpenChange={onOpenChange}>
-      <div className="max-h-[85dvh] overflow-y-auto px-5 pb-8 pt-2">
+      <div className="flex min-h-0 flex-1 flex-col">
+      <div data-scroll-area className="min-h-0 flex-1 overflow-y-auto px-5 pb-4 pt-2">
         <h2 className="text-lg font-bold text-foreground">{t("success.proofTitle")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t("success.proofBody")}</p>
         {target.orderNo && (
@@ -111,12 +113,19 @@ export function PaymentProofSheet({
           {t(`success.utrLabel.${target.method}`)}
           <input
             inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={12}
+            autoComplete="off"
             value={ref}
             onChange={(e) => setRef(e.target.value.replace(/\D/g, "").slice(0, 12))}
             className={`${field} ${errs.ref ? "border-destructive" : "border-border"}`}
             aria-invalid={!!errs.ref}
           />
-          {errs.ref && <span data-field-error className="mt-1 block text-xs text-destructive">{errs.ref}</span>}
+          {errs.ref ? (
+            <span data-field-error className="mt-1 block text-xs text-destructive">{errs.ref}</span>
+          ) : (
+            <span className="mt-1 block text-xs font-normal text-muted-foreground">{t("success.utrHelp")} · {ref.length}/12</span>
+          )}
         </label>
         <label className="mt-4 block text-sm font-semibold">
           {t("success.paidOnLabel")}
@@ -145,15 +154,18 @@ export function PaymentProofSheet({
             </label>
           )}
         </div>
-        <button
-          type="button"
-          disabled={sending}
-          onClick={() => void submit()}
-          className="mt-6 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-primary-foreground disabled:opacity-60"
-        >
-          {sending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Send className="h-4 w-4" aria-hidden />}
-          {t("success.proofSubmit")}
-        </button>
+      </div>
+      <div data-kb-bar className="border-t border-border bg-background px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
+          <button
+            type="button"
+            disabled={sending || !canSubmit}
+            onClick={() => void submit()}
+            className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-primary-foreground disabled:opacity-60"
+          >
+            {sending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Send className="h-4 w-4" aria-hidden />}
+            {t("success.proofSubmit")}
+          </button>
+      </div>
       </div>
     </SheetDrawer>
   );

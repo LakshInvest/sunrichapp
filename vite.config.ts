@@ -27,7 +27,7 @@ export default defineConfig({
         workbox: {
           globDirectory: "dist/client",
           // Hashed JS/CSS/fonts/images: precached per deploy (versioned by the hash list).
-          globPatterns: ["assets/**/*.{js,css,woff,woff2,png,jpg,jpeg,webp,svg}", "*.{png,svg,ico}"],
+          globPatterns: ["assets/**/*.{js,css,woff,woff2,png,jpg,jpeg,webp,svg}", "*.{png,svg,ico,webp}"],
           globIgnores: ["**/jspdf*", "**/html2canvas*", "**/purify*"],
           maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
           navigateFallback: null,

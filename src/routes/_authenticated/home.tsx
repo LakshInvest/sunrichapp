@@ -383,8 +383,8 @@ function Home() {
                 className="flex w-[60px] shrink-0 flex-col items-center gap-1 text-center transition active:scale-95"
               >
                 <span
-                  className={`relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl ${tints[i % tints.length]} ${
-                    selected ? "ring-1 ring-primary" : ""
+                  className={`relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl ${imageUrl ? "bg-card" : tints[i % tints.length]} ${
+                    selected ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
                   }`}
                 >
                   <Icon className={`h-7 w-7 text-primary/70 ${imageUrl ? "hidden" : ""}`} aria-hidden />
@@ -394,9 +394,12 @@ function Home() {
                       alt=""
                       loading="lazy"
                       decoding="async"
-                      className="absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 object-contain"
+                      className="absolute inset-0 h-full w-full rounded-xl object-cover"
                       onError={(e) => {
                         e.currentTarget.hidden = true;
+                        const box = e.currentTarget.parentElement;
+                        box?.classList.remove("bg-card");
+                        box?.classList.add(tints[i % tints.length]!);
                         e.currentTarget.previousElementSibling?.classList.remove("hidden");
                       }}
                     />

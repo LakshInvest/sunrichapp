@@ -342,17 +342,6 @@ async function countFail(admin: Admin, uid: string) {
   return fails;
 }
 
-async function trustedDeviceFor(admin: Admin, uid: string, deviceId: string) {
-  const { data } = await admin
-    .from("user_devices")
-    .select("device_id, last_used_at, trusted_at")
-    .eq("user_id", uid)
-    .is("revoked_at", null)
-    .order("trusted_at", { ascending: false })
-    .limit(20);
-  const list = data ?? [];
-  return list.find((d) => d.device_id === deviceId)?.device_id ?? list[0]?.device_id ?? null;
-}
 
 /** Mobile screen: registered number with a PIN goes straight to the PIN step (any device). */
 export const pinInfo = createServerFn({ method: "POST" })
@@ -384,19 +373,17 @@ export const pinLogin = createServerFn({ method: "POST" })
     if (!mobileSchema.safeParse(m10).success) return { ok: false, status: "not_registered" };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // PIN works on any device for a registered number: check_pin_login only
-    // accepts trusted device ids, so a new phone is checked against the
-    // account's most recent trusted device (the PIN itself is still verified).
+    // check_pin (database) accepts the PIN on any phone and trusts new phones;
+    // always send this phone's real device id.
     const profile = await customerProfile(supabaseAdmin, m10);
     if (!profile) return { ok: false, status: "not_registered" };
     const lock = await pinLock(supabaseAdmin, profile.id);
     if (lock.none) return { ok: false, status: "pin_not_set" };
     if (lock.lockedMinutes) return { ok: false, status: "locked_use_otp", lockMinutes: lock.lockedMinutes };
-    const deviceForCheck = (await trustedDeviceFor(supabaseAdmin, profile.id, data.deviceId)) ?? data.deviceId;
 
     const { data: rows, error } = await supabaseAdmin.rpc("check_pin_login", {
       p_mobile: `+91${m10}`,
-      p_device_id: deviceForCheck,
+      p_device_id: data.deviceId,
       p_pin: data.pin,
       p_user_type: "customer",
     });

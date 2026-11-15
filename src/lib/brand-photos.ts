@@ -18,10 +18,20 @@ export function cacheBrandPhotos(p: BrandPhotos): void {
         img.src = v;
       } else localStorage.removeItem(k);
     }
+    if (p.logo) localStorage.setItem("sunrich.logoImg", p.logo);
+    else localStorage.removeItem("sunrich.logoImg");
+    if (p.texts) localStorage.setItem("sunrich.loginTexts", JSON.stringify(p.texts));
     // Hero photo fallback: keep the bottle/hand (right side) in view.
     if (!p.launch && p.hero) localStorage.setItem("sunrich.launchPos", "70% center");
     else localStorage.removeItem("sunrich.launchPos");
   } catch {
     /* best effort */
   }
+}
+
+/** Command Center login text in the chosen language; null → app's own text. */
+export function loginText(texts: BrandPhotos["texts"] | null | undefined, key: keyof NonNullable<BrandPhotos["texts"]>, lang: string): string | null {
+  const v = texts?.[key];
+  if (!v) return null;
+  return (lang === "hi" ? v.hi : lang === "mr" ? v.mr : null) ?? v.en ?? null;
 }

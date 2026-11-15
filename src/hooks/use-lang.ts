@@ -12,7 +12,9 @@ export function useLang() {
 
   useEffect(() => {
     const saved = localStorage.getItem(LANG_KEY);
-    const value = saved && LANGUAGES.includes(saved as Lang) ? (saved as Lang) : "en";
+    // New users: phone language (Hindi/Marathi), else English.
+    const phone = (navigator.language || "").slice(0, 2).toLowerCase();
+    const value = saved && LANGUAGES.includes(saved as Lang) ? (saved as Lang) : LANGUAGES.includes(phone as Lang) ? (phone as Lang) : "en";
     applyLang(value);
     setLang(value);
     // Keep every hook instance in sync when any component switches language.

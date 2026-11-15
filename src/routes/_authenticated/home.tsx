@@ -1,5 +1,4 @@
 import { sizedUrl } from "@/components/SmartImage";
-import { HeroCarousel } from "@/components/HeroCarousel";
 import { SmartCard } from "@/components/SmartCard";
 import { markFirstScreen } from "@/lib/native";
 import { useCallback, useEffect, useMemo, useRef, useState, type UIEvent } from "react";
@@ -346,8 +345,6 @@ function Home() {
 
   const hero = data?.hero ?? null;
   const heroProductImage = hero?.productImageUrl ?? null;
-  const heroGreeting = hero?.greeting ? loc(hero.greeting, lang) : t("home.greeting");
-  const heroDelivery = hero?.deliveryLine ? loc(hero.deliveryLine, lang) : t("home.deliveryToday");
 
   const renderSection = (key: string) => {
     if (loading && (key === "categories" || key === "banners" || key === "favourites" || key === "popular")) {
@@ -475,7 +472,7 @@ function Home() {
 
     if (key === "popular") {
       return (
-        <div key="popular" className="mt-3 px-3">
+        <div key="popular" className="px-3">
           <h2 className={`mb-2 text-base font-bold text-foreground ${deva}`}>{t("home.popularProducts")}</h2>
           <div className="grid grid-cols-2 gap-2.5">
             {visibleProducts.map((product) => {
@@ -542,22 +539,15 @@ function Home() {
         <ErrorState message={loadError} onRetry={() => void load(true).catch(() => undefined)} />
       ) : (
         <>
-          {/* Hero = banner carousel with address + bell on top */}
-          <HeroCarousel
-            banners={activeBanners}
-            lang={lang}
-            onOpen={(b) => openBanner(b.linkType, b.linkValue)}
-            fallback={
-              <div className="bg-hero aspect-[3/2] w-full px-5 pt-24">
-                {!loading && (
-                  <>
-                    <h1 className={`max-w-[75%] text-3xl font-bold leading-tight text-primary-foreground ${deva}`}>{heroGreeting}</h1>
-                    <p className={`mt-2 text-sm text-primary-foreground/85 ${deva}`}>{heroDelivery}</p>
-                  </>
-                )}
-              </div>
-            }
-            overlay={
+          {/* Hero: one photo (Command Center app_hero), 4:3, location chip + bell on top */}
+          <div className="relative aspect-[4/3] w-full overflow-hidden bg-hero">
+            {hero?.backgroundImageUrl && (
+              <img src={sizedUrl(hero.backgroundImageUrl, 1080)} alt="" fetchPriority="high" decoding="async"
+                onError={(e) => { const img = e.currentTarget; if (hero.backgroundImageUrl && img.src !== hero.backgroundImageUrl) img.src = hero.backgroundImageUrl; else img.hidden = true; }}
+                className="absolute inset-0 h-full w-full object-cover" />
+            )}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-primary/60 to-transparent" aria-hidden />
+            <div className="absolute inset-x-0 top-0 px-4 pt-[max(0.5rem,env(safe-area-inset-top))]">
               <div className="flex items-start justify-between">
                 <button
                   type="button"
@@ -584,15 +574,27 @@ function Home() {
                   {orderUpdates && <span aria-hidden className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent" />}
                 </button>
               </div>
-            }
-          />
+            </div>
+          </div>
 
           {/* Content sheet sliding over the hero */}
-          <div className="relative z-10 -mt-4 rounded-t-3xl bg-background pb-44 pt-4">
+          <div className="relative z-10 bg-background pb-44">
+            <div className="relative z-30 -mt-7 rounded-t-[28px] bg-card px-3 pb-3 pt-3 shadow-[0_-6px_18px_-8px_rgb(11_37_69/0.25)]">
+              <SearchBox
+                value={search}
+                onChange={setSearch}
+                onSubmit={(v) => {
+                  addRecentSearch(v);
+                  setRecents(loadRecentSearches());
+                }}
+                recents={recents}
+                onPickRecent={(v) => setSearch(v)}
+              />
+            </div>
             {pending && (
               <div
                 role="status"
-                className="mx-5 mb-4 rounded-xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-foreground"
+                className="mx-5 mt-3 rounded-xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-foreground"
               >
                 <p className="flex items-start gap-2 font-medium">
                   <Clock className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />
@@ -634,7 +636,7 @@ function Home() {
               <button
                 type="button"
                 onClick={() => setPickupSheet(true)}
-                className="mx-3 mb-2 flex w-[calc(100%-1.5rem)] items-center gap-2 rounded-[12px] bg-secondary/10 px-3 py-2 text-left"
+                className="mx-3 mt-3 flex w-[calc(100%-1.5rem)] items-center gap-2 rounded-[12px] bg-secondary/10 px-3 py-2 text-left"
               >
                 <Store className="h-4 w-4 shrink-0 text-secondary" aria-hidden />
                 <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">{t("home.noAreaShort")}</span>
@@ -660,20 +662,8 @@ function Home() {
               </SheetContent>
             </Sheet>
 
-            <div className="relative z-30 px-3">
-              <SearchBox
-                value={search}
-                onChange={setSearch}
-                onSubmit={(v) => {
-                  addRecentSearch(v);
-                  setRecents(loadRecentSearches());
-                }}
-                recents={recents}
-                onPickRecent={(v) => setSearch(v)}
-              />
-            </div>
 
-            <div className="mt-3 empty:hidden">
+            <div className="mt-3 empty:hidden [&:not(:has(*))]:hidden">
             {settings?.feedbackEnabled !== false && rateOrder && (
               <div className="mx-5 mb-4">
                 <RateOrderCard allowSkip orderId={rateOrder.id} orderNo={rateOrder.orderNo} onDone={() => setRateOrder(null)} />

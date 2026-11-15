@@ -69,7 +69,7 @@ function TileArt({ tile }: { tile: Tile }) {
 
 export function CategoryTiles({ tiles, onOpen }: { tiles: Tile[]; onOpen: (code: string) => void }) {
   return (
-    <div className="no-scrollbar sticky top-0 z-20 flex gap-3 overflow-x-auto bg-background px-3 pb-3 pt-[max(0.25rem,env(safe-area-inset-top))]">
+    <div className="no-scrollbar sticky top-[env(safe-area-inset-top)] z-20 flex gap-3 overflow-x-auto bg-background px-3 py-3">
       {tiles.map((tile, i) => (
         <button
           key={tile.id}

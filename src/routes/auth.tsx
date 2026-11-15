@@ -27,7 +27,7 @@ import {
 import { getMyRegistration } from "@/lib/registration.functions";
 import { useBrand } from "@/lib/brand";
 import { getBrandPhotos, type BrandPhotos } from "@/lib/brand-photos.functions";
-import { cacheBrandPhotos, pickPhoto } from "@/lib/brand-photos";
+import { cacheBrandPhotos, loginText, pickPhoto } from "@/lib/brand-photos";
 import { useAppSettings } from "@/lib/app-settings";
 import { cn } from "@/lib/utils";
 import {
@@ -133,34 +133,6 @@ function WaveBackdrop() {
 }
 
 /** EN · हिं · मरा pill, top right of the navy backdrop. */
-function LangPill() {
-  const { lang, choose } = useLang();
-  const opts: { id: "en" | "hi" | "mr"; label: string }[] = [
-    { id: "en", label: "EN" },
-    { id: "hi", label: "हिं" },
-    { id: "mr", label: "मरा" },
-  ];
-  return (
-    <div className="flex items-center gap-0.5 rounded-full bg-white/15 p-1 backdrop-blur-sm" role="group" aria-label="Language">
-      {opts.map((o) => (
-        <button
-          key={o.id}
-          type="button"
-          onClick={() => choose(o.id)}
-          aria-pressed={lang === o.id}
-          className={cn(
-            "min-h-9 rounded-full px-2.5 text-xs font-semibold transition",
-            lang === o.id ? "bg-white text-primary shadow-sm" : "text-white/80",
-          )}
-        >
-          {o.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-/** A digit box that fills with water from the bottom as you type. */
 function WaterBox({
   index,
   length,
@@ -367,6 +339,17 @@ function Login() {
   const brandPhotos = useServerFn(getBrandPhotos);
   const [loginImage, setLoginImage] = useState<string | null>(null);
   const [photos, setPhotos] = useState<BrandPhotos | null>(null);
+  const [logoImage, setLogoImage] = useState<string | null>(null);
+  const [texts, setTexts] = useState<BrandPhotos["texts"] | null>(null);
+  useEffect(() => {
+    try {
+      setLogoImage(photos ? (photos.logo ?? null) : localStorage.getItem("sunrich.logoImg"));
+      const raw = photos ? null : localStorage.getItem("sunrich.loginTexts");
+      setTexts(photos ? (photos.texts ?? null) : raw ? (JSON.parse(raw) as BrandPhotos["texts"]) : null);
+    } catch {
+      /* storage unavailable */
+    }
+  }, [photos]);
   useEffect(() => {
     let cached: string | null = null;
     try {
@@ -778,14 +761,11 @@ function Login() {
   const font = lang === "en" ? "" : "font-deva";
 
   return (
-    <main className={cn("relative flex min-h-dvh flex-col bg-primary", font)}>
+    <main className={cn("relative flex h-[var(--app-h,100dvh)] flex-col overflow-hidden bg-primary", font)}>
       {!loginImage && <WaveBackdrop />}
 
       <div className="absolute inset-x-0 top-0 z-20 flex items-start justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <OfflineBanner />
-        <div className="ml-auto">
-          <LangPill />
-        </div>
       </div>
 
       {/* Brand photo (top ~45%), edge to edge; plain navy when none is set */}
@@ -801,26 +781,26 @@ function Login() {
         )}
         <div aria-hidden className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-foreground/60 to-transparent" />
         <div aria-hidden className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-foreground/45 to-transparent" />
-        <div className="absolute inset-x-0 top-[calc(env(safe-area-inset-top)+4rem)] flex flex-col items-center text-primary-foreground drop-shadow">
-          <img src={logoWhite.url} alt="Sunrich" className="h-auto w-[45vw] max-w-[220px]" />
+        <div className="absolute inset-x-0 top-[calc(env(safe-area-inset-top)+2.5rem)] flex flex-col items-center text-primary-foreground drop-shadow">
+          <img src={logoImage ?? logoWhite.url} alt="Sunrich" className="h-auto w-[45vw] max-w-[220px]" onError={() => setLogoImage(null)} />
           <p className="mt-1.5 font-deva text-[15px] font-semibold">शुद्ध पियो, खूब जियो</p>
         </div>
       </div>
 
       {/* White card slides up over the photo with the login steps */}
       <section
-        className="auth-login-card relative z-10 -mt-7 flex-1 rounded-t-[28px] bg-card px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-2 shadow-card"
+        data-kb-bar
+        className="auth-login-card relative z-10 -mt-7 min-h-[35%] shrink-0 rounded-t-[28px] bg-card px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 shadow-card"
         aria-label={t("auth.title")}
       >
         <ProgressLine step={step} />
         <div key={step} className="animate-in fade-in slide-in-from-bottom-3 duration-300">
           {step === "welcome" && lastMobile && (
-            <div className="flex flex-col gap-6 py-4">
+            <div className="flex flex-col gap-3 py-2">
               <div>
-                <h1 className="text-center text-2xl font-bold text-primary">
-                  {firstName
-                    ? t("auth.pin.welcomeTitle", { name: firstName })
-                    : t("auth.pin.welcomeTitlePlain")}
+                <h1 className="text-center text-xl font-bold text-primary">
+                  {loginText(texts, "pin_title", lang) ??
+                    (firstName ? t("auth.pin.welcomeTitle", { name: firstName }) : t("auth.pin.welcomeTitlePlain"))}
                 </h1>
                 <p className="mt-2 text-center text-sm text-muted-foreground">{maskMobile(lastMobile)}</p>
               </div>
@@ -884,10 +864,10 @@ function Login() {
           )}
 
           {step === "mobile" && (
-            <form onSubmit={onMobileSubmit} className="flex flex-col gap-5 py-4" noValidate>
+            <form onSubmit={onMobileSubmit} className="flex flex-col gap-3 py-2" noValidate>
               <div>
-                <h1 className="text-center text-2xl font-bold text-primary">{t("auth.title")}</h1>
-                <p className="mt-1 text-center text-sm text-muted-foreground">{t("auth.subtitle")}</p>
+                <h1 className="text-center text-xl font-bold text-primary">{loginText(texts, "login_title", lang) ?? t("auth.title")}</h1>
+                <p className="mt-1 text-center text-sm text-muted-foreground">{loginText(texts, "login_subtitle", lang) ?? t("auth.subtitle")}</p>
               </div>
               {notice && (
                 <p role="status" className="rounded-xl bg-secondary/10 px-4 py-3 text-center text-sm font-medium text-primary">
@@ -931,11 +911,11 @@ function Login() {
           )}
 
           {step === "code" && (
-            <div className="flex flex-col gap-5 py-4">
+            <div className="flex flex-col gap-3 py-2">
               <div>
-                <h1 className="text-center text-2xl font-bold text-primary">{t("auth.codeTitle")}</h1>
+                <h1 className="text-center text-xl font-bold text-primary">{loginText(texts, "otp_title", lang) ?? t("auth.codeTitle")}</h1>
                 <p className="mt-2 text-center text-sm text-muted-foreground">
-                  {t("auth.codeSent", { mobile: pretty })}
+                  {loginText(texts, "otp_subtitle", lang) ? `${loginText(texts, "otp_subtitle", lang)} ${pretty}` : t("auth.codeSent", { mobile: pretty })}
                 </p>
               </div>
               {clipCode && !busy && !otpOk && (
@@ -997,9 +977,9 @@ function Login() {
           )}
 
           {step === "setpin" && (
-            <div className="flex flex-col gap-6 py-4">
+            <div className="flex flex-col gap-3 py-2">
               <div>
-                <h1 className="text-center text-2xl font-bold text-primary">
+                <h1 className="text-center text-xl font-bold text-primary">
                   {pinPhase === "enter" ? t("auth.pin.setPinTitle") : t("auth.pin.confirmTitle")}
                 </h1>
                 <p className="mt-2 text-center text-sm text-muted-foreground">

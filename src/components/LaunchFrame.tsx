@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import logoWhite from "@/assets/brand/sunrich-logo-white.png.asset.json";
 
 /** Inline, runs before first paint: shows the last saved brand image (no JS bundle needed). */
-export const LAUNCH_SCRIPT = `try{var u=localStorage.getItem("sunrich.launchImg");if(u&&/^https:\\/\\//.test(u)){var d=document.documentElement;d.style.setProperty("--launch-img","url("+JSON.stringify(u)+")");d.setAttribute("data-launch-img","");var q=localStorage.getItem("sunrich.launchPos");if(q==="70% center")d.style.setProperty("--launch-pos",q)}}catch(e){}`;
+export const LAUNCH_SCRIPT = `try{var d=document.documentElement,h=/^https:\\/\\//,u=localStorage.getItem("sunrich.launchImg"),g=localStorage.getItem("sunrich.logoImg"),q=localStorage.getItem("sunrich.launchPos");if(u&&h.test(u)){d.style.setProperty("--launch-img","url("+JSON.stringify(u)+")");d.setAttribute("data-launch-img","");if(q==="70% center")d.style.setProperty("--launch-pos",q);var l=document.createElement("link");l.rel="preload";l.as="image";l.href=u;document.head.appendChild(l)}if(g&&h.test(g))d.style.setProperty("--launch-logo","url("+JSON.stringify(g)+")")}catch(e){}`;
 
 /** Static brand screen used while the app loads. No animation, no spinner. */
 export function LaunchArt() {
@@ -10,7 +10,7 @@ export function LaunchArt() {
     <div aria-hidden className="launch-frame">
       <div className="launch-shade" />
       <div className="launch-mark">
-        <img src={logoWhite.url} alt="" className="launch-logo" />
+        <span className="launch-logo" style={{ backgroundImage: `var(--launch-logo, url(${logoWhite.url}))` }} />
         <span className="launch-tag">शुद्ध पियो, खूब जियो</span>
       </div>
     </div>

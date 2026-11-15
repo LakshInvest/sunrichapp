@@ -789,7 +789,7 @@ function Login() {
   const font = lang === "en" ? "" : "font-deva";
 
   return (
-    <main className={cn("relative flex h-[var(--app-h,100dvh)] flex-col overflow-hidden bg-primary", font)}>
+    <main className={cn("fixed inset-x-0 top-0 flex h-[var(--app-h,100dvh)] flex-col overflow-hidden bg-card", font)}>
       {!loginImage && <WaveBackdrop />}
 
       <div className="absolute inset-x-0 top-0 z-20 flex items-start justify-between px-4 pt-[max(0.75rem,env(safe-area-inset-top))]">
@@ -797,7 +797,7 @@ function Login() {
       </div>
 
       {/* Brand photo (top ~45%), edge to edge; plain navy when none is set */}
-      <div className="auth-brand relative z-10 shrink-0 overflow-hidden">
+      <div className="auth-brand relative z-10 shrink-0 overflow-hidden bg-primary">
         {loginImage && (
           <img
             src={loginImage}
@@ -818,7 +818,7 @@ function Login() {
       {/* White card slides up over the photo with the login steps */}
       <section
         data-kb-bar
-        className="auth-login-card relative z-10 -mt-7 shrink-0 rounded-t-[28px] bg-card px-6 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 shadow-card"
+        className="auth-login-card relative z-10 -mt-7 shrink-0 grow rounded-t-[28px] bg-card px-6 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-1 shadow-card"
         aria-label={t("auth.title")}
       >
         <ProgressLine step={step} />

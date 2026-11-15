@@ -38,7 +38,7 @@ const config: CapacitorConfig = {
     StatusBar: {
       backgroundColor: "#0B2545",
       style: "DARK", // DARK = light icons on the navy bar
-      overlaysWebView: false,
+      overlaysWebView: true, // photo screens draw under the bar; light pages switch it off (status-bar.ts)
     },
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"],

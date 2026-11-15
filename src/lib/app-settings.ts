@@ -111,8 +111,7 @@ export function refreshAppSettings(): Promise<AppSettings | null> {
         localStorage.setItem(KEY, JSON.stringify(s));
         // Read before JS loads (inline script in the page shell) and on the signed-out login.
         for (const [k, v] of [["sunrich.launchImg", s.launchImageUrl], ["sunrich.loginImg", s.loginImageUrl]] as const) {
-          if (v) localStorage.setItem(k, v);
-          else localStorage.removeItem(k);
+          if (v) localStorage.setItem(k, v); // empty → keep the hero-photo fallback from brand-photos
         }
       } catch {
         /* best effort */

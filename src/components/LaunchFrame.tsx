@@ -7,7 +7,11 @@ export const LAUNCH_SCRIPT = `try{var u=localStorage.getItem("sunrich.launchImg"
 export function LaunchArt() {
   return (
     <div aria-hidden className="launch-frame">
-      <img src="/launch-logo.webp" alt="" fetchPriority="high" />
+      <div className="launch-shade" />
+      <div className="launch-mark">
+        <span className="launch-word">SUNRICH</span>
+        <span className="launch-tag">शुद्ध पियो, खूब जियो</span>
+      </div>
     </div>
   );
 }

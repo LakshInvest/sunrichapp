@@ -384,8 +384,10 @@
   background-size: cover;
   background-position: center;
 }
-.launch-frame img { position: absolute; left: 50%; top: 50%; width: min(40vw, 240px); border-radius: 22%; box-shadow: 0 12px 32px -8px rgb(0 0 0 / 0.45); transform: translate(-50%, -50%); }
-html[data-launch-img] .launch-frame img { display: none; }
+.launch-shade { position: absolute; inset: 0; background: linear-gradient(to bottom, rgb(0 0 0 / 0.45), transparent 35%, transparent 65%, rgb(0 0 0 / 0.35)); }
+.launch-mark { position: absolute; left: 0; right: 0; top: calc(env(safe-area-inset-top) + 18vh); display: flex; flex-direction: column; align-items: center; gap: 6px; color: #fff; text-shadow: 0 2px 12px rgb(0 0 0 / 0.35); }
+.launch-word { font-weight: 800; letter-spacing: 0.18em; font-size: clamp(32px, 11vw, 48px); line-height: 1; }
+.launch-tag { font-family: "Noto Sans Devanagari", sans-serif; font-weight: 600; font-size: clamp(15px, 4.6vw, 20px); }
 
 /* Login: brand photo top ~45%, white card slides up over it. */
 .auth-brand { height: 45svh; min-height: 220px; }

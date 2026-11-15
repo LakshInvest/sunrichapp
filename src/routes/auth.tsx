@@ -25,6 +25,8 @@ import {
 } from "@/lib/otp.functions";
 import { getMyRegistration } from "@/lib/registration.functions";
 import { useBrand } from "@/lib/brand";
+import { getBrandPhotos, type BrandPhotos } from "@/lib/brand-photos.functions";
+import { cacheBrandPhotos, pickPhoto } from "@/lib/brand-photos";
 import { useAppSettings } from "@/lib/app-settings";
 import { cn } from "@/lib/utils";
 import {
@@ -361,7 +363,9 @@ function Login() {
   const brand = useBrand(lang);
   // Login photo from Command Center (cached from the last settings read; works signed out).
   const appSettings = useAppSettings();
+  const brandPhotos = useServerFn(getBrandPhotos);
   const [loginImage, setLoginImage] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<BrandPhotos | null>(null);
   useEffect(() => {
     let cached: string | null = null;
     try {
@@ -369,8 +373,17 @@ function Login() {
     } catch {
       /* storage unavailable */
     }
-    setLoginImage(appSettings?.loginImageUrl ?? cached);
-  }, [appSettings?.loginImageUrl]);
+    setLoginImage(appSettings?.loginImageUrl ?? pickPhoto(photos?.login, photos?.hero) ?? cached);
+  }, [appSettings?.loginImageUrl, photos]);
+  useEffect(() => {
+    // Public read (works before sign-in); cached so the next open paints instantly.
+    void brandPhotos()
+      .then((p) => {
+        cacheBrandPhotos(p);
+        setPhotos(p);
+      })
+      .catch(() => undefined);
+  }, [brandPhotos]);
   const send = useServerFn(sendOtp);
   const verify = useServerFn(verifyOtp);
   const pinCheck = useServerFn(pinLogin);
@@ -774,9 +787,9 @@ function Login() {
         </div>
       </div>
 
-      {/* Brand photo (top ~45%), or the navy logo block when no photo is set */}
-      <div className="auth-brand relative z-10 flex shrink-0 flex-col items-center justify-center gap-4 overflow-hidden px-6 pb-8">
-        {loginImage ? (
+      {/* Brand photo (top ~45%), edge to edge; plain navy when none is set */}
+      <div className="auth-brand relative z-10 shrink-0 overflow-hidden">
+        {loginImage && (
           <img
             src={loginImage}
             alt=""
@@ -784,16 +797,13 @@ function Login() {
             className="absolute inset-0 h-full w-full object-cover"
             onError={() => setLoginImage(null)}
           />
-        ) : (
-          <>
-            <img
-              src="/launch-logo.webp"
-              alt={`Sunrich – ${brand.tagline}`}
-              className="w-[40vw] max-w-[220px] rounded-[22%] shadow-[0_12px_32px_-8px_rgb(0_0_0/0.45)] animate-in fade-in duration-500"
-              draggable={false}
-            />
-          </>
         )}
+        <div aria-hidden className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-foreground/60 to-transparent" />
+        <div aria-hidden className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-foreground/45 to-transparent" />
+        <div className="absolute left-5 top-[calc(env(safe-area-inset-top)+0.75rem)] text-primary-foreground drop-shadow">
+          <p className="text-[28px] font-extrabold leading-none tracking-[0.16em]">SUNRICH</p>
+          <p className="mt-1.5 font-deva text-[15px] font-semibold">शुद्ध पियो, खूब जियो</p>
+        </div>
       </div>
 
       {/* White card slides up over the photo with the login steps */}

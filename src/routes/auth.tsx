@@ -21,6 +21,7 @@ import {
   pinLogin,
   getMyDevice,
   welcomeName,
+  pinInfo,
   type OtpResult,
   type PinLoginResult,
 } from "@/lib/otp.functions";
@@ -385,6 +386,7 @@ function Login() {
     return () => clearTimeout(id);
   }, [router]);
   const nameLookup = useServerFn(welcomeName);
+  const pinStatus = useServerFn(pinInfo);
   const offline = useOffline();
 
   const [step, setStep] = useState<Step>("mobile");
@@ -479,9 +481,7 @@ function Login() {
   };
 
   const errText = (r: Extract<OtpResult, { ok: false }>) =>
-    r.code === "provider" && r.message
-      ? r.message
-      : t(`auth.errors.${r.code}`, { seconds: r.seconds, left: r.left, defaultValue: t("auth.errors.generic") });
+    t(`auth.errors.${r.code}`, { seconds: r.seconds, left: r.left, defaultValue: t("auth.errors.generic") });
 
   /** Home when registration is done, registration placeholder when it isn't. */
   const routeAfterLogin = async () => {
@@ -506,6 +506,19 @@ function Login() {
     }
     setBusy(true);
     try {
+      // Registered number with a PIN: straight to the PIN step on any device.
+      if (!forcePin && step === "mobile") {
+        const info = await pinStatus({ data: { mobile } }).catch(() => null);
+        if (info?.hasPin && !info.lockMinutes) {
+          setLastMobile(mobile);
+          setLastMobileState(mobile);
+          setFirstName(null);
+          setPin(Array(4).fill(""));
+          setStep("welcome");
+          return;
+        }
+        if (info?.lockMinutes) setNotice(t("auth.pin.locked", { minutes: info.lockMinutes }));
+      }
       const r = await send({ data: { mobile } });
       if (!r.ok) {
         setError(errText(r));
@@ -644,6 +657,11 @@ function Login() {
           setMobile("");
           setForcePin(false);
           setStep("mobile");
+        } else if (r.status === "locked_use_otp") {
+          setNotice(t("auth.pin.locked", { minutes: r.lockMinutes ?? 15 }));
+          setMobile(m);
+          setForcePin(true);
+          setStep("mobile");
         } else if (r.status === "device_not_trusted") {
           console.warn("[sunrich] device_not_trusted", { sent: deviceId, saved: savedDeviceIds() });
           setNotice(t("auth.pin.deviceNotRecognised"));
@@ -653,7 +671,7 @@ function Login() {
         } else {
           setNotice(t("auth.pin.useOtp"));
           setMobile(m);
-          setForcePin(r.status === "pin_not_set" || r.status === "locked_use_otp");
+          setForcePin(r.status === "pin_not_set");
           setStep("mobile");
         }
         return;
@@ -790,7 +808,7 @@ function Login() {
       {/* White card slides up over the photo with the login steps */}
       <section
         data-kb-bar
-        className="auth-login-card relative z-10 -mt-7 min-h-[35%] shrink-0 rounded-t-[28px] bg-card px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 shadow-card"
+        className="auth-login-card relative z-10 -mt-7 shrink-0 rounded-t-[28px] bg-card px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 shadow-card"
         aria-label={t("auth.title")}
       >
         <ProgressLine step={step} />

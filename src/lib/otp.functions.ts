@@ -15,6 +15,7 @@ export type PinLoginResult =
       ok: false;
       status: "not_registered" | "device_not_trusted" | "pin_not_set" | "locked_use_otp" | "wrong_pin" | "generic";
       triesLeft?: number;
+      lockMinutes?: number;
     };
 
 const mobileSchema = z.string().regex(/^[6-9]\d{9}$/);
@@ -132,7 +133,10 @@ export const sendOtp = createServerFn({ method: "POST" })
 
     const apiKey = process.env["AISENSY_API_KEY"];
     const campaign = process.env["AISENSY_OTP_CAMPAIGN"];
-    if (!apiKey || !campaign) return { ok: false, code: "generic" };
+    if (!apiKey || !campaign) {
+      console.error("[otp] send skipped: AISENSY_API_KEY or AISENSY_OTP_CAMPAIGN missing");
+      return { ok: false, code: "notSent" };
+    }
     try {
       const res = await fetch("https://backend.aisensy.com/campaign/t1/api/v2", {
         method: "POST",
@@ -146,8 +150,9 @@ export const sendOtp = createServerFn({ method: "POST" })
           buttons: [{ type: "button", sub_type: "url", index: 0, parameters: [{ type: "text", text: otp }] }],
         }),
       });
+      const text = await res.text();
+      console.info("[otp] aisensy", res.status, m10.slice(-4), text.split(apiKey).join("***").slice(0, 300));
       if (!res.ok) {
-        const text = await res.text();
         let msg = text;
         try {
           const j = JSON.parse(text);
@@ -157,11 +162,11 @@ export const sendOtp = createServerFn({ method: "POST" })
         }
         msg = String(msg).split(apiKey).join("***").slice(0, 300);
         console.error("aisensy error", res.status, msg);
-        return { ok: false, code: "provider", message: msg };
+        return { ok: false, code: "notSent", message: msg };
       }
     } catch (e) {
       console.error("aisensy fetch failed", (e as Error).message);
-      return { ok: false, code: "generic" };
+      return { ok: false, code: "notSent" };
     }
     return { ok: true };
   });
@@ -291,6 +296,75 @@ export const verifyOtp = createServerFn({ method: "POST" })
     return { ok: true, tokenHash: link.properties.hashed_token, trusted };
   });
 
+
+export const PIN_MAX_TRIES = 5;
+export const PIN_LOCK_MINUTES = 15;
+
+async function customerProfile(admin: Admin, m10: string) {
+  const { data } = await admin
+    .from("user_profiles")
+    .select("id, is_active")
+    .in("mobile", variants(m10))
+    .eq("user_type", "customer")
+    .limit(1)
+    .maybeSingle();
+  return data;
+}
+
+/** Minutes left on a PIN lock (5 wrong PINs → 15 min), from user_pins. Lock expiry resets the counter. */
+async function pinLock(admin: Admin, uid: string): Promise<{ none?: boolean; lockedMinutes?: number }> {
+  const { data } = await admin.from("user_pins").select("failed_attempts, updated_at").eq("user_id", uid).maybeSingle();
+  if (!data) return { none: true };
+  const left = pinLockMinutesLeft(data.failed_attempts, data.updated_at, Date.now());
+  if (left > 0) return { lockedMinutes: left };
+  if (data.failed_attempts >= PIN_MAX_TRIES) {
+    await admin.from("user_pins").update({ failed_attempts: 0 }).eq("user_id", uid);
+  }
+  return {};
+}
+
+/** Pure: minutes still locked given the fail count and the time of the last failure. */
+export function pinLockMinutesLeft(fails: number, lastFailIso: string, now: number) {
+  if (fails < PIN_MAX_TRIES) return 0;
+  const ms = new Date(lastFailIso).getTime() + PIN_LOCK_MINUTES * 60_000 - now;
+  return ms > 0 ? Math.ceil(ms / 60_000) : 0;
+}
+
+/** Reads the fail count after a wrong PIN and stamps the failure time (lock clock). */
+async function countFail(admin: Admin, uid: string) {
+  const { data } = await admin.from("user_pins").select("failed_attempts").eq("user_id", uid).maybeSingle();
+  const fails = data?.failed_attempts ?? PIN_MAX_TRIES;
+  await admin.from("user_pins").update({ updated_at: new Date().toISOString() }).eq("user_id", uid);
+  return fails;
+}
+
+async function trustedDeviceFor(admin: Admin, uid: string, deviceId: string) {
+  const { data } = await admin
+    .from("user_devices")
+    .select("device_id, last_used_at, trusted_at")
+    .eq("user_id", uid)
+    .is("revoked_at", null)
+    .order("trusted_at", { ascending: false })
+    .limit(20);
+  const list = data ?? [];
+  return list.find((d) => d.device_id === deviceId)?.device_id ?? list[0]?.device_id ?? null;
+}
+
+/** Mobile screen: registered number with a PIN goes straight to the PIN step (any device). */
+export const pinInfo = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ mobile: z.string() }).parse(d))
+  .handler(async ({ data }): Promise<{ hasPin: boolean; lockMinutes?: number }> => {
+    const m10 = data.mobile.replace(/\D/g, "").slice(-10);
+    if (!mobileSchema.safeParse(m10).success) return { hasPin: false };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const profile = await customerProfile(supabaseAdmin, m10);
+    if (!profile || !profile.is_active) return { hasPin: false };
+    const lock = await pinLock(supabaseAdmin, profile.id);
+    if (lock.none) return { hasPin: false };
+    if (!(await trustedDeviceFor(supabaseAdmin, profile.id, ""))) return { hasPin: false };
+    return lock.lockedMinutes ? { hasPin: true, lockMinutes: lock.lockedMinutes } : { hasPin: true };
+  });
+
 /** PIN login: verifies against the check_pin RPC (service-role only) and returns a magic-link token. */
 export const pinLogin = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
@@ -307,9 +381,19 @@ export const pinLogin = createServerFn({ method: "POST" })
     if (!mobileSchema.safeParse(m10).success) return { ok: false, status: "not_registered" };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+    // PIN works on any device for a registered number: check_pin_login only
+    // accepts trusted device ids, so a new phone is checked against the
+    // account's most recent trusted device (the PIN itself is still verified).
+    const profile = await customerProfile(supabaseAdmin, m10);
+    if (!profile) return { ok: false, status: "not_registered" };
+    const lock = await pinLock(supabaseAdmin, profile.id);
+    if (lock.none) return { ok: false, status: "pin_not_set" };
+    if (lock.lockedMinutes) return { ok: false, status: "locked_use_otp", lockMinutes: lock.lockedMinutes };
+    const deviceForCheck = (await trustedDeviceFor(supabaseAdmin, profile.id, data.deviceId)) ?? data.deviceId;
+
     const { data: rows, error } = await supabaseAdmin.rpc("check_pin_login", {
       p_mobile: `+91${m10}`,
-      p_device_id: data.deviceId,
+      p_device_id: deviceForCheck,
       p_pin: data.pin,
       p_user_type: "customer",
     });
@@ -322,13 +406,15 @@ export const pinLogin = createServerFn({ method: "POST" })
 
     const result = row.out_result ?? "";
     if (result !== "ok" || !row.out_user_id) {
-      if (result.startsWith("wrong_pin")) {
-        const triesLeft = Number.parseInt(result.split(":")[1] ?? "0", 10);
-        return { ok: false, status: "wrong_pin", triesLeft: Number.isFinite(triesLeft) ? triesLeft : 0 };
+      if (result.startsWith("wrong_pin") || result === "locked_use_otp") {
+        const fails = await countFail(supabaseAdmin, profile.id);
+        if (fails >= PIN_MAX_TRIES) return { ok: false, status: "locked_use_otp", lockMinutes: PIN_LOCK_MINUTES };
+        return { ok: false, status: "wrong_pin", triesLeft: PIN_MAX_TRIES - fails };
       }
       const known = ["not_registered", "device_not_trusted", "pin_not_set", "locked_use_otp"] as const;
       return { ok: false, status: (known as readonly string[]).includes(result) ? (result as (typeof known)[number]) : "generic" };
     }
+    await supabaseAdmin.from("user_pins").update({ failed_attempts: 0 }).eq("user_id", profile.id);
 
     // check_pin_login returns the sign-in email, saving a user lookup.
     const email = row.out_email;

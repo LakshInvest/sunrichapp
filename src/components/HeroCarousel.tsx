@@ -73,12 +73,6 @@ export function HeroCarousel({
                   className="absolute inset-0 h-full w-full object-cover"
                 />
               )}
-              {(b.title.en.trim() || b.subtitle) && (
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-primary/85 to-transparent px-5 pb-12 pt-12">
-                  {b.title.en.trim() && <p className="text-lg font-bold leading-snug text-primary-foreground">{loc(b.title, lang)}</p>}
-                  {b.subtitle && <p className="text-sm text-primary-foreground/85">{loc(b.subtitle, lang)}</p>}
-                </div>
-              )}
             </button>
           ))}
         </div>
@@ -86,7 +80,7 @@ export function HeroCarousel({
       <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-primary/70 to-transparent" aria-hidden />
       <div className="absolute inset-x-0 top-0 px-5 pt-[max(0.5rem,env(safe-area-inset-top))]">{overlay}</div>
       {banners.length > 1 && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-9 flex justify-center gap-1.5" aria-hidden>
+        <div className="pointer-events-none absolute inset-x-0 bottom-11 flex justify-center gap-1.5" aria-hidden>
           {banners.map((b, i) => (
             <span key={b.id} className={`h-1.5 rounded-full transition-all ${i === index ? "w-4 bg-primary-foreground" : "w-1.5 bg-primary-foreground/50"}`} />
           ))}

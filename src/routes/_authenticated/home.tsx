@@ -290,7 +290,7 @@ function Home() {
   const pending = reg?.status === "pending_approval";
 
   const activeCategories = data?.categories ?? [];
-  const activeBanners = (data?.banners ?? []).filter((b) => b.imageUrl || b.title.en.trim() !== "");
+  const activeBanners = (data?.banners ?? []).filter((b) => !!b.imageUrl);
   const sections = data?.sections ?? [];
 
   const isFav = (p: { id: string; isFavourite: boolean }) => fav.isFav(p);
@@ -611,8 +611,8 @@ function Home() {
           )}
 
           {/* Content sheet sliding over the hero */}
-          <div className="relative z-10 bg-background pb-44">
-            <div className="relative z-30 -mt-7 rounded-t-[28px] bg-card px-3 pb-3 pt-3 shadow-[0_-6px_18px_-8px_rgb(11_37_69/0.25)]">
+          <div className="relative z-10 -mt-8 rounded-t-[28px] bg-background pb-44">
+            <div className="relative z-30 rounded-t-[28px] bg-card px-3 pb-3 pt-3 shadow-[0_-6px_18px_-8px_rgb(11_37_69/0.25)]">
               <SearchBox
                 value={search}
                 onChange={setSearch}

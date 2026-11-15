@@ -48,7 +48,8 @@
       "generic": "Something went wrong. Please try again.",
       "provider": "Could not send OTP. Please try again.",
       "blocked": "Your account is blocked. Please contact Sunrich.",
-      "ipLimit": "Too many OTP requests from your network. Please try again later."
+      "ipLimit": "Too many OTP requests from your network. Please try again later.",
+      "notSent": "OTP was not sent. Please try again after 30 seconds."
     },
     "metaTitle": "Sunrich — Log in",
     "metaDescription": "Log in to your Sunrich account to order packaged drinking water.",
@@ -56,7 +57,7 @@
       "group": "PIN",
       "welcomeTitle": "Welcome back, {{name}} 👋",
       "welcomeSubtitle": "Enter your 4-digit PIN",
-      "wrongTries": "Wrong PIN. {{n}} tries left.",
+      "wrongTries": "Wrong PIN – {{n}} tries left",
       "useOtp": "Please verify with WhatsApp OTP.",
       "forgotPin": "Forgot PIN?",
       "differentNumber": "Login with a different number",
@@ -74,7 +75,8 @@
       "deviceNotRecognised": "This device is not recognised — verify once with OTP.",
       "success": "Welcome back!",
       "checking": "Checking PIN…",
-      "welcomeTitlePlain": "Welcome back 👋"
+      "welcomeTitlePlain": "Welcome back 👋",
+      "locked": "Too many wrong PINs. PIN login is locked for {{minutes}} min — please verify with WhatsApp OTP."
     },
     "otpSentToast": "OTP sent to WhatsApp {{mobile}}",
     "secureNote": "Secure login",

@@ -32,7 +32,7 @@ import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { clearMyPhoto } from "@/lib/profile.functions";
 import { AddressSheet } from "@/components/AddressSheet";
 import { LanguageSheet } from "@/components/LanguageSheet";
-import { Logo } from "@/components/Logo";
+import appIcon from "@/assets/brand/sunrich-app-icon-final.png.asset.json";
 import { useOffline } from "@/hooks/use-offline";
 import {
   AlertDialog,
@@ -86,6 +86,8 @@ export const Route = createFileRoute("/_authenticated/account")({
       { property: "og:title", content: en.account.metaTitle },
       { property: "og:description", content: en.account.metaDescription },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: `https://user.sunrich.in${appIcon.url}` },
+      { name: "twitter:image", content: `https://user.sunrich.in${appIcon.url}` },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
@@ -589,7 +591,7 @@ function Account() {
             <DrawerTitle className="text-center">{t("account.about")}</DrawerTitle>
           </DrawerHeader>
           <div className="flex flex-col items-center gap-3 px-4 pb-10 text-center">
-            <Logo size="md" />
+            <img src={appIcon.url} alt="Sunrich" width={96} height={96} className="h-24 w-24 rounded-xl" />
             <p className="max-w-72 whitespace-pre-line text-sm text-muted-foreground">
               {settings?.about.en ? loc(settings.about, lang) : t("account.aboutBody")}
             </p>

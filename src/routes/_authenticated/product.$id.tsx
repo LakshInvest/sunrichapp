@@ -1,4 +1,5 @@
 import { formatPack } from "@/lib/pack-label";
+import appIcon from "@/assets/brand/sunrich-app-icon-final.png.asset.json";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { serverMessage } from "@/lib/form-errors";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -39,6 +40,8 @@ export const Route = createFileRoute("/_authenticated/product/$id")({
       { property: "og:title", content: en.product.metaTitle },
       { property: "og:description", content: en.product.metaDescription },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: `https://user.sunrich.in${appIcon.url}` },
+      { name: "twitter:image", content: `https://user.sunrich.in${appIcon.url}` },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),

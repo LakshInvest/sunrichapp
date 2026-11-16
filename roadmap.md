@@ -1,3 +1,9 @@
+# Prompt-57
+- [x] Shared content-sized mobile/OTP/PIN card; remaining-height photo. Mobile and PIN verified at all three sizes with simulated keyboard resizing.
+- [x] New favicon, 192/512 install icons, safe-zone maskable 512, apple-touch 180, About/offline and app/product sharing images; white photo logo preserved. Removed unused launch-logo.webp; retained historical CDN assets used by earlier deployments.
+- [x] 199 tests passed; metadata audit and build OK; no SQL. Request publication after commit.
+- [ ] Real Android keyboard, OTP screen and signed-in About checks — no Android device or external Supabase customer session available.
+
 # Prompt-56
 - [x] Cached launch/login logo and tagline settings; all four default true.
 - [x] Visible quantity cursor and keyboard-safe light pages/sheets; avoid subtracting keyboard height twice.

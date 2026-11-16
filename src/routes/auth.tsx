@@ -1,4 +1,5 @@
 import logoWhite from "@/assets/brand/sunrich-logo-white.png.asset.json";
+import appIcon from "@/assets/brand/sunrich-app-icon-final.png.asset.json";
 import { markFirstScreen } from "@/lib/native";
 import { AppLoader } from "@/components/AppLoader";
 import { BottleLoader } from "@/components/BottleLoader";
@@ -52,6 +53,8 @@ export const Route = createFileRoute("/auth")({
       { property: "og:title", content: en.auth.metaTitle },
       { property: "og:description", content: en.auth.metaDescription },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: `https://user.sunrich.in${appIcon.url}` },
+      { name: "twitter:image", content: `https://user.sunrich.in${appIcon.url}` },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
@@ -799,8 +802,8 @@ function Login() {
         <OfflineBanner />
       </div>
 
-      {/* Brand photo (top ~45%), edge to edge; plain navy when none is set */}
-      <div className="auth-brand relative z-10 shrink-0 overflow-hidden bg-primary">
+      {/* Edge-to-edge photo fills the space above the content-sized form. */}
+      <div className="auth-brand relative z-10 overflow-hidden bg-primary">
         {loginImage && (
           <img
             src={loginImage}
@@ -821,7 +824,7 @@ function Login() {
       {/* White card slides up over the photo with the login steps */}
       <section
         data-kb-bar
-        className="auth-login-card relative z-10 -mt-7 shrink-0 grow rounded-t-[28px] bg-card px-6 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-1 shadow-card"
+        className="auth-login-card relative z-10 -mt-7 rounded-t-[28px] bg-card px-6 pt-1 shadow-card"
         aria-label={t("auth.title")}
       >
         <ProgressLine step={step} />

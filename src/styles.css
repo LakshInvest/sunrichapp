@@ -395,10 +395,10 @@ html[data-launch-hide-tagline] .launch-tag { display: none; }
 .qty-input { color: var(--primary-foreground); -webkit-text-fill-color: var(--primary-foreground); caret-color: var(--primary-foreground); }
 .keyboard-sheet { bottom: var(--kb, 0px); }
 
-/* Login: brand photo top ~45%, white card slides up over it. */
-/* Photo takes what the card leaves (>=35% on a 360x640 phone); with the keyboard open it shrinks, never the form. */
-.auth-brand { flex: 1 1 0%; min-height: 72px; max-height: calc(var(--app-h, 100dvh) * 0.6); }
-.auth-login-card { animation: auth-card-enter 320ms ease-out both; }
+/* The form owns only its content height; the photo takes all remaining space. */
+.auth-brand { flex: 1 1 0%; min-height: 0; }
+.auth-brand > img { object-position: center 30%; }
+.auth-login-card { flex: 0 0 auto; padding-bottom: calc(16px + env(safe-area-inset-bottom)); animation: auth-card-enter 320ms ease-out both; }
 @keyframes auth-card-enter { from { transform: translateY(32px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .auth-login-card { animation: none; } }
 

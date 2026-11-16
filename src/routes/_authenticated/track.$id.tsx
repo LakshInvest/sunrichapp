@@ -41,6 +41,7 @@ import { canCustomerCancel, useAppSettings } from "@/lib/app-settings";
 import { canChangeDeliveryMode, setOrderDeliveryMode } from "@/lib/orders";
 import { fetchMyFeedback, planReorder, type OrderFeedback } from "@/lib/feedback";
 import { googleMapsLink } from "@/lib/maps";
+import { openExternal } from "@/lib/native";
 import { RateOrderCard } from "@/components/RateOrderCard";
 import { useIsDemo } from "@/hooks/use-demo";
 import { MessageCircle, Star } from "lucide-react";
@@ -429,7 +430,7 @@ function OrderDetail() {
           {!pickupOrder && <p className="mt-1 text-sm text-muted-foreground">{addrLines.join(", ") || "—"}</p>}
           {pickupOrder && order.pickupVehicleNo && <p className="mt-1 text-sm text-muted-foreground">{t("delivery.vehicleShown", { no: order.pickupVehicleNo })}</p>}
           {!pickupOrder && (
-            <a href={googleMapsLink(mapLat, mapLng)} target="_blank" rel="noreferrer" className="mt-1 inline-flex min-h-10 items-center text-xs font-semibold text-secondary">
+            <a href={googleMapsLink(mapLat, mapLng)} target="_blank" rel="noreferrer" onClick={(e) => { e.preventDefault(); openExternal(googleMapsLink(mapLat, mapLng)); }} className="mt-1 inline-flex min-h-10 items-center text-xs font-semibold text-secondary">
               {t("location.openInMaps")}
             </a>
           )}

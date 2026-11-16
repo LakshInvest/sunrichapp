@@ -43,6 +43,7 @@ import { deliveryDays, minOrderShortfall, slotName, slotsFor, useAppSettings } f
 import { Check, Plus } from "lucide-react";
 import { getHomeExtras, onHomeExtras, pickupInfo } from "@/lib/catalogue";
 import { showMessage } from "@/components/MessageCard";
+import { openExternal } from "@/lib/native";
 
 const PAY_ICONS = { credit: Wallet, upi: PhoneIcon, bank: LandmarkIcon, cash: Banknote, cheque: FileCheck2 } as const;
 
@@ -426,7 +427,7 @@ function Checkout() {
                 </span>
                 {m === "pickup" && (pickupAt.hours ?? settings?.pickupHours) && <span className="block text-xs text-muted-foreground">{pickupAt.hours ?? settings?.pickupHours}</span>}
                 {m === "pickup" && (
-                  <a href={PLANT_MAP_URL} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="mt-1 inline-flex min-h-9 items-center gap-1 text-xs font-semibold text-secondary">
+                  <a href={PLANT_MAP_URL} target="_blank" rel="noreferrer" onClick={(e) => { e.preventDefault(); e.stopPropagation(); openExternal(PLANT_MAP_URL); }} className="mt-1 inline-flex min-h-9 items-center gap-1 text-xs font-semibold text-secondary">
                     <MapPin className="h-3.5 w-3.5" aria-hidden /> {t("delivery.openMap")}
                   </a>
                 )}

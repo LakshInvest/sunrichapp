@@ -21,7 +21,9 @@ import { getMyCustomerId } from "@/lib/orders";
 import { fetchAppInfo } from "@/lib/app-info";
 import { fetchOpenBills } from "@/lib/billing";
 import { serverMessage } from "@/lib/form-errors";
-import { shareOrDownload } from "@/lib/ledger";
+import { deliverStatement } from "@/lib/statement-delivery";
+import { uploadStatement } from "@/lib/statement.functions";
+import { useServerFn } from "@tanstack/react-start";
 import {
   fetchKhataEntries,
   fetchKhataProofs,
@@ -286,13 +288,18 @@ function DateRange({ value, onChange }: { value: { from: string; to: string }; o
 
 function StatementSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const { t } = useTranslation();
+  const upload = useServerFn(uploadStatement);
   const [key, setKey] = useState<KhataRange>("thisMonth");
   const [custom, setCustom] = useState(() => khataRange("thisMonth"));
   const r = key === "custom" ? custom : khataRange(key);
   const [busy, setBusy] = useState<null | "share" | "download">(null);
+  const [failure, setFailure] = useState<string | null>(null);
+  const offline = useOffline();
 
   const make = async (mode: "share" | "download") => {
+    if (busy || offline) return;
     setBusy(mode);
+    setFailure(null);
     try {
       const [rows, info, cid, bills] = await Promise.all([
         fetchKhataEntries(r.from, r.to),
@@ -333,16 +340,10 @@ function StatementSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
         },
       });
       const name = `Sunrich-statement-${r.from}-to-${r.to}.pdf`;
-      if (mode === "download") {
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = name;
-        a.click();
-      } else {
-        await shareOrDownload(blob, name, t("khata.stmt.shareText"));
-      }
+      await deliverStatement(blob, name, `Sunrich statement ${r.from}–${r.to}`, mode, upload);
     } catch (e) {
-      toast.error(serverMessage(e, t("errors.generic")));
+      console.error("Khata statement", e);
+      setFailure(serverMessage(e, t("khata.stmt.failed")));
     } finally {
       setBusy(null);
     }
@@ -370,15 +371,17 @@ function StatementSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (
         </div>
         {key === "custom" && <DateRange value={custom} onChange={setCustom} />}
         <div className="mt-5 grid grid-cols-2 gap-2">
-          <Button type="button" variant="outline" disabled={!!busy} onClick={() => void make("download")} className="h-auto min-h-12 rounded-xl font-semibold">
+          <Button type="button" variant="outline" disabled={!!busy || offline} onClick={() => void make("download")} className="h-auto min-h-12 rounded-xl font-semibold">
             {busy === "download" ? <Loader2 className="animate-spin" aria-hidden /> : <Download aria-hidden />}
             {t("khata.stmt.download")}
           </Button>
-          <Button type="button" disabled={!!busy} onClick={() => void make("share")} className="h-auto min-h-12 rounded-xl font-semibold">
+          <Button type="button" disabled={!!busy || offline} onClick={() => void make("share")} className="h-auto min-h-12 rounded-xl font-semibold">
             {busy === "share" ? <Loader2 className="animate-spin" aria-hidden /> : <Share2 aria-hidden />}
             {t("khata.stmt.share")}
           </Button>
         </div>
+        {failure && <p role="alert" className="mt-3 text-sm text-destructive">{failure}</p>}
+        {offline && <p className="mt-3 text-sm text-muted-foreground">{t("offline.hint")}</p>}
       </div>
     </SheetDrawer>
   );

@@ -1,11 +1,19 @@
-import { lineShort } from "@/lib/pack-label";
-import { planReorder } from "@/lib/feedback";
+import { fetchMyFeedback, planReorder, type OrderFeedback } from "@/lib/feedback";
+import { RateOrderCard } from "@/components/RateOrderCard";
+import { Button } from "@/components/ui/button";
+import { SheetDrawer } from "@/components/SheetDrawer";
+import { orderPayment, type OrderBill } from "@/lib/order-card";
+import { supabase } from "@/integrations/supabase/client";
+import { ownCustomerFilter } from "@/lib/my-customer";
+import { getHomeExtras, onHomeExtras } from "@/lib/catalogue";
+import { useAppSettings } from "@/lib/app-settings";
+import { serverMessage } from "@/lib/form-errors";
 import { readSwr, swr } from "@/lib/swr-cache";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PageShell } from "@/components/PageShell";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Truck, Factory, Star } from "lucide-react";
 import { toast } from "sonner";
 import { SmartImage } from "@/components/SmartImage";
 import { useCart } from "@/hooks/use-cart";
@@ -25,7 +33,6 @@ import {
   buildTimeline,
   type OrderDto,
 } from "@/lib/orders";
-import { fetchOrdersAwaitingPayment } from "@/lib/pay-reminder";
 import en from "@/locales/en.json";
 
 export const Route = createFileRoute("/_authenticated/track/")({
@@ -49,22 +56,31 @@ function MyOrders() {
 
   const [orders, setOrders] = useState<OrderDto[] | null>(() => readSwr<OrderDto[]>("orders"));
   const [error, setError] = useState<string | null>(null);
-  const [unpaid, setUnpaid] = useState<Set<string>>(new Set());
+  const [bills, setBills] = useState<Record<string, OrderBill> | null>(null);
+  const [ratings, setRatings] = useState<Record<string, OrderFeedback> | null>(null);
+  const [ratingOrder, setRatingOrder] = useState<OrderDto | null>(null);
+  const [homeExtras, setHomeExtras] = useState(() => getHomeExtras());
+  const settings = useAppSettings();
+  useEffect(() => onHomeExtras(setHomeExtras), []);
 
   const load = useCallback(async () => {
     try {
       const list = await swr("orders", fetchMyOrders);
       setOrders(list);
       setError(null);
-      fetchOrdersAwaitingPayment(list).then((u) => setUnpaid(new Set(u.map((o) => o.id))), () => undefined);
+      const cid = await ownCustomerFilter();
+      const { data: invoices, error: billError } = await supabase.from("invoices").select("id, order_id, invoice_no, grand_total, amount_paid").eq("customer_id", cid).neq("status", "cancelled").order("invoice_date");
+      if (billError) throw billError;
+      setBills(Object.fromEntries((invoices ?? []).map((b) => [b.order_id, { id: b.id, no: b.invoice_no, total: Number(b.grand_total), paid: Number(b.amount_paid) }])));
+      fetchMyFeedback(list.filter((o) => statusGroup(o.status) === "delivered").map((o) => o.id)).then(setRatings, (e) => console.warn("order ratings", e));
     } catch (e) {
-      setError((e as Error).message);
+      setError(serverMessage(e, t("common.loadError")));
       throw e;
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
-    void load();
+    void load().catch(() => undefined);
     markOrdersSeen();
     const id = setInterval(() => void load().catch(() => undefined), 60_000);
     return () => clearInterval(id);
@@ -96,32 +112,26 @@ function MyOrders() {
 
   const card = (o: OrderDto) => {
     const group = statusGroup(o.status);
-    const status = unpaid.has(o.id) && o.status === "approved" ? "placed" : o.status;
+    const status = o.status;
     const { steps, reached } = buildTimeline(o.status, o.history);
-    const shownLines = o.lines.slice(0, 4);
-    const summary = shownLines.map((l) => lineShort(l.packLabel, l.productName, l.qty)).join(", ") + (o.lines.length > 4 ? ` ${t("orders.moreItems", { count: o.lines.length - 4, defaultValue: `+${o.lines.length - 4} more` })}` : "");
+    const bill = bills?.[o.id];
+    const payment = orderPayment(o, bill);
+    const rating = ratings?.[o.id];
     return (
       <li key={o.id} className="rounded-2xl bg-card p-4 shadow-sm">
-        <button type="button" onClick={() => navigate({ to: "/track/$id", params: { id: o.id } })} className="w-full text-left">
+        <Button variant="ghost" type="button" onClick={() => navigate({ to: "/track/$id", params: { id: o.id } })} className="block h-auto w-full whitespace-normal p-0 text-left hover:bg-transparent">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-xs text-muted-foreground">{indDate(o.createdAt, lang)}</p>
+            <div className="min-w-0"><p className="break-words text-sm font-bold text-primary">{o.orderNo}</p><p className="mt-1 text-xs text-muted-foreground">{indDate(o.createdAt, lang)}</p></div>
             {group === "cancelled" ? (
               <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">{t("status.cancelled")}</span>
             ) : (
               <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${statusChipClass(status)}`}>{t(`status.${status}`)}</span>
             )}
           </div>
-          <div className="mt-2 flex items-center gap-3">
-            <div className="flex shrink-0 gap-1">
-              {o.lines.slice(0, 3).map((l) => (
-                <span key={l.productId} className="h-9 w-9 overflow-hidden rounded-lg border border-border bg-card">
-                  <SmartImage width={36} src={thumb(l.productId)} alt="" className="h-9 w-9 object-contain p-0.5" />
-                </span>
-              ))}
-            </div>
-            <p className="line-clamp-2 min-w-0 flex-1 text-sm text-foreground">{summary}</p>
-            <p className="shrink-0 text-sm font-bold text-primary">{formatINR(o.grandTotal)}</p>
-          </div>
+          <ul className="mt-3 space-y-2">{o.lines.map((l) => <li key={l.id} className="flex items-center gap-3"><SmartImage width={44} src={thumb(l.productId)} alt="" className="h-11 w-11 shrink-0 rounded-lg object-contain" /><span className="min-w-0 flex-1 break-words text-sm font-medium text-foreground">{l.productName}</span><span className="shrink-0 text-sm text-muted-foreground">×{l.qty}</span></li>)}</ul>
+          <p className="mt-3 flex items-start gap-2 text-sm text-foreground">{o.deliveryMode === "pickup" ? <Factory className="h-4 w-4 shrink-0" /> : <Truck className="h-4 w-4 shrink-0" />}<span>{t(o.deliveryMode === "pickup" ? "orders2.pickup" : "orders2.delivery")} · {o.deliveryMode === "pickup" ? String(homeExtras?.pickup?.["unit_name"] ?? settings?.plantAddress ?? t("checkout2.plantDefault")) : o.deliveryDate ? indDate(o.deliveryDate, lang) : "—"}</span></p>
+          {bill && <p className="mt-2 break-words text-xs text-muted-foreground">{t("orders2.billNo")} {bill.no}</p>}
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3"><span className={`text-xs font-semibold ${payment.kind === "paid" ? "text-success" : "text-warning-foreground"}`}>{t("orders2.payment")}: {t(`orders2.paymentState.${payment.kind}`, { amount: formatINR(payment.due) })}</span><span className="text-base font-bold text-primary">{formatINR(o.grandTotal)}</span></div>
           {group === "active" && (
             <ol className="mt-3 flex gap-1" aria-hidden>
               {steps.map((st, i) => (
@@ -129,19 +139,19 @@ function MyOrders() {
               ))}
             </ol>
           )}
-        </button>
+        </Button>
         {group === "active" && o.status === "dispatched" && (
           <button type="button" onClick={() => navigate({ to: "/track/$id", params: { id: o.id } })} className="mt-3 min-h-11 w-full rounded-xl bg-primary text-sm font-bold text-primary-foreground">
             {t("track.trackBtn")}
           </button>
         )}
-        {unpaid.has(o.id) && (
+        {bills !== null && payment.canPay && (
           <button
             type="button"
-            onClick={() => navigate({ to: "/track/$id", params: { id: o.id }, search: { pay: 1 } })}
+            onClick={() => payment.kind === "credit" || group === "delivered" ? navigate({ to: "/khata/pay" }) : navigate({ to: "/track/$id", params: { id: o.id }, search: { pay: 1 } })}
             className="mt-3 flex min-h-11 w-full items-center justify-between rounded-xl bg-warning/15 px-4 text-sm font-semibold text-warning-foreground"
           >
-            <span>{t("pay.chip.pending")}</span>
+            <span>{formatINR(payment.due)}</span>
             <span className="text-xs font-bold">{t("pay.payNow")} →</span>
           </button>
         )}
@@ -155,6 +165,7 @@ function MyOrders() {
             </button>
           </div>
         )}
+        {group === "delivered" && settings?.feedbackEnabled !== false && ratings !== null && <Button variant="ghost" className="mt-2 h-auto min-h-11 w-full flex-wrap justify-start gap-2 whitespace-normal px-0" disabled={offline || !!rating} onClick={() => setRatingOrder(o)}><span className="text-xs">{t(rating ? "feedback.yourRating" : "orders2.rate")}</span><span className="flex gap-1">{[1,2,3,4,5].map((n) => <Star key={n} className={`h-5 w-5 ${rating && n <= rating.rating ? "fill-accent text-accent" : "text-muted-foreground"}`} />)}</span></Button>}
       </li>
     );
   };
@@ -178,6 +189,7 @@ function MyOrders() {
       )}
 
       <div className="px-5 pb-28 pt-2">
+        {error && orders !== null && <p role="alert" className="mb-3 text-sm text-destructive">{error}</p>}
         {error && orders == null ? (
           <ErrorState message={error} onRetry={() => void load().catch(() => undefined)} />
         ) : orders == null ? (
@@ -213,6 +225,7 @@ function MyOrders() {
       </div>
 
       <BottomNav />
+      <SheetDrawer open={!!ratingOrder} onOpenChange={(open) => !open && setRatingOrder(null)}>{ratingOrder && <div className="px-5 pb-6"><RateOrderCard orderId={ratingOrder.id} orderNo={ratingOrder.orderNo} onDone={(rating) => { setRatings((old) => ({ ...old, [ratingOrder.id]: { orderId: ratingOrder.id, rating, tags: [], comment: null } })); setRatingOrder(null); }} /></div>}</SheetDrawer>
     </PageShell>
   );
 }

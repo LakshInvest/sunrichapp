@@ -199,3 +199,14 @@ keeps the old flow (opens the UPI app, then asks "Payment done?").
 5. Install on a phone with GPay/PhonePe/Paytm. Only the installed apps' buttons appear on the pay card.
 6. Run `database/20261104_upi_response.sql` once so the UPI reply is saved with the payment
    (column `payment_proofs.upi_response`). Without it, payments still work; the reply just isn't saved.
+
+## Prompt-55 Android checks
+
+Run `npx cap sync android` and rebuild the APK to copy the self-contained offline page and register Browser, Share, AppLauncher and NativeSettings. The hosted app changes do not replace the APK's bundled offline page.
+
+- At 360/390/412 widths: Download a Khata statement in Browser; Share should include `Sunrich statement <from>–<to>` and a seven-day private URL. Keep Sunrich open behind it.
+- Open every pickup/order map link; Maps or Browser should open outside the WebView.
+- Test location granted/GPS ON, granted/GPS OFF, first request, and permanent refusal. Returning from location/app settings should retry the picker automatically.
+- Add a Latur address with house number, no landmark, receiver name and ten-digit mobile; confirm it reads back after saving. `save_my_address` requires receiver mobiles in `+91` format (`ca_mobile`); the app now normalizes them. Exact future RPC errors are logged and available under Error details.
+- Existing private `customer-docs` storage is reused; no SQL, bucket or policy changes.
+- Sandbox checks: 186 tests passed; login and inline offline logo passed at all three widths. Authenticated customer flows and actual installed-Android handoffs remain unverified: external Supabase has no injectable customer session, and the sandbox is not an Android device. Google Maps rendering must be checked on the authorized deployed origin.

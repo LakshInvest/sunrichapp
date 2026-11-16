@@ -47,6 +47,7 @@ export function AddressEditor({
   const [pin, setPin] = useState<LocationValue | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverErr, setServerErr] = useState<string | null>(null);
+  const [saveDetail, setSaveDetail] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [step, setStep] = useState<"map" | "details">("map");
   const [receiverOpen, setReceiverOpen] = useState(false);
@@ -76,6 +77,7 @@ export function AddressEditor({
     setErrors({});
     setServerErr(null);
     setStep(address ? "details" : "map");
+    setSaveDetail(null);
     setReceiverOpen(false);
     if (address) {
       setF({
@@ -86,7 +88,7 @@ export function AddressEditor({
         city: address.city ?? "",
         pincode: address.pincode ?? "",
         contactName: address.contactName ?? "",
-        contactMobile: address.contactMobile ?? "",
+        contactMobile: (address.contactMobile ?? "").replace(/^\+91/, ""),
         isDefault: address.isDefault,
       });
       setPin(address.lat != null && address.lng != null ? { lat: address.lat, lng: address.lng, accuracy: null } : null);
@@ -105,6 +107,7 @@ export function AddressEditor({
     }
     setSaving(true);
     setServerErr(null);
+    setSaveDetail(null);
     try {
       const id = await saveMyAddress({
         id: address?.id ?? null,
@@ -125,6 +128,7 @@ export function AddressEditor({
       onOpenChange(false);
     } catch (err) {
       setServerErr(serverMessage(err, t("addresses.errSave")));
+      setSaveDetail(err instanceof Error ? err.message : null);
       setTimeout(scrollToFirstError, 0);
     } finally {
       setSaving(false);
@@ -166,7 +170,7 @@ export function AddressEditor({
           </div>
           <button
             type="button"
-            onClick={() => setStep("details")}
+            onClick={() => { if (!pin) setPin(DEFAULT_LOCATION); setStep("details"); }}
             className="mt-4 flex min-h-12 w-full items-center justify-center rounded-xl bg-primary text-base font-semibold text-primary-foreground transition active:scale-[0.98]"
           >
             {t("address2.confirmPin")}
@@ -202,6 +206,7 @@ export function AddressEditor({
               {serverErr}
             </p>
           )}
+          {saveDetail && <details className="mt-2 text-xs text-muted-foreground"><summary className="min-h-11 cursor-pointer py-3">{t("addresses.errorDetails")}</summary><p className="break-words select-text">{saveDetail}</p></details>}
           <button
             type="button"
             onClick={() => void save()}

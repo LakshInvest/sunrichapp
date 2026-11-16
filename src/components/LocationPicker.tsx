@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Crosshair, Loader2, LocateOff, MapPin } from "lucide-react";
-import { isNative, locateDevice, openAppSettings } from "@/lib/native";
+import { isNative, locateDevice, checkLocationAccess, openAppSettings, openLocationSettings } from "@/lib/native";
+import { Button } from "@/components/ui/button";
 import { SheetDrawer } from "./SheetDrawer";
 import { PinMap } from "./PinMap";
 import { PlaceSearch } from "./PlaceSearch";
@@ -44,12 +45,15 @@ export function LocationPicker({
   const [locating, setLocating] = useState(false);
   const [problem, setProblem] = useState<"denied" | "off" | null>(null);
   const [disclose, setDisclose] = useState(false);
+  const awaitingSettings = useRef(false);
   const isDefault = value.lat === DEFAULT_LOCATION.lat && value.lng === DEFAULT_LOCATION.lng;
 
   // Play policy: our own prominent disclosure before the system prompt.
-  const locate = () => {
+  const locate = async () => {
     if (locating) return;
-    if (localStorage.getItem("sunrich.locConsent") !== "1") {
+    const permission = await checkLocationAccess();
+    if (permission === "denied" || permission === "off") { setProblem(permission); return; }
+    if (permission === "prompt") {
       setDisclose(true);
       return;
     }
@@ -58,15 +62,15 @@ export function LocationPicker({
   useEffect(() => {
     if (!autoLocate && !isDefault) return;
     // Wait for the parent sheet to finish opening before stacking the explanation sheet.
-    const id = setTimeout(locate, 450);
+    const id = setTimeout(() => void locate(), 450);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoLocate]);
 
-  const runLocate = async () => {
+  const runLocate = async (request = false) => {
     setProblem(null);
     setLocating(true);
-    const r = await locateDevice();
+    const r = await locateDevice(request);
     setLocating(false);
     if (r.ok) onChange({ lat: r.lat, lng: r.lng, accuracy: r.accuracy });
     else setProblem(r.reason);
@@ -77,17 +81,32 @@ export function LocationPicker({
   // the phone's App-settings page so the customer can enable it there.
   const tapAllow = async () => {
     if (locating) return;
-    setLocating(true);
-    const r = await locateDevice();
-    setLocating(false);
-    if (r.ok) {
-      setProblem(null);
-      onChange({ lat: r.lat, lng: r.lng, accuracy: r.accuracy });
+    if (isNative()) {
+      awaitingSettings.current = true;
+      try {
+        if (problem === "off") await openLocationSettings();
+        else await openAppSettings();
+      } catch (e) { console.warn("location settings", e); awaitingSettings.current = false; }
       return;
     }
-    if (r.reason === "denied" && isNative()) await openAppSettings();
-    else setProblem(r.reason);
+    await runLocate(true);
   };
+
+  useEffect(() => {
+    let alive = true;
+    const retry = () => { if (awaitingSettings.current) { awaitingSettings.current = false; void runLocate(); } };
+    const visible = () => { if (document.visibilityState === "visible") retry(); };
+    window.addEventListener("focus", retry);
+    document.addEventListener("visibilitychange", visible);
+    let remove: (() => void) | undefined;
+    if (isNative()) void import("@capacitor/app").then(async ({ App }) => {
+      const h = await App.addListener("appStateChange", ({ isActive }) => { if (isActive) retry(); });
+      if (alive) remove = () => void h.remove(); else void h.remove();
+    });
+    return () => { alive = false; remove?.(); window.removeEventListener("focus", retry); document.removeEventListener("visibilitychange", visible); };
+    // Retry the currently open picker after returning from phone settings.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onChange]);
 
   // Pin → address: debounce while the pin moves, then reverse geocode (browser Geocoder).
   const pinAddress = useReverseAddress(value);
@@ -106,7 +125,7 @@ export function LocationPicker({
             onClick={() => {
               localStorage.setItem("sunrich.locConsent", "1");
               setDisclose(false);
-              void runLocate();
+              void runLocate(true);
             }}
             className="mt-5 min-h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground transition active:scale-[0.98]"
           >
@@ -132,13 +151,13 @@ export function LocationPicker({
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             {problem === "off" ? t("location.offBody") : t("location.deniedBody")}
           </p>
-          <button
+          <Button
             type="button"
             onClick={() => void tapAllow()}
             className="mt-5 min-h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground transition active:scale-[0.98]"
           >
-            {problem === "off" ? t("location.retry") : t("location.allow")}
-          </button>
+            {isNative() ? t(problem === "off" ? "location.turnOn" : "permissions.settings") : t("location.retry")}
+          </Button>
           <button
             type="button"
             onClick={() => setProblem(null)}

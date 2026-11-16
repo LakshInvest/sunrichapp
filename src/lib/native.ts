@@ -19,10 +19,30 @@ export async function openInApp(url: string): Promise<void> {
 /** tel:, mailto:, wa.me and map links hand off to native apps. */
 export function openExternal(url: string): void {
   if (isNative() && url.startsWith("http")) {
-    window.open(url, "_system");
+    void launchExternal(url).catch(async (e) => {
+      console.error("external link", e);
+      const { toast } = await import("sonner");
+      const { default: i18n } = await import("@/lib/i18n");
+      toast.error(i18n.t("errors.generic"));
+    });
+    return;
+  }
+  if (url.startsWith("http")) {
+    window.open(url, "_blank", "noopener,noreferrer");
     return;
   }
   window.location.href = url;
+}
+
+async function launchExternal(url: string): Promise<void> {
+  const { AppLauncher } = await import("@capacitor/app-launcher");
+  try {
+    const result = await AppLauncher.openUrl({ url });
+    if (result.completed) return;
+  } catch (e) {
+    console.warn("AppLauncher handoff", e);
+  }
+  await openInApp(url);
 }
 
 /**
@@ -138,6 +158,30 @@ export async function openAppSettings(): Promise<void> {
   }
 }
 
+export async function openLocationSettings(): Promise<void> {
+  if (!isNative()) return;
+  const { NativeSettings, AndroidSettings, IOSSettings } = await import("capacitor-native-settings");
+  await NativeSettings.open({ optionAndroid: AndroidSettings.Location, optionIOS: IOSSettings.LocationServices });
+}
+
+/** Check without asking: a granted permission must never show our disclosure again. */
+export async function checkLocationAccess(): Promise<"granted" | "prompt" | "denied" | "off"> {
+  try {
+    if (isNative()) {
+      const { Geolocation } = await import("@capacitor/geolocation");
+      const p = await Geolocation.checkPermissions();
+      if (p.location === "granted" || p.coarseLocation === "granted") return "granted";
+      return p.location === "denied" ? "denied" : "prompt";
+    }
+    if (!navigator.geolocation) return "off";
+    if (!navigator.permissions) return "prompt";
+    const p = await navigator.permissions.query({ name: "geolocation" });
+    return p.state === "granted" ? "granted" : p.state === "denied" ? "denied" : "prompt";
+  } catch (e) {
+    return locateFailure(e);
+  }
+}
+
 export type LocateResult =
   | { ok: true; lat: number; lng: number; accuracy: number | null }
   | { ok: false; reason: "denied" | "off" };
@@ -156,17 +200,18 @@ export function locateFailure(e: unknown): "denied" | "off" {
  * Geolocation plugin shows Google's "Turn on location" dialog itself when
  * location is off; declining it lands here as "off".
  */
-export async function locateDevice(): Promise<LocateResult> {
+export async function locateDevice(request = false): Promise<LocateResult> {
   try {
     if (isNative()) {
       const { Geolocation } = await import("@capacitor/geolocation");
-      let perm = await Geolocation.checkPermissions().catch(() => null);
-      if (!perm || perm.location !== "granted") perm = await Geolocation.requestPermissions().catch(() => null);
+      let perm = await Geolocation.checkPermissions();
+      if (request && perm.location !== "granted" && perm.coarseLocation !== "granted" && perm.location !== "denied") perm = await Geolocation.requestPermissions();
       if (!perm || (perm.location !== "granted" && perm.coarseLocation !== "granted")) return { ok: false, reason: "denied" };
       const p = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });
       return { ok: true, lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy ?? null };
     }
     if (!("geolocation" in navigator)) return { ok: false, reason: "off" };
+    if (!request && await checkLocationAccess() !== "granted") return { ok: false, reason: "denied" };
     const p = await new Promise<GeolocationPosition>((resolve, reject) =>
       navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }),
     );

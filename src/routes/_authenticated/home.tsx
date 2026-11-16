@@ -46,8 +46,7 @@ import { useFavourites } from "@/hooks/use-favourites";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { fetchMyOrders, type OrderDto } from "@/lib/orders";
 import { hasUnreadNotices } from "@/lib/notifications";
-import { fetchMyFeedback, planReorder, skippedRatings } from "@/lib/feedback";
-import { RateOrderCard } from "@/components/RateOrderCard";
+import { planReorder } from "@/lib/feedback";
 import { useAppSettings } from "@/lib/app-settings";
 import { toast } from "sonner";
 import { Repeat2, Store, ChevronRight } from "lucide-react";
@@ -249,7 +248,6 @@ function Home() {
   const [outForDelivery, setOutForDelivery] = useState<OrderDto | null>(null);
   const [homeExtras, setHomeExtrasState] = useState(() => getHomeExtras());
   useEffect(() => onHomeExtras(setHomeExtrasState), []);
-  const [rateOrder, setRateOrder] = useState<OrderDto | null>(null);
   useEffect(() => {
     let active = true;
     void (async () => {
@@ -259,10 +257,6 @@ function Home() {
         if (!active) return;
         setLastDelivered(done[0] ?? null);
         setOutForDelivery(list.find((o) => o.status === "dispatched") ?? null);
-        const recent = done.slice(0, 5);
-        const fb = await fetchMyFeedback(recent.map((o) => o.id));
-        const skipped = skippedRatings();
-        if (active) setRateOrder(recent.find((o) => !fb[o.id] && !skipped.includes(o.id)) ?? null);
       } catch {
         /* offline — skip */
       }
@@ -697,11 +691,6 @@ function Home() {
 
 
             <div className="mt-3 empty:hidden [&:not(:has(*))]:hidden">
-            {settings?.feedbackEnabled !== false && rateOrder && (
-              <div className="mx-5 mb-4">
-                <RateOrderCard allowSkip orderId={rateOrder.id} orderNo={rateOrder.orderNo} onDone={() => setRateOrder(null)} />
-              </div>
-            )}
             <SmartCard
               overdue={Number((homeExtras?.khata?.["overdue"] as number | undefined) ?? 0)}
               outForDelivery={outForDelivery}

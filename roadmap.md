@@ -1,3 +1,13 @@
+# Prompt-55
+- [x] Private statement PDF links, native download/share, web download and error handling; reuse customer-docs with verified customer-scoped upload.
+- [x] External map handoff everywhere; offline inline logo.
+- [x] Detailed order cards, bill/payment balances, ratings moved from Home.
+- [x] Address RPC diagnosis: ca_mobile requires +91; normalize receiver, retain optional landmark and confirmed pin; expose exact future RPC errors.
+- [x] Permission-aware location, GPS/app settings and automatic retry.
+- [x] 186 tests; login/offline at 360/390/412, build OK. Publication requested after commit.
+- [ ] Signed-in statement/address/order checks — external Supabase customer session unavailable.
+- [ ] Installed-APK downloads/share/Maps/location and offline page — requires rebuilt APK and Android phone; Maps requires authorized deployed origin.
+
 # Prompt-19 roadmap — 15 tasks
 
 ## Prompt-47 — native UPI proxy and pickup totals

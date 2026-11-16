@@ -65,6 +65,12 @@ export function mapAddressRow(row: Record<string, unknown>): SavedAddress {
 
 export type AddressInput = Omit<SavedAddress, "id"> & { id: string | null };
 
+export function addressMobile(value: string | null): string | null {
+  if (!value?.trim()) return null;
+  const digits = value.replace(/\D/g, "").replace(/^91(?=\d{10}$)/, "");
+  return `+91${digits}`;
+}
+
 export async function saveMyAddress(a: AddressInput): Promise<string> {
   const args: Record<string, unknown> = {
     p_id: a.id,
@@ -83,10 +89,13 @@ export async function saveMyAddress(a: AddressInput): Promise<string> {
   opt("p_latitude", a.lat);
   opt("p_longitude", a.lng);
   opt("p_contact_name", a.contactName);
-  opt("p_contact_mobile", a.contactMobile);
+  opt("p_contact_mobile", addressMobile(a.contactMobile));
   // p_id is nullable in the RPC for new rows; generated types mark it required.
   const { data, error } = await supabase.rpc("save_my_address", args as never);
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("save_my_address", { message: error.message, code: error.code, details: error.details, hint: error.hint });
+    throw new Error(`save_my_address: ${error.message}`);
+  }
   return String(data);
 }
 
@@ -105,7 +114,7 @@ export function validateAddress(a: Pick<AddressInput, "line1" | "pincode" | "con
   const e: Record<string, string> = {};
   if (!a.line1.trim()) e["line1"] = "addresses.errLine1";
   if (a.pincode && !/^\d{6}$/.test(a.pincode.trim())) e["pincode"] = "addresses.errPincode";
-  if (a.contactMobile && !/^\d{10}$/.test(a.contactMobile.replace(/\D/g, ""))) e["contactMobile"] = "addresses.errMobile";
+  if (a.contactMobile && !/^\+91[6-9]\d{9}$/.test(addressMobile(a.contactMobile) ?? "")) e["contactMobile"] = "addresses.errMobile";
   return e;
 }
 

@@ -5,7 +5,7 @@ import { CheckCircle2, Clock, Copy, Loader2, Paperclip, Send, XCircle } from "lu
 import { SheetDrawer } from "@/components/SheetDrawer";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { prepareUpload } from "@/lib/image-compress";
-import { scrollToFirstError, serverMessage } from "@/lib/form-errors";
+import { paymentReportMessage, scrollToFirstError } from "@/lib/form-errors";
 import { getMyCustomerId } from "@/lib/orders";
 import { attachUpiResponse, submitPaymentProof, validUtr } from "@/lib/payments";
 import type { UpiResponse } from "@/lib/upi";
@@ -42,6 +42,7 @@ export function PaymentProofSheet({
   const [file, setFile] = useState<File | null>(null);
   const [errs, setErrs] = useState<Partial<Record<"ref" | "date", string>>>({});
   const [sending, setSending] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -49,6 +50,7 @@ export function PaymentProofSheet({
       setDate(today());
       setFile(null);
       setErrs({});
+      setSubmitError(null);
     }
   }, [open, target?.utr]);
 
@@ -67,6 +69,7 @@ export function PaymentProofSheet({
       return;
     }
     setSending(true);
+    setSubmitError(null);
     try {
       let path: string | undefined;
       if (file) {
@@ -91,7 +94,7 @@ export function PaymentProofSheet({
       onOpenChange(false);
       onDone?.();
     } catch (err) {
-      toast.error(serverMessage(err, t("errors.generic")));
+      setSubmitError(paymentReportMessage(err));
     } finally {
       setSending(false);
     }
@@ -156,6 +159,7 @@ export function PaymentProofSheet({
         </div>
       </div>
       <div data-kb-bar className="border-t border-border bg-background px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
+          {submitError && <p role="alert" className="mb-3 text-sm font-medium text-destructive">{submitError}</p>}
           <button
             type="button"
             disabled={sending || !canSubmit}

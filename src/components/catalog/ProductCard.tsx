@@ -142,7 +142,7 @@ export function QtyStepper({
           }}
           onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
           aria-label={t("home.typeQty")}
-          size={1} className="h-full w-0 min-w-0 flex-1 bg-transparent text-center text-sm font-bold text-primary-foreground caret-transparent outline-none selection:bg-transparent"
+          size={1} className="qty-input h-full w-0 min-w-[2ch] flex-1 bg-transparent text-center text-sm font-bold text-primary-foreground caret-primary-foreground outline-none selection:bg-secondary selection:text-primary-foreground"
         />
       ) : (
         <button

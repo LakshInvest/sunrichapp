@@ -1,3 +1,10 @@
+# Prompt-56
+- [x] Cached launch/login logo and tagline settings; all four default true.
+- [x] Visible quantity cursor and keyboard-safe light pages/sheets; avoid subtracting keyboard height twice.
+- [x] Friendly localized payment report reasons with UTR retained after rejection.
+- [x] Login at 360/390/412; light html/body and no horizontal overflow. Publication requested after final tests/commit.
+- [ ] Real signed-in Home/cart/payment and Android keyboard checks — external unmanaged Supabase session unavailable; isolated browser control mounting failed. UTR retention covered by component regression test.
+
 # Prompt-55
 - [x] Private statement PDF links, native download/share, web download and error handling; reuse customer-docs with verified customer-scoped upload.
 - [x] External map handoff everywhere; offline inline logo.

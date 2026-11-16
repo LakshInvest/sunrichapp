@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { useLang } from "@/hooks/use-lang";
 import { useOffline } from "@/hooks/use-offline";
 import { formatINR } from "@/lib/catalogue";
-import { scrollToFirstError, serverMessage } from "@/lib/form-errors";
+import { paymentReportMessage, scrollToFirstError, serverMessage } from "@/lib/form-errors";
 import { prepareUpload } from "@/lib/image-compress";
 import { validUtr } from "@/lib/payments";
 import { getKhataPayInfo, type KhataPayInfo } from "@/lib/payments.functions";
@@ -171,7 +171,7 @@ function PayPage() {
       if (mode === "upi") void attachUpiResponse(proofId, upiResp);
       setStep(3);
     } catch (x) {
-      setErrs({ submit: serverMessage(x, t("errors.generic")) });
+      setErrs({ submit: paymentReportMessage(x) });
     } finally {
       setSending(false);
     }

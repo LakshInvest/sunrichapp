@@ -1,5 +1,15 @@
 import type { BrandPhotos } from "./brand-photos.functions";
 
+/** Only an explicit false hides a brand element; older settings default to visible. */
+export function brandVisibility(settings: Record<string, unknown> = {}) {
+  return {
+    launchShowLogo: settings["launch_show_logo"] !== false,
+    launchShowTagline: settings["launch_show_tagline"] !== false,
+    loginShowLogo: settings["login_show_logo"] !== false,
+    loginShowTagline: settings["login_show_tagline"] !== false,
+  };
+}
+
 /** Source order: own setting → Home hero photo → none (navy). */
 export function pickPhoto(own: string | null | undefined, hero: string | null | undefined): string | null {
   return own || hero || null;
@@ -8,6 +18,9 @@ export function pickPhoto(own: string | null | undefined, hero: string | null | 
 /** Save the resolved URLs where the inline launch script and the login screen read them. */
 export function cacheBrandPhotos(p: BrandPhotos): void {
   try {
+    localStorage.setItem("sunrich.brandVisibility", JSON.stringify(p.visibility ?? brandVisibility()));
+    document.documentElement.toggleAttribute("data-launch-hide-logo", p.visibility?.launchShowLogo === false);
+    document.documentElement.toggleAttribute("data-launch-hide-tagline", p.visibility?.launchShowTagline === false);
     for (const [k, v] of [
       ["sunrich.loginImg", pickPhoto(p.login, p.hero)],
       ["sunrich.launchImg", pickPhoto(p.launch, p.hero)],

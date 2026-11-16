@@ -20,7 +20,7 @@ export function SheetDrawer({
   const dismiss = useBackClose(open, () => onOpenChange(false));
   return (
     <Drawer repositionInputs={false} open={open} onOpenChange={(o) => (o ? onOpenChange(true) : dismiss())}>
-      <DrawerContent className={`mx-auto max-h-[calc(var(--app-h,100dvh)-var(--kb,0px)-env(safe-area-inset-top))] max-w-md ${className ?? ""}`}>{children}</DrawerContent>
+      <DrawerContent className={`keyboard-sheet mx-auto max-h-[calc(var(--app-h,100dvh)-env(safe-area-inset-top))] max-w-md ${className ?? ""}`}>{children}</DrawerContent>
     </Drawer>
   );
 }

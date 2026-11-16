@@ -28,7 +28,7 @@ import {
 import { getMyRegistration } from "@/lib/registration.functions";
 import { useBrand } from "@/lib/brand";
 import { getBrandPhotos, type BrandPhotos } from "@/lib/brand-photos.functions";
-import { cacheBrandPhotos, loginText, pickPhoto } from "@/lib/brand-photos";
+import { brandVisibility, cacheBrandPhotos, loginText, pickPhoto } from "@/lib/brand-photos";
 import { useAppSettings } from "@/lib/app-settings";
 import { cn } from "@/lib/utils";
 import {
@@ -342,8 +342,11 @@ function Login() {
   const [photos, setPhotos] = useState<BrandPhotos | null>(null);
   const [logoImage, setLogoImage] = useState<string | null>(null);
   const [texts, setTexts] = useState<BrandPhotos["texts"] | null>(null);
+  const [visibility, setVisibility] = useState(brandVisibility);
   useEffect(() => {
     try {
+      const flags = localStorage.getItem("sunrich.brandVisibility");
+      setVisibility(photos?.visibility ?? (flags ? JSON.parse(flags) : brandVisibility()));
       setLogoImage(photos ? (photos.logo ?? null) : localStorage.getItem("sunrich.logoImg"));
       const raw = photos ? null : localStorage.getItem("sunrich.loginTexts");
       setTexts(photos ? (photos.texts ?? null) : raw ? (JSON.parse(raw) as BrandPhotos["texts"]) : null);
@@ -810,8 +813,8 @@ function Login() {
         <div aria-hidden className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-foreground/60 to-transparent" />
         <div aria-hidden className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-foreground/45 to-transparent" />
         <div className="absolute inset-x-0 top-[calc(env(safe-area-inset-top)+2.5rem)] flex flex-col items-center text-primary-foreground drop-shadow">
-          <img src={logoImage ?? logoWhite.url} alt="Sunrich" className="h-auto w-[45vw] max-w-[220px]" onError={() => setLogoImage(null)} />
-          <p className="mt-1.5 font-deva text-[15px] font-semibold">शुद्ध पियो, खूब जियो</p>
+          {visibility.loginShowLogo !== false && <img src={logoImage ?? logoWhite.url} alt="Sunrich" className="h-auto w-[45vw] max-w-[220px]" onError={() => setLogoImage(null)} />}
+          {visibility.loginShowTagline !== false && <p className="mt-1.5 font-deva text-[15px] font-semibold">शुद्ध पियो, खूब जियो</p>}
         </div>
       </div>
 

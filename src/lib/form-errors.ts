@@ -24,6 +24,33 @@ const TECHNICAL_RE = /pgrst|pgcode|42501|permission denied|row-level|violates|jw
 /** The pricing engine rejects unpriced lines ("No price set for <name>") — always show the friendly price message. */
 const NO_PRICE_RE = /^no price set for /i;
 
+/** Known payment-report rejections retain their reason without exposing database wording. */
+export function paymentReportReason(e: unknown): "dailyLimit" | "duplicate" | "amount" | "reference" | "date" | "proof" | "cash" | "cheque" | "method" | null {
+  const raw = e && typeof e === "object" && "message" in e ? String(e.message) : "";
+  if (/too many payment reports|payment.*(?:daily|today).*limit|daily.*payment.*limit/i.test(raw)) return "dailyLimit";
+  if (/payment is already reported|already.*(?:reported|reference|utr)|duplicate.*(?:payment|reference|utr)/i.test(raw)) return "duplicate";
+  if (/amount must be|invalid amount|amount.*(?:positive|greater than zero|more than zero)/i.test(raw)) return "amount";
+  if (/payment date.*future/i.test(raw)) return "date";
+  if (/add the utr.*screenshot/i.test(raw)) return "proof";
+  if (/choose who.*cash/i.test(raw)) return "cash";
+  if (/enter the cheque number/i.test(raw)) return "cheque";
+  if (/choose how you paid/i.test(raw)) return "method";
+  if (/(?:invalid|12 digits|twelve digits).*(?:utr|reference)|(?:utr|reference).*(?:invalid|12 digits|twelve digits)/i.test(raw)) return "reference";
+  return null;
+}
+
+export function paymentReportMessage(e: unknown): string {
+  const reason = paymentReportReason(e);
+  if (reason) {
+    console.error("[sunrich] payment report error:", e);
+    return i18n.t(`paymentReport.${reason}`);
+  }
+  // Keep network recovery, but never display an untranslated unknown payment diagnostic.
+  const raw = e && typeof e === "object" && "message" in e ? String(e.message) : "";
+  console.error("[sunrich] payment report error:", e);
+  return NETWORK_RE.test(raw) ? i18n.t("errors.network") : i18n.t("paymentReport.failed");
+}
+
 export function serverMessage(e: unknown, fallback: string): string {
   const raw = e && typeof e === "object" && "message" in e ? String((e as { message: unknown }).message ?? "").trim() : "";
   if (raw) console.error("[sunrich] server error:", raw, e);

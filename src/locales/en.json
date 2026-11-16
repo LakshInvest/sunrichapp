@@ -1,5 +1,17 @@
 {
   "brand": "Sunrich",
+  "paymentReport": {
+    "dailyLimit": "Too many payments have been reported today — please contact Sunrich.",
+    "duplicate": "This payment has already been reported. Please check its status in Khata.",
+    "amount": "Please enter a payment amount greater than zero.",
+    "reference": "Please check the payment reference and enter its 12 digits.",
+    "date": "Please choose today or an earlier payment date.",
+    "proof": "Please add the payment reference or a screenshot.",
+    "cash": "Please choose who received your cash payment.",
+    "cheque": "Please enter the cheque number.",
+    "method": "Please choose how you paid.",
+    "failed": "Your payment report could not be sent. Please try again or contact Sunrich; your details are still here."
+  },
   "chooseLanguage": "Choose your language",
   "chooseLanguageHint": "You can change this later",
   "welcomeTitle": "Welcome to Sunrich",

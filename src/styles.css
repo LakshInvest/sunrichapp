@@ -309,10 +309,12 @@
 
   html {
     background-color: var(--color-background);
+    min-height: var(--app-h, 100dvh);
   }
 
   body {
     background-color: var(--color-background);
+    min-height: var(--app-h, 100dvh);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     font-variant-numeric: tabular-nums;
@@ -388,6 +390,10 @@
 .launch-mark { position: absolute; left: 0; right: 0; top: calc(env(safe-area-inset-top) + 12vh); display: flex; flex-direction: column; align-items: center; gap: 6px; color: #fff; text-shadow: 0 2px 12px rgb(0 0 0 / 0.35); }
 .launch-logo { display: block; width: 45vw; max-width: 240px; aspect-ratio: 3 / 1; background: center / contain no-repeat; filter: drop-shadow(0 2px 10px rgb(0 0 0 / 0.35)); }
 .launch-tag { font-family: "Noto Sans Devanagari", sans-serif; font-weight: 600; font-size: clamp(15px, 4.6vw, 20px); }
+html[data-launch-hide-logo] .launch-logo,
+html[data-launch-hide-tagline] .launch-tag { display: none; }
+.qty-input { color: var(--primary-foreground); -webkit-text-fill-color: var(--primary-foreground); caret-color: var(--primary-foreground); }
+.keyboard-sheet { bottom: var(--kb, 0px); }
 
 /* Login: brand photo top ~45%, white card slides up over it. */
 /* Photo takes what the card leaves (>=35% on a 360x640 phone); with the keyboard open it shrinks, never the form. */

@@ -45,7 +45,7 @@ export function PageShell({
   onRefresh,
   ...rest
 }: { className?: string; children: ReactNode; onRefresh?: () => unknown } & HTMLAttributes<HTMLElement>) {
-  const cls = `mx-auto min-h-dvh max-w-md overflow-x-clip bg-background ${className}`;
+  const cls = `mx-auto min-h-[var(--app-h,100dvh)] max-w-md overflow-x-clip bg-background ${className}`;
   if (onRefresh) {
     return (
       <RefreshShell onRefresh={onRefresh} className={cls} {...rest}>

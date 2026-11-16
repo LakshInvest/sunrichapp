@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import logoWhite from "@/assets/brand/sunrich-logo-white.png.asset.json";
 
 /** Inline, runs before first paint: shows the last saved brand image (no JS bundle needed). */
-export const LAUNCH_SCRIPT = `try{var d=document.documentElement,h=/^https:\\/\\//,u=localStorage.getItem("sunrich.launchImg"),g=localStorage.getItem("sunrich.logoImg"),q=localStorage.getItem("sunrich.launchPos");if(u&&h.test(u)){d.style.setProperty("--launch-img","url("+JSON.stringify(u)+")");d.setAttribute("data-launch-img","");if(q==="70% center")d.style.setProperty("--launch-pos",q);var l=document.createElement("link");l.rel="preload";l.as="image";l.href=u;document.head.appendChild(l)}if(g&&h.test(g))d.style.setProperty("--launch-logo","url("+JSON.stringify(g)+")")}catch(e){}`;
+export const LAUNCH_SCRIPT = `try{var d=document.documentElement,h=/^https:\\/\\//,u=localStorage.getItem("sunrich.launchImg"),g=localStorage.getItem("sunrich.logoImg"),q=localStorage.getItem("sunrich.launchPos"),v=JSON.parse(localStorage.getItem("sunrich.brandVisibility")||"{}");d.toggleAttribute("data-launch-hide-logo",v.launchShowLogo===false);d.toggleAttribute("data-launch-hide-tagline",v.launchShowTagline===false);if(u&&h.test(u)){d.style.setProperty("--launch-img","url("+JSON.stringify(u)+")");d.setAttribute("data-launch-img","");if(q==="70% center")d.style.setProperty("--launch-pos",q);var l=document.createElement("link");l.rel="preload";l.as="image";l.href=u;document.head.appendChild(l)}if(g&&h.test(g))d.style.setProperty("--launch-logo","url("+JSON.stringify(g)+")")}catch(e){}`;
 
 /** Static brand screen used while the app loads. No animation, no spinner. */
 export function LaunchArt() {

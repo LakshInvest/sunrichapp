@@ -195,7 +195,11 @@ export type Database = {
           holidays: string[]
           latest_app_version: string
           launch_image_url: string | null
+          launch_show_logo: boolean
+          launch_show_tagline: boolean
           login_image_url: string | null
+          login_show_logo: boolean
+          login_show_tagline: boolean
           login_subtitle: string | null
           login_subtitle_hi: string | null
           login_subtitle_mr: string | null
@@ -265,7 +269,11 @@ export type Database = {
           holidays?: string[]
           latest_app_version?: string
           launch_image_url?: string | null
+          launch_show_logo?: boolean
+          launch_show_tagline?: boolean
           login_image_url?: string | null
+          login_show_logo?: boolean
+          login_show_tagline?: boolean
           login_subtitle?: string | null
           login_subtitle_hi?: string | null
           login_subtitle_mr?: string | null
@@ -335,7 +343,11 @@ export type Database = {
           holidays?: string[]
           latest_app_version?: string
           launch_image_url?: string | null
+          launch_show_logo?: boolean
+          launch_show_tagline?: boolean
           login_image_url?: string | null
+          login_show_logo?: boolean
+          login_show_tagline?: boolean
           login_subtitle?: string | null
           login_subtitle_hi?: string | null
           login_subtitle_mr?: string | null

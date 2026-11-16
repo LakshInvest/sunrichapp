@@ -6839,6 +6839,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      cc_unlock_pin: { Args: { p_user_id: string }; Returns: undefined }
       cc_unplanned_orders: {
         Args: { p_date: string }
         Returns: {

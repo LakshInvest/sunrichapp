@@ -1700,6 +1700,42 @@ export type Database = {
           },
         ]
       }
+      customer_salesmen: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          customer_id: string
+          salesman_user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          customer_id: string
+          salesman_user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          customer_id?: string
+          salesman_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_salesmen_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_salesmen_salesman_user_id_fkey"
+            columns: ["salesman_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_type_documents: {
         Row: {
           customer_type_id: string
@@ -1852,6 +1888,7 @@ export type Database = {
           approved_by: string | null
           area_id: string | null
           business_name: string | null
+          change_note: string | null
           city: string | null
           company_id: string
           contact_name: string
@@ -1891,6 +1928,7 @@ export type Database = {
           approved_by?: string | null
           area_id?: string | null
           business_name?: string | null
+          change_note?: string | null
           city?: string | null
           company_id: string
           contact_name: string
@@ -1930,6 +1968,7 @@ export type Database = {
           approved_by?: string | null
           area_id?: string | null
           business_name?: string | null
+          change_note?: string | null
           city?: string | null
           company_id?: string
           contact_name?: string
@@ -4945,8 +4984,69 @@ export type Database = {
           },
         ]
       }
+      price_change_alerts: {
+        Row: {
+          body: string | null
+          change_pct: number | null
+          changed_by: string | null
+          changed_by_name: string | null
+          company_id: string | null
+          created_at: string
+          customer_id: string | null
+          id: string
+          kind: string
+          new_value: number | null
+          note: string | null
+          old_value: number | null
+          order_id: string | null
+          price_plan_id: string | null
+          product_id: string | null
+          scheme_id: string | null
+          title: string | null
+        }
+        Insert: {
+          body?: string | null
+          change_pct?: number | null
+          changed_by?: string | null
+          changed_by_name?: string | null
+          company_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          kind: string
+          new_value?: number | null
+          note?: string | null
+          old_value?: number | null
+          order_id?: string | null
+          price_plan_id?: string | null
+          product_id?: string | null
+          scheme_id?: string | null
+          title?: string | null
+        }
+        Update: {
+          body?: string | null
+          change_pct?: number | null
+          changed_by?: string | null
+          changed_by_name?: string | null
+          company_id?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          kind?: string
+          new_value?: number | null
+          note?: string | null
+          old_value?: number | null
+          order_id?: string | null
+          price_plan_id?: string | null
+          product_id?: string | null
+          scheme_id?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
       price_plan_items: {
         Row: {
+          change_note: string | null
           city_id: string | null
           created_at: string
           created_by: string | null
@@ -4959,6 +5059,7 @@ export type Database = {
           zone_id: string | null
         }
         Insert: {
+          change_note?: string | null
           city_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -4971,6 +5072,7 @@ export type Database = {
           zone_id?: string | null
         }
         Update: {
+          change_note?: string | null
           city_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -5175,6 +5277,7 @@ export type Database = {
           brand_id: string
           bulk_threshold_qty: number | null
           category_id: string | null
+          change_note: string | null
           code: string
           company_id: string
           created_at: string
@@ -5225,6 +5328,7 @@ export type Database = {
           brand_id: string
           bulk_threshold_qty?: number | null
           category_id?: string | null
+          change_note?: string | null
           code: string
           company_id: string
           created_at?: string
@@ -5275,6 +5379,7 @@ export type Database = {
           brand_id?: string
           bulk_threshold_qty?: number | null
           category_id?: string | null
+          change_note?: string | null
           code?: string
           company_id?: string
           created_at?: string
@@ -5822,6 +5927,39 @@ export type Database = {
           },
         ]
       }
+      sales_active_customer: {
+        Row: {
+          customer_id: string
+          picked_at: string
+          user_id: string
+        }
+        Insert: {
+          customer_id: string
+          picked_at?: string
+          user_id: string
+        }
+        Update: {
+          customer_id?: string
+          picked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_active_customer_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_active_customer_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scheme_combo_items: {
         Row: {
           id: string
@@ -5926,6 +6064,7 @@ export type Database = {
           budget_amount: number | null
           budget_free_qty: number | null
           buy_qty: number | null
+          change_note: string | null
           code: string | null
           combinable: boolean
           company_id: string
@@ -5963,6 +6102,7 @@ export type Database = {
           budget_amount?: number | null
           budget_free_qty?: number | null
           buy_qty?: number | null
+          change_note?: string | null
           code?: string | null
           combinable?: boolean
           company_id: string
@@ -6000,6 +6140,7 @@ export type Database = {
           budget_amount?: number | null
           budget_free_qty?: number | null
           buy_qty?: number | null
+          change_note?: string | null
           code?: string | null
           combinable?: boolean
           company_id?: string
@@ -9884,6 +10025,7 @@ export type Database = {
           budget_amount: number | null
           budget_free_qty: number | null
           buy_qty: number | null
+          change_note: string | null
           code: string | null
           combinable: boolean
           company_id: string
@@ -10012,6 +10154,23 @@ export type Database = {
         Args: { p_boundary: Json; p_lat: number; p_lng: number }
         Returns: boolean
       }
+      _price_alert: {
+        Args: {
+          p_company: string
+          p_customer: string
+          p_kind: string
+          p_new: number
+          p_note: string
+          p_old: number
+          p_order: string
+          p_plan: string
+          p_product: string
+          p_scheme: string
+          p_title: string
+          p_where: string
+        }
+        Returns: undefined
+      }
       _price_lines:
         | {
             Args: { p_customer_id: string; p_lines: Json; p_office: boolean }
@@ -10035,6 +10194,7 @@ export type Database = {
         Args: { p_opening_id: string }
         Returns: undefined
       }
+      _sales_can_use: { Args: { p_customer_id: string }; Returns: boolean }
       _scheme_free_line: {
         Args: {
           p_incl: boolean
@@ -10217,6 +10377,7 @@ export type Database = {
         Args: {
           p_category_id?: string
           p_from: string
+          p_note?: string
           p_percent: number
           p_plan_id: string
         }
@@ -10260,6 +10421,28 @@ export type Database = {
           p_vehicle_id: string
         }
         Returns: Json
+      }
+      cc_audit_log: {
+        Args: {
+          p_actor?: string
+          p_entity?: string
+          p_from?: string
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+          p_to?: string
+        }
+        Returns: {
+          action: string
+          actor_name: string
+          actor_user_id: string
+          changes: Json
+          created_at: string
+          details: Json
+          entity_id: string
+          entity_type: string
+          id: number
+        }[]
       }
       cc_can_edit_delivery_appearance: { Args: never; Returns: boolean }
       cc_cash_mismatch: {
@@ -10319,6 +10502,16 @@ export type Database = {
           photo_url: string
           trips_on_date: number
           unit_id: string
+          user_id: string
+        }[]
+      }
+      cc_list_salesmen: {
+        Args: never
+        Returns: {
+          all_stores: boolean
+          full_name: string
+          mobile: string
+          stores: number
           user_id: string
         }[]
       }
@@ -10411,6 +10604,34 @@ export type Database = {
           taken_at: string
         }[]
       }
+      cc_price_alerts: {
+        Args: { p_from?: string; p_kind?: string; p_to?: string }
+        Returns: {
+          body: string | null
+          change_pct: number | null
+          changed_by: string | null
+          changed_by_name: string | null
+          company_id: string | null
+          created_at: string
+          customer_id: string | null
+          id: string
+          kind: string
+          new_value: number | null
+          note: string | null
+          old_value: number | null
+          order_id: string | null
+          price_plan_id: string | null
+          product_id: string | null
+          scheme_id: string | null
+          title: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "price_change_alerts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       cc_read_notifications: { Args: { p_keys?: string[] }; Returns: undefined }
       cc_record_backup_size: {
         Args: { p_backup_id: string; p_bytes: number }
@@ -10488,6 +10709,10 @@ export type Database = {
           p_session: string
         }
         Returns: Json
+      }
+      cc_set_customer_salesmen: {
+        Args: { p_customer_id: string; p_user_ids: string[] }
+        Returns: number
       }
       cc_set_scheme_active: {
         Args: { p_active: boolean; p_id: string }
@@ -11591,6 +11816,24 @@ export type Database = {
         Args: { p_args: Json; p_op_id: string; p_rpc: string }
         Returns: Json
       }
+      sales_my_customers: {
+        Args: { p_q?: string }
+        Returns: {
+          business_name: string
+          city: string
+          contact_name: string
+          customer_code: string
+          customer_type: string
+          id: string
+          is_active_pick: boolean
+          last_order_at: string
+          mobile: string
+          outstanding: number
+          status: string
+        }[]
+      }
+      sales_pick_customer: { Args: { p_customer_id: string }; Returns: Json }
+      sales_whoami: { Args: never; Returns: Json }
       save_my_address: {
         Args: {
           p_address_line1: string

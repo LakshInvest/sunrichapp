@@ -2120,6 +2120,7 @@ export type Database = {
           expense_limit_per_trip: number
           expense_types: string[]
           expenses_enabled: boolean
+          expired_credit_percent: number
           expired_returns_enabled: boolean
           failed_reasons: string[]
           gate_approval_wait_minutes: number
@@ -2183,6 +2184,7 @@ export type Database = {
           expense_limit_per_trip?: number
           expense_types?: string[]
           expenses_enabled?: boolean
+          expired_credit_percent?: number
           expired_returns_enabled?: boolean
           failed_reasons?: string[]
           gate_approval_wait_minutes?: number
@@ -2246,6 +2248,7 @@ export type Database = {
           expense_limit_per_trip?: number
           expense_types?: string[]
           expenses_enabled?: boolean
+          expired_credit_percent?: number
           expired_returns_enabled?: boolean
           failed_reasons?: string[]
           gate_approval_wait_minutes?: number
@@ -6931,6 +6934,8 @@ export type Database = {
           longitude: number | null
           order_id: string
           otp_verified: boolean
+          payment_reason: string | null
+          payment_resolution: string | null
           photo_url: string | null
           seq: number
           signature_url: string | null
@@ -6954,6 +6959,8 @@ export type Database = {
           longitude?: number | null
           order_id: string
           otp_verified?: boolean
+          payment_reason?: string | null
+          payment_resolution?: string | null
           photo_url?: string | null
           seq?: number
           signature_url?: string | null
@@ -6977,6 +6984,8 @@ export type Database = {
           longitude?: number | null
           order_id?: string
           otp_verified?: boolean
+          payment_reason?: string | null
+          payment_resolution?: string | null
           photo_url?: string | null
           seq?: number
           signature_url?: string | null
@@ -10294,10 +10303,12 @@ export type Database = {
           p_action: string
           p_id: string
           p_note?: string
+          p_rate_per_pack?: number
           p_received_qty?: number
         }
         Returns: Json
       }
+      cc_expired_return_quote: { Args: { p_id: string }; Returns: Json }
       cc_get_scheme: { Args: { p_id: string }; Returns: Json }
       cc_handover_expected: { Args: { p_id: string }; Returns: Json }
       cc_list_drivers: {
@@ -10620,6 +10631,17 @@ export type Database = {
         Returns: undefined
       }
       close_query: { Args: { p_query_id: string }; Returns: undefined }
+      collect_delivery_payment: {
+        Args: {
+          p_amount: number
+          p_mode: string
+          p_photo_url?: string
+          p_reason?: string
+          p_reference?: string
+          p_stop_id: string
+        }
+        Returns: string
+      }
       collect_stop_payment: {
         Args: {
           p_amount: number
@@ -11101,6 +11123,7 @@ export type Database = {
           expense_limit_per_trip: number
           expense_types: string[]
           expenses_enabled: boolean
+          expired_credit_percent: number
           expired_returns_enabled: boolean
           failed_reasons: string[]
           gate_approval_wait_minutes: number

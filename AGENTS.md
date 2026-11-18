@@ -35,3 +35,4 @@ Subdirectories `src/lib/` and `src/routes/` have their own `AGENTS.md`; read the
 - Permissions: one-time intro (`PermissionsIntro`), then contextual asks only. Big problems use `showMessage()`; foreground push `showInAppPush()`. Why: no nagging, clear messages.
 - Product extras via `my_product` (`product-extras.ts`); share `/p/$id`. Why: details without price changes.
 - Reports use statement balances. Why: notes count once.
+- Scheme displays preserve RPC product details and scheme_info type/free_value fields; replacement labels use the server type. Why: gifts outside the catalogue and expired-return replacements must remain distinguishable without calculating discounts.

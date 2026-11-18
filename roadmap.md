@@ -1,3 +1,10 @@
+# Prompt-61
+- [x] Audited existing offers, product badges, server quote/free lines/hints, split names, order history and benefits. Added localized replacement-type labels, compact badges, RPC gift/combo products and server free_value breakdown; no SQL.
+- [x] 217 tests passed; corrected test fixture type and reran 11 scheme tests; build OK. Login plus mounted quote/free/hint/bill/split controls checked at 360/390/412 in en/hi/mr, no overflow or runtime errors; +4 requested exactly four packs.
+- [x] Read-only inspection confirmed my_schemes, quote_my_order, orders/order_lines policies and replacement type; no blocked inspection. All content routes have metadata (balance/order are redirects only). Basic security scan complete, no critical findings. Request publication after commit.
+- [ ] Real customer offers → product → cart → checkout/order/report read-back — external unmanaged Supabase session unavailable; mounted sample controls are not signed-in end-to-end verification.
+- [ ] Android PDF/WhatsApp sharing — requires installed APK and phone.
+
 # Prompt-60
 - [x] Offers row/sheet and product badges/rules in English/Hindi/Marathi.
 - [x] Server quote discounts/free rows/hints/bill and exact names from split[].

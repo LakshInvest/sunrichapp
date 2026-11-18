@@ -2,11 +2,11 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import type { QuoteResult } from "@/lib/orders";
 import { formatINR } from "@/lib/catalogue";
-import type { SchemeInfo } from "@/lib/scheme-rules";
+import { isFreeReplacement, type SchemeInfo } from "@/lib/scheme-rules";
 
 export function SchemeLinePrice({ gross, net, discount, free, info = [] }: { gross?: number | undefined; net: number; discount?: number | undefined; free?: boolean | undefined; info?: SchemeInfo[] | undefined }) {
   const { t } = useTranslation();
-  return <div className="text-sm"><span className="font-bold text-primary">{free ? `${t("offers.free")} ${formatINR(0)}` : formatINR(net)}</span>{!free && (discount ?? 0) > 0 && gross != null && <del className="ml-2 text-xs text-muted-foreground">{formatINR(gross)}</del>}{info.map((s, i) => <p key={i} className="mt-1 break-words text-xs text-success">{t("offers.line", { name: s.name })}{Number(s.amount) > 0 ? ` −${formatINR(s.amount)}` : ""}</p>)}</div>;
+  return <div className="text-sm"><span className="font-bold text-primary">{free ? `${t("offers.free")} ${formatINR(0)}` : formatINR(net)}</span>{!free && (discount ?? 0) > 0 && gross != null && <del className="ml-2 text-xs text-muted-foreground">{formatINR(gross)}</del>}{info.map((s, i) => <p key={i} className="mt-1 break-words text-xs text-success">{isFreeReplacement(s) ? t("offers.replacement") : t("offers.line", { name: s.name })}{Number(s.amount) > 0 ? ` −${formatINR(s.amount)}` : ""}</p>)}</div>;
 }
 export function QuoteFreeLines({ quote }: { quote: QuoteResult | null }) {
   const { t } = useTranslation();

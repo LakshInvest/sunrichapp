@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_appearance: {
+        Row: {
+          app: string
+          company_id: string
+          created_at: string
+          screen_changed_at: Json
+          settings: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          app?: string
+          company_id: string
+          created_at?: string
+          screen_changed_at?: Json
+          settings?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          app?: string
+          company_id?: string
+          created_at?: string
+          screen_changed_at?: Json
+          settings?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_appearance_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_banners: {
         Row: {
           company_id: string
@@ -182,6 +220,7 @@ export type Database = {
           allow_cancel_before: string
           allow_order_notes: boolean
           app_logo_url: string | null
+          appearance_changed_at: Json
           auto_plan_last_date: string | null
           closed_weekdays: number[]
           company_id: string
@@ -210,6 +249,7 @@ export type Database = {
           login_title_hi: string | null
           login_title_mr: string | null
           maintenance_message: string | null
+          max_devices_per_user: number
           min_app_version: string
           min_order_value: number
           multiple_addresses: boolean
@@ -256,6 +296,7 @@ export type Database = {
           allow_cancel_before?: string
           allow_order_notes?: boolean
           app_logo_url?: string | null
+          appearance_changed_at?: Json
           auto_plan_last_date?: string | null
           closed_weekdays?: number[]
           company_id: string
@@ -284,6 +325,7 @@ export type Database = {
           login_title_hi?: string | null
           login_title_mr?: string | null
           maintenance_message?: string | null
+          max_devices_per_user?: number
           min_app_version?: string
           min_order_value?: number
           multiple_addresses?: boolean
@@ -330,6 +372,7 @@ export type Database = {
           allow_cancel_before?: string
           allow_order_notes?: boolean
           app_logo_url?: string | null
+          appearance_changed_at?: Json
           auto_plan_last_date?: string | null
           closed_weekdays?: number[]
           company_id?: string
@@ -358,6 +401,7 @@ export type Database = {
           login_title_hi?: string | null
           login_title_mr?: string | null
           maintenance_message?: string | null
+          max_devices_per_user?: number
           min_app_version?: string
           min_order_value?: number
           multiple_addresses?: boolean
@@ -696,10 +740,97 @@ export type Database = {
             foreignKeyName: "cash_handovers_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_handovers_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
             referencedRelation: "trips"
             referencedColumns: ["id"]
           },
         ]
+      }
+      cc_backup_metrics: {
+        Row: {
+          backup_id: string
+          byte_size: number
+          company_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          backup_id: string
+          byte_size: number
+          company_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          backup_id?: string
+          byte_size?: number
+          company_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cc_backup_metrics_backup_id_fkey"
+            columns: ["backup_id"]
+            isOneToOne: true
+            referencedRelation: "photo_backups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc_notification_reads: {
+        Row: {
+          created_at: string
+          item_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          item_key: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          item_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cc_photo_deletion_audit: {
+        Row: {
+          byte_size: number
+          company_id: string
+          created_at: string
+          id: string
+          photo_id: string
+          updated_at: string
+        }
+        Insert: {
+          byte_size?: number
+          company_id: string
+          created_at?: string
+          id?: string
+          photo_id: string
+          updated_at?: string
+        }
+        Update: {
+          byte_size?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          photo_id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       client_ops: {
         Row: {
@@ -890,6 +1021,33 @@ export type Database = {
           },
         ]
       }
+      courier_companies: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       credit_debit_notes: {
         Row: {
           approved_at: string | null
@@ -989,7 +1147,21 @@ export type Database = {
             foreignKeyName: "credit_debit_notes_invoice_id_fkey"
             columns: ["invoice_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
             referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_orders"
             referencedColumns: ["id"]
           },
           {
@@ -1003,7 +1175,21 @@ export type Database = {
             foreignKeyName: "credit_debit_notes_stop_id_fkey"
             columns: ["stop_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
             referencedRelation: "trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
             referencedColumns: ["id"]
           },
           {
@@ -1138,6 +1324,81 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_crate_movements: {
+        Row: {
+          company_id: string
+          crates_left: number
+          crates_picked_up: number
+          created_at: string
+          created_by: string
+          customer_id: string
+          id: string
+          stop_id: string
+          trip_id: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          crates_left?: number
+          crates_picked_up?: number
+          created_at?: string
+          created_by?: string
+          customer_id: string
+          id?: string
+          stop_id: string
+          trip_id: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          crates_left?: number
+          crates_picked_up?: number
+          created_at?: string
+          created_by?: string
+          customer_id?: string
+          id?: string
+          stop_id?: string
+          trip_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_crate_movements_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_crate_movements_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: true
+            referencedRelation: "cc70_report_trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_crate_movements_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: true
+            referencedRelation: "trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_crate_movements_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_crate_movements_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
             referencedColumns: ["id"]
           },
         ]
@@ -1771,6 +2032,9 @@ export type Database = {
           delivered_qty: number
           empties_returned: number
           order_line_id: string
+          reason_code: string | null
+          reason_note: string | null
+          reason_photo_url: string | null
           refused_qty: number
           short_qty: number
           stop_id: string
@@ -1780,6 +2044,9 @@ export type Database = {
           delivered_qty?: number
           empties_returned?: number
           order_line_id: string
+          reason_code?: string | null
+          reason_note?: string | null
+          reason_photo_url?: string | null
           refused_qty?: number
           short_qty?: number
           stop_id: string
@@ -1789,6 +2056,9 @@ export type Database = {
           delivered_qty?: number
           empties_returned?: number
           order_line_id?: string
+          reason_code?: string | null
+          reason_note?: string | null
+          reason_photo_url?: string | null
           refused_qty?: number
           short_qty?: number
           stop_id?: string
@@ -1798,7 +2068,21 @@ export type Database = {
             foreignKeyName: "delivery_lines_order_line_id_fkey"
             columns: ["order_line_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_order_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_lines_order_line_id_fkey"
+            columns: ["order_line_id"]
+            isOneToOne: false
             referencedRelation: "order_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_lines_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trip_stops"
             referencedColumns: ["id"]
           },
           {
@@ -1819,23 +2103,28 @@ export type Database = {
           allow_pickup_only: boolean
           allow_spot_sale: boolean
           allow_upi: boolean
+          arrival_distance_limit_m: number
           arrived_button_enabled: boolean
           ask_office_no_reply: string
           ask_office_wait_minutes: number
           auto_credit_block_enabled: boolean
           collect_old_dues: boolean
           company_id: string
+          crates_at_customer_enabled: boolean
           default_language: string
           distributor_reply_minutes: number
           expense_bill_photo_required: boolean
           expense_limit_per_trip: number
           expense_types: string[]
           expenses_enabled: boolean
+          expired_returns_enabled: boolean
           failed_reasons: string[]
+          gate_approval_wait_minutes: number
           gate_pass_print: boolean
           location_at_each_stop: boolean
           location_interval_minutes: number
           location_tracking_enabled: boolean
+          office_emergency_number: string | null
           photo_days_challan: number
           photo_days_cheque: number
           photo_days_delivery: number
@@ -1877,23 +2166,28 @@ export type Database = {
           allow_pickup_only?: boolean
           allow_spot_sale?: boolean
           allow_upi?: boolean
+          arrival_distance_limit_m?: number
           arrived_button_enabled?: boolean
           ask_office_no_reply?: string
           ask_office_wait_minutes?: number
           auto_credit_block_enabled?: boolean
           collect_old_dues?: boolean
           company_id: string
+          crates_at_customer_enabled?: boolean
           default_language?: string
           distributor_reply_minutes?: number
           expense_bill_photo_required?: boolean
           expense_limit_per_trip?: number
           expense_types?: string[]
           expenses_enabled?: boolean
+          expired_returns_enabled?: boolean
           failed_reasons?: string[]
+          gate_approval_wait_minutes?: number
           gate_pass_print?: boolean
           location_at_each_stop?: boolean
           location_interval_minutes?: number
           location_tracking_enabled?: boolean
+          office_emergency_number?: string | null
           photo_days_challan?: number
           photo_days_cheque?: number
           photo_days_delivery?: number
@@ -1935,23 +2229,28 @@ export type Database = {
           allow_pickup_only?: boolean
           allow_spot_sale?: boolean
           allow_upi?: boolean
+          arrival_distance_limit_m?: number
           arrived_button_enabled?: boolean
           ask_office_no_reply?: string
           ask_office_wait_minutes?: number
           auto_credit_block_enabled?: boolean
           collect_old_dues?: boolean
           company_id?: string
+          crates_at_customer_enabled?: boolean
           default_language?: string
           distributor_reply_minutes?: number
           expense_bill_photo_required?: boolean
           expense_limit_per_trip?: number
           expense_types?: string[]
           expenses_enabled?: boolean
+          expired_returns_enabled?: boolean
           failed_reasons?: string[]
+          gate_approval_wait_minutes?: number
           gate_pass_print?: boolean
           location_at_each_stop?: boolean
           location_interval_minutes?: number
           location_tracking_enabled?: boolean
+          office_emergency_number?: string | null
           photo_days_challan?: number
           photo_days_cheque?: number
           photo_days_delivery?: number
@@ -2223,6 +2522,54 @@ export type Database = {
           },
         ]
       }
+      expired_scrap_stock: {
+        Row: {
+          company_id: string
+          created_at: string
+          expired_return_id: string
+          id: string
+          product_id: string
+          qty: number
+          unit_id: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          expired_return_id: string
+          id?: string
+          product_id: string
+          qty: number
+          unit_id: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          expired_return_id?: string
+          id?: string
+          product_id?: string
+          qty?: number
+          unit_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expired_scrap_stock_expired_return_id_fkey"
+            columns: ["expired_return_id"]
+            isOneToOne: true
+            referencedRelation: "trip_expired_returns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expired_scrap_stock_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       firm_bank_accounts: {
         Row: {
           account_name: string
@@ -2426,8 +2773,169 @@ export type Database = {
           },
         ]
       }
+      gate_approval_events: {
+        Row: {
+          actor_id: string
+          company_id: string
+          created_at: string
+          data: Json
+          entity_id: string | null
+          event: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          actor_id?: string
+          company_id?: string
+          created_at?: string
+          data?: Json
+          entity_id?: string | null
+          event: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          actor_id?: string
+          company_id?: string
+          created_at?: string
+          data?: Json
+          entity_id?: string | null
+          event?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      gate_approval_recipients: {
+        Row: {
+          company_id: string
+          created_at: string
+          request_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          request_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          request_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gate_approval_recipients_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "gate_approval_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gate_approval_requests: {
+        Row: {
+          answered_by: string | null
+          approval_mode: string | null
+          company_id: string
+          created_at: string
+          details: Json
+          host_id: string | null
+          id: string
+          phone_approved_by: string | null
+          reason: string | null
+          requested_by: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          answered_by?: string | null
+          approval_mode?: string | null
+          company_id?: string
+          created_at?: string
+          details: Json
+          host_id?: string | null
+          id?: string
+          phone_approved_by?: string | null
+          reason?: string | null
+          requested_by?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          answered_by?: string | null
+          approval_mode?: string | null
+          company_id?: string
+          created_at?: string
+          details?: Json
+          host_id?: string | null
+          id?: string
+          phone_approved_by?: string | null
+          reason?: string | null
+          requested_by?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      gate_blocks: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          id: string
+          mobile: string | null
+          name: string
+          reason: string
+          removal_note: string | null
+          removed_at: string | null
+          removed_by: string | null
+          until_day: string | null
+          updated_at: string
+          vehicle_no: string | null
+        }
+        Insert: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          mobile?: string | null
+          name: string
+          reason: string
+          removal_note?: string | null
+          removed_at?: string | null
+          removed_by?: string | null
+          until_day?: string | null
+          updated_at?: string
+          vehicle_no?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          mobile?: string | null
+          name?: string
+          reason?: string
+          removal_note?: string | null
+          removed_at?: string | null
+          removed_by?: string | null
+          until_day?: string | null
+          updated_at?: string
+          vehicle_no?: string | null
+        }
+        Relationships: []
+      }
       gate_entries: {
         Row: {
+          approval_by: string | null
+          approval_mode: string | null
+          approval_request_id: string | null
           challan_photo_path: string | null
           company_id: string
           courier_name: string | null
@@ -2445,6 +2953,7 @@ export type Database = {
           name: string
           out_at: string | null
           out_by: string | null
+          out_photo_path: string | null
           parcel_count: number | null
           people_count: number
           person_type: string
@@ -2455,6 +2964,9 @@ export type Database = {
           vehicle_no: string | null
         }
         Insert: {
+          approval_by?: string | null
+          approval_mode?: string | null
+          approval_request_id?: string | null
           challan_photo_path?: string | null
           company_id?: string
           courier_name?: string | null
@@ -2472,6 +2984,7 @@ export type Database = {
           name: string
           out_at?: string | null
           out_by?: string | null
+          out_photo_path?: string | null
           parcel_count?: number | null
           people_count?: number
           person_type?: string
@@ -2482,6 +2995,9 @@ export type Database = {
           vehicle_no?: string | null
         }
         Update: {
+          approval_by?: string | null
+          approval_mode?: string | null
+          approval_request_id?: string | null
           challan_photo_path?: string | null
           company_id?: string
           courier_name?: string | null
@@ -2499,6 +3015,7 @@ export type Database = {
           name?: string
           out_at?: string | null
           out_by?: string | null
+          out_photo_path?: string | null
           parcel_count?: number | null
           people_count?: number
           person_type?: string
@@ -2540,10 +3057,68 @@ export type Database = {
             foreignKeyName: "gate_passes_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: true
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gate_passes_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: true
             referencedRelation: "trips"
             referencedColumns: ["id"]
           },
         ]
+      }
+      gate_pre_invites: {
+        Row: {
+          cancelled_at: string | null
+          cancelled_by: string | null
+          company_id: string
+          created_at: string
+          created_by: string
+          from_day: string
+          host_id: string
+          id: string
+          mobile: string | null
+          name: string
+          purpose: string
+          to_day: string
+          updated_at: string
+          vehicle_no: string | null
+        }
+        Insert: {
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          from_day: string
+          host_id: string
+          id?: string
+          mobile?: string | null
+          name: string
+          purpose: string
+          to_day: string
+          updated_at?: string
+          vehicle_no?: string | null
+        }
+        Update: {
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          from_day?: string
+          host_id?: string
+          id?: string
+          mobile?: string | null
+          name?: string
+          purpose?: string
+          to_day?: string
+          updated_at?: string
+          vehicle_no?: string | null
+        }
+        Relationships: []
       }
       gate_problems: {
         Row: {
@@ -2587,6 +3162,60 @@ export type Database = {
           resolved_at?: string | null
           resolved_by?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      gate_qr_secret: {
+        Row: {
+          company_id: string
+          created_at: string
+          secret: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          secret?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          secret?: string
+        }
+        Relationships: []
+      }
+      gate_scan_log: {
+        Row: {
+          company_id: string
+          created_at: string
+          guard_id: string | null
+          guard_name: string | null
+          id: string
+          kind: string
+          label: string | null
+          mode: string
+          ref_id: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          guard_id?: string | null
+          guard_name?: string | null
+          id?: string
+          kind: string
+          label?: string | null
+          mode: string
+          ref_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          guard_id?: string | null
+          guard_name?: string | null
+          id?: string
+          kind?: string
+          label?: string | null
+          mode?: string
+          ref_id?: string | null
         }
         Relationships: []
       }
@@ -3165,7 +3794,21 @@ export type Database = {
             foreignKeyName: "invoice_lines_invoice_id_fkey"
             columns: ["invoice_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
             referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_order_line_id_fkey"
+            columns: ["order_line_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_order_lines"
             referencedColumns: ["id"]
           },
           {
@@ -3310,7 +3953,21 @@ export type Database = {
             foreignKeyName: "invoices_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: true
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
             referencedColumns: ["id"]
           },
           {
@@ -3425,6 +4082,13 @@ export type Database = {
             foreignKeyName: "order_feedback_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: true
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_feedback_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
@@ -3499,6 +4163,13 @@ export type Database = {
             foreignKeyName: "order_lines_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_lines_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
@@ -3540,6 +4211,13 @@ export type Database = {
           to_status?: Database["public"]["Enums"]["order_status"]
         }
         Relationships: [
+          {
+            foreignKeyName: "order_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "order_status_history_order_id_fkey"
             columns: ["order_id"]
@@ -3985,6 +4663,13 @@ export type Database = {
             foreignKeyName: "payment_proofs_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_proofs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
@@ -4397,6 +5082,7 @@ export type Database = {
           pack_label: string | null
           pack_label_hi: string | null
           pack_label_mr: string | null
+          packs_per_crate: number | null
           reorder_level: number | null
           sell_unit: Database["public"]["Enums"]["sell_unit"]
           sell_unit_id: string | null
@@ -4446,6 +5132,7 @@ export type Database = {
           pack_label?: string | null
           pack_label_hi?: string | null
           pack_label_mr?: string | null
+          packs_per_crate?: number | null
           reorder_level?: number | null
           sell_unit?: Database["public"]["Enums"]["sell_unit"]
           sell_unit_id?: string | null
@@ -4495,6 +5182,7 @@ export type Database = {
           pack_label?: string | null
           pack_label_hi?: string | null
           pack_label_mr?: string | null
+          packs_per_crate?: number | null
           reorder_level?: number | null
           sell_unit?: Database["public"]["Enums"]["sell_unit"]
           sell_unit_id?: string | null
@@ -4615,6 +5303,13 @@ export type Database = {
             foreignKeyName: "receipt_allocation_history_invoice_id_fkey"
             columns: ["invoice_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_allocation_history_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
             referencedRelation: "invoices"
             referencedColumns: ["id"]
           },
@@ -4623,6 +5318,13 @@ export type Database = {
             columns: ["opening_id"]
             isOneToOne: false
             referencedRelation: "customer_opening_balances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_allocation_history_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_receipts"
             referencedColumns: ["id"]
           },
           {
@@ -4667,6 +5369,13 @@ export type Database = {
             foreignKeyName: "receipt_allocation_log_receipt_id_fkey"
             columns: ["receipt_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_receipts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_allocation_log_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
             referencedRelation: "receipts"
             referencedColumns: ["id"]
           },
@@ -4702,6 +5411,13 @@ export type Database = {
             foreignKeyName: "receipt_allocations_invoice_id_fkey"
             columns: ["invoice_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_allocations_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
             referencedRelation: "invoices"
             referencedColumns: ["id"]
           },
@@ -4710,6 +5426,13 @@ export type Database = {
             columns: ["opening_id"]
             isOneToOne: false
             referencedRelation: "customer_opening_balances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_allocations_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_receipts"
             referencedColumns: ["id"]
           },
           {
@@ -4839,6 +5562,13 @@ export type Database = {
             foreignKeyName: "receipts_bounce_charge_note_id_fkey"
             columns: ["bounce_charge_note_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_credit_debit_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_bounce_charge_note_id_fkey"
+            columns: ["bounce_charge_note_id"]
+            isOneToOne: false
             referencedRelation: "credit_debit_notes"
             referencedColumns: ["id"]
           },
@@ -4868,6 +5598,13 @@ export type Database = {
             columns: ["firm_id"]
             isOneToOne: false
             referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_trip_collection_id_fkey"
+            columns: ["trip_collection_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trip_collections"
             referencedColumns: ["id"]
           },
           {
@@ -5005,6 +5742,36 @@ export type Database = {
           },
         ]
       }
+      staff_name_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          company_id: string
+          id: string
+          new_name: string | null
+          old_name: string | null
+          user_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          company_id: string
+          id?: string
+          new_name?: string | null
+          old_name?: string | null
+          user_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          company_id?: string
+          id?: string
+          new_name?: string | null
+          old_name?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       staff_notifications: {
         Row: {
           body: string | null
@@ -5043,6 +5810,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      staff_photo_history: {
+        Row: {
+          changed_at: string
+          changed_by: string
+          company_id: string
+          id: string
+          new_photo_path: string | null
+          old_photo_path: string | null
+          user_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by: string
+          company_id: string
+          id?: string
+          new_photo_path?: string | null
+          old_photo_path?: string | null
+          user_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string
+          company_id?: string
+          id?: string
+          new_photo_path?: string | null
+          old_photo_path?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_photo_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stock_movements: {
         Row: {
@@ -5204,7 +6009,21 @@ export type Database = {
             foreignKeyName: "trip_alerts_stop_id_fkey"
             columns: ["stop_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_alerts_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
             referencedRelation: "trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_alerts_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
             referencedColumns: ["id"]
           },
           {
@@ -5274,6 +6093,13 @@ export type Database = {
             foreignKeyName: "trip_collections_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_collections_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
             referencedRelation: "orders"
             referencedColumns: ["id"]
           },
@@ -5281,7 +6107,21 @@ export type Database = {
             foreignKeyName: "trip_collections_stop_id_fkey"
             columns: ["stop_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_collections_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
             referencedRelation: "trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_collections_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
             referencedColumns: ["id"]
           },
           {
@@ -5300,6 +6140,7 @@ export type Database = {
           bill_photo_url: string | null
           created_at: string
           created_by: string | null
+          diesel_litres: number | null
           expense_type: string
           id: string
           note: string | null
@@ -5312,6 +6153,7 @@ export type Database = {
           bill_photo_url?: string | null
           created_at?: string
           created_by?: string | null
+          diesel_litres?: number | null
           expense_type: string
           id?: string
           note?: string | null
@@ -5324,6 +6166,7 @@ export type Database = {
           bill_photo_url?: string | null
           created_at?: string
           created_by?: string | null
+          diesel_litres?: number | null
           expense_type?: string
           id?: string
           note?: string | null
@@ -5333,6 +6176,110 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "trip_expenses_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_expenses_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_expired_returns: {
+        Row: {
+          company_id: string
+          created_at: string
+          customer_id: string
+          driver_user_id: string
+          id: string
+          office_action: string | null
+          office_note: string | null
+          photo_url: string
+          product_id: string
+          qty: number
+          received_at: string | null
+          received_qty: number | null
+          stop_id: string
+          trip_id: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          customer_id: string
+          driver_user_id?: string
+          id?: string
+          office_action?: string | null
+          office_note?: string | null
+          photo_url: string
+          product_id: string
+          qty: number
+          received_at?: string | null
+          received_qty?: number | null
+          stop_id: string
+          trip_id: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          customer_id?: string
+          driver_user_id?: string
+          id?: string
+          office_action?: string | null
+          office_note?: string | null
+          photo_url?: string
+          product_id?: string
+          qty?: number
+          received_at?: string | null
+          received_qty?: number | null
+          stop_id?: string
+          trip_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_expired_returns_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_expired_returns_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_expired_returns_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_expired_returns_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_expired_returns_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_expired_returns_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "trips"
@@ -5362,6 +6309,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_extra_load_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
             referencedColumns: ["id"]
           },
           {
@@ -5416,6 +6370,13 @@ export type Database = {
             foreignKeyName: "trip_loading_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_loading_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
             referencedRelation: "trips"
             referencedColumns: ["id"]
           },
@@ -5459,6 +6420,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "trip_locations_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trip_locations_trip_id_fkey"
             columns: ["trip_id"]
@@ -5524,6 +6492,13 @@ export type Database = {
             foreignKeyName: "trip_pickups_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_pickups_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
             referencedRelation: "trips"
             referencedColumns: ["id"]
           },
@@ -5575,6 +6550,13 @@ export type Database = {
             foreignKeyName: "trip_returns_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_returns_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
             referencedRelation: "trips"
             referencedColumns: ["id"]
           },
@@ -5582,6 +6564,11 @@ export type Database = {
       }
       trip_stops: {
         Row: {
+          arrival_distance_m: number | null
+          arrival_latitude: number | null
+          arrival_longitude: number | null
+          arrival_note: string | null
+          arrival_reason: string | null
           arrived_at: string | null
           delivered_at: string | null
           do_later_at: string | null
@@ -5600,6 +6587,11 @@ export type Database = {
           trip_id: string
         }
         Insert: {
+          arrival_distance_m?: number | null
+          arrival_latitude?: number | null
+          arrival_longitude?: number | null
+          arrival_note?: string | null
+          arrival_reason?: string | null
           arrived_at?: string | null
           delivered_at?: string | null
           do_later_at?: string | null
@@ -5618,6 +6610,11 @@ export type Database = {
           trip_id: string
         }
         Update: {
+          arrival_distance_m?: number | null
+          arrival_latitude?: number | null
+          arrival_longitude?: number | null
+          arrival_note?: string | null
+          arrival_reason?: string | null
           arrived_at?: string | null
           delivered_at?: string | null
           do_later_at?: string | null
@@ -5640,7 +6637,21 @@ export type Database = {
             foreignKeyName: "trip_stops_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_stops_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_stops_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
             referencedColumns: ["id"]
           },
           {
@@ -5685,6 +6696,13 @@ export type Database = {
             foreignKeyName: "trip_vehicle_checks_trip_id_fkey"
             columns: ["trip_id"]
             isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_vehicle_checks_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
             referencedRelation: "trips"
             referencedColumns: ["id"]
           },
@@ -5696,6 +6714,12 @@ export type Database = {
           cash_expected: number
           cash_received: number | null
           company_id: string
+          crates_load_reason: string | null
+          crates_loaded: number | null
+          crates_planned: number | null
+          crates_planned_manual: boolean
+          crates_return_reason: string | null
+          crates_returned: number | null
           created_at: string
           customer_vehicle_no: string | null
           driver_started_at: string | null
@@ -5712,6 +6736,8 @@ export type Database = {
           gate_in_manual: boolean
           gate_out_at: string | null
           gate_out_by: string | null
+          gate_out_manual: boolean
+          gate_return_note: string | null
           helper_user_ids: string[]
           hired_driver_mobile: string | null
           hired_driver_name: string | null
@@ -5742,6 +6768,12 @@ export type Database = {
           cash_expected?: number
           cash_received?: number | null
           company_id: string
+          crates_load_reason?: string | null
+          crates_loaded?: number | null
+          crates_planned?: number | null
+          crates_planned_manual?: boolean
+          crates_return_reason?: string | null
+          crates_returned?: number | null
           created_at?: string
           customer_vehicle_no?: string | null
           driver_started_at?: string | null
@@ -5758,6 +6790,8 @@ export type Database = {
           gate_in_manual?: boolean
           gate_out_at?: string | null
           gate_out_by?: string | null
+          gate_out_manual?: boolean
+          gate_return_note?: string | null
           helper_user_ids?: string[]
           hired_driver_mobile?: string | null
           hired_driver_name?: string | null
@@ -5788,6 +6822,12 @@ export type Database = {
           cash_expected?: number
           cash_received?: number | null
           company_id?: string
+          crates_load_reason?: string | null
+          crates_loaded?: number | null
+          crates_planned?: number | null
+          crates_planned_manual?: boolean
+          crates_return_reason?: string | null
+          crates_returned?: number | null
           created_at?: string
           customer_vehicle_no?: string | null
           driver_started_at?: string | null
@@ -5804,6 +6844,8 @@ export type Database = {
           gate_in_manual?: boolean
           gate_out_at?: string | null
           gate_out_by?: string | null
+          gate_out_manual?: boolean
+          gate_return_note?: string | null
           helper_user_ids?: string[]
           hired_driver_mobile?: string | null
           hired_driver_name?: string | null
@@ -6214,6 +7256,7 @@ export type Database = {
       }
       user_sessions: {
         Row: {
+          device_id: string | null
           ip_address: string | null
           last_seen_at: string
           login_method: string | null
@@ -6227,6 +7270,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          device_id?: string | null
           ip_address?: string | null
           last_seen_at?: string
           login_method?: string | null
@@ -6240,6 +7284,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          device_id?: string | null
           ip_address?: string | null
           last_seen_at?: string
           login_method?: string | null
@@ -6253,6 +7298,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      vehicle_qr_codes: {
+        Row: {
+          active: boolean
+          code: string
+          company_id: string
+          created_at: string
+          id: string
+          revoked_at: string | null
+          revoked_by: string | null
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          active?: boolean
+          code?: string
+          company_id: string
+          created_at?: string
+          id?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_qr_codes_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vehicles: {
         Row: {
@@ -6358,6 +7447,1889 @@ export type Database = {
       }
     }
     Views: {
+      cc70_report_cash_handovers: {
+        Row: {
+          amount: number | null
+          company_id: string | null
+          confirmed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          from_user_id: string | null
+          handover_date: string | null
+          id: string | null
+          mismatch_at: string | null
+          mismatch_reason: string | null
+          note: string | null
+          received_amount: number | null
+          to_user_id: string | null
+          trip_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          company_id?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          from_user_id?: string | null
+          handover_date?: string | null
+          id?: string | null
+          mismatch_at?: string | null
+          mismatch_reason?: string | null
+          note?: string | null
+          received_amount?: number | null
+          to_user_id?: string | null
+          trip_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          company_id?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          from_user_id?: string | null
+          handover_date?: string | null
+          id?: string | null
+          mismatch_at?: string | null
+          mismatch_reason?: string | null
+          note?: string | null
+          received_amount?: number | null
+          to_user_id?: string | null
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_handovers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_handovers_from_user_id_fkey"
+            columns: ["from_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_handovers_to_user_id_fkey"
+            columns: ["to_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_handovers_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_handovers_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_container_movements: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          customer_id: string | null
+          id: number | null
+          note: string | null
+          product_id: string | null
+          qty_in: number | null
+          qty_out: number | null
+          ref_id: string | null
+          ref_type: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_id?: string | null
+          id?: number | null
+          note?: string | null
+          product_id?: string | null
+          qty_in?: number | null
+          qty_out?: number | null
+          ref_id?: string | null
+          ref_type?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_id?: string | null
+          id?: number | null
+          note?: string | null
+          product_id?: string | null
+          qty_in?: number | null
+          qty_out?: number | null
+          ref_id?: string | null
+          ref_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "container_movements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "container_movements_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "container_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_credit_debit_notes: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          customer_id: string | null
+          firm_id: string | null
+          gst_rate: number | null
+          id: string | null
+          invoice_id: string | null
+          note_date: string | null
+          note_no: string | null
+          note_type: string | null
+          order_id: string | null
+          reason: string | null
+          reject_reason: string | null
+          status: string | null
+          stop_id: string | null
+          tax_amount: number | null
+          taxable_value: number | null
+          total: number | null
+          trip_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_id?: string | null
+          firm_id?: string | null
+          gst_rate?: number | null
+          id?: string | null
+          invoice_id?: string | null
+          note_date?: string | null
+          note_no?: string | null
+          note_type?: string | null
+          order_id?: string | null
+          reason?: string | null
+          reject_reason?: string | null
+          status?: string | null
+          stop_id?: string | null
+          tax_amount?: number | null
+          taxable_value?: number | null
+          total?: number | null
+          trip_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_id?: string | null
+          firm_id?: string | null
+          gst_rate?: number | null
+          id?: string | null
+          invoice_id?: string | null
+          note_date?: string | null
+          note_no?: string | null
+          note_type?: string | null
+          order_id?: string | null
+          reason?: string | null
+          reject_reason?: string | null
+          status?: string | null
+          stop_id?: string | null
+          tax_amount?: number | null
+          taxable_value?: number | null
+          total?: number | null
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_debit_notes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_invoice_lines: {
+        Row: {
+          cgst: number | null
+          description: string | null
+          gst_rate: number | null
+          hsn_code: string | null
+          id: string | null
+          igst: number | null
+          invoice_id: string | null
+          line_total: number | null
+          order_line_id: string | null
+          product_id: string | null
+          qty: number | null
+          sgst: number | null
+          sort_order: number | null
+          taxable_value: number | null
+          unit_price: number | null
+        }
+        Insert: {
+          cgst?: number | null
+          description?: string | null
+          gst_rate?: number | null
+          hsn_code?: string | null
+          id?: string | null
+          igst?: number | null
+          invoice_id?: string | null
+          line_total?: number | null
+          order_line_id?: string | null
+          product_id?: string | null
+          qty?: number | null
+          sgst?: number | null
+          sort_order?: number | null
+          taxable_value?: number | null
+          unit_price?: number | null
+        }
+        Update: {
+          cgst?: number | null
+          description?: string | null
+          gst_rate?: number | null
+          hsn_code?: string | null
+          id?: string | null
+          igst?: number | null
+          invoice_id?: string | null
+          line_total?: number | null
+          order_line_id?: string | null
+          product_id?: string | null
+          qty?: number | null
+          sgst?: number | null
+          sort_order?: number | null
+          taxable_value?: number | null
+          unit_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_order_line_id_fkey"
+            columns: ["order_line_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_order_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_order_line_id_fkey"
+            columns: ["order_line_id"]
+            isOneToOne: false
+            referencedRelation: "order_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_invoices: {
+        Row: {
+          ack_date: string | null
+          ack_no: string | null
+          amount_paid: number | null
+          billing_address: string | null
+          business_name: string | null
+          cgst: number | null
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          customer_gstin: string | null
+          customer_id: string | null
+          customer_name: string | null
+          deposit_total: number | null
+          due_date: string | null
+          eway_bill_no: string | null
+          firm_id: string | null
+          grand_total: number | null
+          id: string | null
+          igst: number | null
+          invoice_date: string | null
+          invoice_no: string | null
+          irn: string | null
+          is_interstate: boolean | null
+          order_id: string | null
+          payment_status: string | null
+          place_of_supply: string | null
+          round_off: number | null
+          sgst: number | null
+          status: string | null
+          taxable_value: number | null
+          trip_id: string | null
+        }
+        Insert: {
+          ack_date?: string | null
+          ack_no?: string | null
+          amount_paid?: number | null
+          billing_address?: string | null
+          business_name?: string | null
+          cgst?: number | null
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_gstin?: string | null
+          customer_id?: string | null
+          customer_name?: string | null
+          deposit_total?: number | null
+          due_date?: string | null
+          eway_bill_no?: string | null
+          firm_id?: string | null
+          grand_total?: number | null
+          id?: string | null
+          igst?: number | null
+          invoice_date?: string | null
+          invoice_no?: string | null
+          irn?: string | null
+          is_interstate?: boolean | null
+          order_id?: string | null
+          payment_status?: string | null
+          place_of_supply?: string | null
+          round_off?: number | null
+          sgst?: number | null
+          status?: string | null
+          taxable_value?: number | null
+          trip_id?: string | null
+        }
+        Update: {
+          ack_date?: string | null
+          ack_no?: string | null
+          amount_paid?: number | null
+          billing_address?: string | null
+          business_name?: string | null
+          cgst?: number | null
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_gstin?: string | null
+          customer_id?: string | null
+          customer_name?: string | null
+          deposit_total?: number | null
+          due_date?: string | null
+          eway_bill_no?: string | null
+          firm_id?: string | null
+          grand_total?: number | null
+          id?: string | null
+          igst?: number | null
+          invoice_date?: string | null
+          invoice_no?: string | null
+          irn?: string | null
+          is_interstate?: boolean | null
+          order_id?: string | null
+          payment_status?: string | null
+          place_of_supply?: string | null
+          round_off?: number | null
+          sgst?: number | null
+          status?: string | null
+          taxable_value?: number | null
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_order_feedback: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          customer_id: string | null
+          order_id: string | null
+          rating: number | null
+          tags: string[] | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          customer_id?: string | null
+          order_id?: string | null
+          rating?: number | null
+          tags?: string[] | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          customer_id?: string | null
+          order_id?: string | null
+          rating?: number | null
+          tags?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_feedback_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_feedback_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_feedback_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_order_lines: {
+        Row: {
+          delivery_charge_per_pack: number | null
+          deposit_per_unit: number | null
+          deposit_total: number | null
+          gst_rate: number | null
+          hsn_code: string | null
+          id: string | null
+          line_total: number | null
+          mrp: number | null
+          new_containers: number | null
+          order_id: string | null
+          pack_label: string | null
+          product_code: string | null
+          product_id: string | null
+          product_name: string | null
+          qty: number | null
+          sort_order: number | null
+          tax_amount: number | null
+          taxable_value: number | null
+          unit_price: number | null
+        }
+        Insert: {
+          delivery_charge_per_pack?: number | null
+          deposit_per_unit?: number | null
+          deposit_total?: number | null
+          gst_rate?: number | null
+          hsn_code?: string | null
+          id?: string | null
+          line_total?: number | null
+          mrp?: number | null
+          new_containers?: number | null
+          order_id?: string | null
+          pack_label?: string | null
+          product_code?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          qty?: number | null
+          sort_order?: number | null
+          tax_amount?: number | null
+          taxable_value?: number | null
+          unit_price?: number | null
+        }
+        Update: {
+          delivery_charge_per_pack?: number | null
+          deposit_per_unit?: number | null
+          deposit_total?: number | null
+          gst_rate?: number | null
+          hsn_code?: string | null
+          id?: string | null
+          line_total?: number | null
+          mrp?: number | null
+          new_containers?: number | null
+          order_id?: string | null
+          pack_label?: string | null
+          product_code?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          qty?: number | null
+          sort_order?: number | null
+          tax_amount?: number | null
+          taxable_value?: number | null
+          unit_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_lines_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_lines_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_orders: {
+        Row: {
+          amount_paid: number | null
+          approved_at: string | null
+          approved_by: string | null
+          area_id: string | null
+          business_name: string | null
+          cancel_reason: string | null
+          cancelled_by: string | null
+          company_id: string | null
+          created_at: string | null
+          credit_limit_snapshot: number | null
+          customer_id: string | null
+          customer_mobile: string | null
+          customer_name: string | null
+          customer_type_code: string | null
+          delivery_address_id: string | null
+          delivery_address_line1: string | null
+          delivery_address_line2: string | null
+          delivery_address_text: string | null
+          delivery_charge: number | null
+          delivery_city: string | null
+          delivery_date: string | null
+          delivery_landmark: string | null
+          delivery_lat: number | null
+          delivery_latitude: number | null
+          delivery_lng: number | null
+          delivery_longitude: number | null
+          delivery_mode: string | null
+          delivery_otp: string | null
+          delivery_pincode: string | null
+          delivery_slot: string | null
+          deposit_total: number | null
+          distributor_assigned_at: string | null
+          distributor_note: string | null
+          distributor_responded_at: string | null
+          distributor_status: string | null
+          due_date: string | null
+          firm_id: string | null
+          fulfiller_customer_id: string | null
+          grand_total: number | null
+          hold_reason: string | null
+          id: string | null
+          is_express: boolean | null
+          items_total: number | null
+          notes: string | null
+          order_group_id: string | null
+          order_no: string | null
+          order_type: string | null
+          outstanding_snapshot: number | null
+          payment_method: string | null
+          payment_mode: string | null
+          payment_status: string | null
+          pickup_vehicle_no: string | null
+          placed_by: string | null
+          price_plan_id: string | null
+          redeliver_at: string | null
+          redeliver_reason: string | null
+          release_batch_at: string | null
+          released_at: string | null
+          round_off: number | null
+          route_id: string | null
+          source: string | null
+          status: Database["public"]["Enums"]["order_status"] | null
+          tax_total: number | null
+          taxable_value: number | null
+          updated_at: string | null
+          zone_id: string | null
+        }
+        Insert: {
+          amount_paid?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          area_id?: string | null
+          business_name?: string | null
+          cancel_reason?: string | null
+          cancelled_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          credit_limit_snapshot?: number | null
+          customer_id?: string | null
+          customer_mobile?: string | null
+          customer_name?: string | null
+          customer_type_code?: string | null
+          delivery_address_id?: string | null
+          delivery_address_line1?: string | null
+          delivery_address_line2?: string | null
+          delivery_address_text?: string | null
+          delivery_charge?: number | null
+          delivery_city?: string | null
+          delivery_date?: string | null
+          delivery_landmark?: string | null
+          delivery_lat?: number | null
+          delivery_latitude?: number | null
+          delivery_lng?: number | null
+          delivery_longitude?: number | null
+          delivery_mode?: string | null
+          delivery_otp?: string | null
+          delivery_pincode?: string | null
+          delivery_slot?: string | null
+          deposit_total?: number | null
+          distributor_assigned_at?: string | null
+          distributor_note?: string | null
+          distributor_responded_at?: string | null
+          distributor_status?: string | null
+          due_date?: string | null
+          firm_id?: string | null
+          fulfiller_customer_id?: string | null
+          grand_total?: number | null
+          hold_reason?: string | null
+          id?: string | null
+          is_express?: boolean | null
+          items_total?: number | null
+          notes?: string | null
+          order_group_id?: string | null
+          order_no?: string | null
+          order_type?: string | null
+          outstanding_snapshot?: number | null
+          payment_method?: string | null
+          payment_mode?: string | null
+          payment_status?: string | null
+          pickup_vehicle_no?: string | null
+          placed_by?: string | null
+          price_plan_id?: string | null
+          redeliver_at?: string | null
+          redeliver_reason?: string | null
+          release_batch_at?: string | null
+          released_at?: string | null
+          round_off?: number | null
+          route_id?: string | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["order_status"] | null
+          tax_total?: number | null
+          taxable_value?: number | null
+          updated_at?: string | null
+          zone_id?: string | null
+        }
+        Update: {
+          amount_paid?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          area_id?: string | null
+          business_name?: string | null
+          cancel_reason?: string | null
+          cancelled_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          credit_limit_snapshot?: number | null
+          customer_id?: string | null
+          customer_mobile?: string | null
+          customer_name?: string | null
+          customer_type_code?: string | null
+          delivery_address_id?: string | null
+          delivery_address_line1?: string | null
+          delivery_address_line2?: string | null
+          delivery_address_text?: string | null
+          delivery_charge?: number | null
+          delivery_city?: string | null
+          delivery_date?: string | null
+          delivery_landmark?: string | null
+          delivery_lat?: number | null
+          delivery_latitude?: number | null
+          delivery_lng?: number | null
+          delivery_longitude?: number | null
+          delivery_mode?: string | null
+          delivery_otp?: string | null
+          delivery_pincode?: string | null
+          delivery_slot?: string | null
+          deposit_total?: number | null
+          distributor_assigned_at?: string | null
+          distributor_note?: string | null
+          distributor_responded_at?: string | null
+          distributor_status?: string | null
+          due_date?: string | null
+          firm_id?: string | null
+          fulfiller_customer_id?: string | null
+          grand_total?: number | null
+          hold_reason?: string | null
+          id?: string | null
+          is_express?: boolean | null
+          items_total?: number | null
+          notes?: string | null
+          order_group_id?: string | null
+          order_no?: string | null
+          order_type?: string | null
+          outstanding_snapshot?: number | null
+          payment_method?: string | null
+          payment_mode?: string | null
+          payment_status?: string | null
+          pickup_vehicle_no?: string | null
+          placed_by?: string | null
+          price_plan_id?: string | null
+          redeliver_at?: string | null
+          redeliver_reason?: string | null
+          release_batch_at?: string | null
+          released_at?: string | null
+          round_off?: number | null
+          route_id?: string | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["order_status"] | null
+          tax_total?: number | null
+          taxable_value?: number | null
+          updated_at?: string | null
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "geo_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_delivery_address_id_fkey"
+            columns: ["delivery_address_id"]
+            isOneToOne: false
+            referencedRelation: "customer_addresses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_fulfiller_customer_id_fkey"
+            columns: ["fulfiller_customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_price_plan_id_fkey"
+            columns: ["price_plan_id"]
+            isOneToOne: false
+            referencedRelation: "price_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "geo_routes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "geo_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_payment_proofs: {
+        Row: {
+          amount: number | null
+          balance_after: number | null
+          cash_paid_to: string | null
+          cash_paid_to_name: string | null
+          cheque_bank: string | null
+          cheque_date: string | null
+          cheque_no: string | null
+          collected_by: string | null
+          company_id: string | null
+          created_at: string | null
+          customer_id: string | null
+          firm_id: string | null
+          id: string | null
+          method: string | null
+          order_id: string | null
+          paid_on: string | null
+          receipt_id: string | null
+          reference: string | null
+          reject_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          screenshot_path: string | null
+          source: string | null
+          status: string | null
+          submitted_by: string | null
+          upi_response: Json | null
+        }
+        Insert: {
+          amount?: number | null
+          balance_after?: number | null
+          cash_paid_to?: string | null
+          cash_paid_to_name?: string | null
+          cheque_bank?: string | null
+          cheque_date?: string | null
+          cheque_no?: string | null
+          collected_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          customer_id?: string | null
+          firm_id?: string | null
+          id?: string | null
+          method?: string | null
+          order_id?: string | null
+          paid_on?: string | null
+          receipt_id?: string | null
+          reference?: string | null
+          reject_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          screenshot_path?: string | null
+          source?: string | null
+          status?: string | null
+          submitted_by?: string | null
+          upi_response?: Json | null
+        }
+        Update: {
+          amount?: number | null
+          balance_after?: number | null
+          cash_paid_to?: string | null
+          cash_paid_to_name?: string | null
+          cheque_bank?: string | null
+          cheque_date?: string | null
+          cheque_no?: string | null
+          collected_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          customer_id?: string | null
+          firm_id?: string | null
+          id?: string | null
+          method?: string | null
+          order_id?: string | null
+          paid_on?: string | null
+          receipt_id?: string | null
+          reference?: string | null
+          reject_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          screenshot_path?: string | null
+          source?: string | null
+          status?: string | null
+          submitted_by?: string | null
+          upi_response?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_proofs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_proofs_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_proofs_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_proofs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_proofs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_receipt_allocations: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          id: string | null
+          invoice_id: string | null
+          opening_id: string | null
+          receipt_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          id?: string | null
+          invoice_id?: string | null
+          opening_id?: string | null
+          receipt_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          id?: string | null
+          invoice_id?: string | null
+          opening_id?: string | null
+          receipt_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipt_allocations_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_allocations_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_allocations_opening_id_fkey"
+            columns: ["opening_id"]
+            isOneToOne: false
+            referencedRelation: "customer_opening_balances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_allocations_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_receipts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipt_allocations_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
+            referencedRelation: "receipts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_receipts: {
+        Row: {
+          amount: number | null
+          bank_account_id: string | null
+          bank_charges: number | null
+          bounce_charge_note_id: string | null
+          bounce_reason: string | null
+          bounced_on: string | null
+          cancel_reason: string | null
+          cheque_bank: string | null
+          cheque_date: string | null
+          cheque_no: string | null
+          cheque_photo_url: string | null
+          cheque_status: string | null
+          cleared_on: string | null
+          collected_by: string | null
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          customer_id: string | null
+          deposit_bank_account_id: string | null
+          deposit_slip_path: string | null
+          deposited_on: string | null
+          firm_id: string | null
+          id: string | null
+          mode: string | null
+          notes: string | null
+          proof_name: string | null
+          proof_path: string | null
+          receipt_date: string | null
+          receipt_no: string | null
+          reference: string | null
+          source: string | null
+          status: string | null
+          trip_collection_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          bank_account_id?: string | null
+          bank_charges?: number | null
+          bounce_charge_note_id?: string | null
+          bounce_reason?: string | null
+          bounced_on?: string | null
+          cancel_reason?: string | null
+          cheque_bank?: string | null
+          cheque_date?: string | null
+          cheque_no?: string | null
+          cheque_photo_url?: string | null
+          cheque_status?: string | null
+          cleared_on?: string | null
+          collected_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_id?: string | null
+          deposit_bank_account_id?: string | null
+          deposit_slip_path?: string | null
+          deposited_on?: string | null
+          firm_id?: string | null
+          id?: string | null
+          mode?: string | null
+          notes?: string | null
+          proof_name?: string | null
+          proof_path?: string | null
+          receipt_date?: string | null
+          receipt_no?: string | null
+          reference?: string | null
+          source?: string | null
+          status?: string | null
+          trip_collection_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          bank_account_id?: string | null
+          bank_charges?: number | null
+          bounce_charge_note_id?: string | null
+          bounce_reason?: string | null
+          bounced_on?: string | null
+          cancel_reason?: string | null
+          cheque_bank?: string | null
+          cheque_date?: string | null
+          cheque_no?: string | null
+          cheque_photo_url?: string | null
+          cheque_status?: string | null
+          cleared_on?: string | null
+          collected_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          customer_id?: string | null
+          deposit_bank_account_id?: string | null
+          deposit_slip_path?: string | null
+          deposited_on?: string | null
+          firm_id?: string | null
+          id?: string | null
+          mode?: string | null
+          notes?: string | null
+          proof_name?: string | null
+          proof_path?: string | null
+          receipt_date?: string | null
+          receipt_no?: string | null
+          reference?: string | null
+          source?: string | null
+          status?: string | null
+          trip_collection_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipts_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "firm_bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_bounce_charge_note_id_fkey"
+            columns: ["bounce_charge_note_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_credit_debit_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_bounce_charge_note_id_fkey"
+            columns: ["bounce_charge_note_id"]
+            isOneToOne: false
+            referencedRelation: "credit_debit_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_deposit_bank_account_id_fkey"
+            columns: ["deposit_bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "firm_bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_trip_collection_id_fkey"
+            columns: ["trip_collection_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trip_collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "receipts_trip_collection_id_fkey"
+            columns: ["trip_collection_id"]
+            isOneToOne: false
+            referencedRelation: "trip_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_trip_alerts: {
+        Row: {
+          alert_type: string | null
+          id: string | null
+          latitude: number | null
+          longitude: number | null
+          note: string | null
+          raised_at: string | null
+          raised_by: string | null
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          stop_id: string | null
+          trip_id: string | null
+        }
+        Insert: {
+          alert_type?: string | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          note?: string | null
+          raised_at?: string | null
+          raised_by?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          stop_id?: string | null
+          trip_id?: string | null
+        }
+        Update: {
+          alert_type?: string | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          note?: string | null
+          raised_at?: string | null
+          raised_by?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          stop_id?: string | null
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_alerts_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_alerts_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_alerts_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_alerts_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_trip_collections: {
+        Row: {
+          against_old_dues: boolean | null
+          amount: number | null
+          collected_at: string | null
+          collected_by: string | null
+          confirmed: boolean | null
+          customer_id: string | null
+          id: string | null
+          mode: string | null
+          order_id: string | null
+          photo_url: string | null
+          reference: string | null
+          stop_id: string | null
+          trip_id: string | null
+        }
+        Insert: {
+          against_old_dues?: boolean | null
+          amount?: number | null
+          collected_at?: string | null
+          collected_by?: string | null
+          confirmed?: boolean | null
+          customer_id?: string | null
+          id?: string | null
+          mode?: string | null
+          order_id?: string | null
+          photo_url?: string | null
+          reference?: string | null
+          stop_id?: string | null
+          trip_id?: string | null
+        }
+        Update: {
+          against_old_dues?: boolean | null
+          amount?: number | null
+          collected_at?: string | null
+          collected_by?: string | null
+          confirmed?: boolean | null
+          customer_id?: string | null
+          id?: string | null
+          mode?: string | null
+          order_id?: string | null
+          photo_url?: string | null
+          reference?: string | null
+          stop_id?: string | null
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_collections_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_collections_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_collections_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_collections_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_collections_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "trip_stops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_collections_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_collections_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_trip_expenses: {
+        Row: {
+          amount: number | null
+          approved: boolean | null
+          bill_photo_url: string | null
+          created_at: string | null
+          created_by: string | null
+          expense_type: string | null
+          id: string | null
+          note: string | null
+          paid_from_cash: boolean | null
+          trip_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          approved?: boolean | null
+          bill_photo_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          expense_type?: string | null
+          id?: string | null
+          note?: string | null
+          paid_from_cash?: boolean | null
+          trip_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          approved?: boolean | null
+          bill_photo_url?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          expense_type?: string | null
+          id?: string | null
+          note?: string | null
+          paid_from_cash?: boolean | null
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_expenses_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_expenses_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_trip_returns: {
+        Row: {
+          actual_qty: number | null
+          expected_qty: number | null
+          id: string | null
+          kind: string | null
+          note: string | null
+          product_id: string | null
+          received_at: string | null
+          received_by: string | null
+          trip_id: string | null
+        }
+        Insert: {
+          actual_qty?: number | null
+          expected_qty?: number | null
+          id?: string | null
+          kind?: string | null
+          note?: string | null
+          product_id?: string | null
+          received_at?: string | null
+          received_by?: string | null
+          trip_id?: string | null
+        }
+        Update: {
+          actual_qty?: number | null
+          expected_qty?: number | null
+          id?: string | null
+          kind?: string | null
+          note?: string | null
+          product_id?: string | null
+          received_at?: string | null
+          received_by?: string | null
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_returns_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_returns_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_returns_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_trip_stops: {
+        Row: {
+          arrived_at: string | null
+          delivered_at: string | null
+          do_later_at: string | null
+          fail_reason: string | null
+          id: string | null
+          is_spot_sale: boolean | null
+          latitude: number | null
+          longitude: number | null
+          order_id: string | null
+          otp_verified: boolean | null
+          photo_url: string | null
+          seq: number | null
+          signature_url: string | null
+          signed_copy_received: boolean | null
+          status: string | null
+          trip_id: string | null
+        }
+        Insert: {
+          arrived_at?: string | null
+          delivered_at?: string | null
+          do_later_at?: string | null
+          fail_reason?: string | null
+          id?: string | null
+          is_spot_sale?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          order_id?: string | null
+          otp_verified?: boolean | null
+          photo_url?: string | null
+          seq?: number | null
+          signature_url?: string | null
+          signed_copy_received?: boolean | null
+          status?: string | null
+          trip_id?: string | null
+        }
+        Update: {
+          arrived_at?: string | null
+          delivered_at?: string | null
+          do_later_at?: string | null
+          fail_reason?: string | null
+          id?: string | null
+          is_spot_sale?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          order_id?: string | null
+          otp_verified?: boolean | null
+          photo_url?: string | null
+          seq?: number | null
+          signature_url?: string | null
+          signed_copy_received?: boolean | null
+          status?: string | null
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_stops_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_stops_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_stops_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_stops_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cc70_report_trips: {
+        Row: {
+          cancel_reason: string | null
+          cash_expected: number | null
+          cash_received: number | null
+          company_id: string | null
+          crates_load_reason: string | null
+          crates_loaded: number | null
+          crates_planned: number | null
+          crates_planned_manual: boolean | null
+          crates_return_reason: string | null
+          crates_returned: number | null
+          created_at: string | null
+          customer_vehicle_no: string | null
+          driver_started_at: string | null
+          driver_user_id: string | null
+          end_odometer: number | null
+          end_odometer_photo_url: string | null
+          ended_at: string | null
+          est_km: number | null
+          est_minutes: number | null
+          fuel_amount: number | null
+          fuel_litres: number | null
+          gate_in_at: string | null
+          gate_in_by: string | null
+          gate_in_manual: boolean | null
+          gate_out_at: string | null
+          gate_out_by: string | null
+          gate_out_manual: boolean | null
+          gate_return_note: string | null
+          helper_user_ids: string[] | null
+          hired_driver_mobile: string | null
+          hired_driver_name: string | null
+          id: string | null
+          loaded_at: string | null
+          loaded_by: string | null
+          planned_by: string | null
+          returns_received_at: string | null
+          route_id: string | null
+          route_method: string | null
+          route_optimised_at: string | null
+          settle_note: string | null
+          settled_at: string | null
+          settled_by: string | null
+          start_odometer: number | null
+          start_odometer_photo_url: string | null
+          start_selfie_url: string | null
+          status: Database["public"]["Enums"]["trip_status"] | null
+          trip_date: string | null
+          trip_no: string | null
+          trip_type: string | null
+          unit_id: string | null
+          updated_at: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          cancel_reason?: string | null
+          cash_expected?: number | null
+          cash_received?: number | null
+          company_id?: string | null
+          crates_load_reason?: string | null
+          crates_loaded?: number | null
+          crates_planned?: number | null
+          crates_planned_manual?: boolean | null
+          crates_return_reason?: string | null
+          crates_returned?: number | null
+          created_at?: string | null
+          customer_vehicle_no?: string | null
+          driver_started_at?: string | null
+          driver_user_id?: string | null
+          end_odometer?: number | null
+          end_odometer_photo_url?: string | null
+          ended_at?: string | null
+          est_km?: number | null
+          est_minutes?: number | null
+          fuel_amount?: number | null
+          fuel_litres?: number | null
+          gate_in_at?: string | null
+          gate_in_by?: string | null
+          gate_in_manual?: boolean | null
+          gate_out_at?: string | null
+          gate_out_by?: string | null
+          gate_out_manual?: boolean | null
+          gate_return_note?: string | null
+          helper_user_ids?: string[] | null
+          hired_driver_mobile?: string | null
+          hired_driver_name?: string | null
+          id?: string | null
+          loaded_at?: string | null
+          loaded_by?: string | null
+          planned_by?: string | null
+          returns_received_at?: string | null
+          route_id?: string | null
+          route_method?: string | null
+          route_optimised_at?: string | null
+          settle_note?: string | null
+          settled_at?: string | null
+          settled_by?: string | null
+          start_odometer?: number | null
+          start_odometer_photo_url?: string | null
+          start_selfie_url?: string | null
+          status?: Database["public"]["Enums"]["trip_status"] | null
+          trip_date?: string | null
+          trip_no?: string | null
+          trip_type?: string | null
+          unit_id?: string | null
+          updated_at?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          cancel_reason?: string | null
+          cash_expected?: number | null
+          cash_received?: number | null
+          company_id?: string | null
+          crates_load_reason?: string | null
+          crates_loaded?: number | null
+          crates_planned?: number | null
+          crates_planned_manual?: boolean | null
+          crates_return_reason?: string | null
+          crates_returned?: number | null
+          created_at?: string | null
+          customer_vehicle_no?: string | null
+          driver_started_at?: string | null
+          driver_user_id?: string | null
+          end_odometer?: number | null
+          end_odometer_photo_url?: string | null
+          ended_at?: string | null
+          est_km?: number | null
+          est_minutes?: number | null
+          fuel_amount?: number | null
+          fuel_litres?: number | null
+          gate_in_at?: string | null
+          gate_in_by?: string | null
+          gate_in_manual?: boolean | null
+          gate_out_at?: string | null
+          gate_out_by?: string | null
+          gate_out_manual?: boolean | null
+          gate_return_note?: string | null
+          helper_user_ids?: string[] | null
+          hired_driver_mobile?: string | null
+          hired_driver_name?: string | null
+          id?: string | null
+          loaded_at?: string | null
+          loaded_by?: string | null
+          planned_by?: string | null
+          returns_received_at?: string | null
+          route_id?: string | null
+          route_method?: string | null
+          route_optimised_at?: string | null
+          settle_note?: string | null
+          settled_at?: string | null
+          settled_by?: string | null
+          start_odometer?: number | null
+          start_odometer_photo_url?: string | null
+          start_selfie_url?: string | null
+          status?: Database["public"]["Enums"]["trip_status"] | null
+          trip_date?: string | null
+          trip_no?: string | null
+          trip_type?: string | null
+          unit_id?: string | null
+          updated_at?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trips_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_driver_user_id_fkey"
+            columns: ["driver_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "geo_routes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       container_balances: {
         Row: {
           balance: number | null
@@ -6526,6 +9498,13 @@ export type Database = {
         Returns: string
       }
       _fifo_allocate: { Args: { p_receipt_id: string }; Returns: number }
+      _gate_log: {
+        Args: { p_kind: string; p_label: string; p_mode: string; p_ref: string }
+        Returns: undefined
+      }
+      _gate_secret: { Args: never; Returns: string }
+      _gate_staff_hit: { Args: { p_id: string }; Returns: Json }
+      _gate_vehicle_hit: { Args: { p_vehicle: string }; Returns: Json }
       _generate_invoice: {
         Args: { p_order_id: string; p_trip_id: string }
         Returns: string
@@ -6540,6 +9519,7 @@ export type Database = {
         Args: { p_customer_id: string; p_except_order?: string }
         Returns: boolean
       }
+      _is_qa_trip: { Args: { p_id: string }; Returns: boolean }
       _is_trip_order: { Args: { p_order_id: string }; Returns: boolean }
       _next_order_no: { Args: { p_firm_id: string }; Returns: string }
       _open_bills: {
@@ -6647,6 +9627,17 @@ export type Database = {
           p_file_path: string
           p_file_size?: number
           p_mime_type?: string
+        }
+        Returns: string
+      }
+      add_delivery_expense: {
+        Args: {
+          p_amount: number
+          p_bill_photo_url?: string
+          p_litres?: number
+          p_note?: string
+          p_trip_id: string
+          p_type: string
         }
         Returns: string
       }
@@ -6801,6 +9792,7 @@ export type Database = {
         }
         Returns: Json
       }
+      cc_can_edit_delivery_appearance: { Args: never; Returns: boolean }
       cc_cash_mismatch: {
         Args: { p_id: string; p_reason: string; p_received: number }
         Returns: undefined
@@ -6817,9 +9809,82 @@ export type Database = {
         }
         Returns: Json
       }
+      cc_delivery_appearance: { Args: never; Returns: Json }
+      cc_list_drivers: {
+        Args: { p_date?: string; p_unit_id?: string }
+        Returns: {
+          full_name: string
+          mobile: string
+          photo_url: string
+          trips_on_date: number
+          unit_id: string
+          user_id: string
+        }[]
+      }
+      cc_logout_session: { Args: { p_session_id: string }; Returns: boolean }
+      cc_mark_redelivery: {
+        Args: { p_order_id: string; p_reason: string }
+        Returns: undefined
+      }
       cc_move_stops: {
         Args: { p_stop_ids: string[]; p_to_trip_id: string }
         Returns: number
+      }
+      cc_notification_extras: {
+        Args: never
+        Returns: {
+          body: string
+          created_at: string
+          item_key: string
+          kind: string
+          read_at: string
+          ref_id: string
+          title: string
+        }[]
+      }
+      cc_notification_feed: {
+        Args: never
+        Returns: {
+          body: string
+          created_at: string
+          item_key: string
+          kind: string
+          read_at: string
+          ref_id: string
+          title: string
+        }[]
+      }
+      cc_notifications: { Args: never; Returns: Json }
+      cc_photo_inventory: {
+        Args: {
+          p_expiring?: boolean
+          p_from?: string
+          p_to?: string
+          p_types?: string[]
+        }
+        Returns: {
+          bucket: string
+          byte_size: number
+          downloaded_at: string
+          expires_on: string
+          id: string
+          path: string
+          photo_type: string
+          taken_at: string
+        }[]
+      }
+      cc_read_notifications: { Args: { p_keys?: string[] }; Returns: undefined }
+      cc_record_backup_size: {
+        Args: { p_backup_id: string; p_bytes: number }
+        Returns: undefined
+      }
+      cc_register_staff_session: {
+        Args: {
+          p_device_id: string
+          p_login_method?: string
+          p_user_agent?: string
+        }
+        Returns: Json
       }
       cc_reject_credit_note: {
         Args: { p_note_id: string; p_reason: string }
@@ -6828,6 +9893,29 @@ export type Database = {
       cc_resolve_gate_problem: {
         Args: { p_id: string; p_note: string }
         Returns: undefined
+      }
+      cc_save_photo_settings: { Args: { p: Json }; Returns: undefined }
+      cc_server_action: {
+        Args: { p_action: string; p_actor: string; p_data: Json }
+        Returns: Json
+      }
+      cc_server_photo_settings: {
+        Args: {
+          p_actor: string
+          p_data: Json
+          p_save?: boolean
+          p_session: string
+        }
+        Returns: Json
+      }
+      cc_server_session_action: {
+        Args: {
+          p_action: string
+          p_actor: string
+          p_data: Json
+          p_session: string
+        }
+        Returns: Json
       }
       cc_set_stop_order: {
         Args: {
@@ -6864,6 +9952,60 @@ export type Database = {
           pincode: string
           updated_at: string
         }[]
+      }
+      cc69_assert_driver: {
+        Args: { p_trip: Database["public"]["Tables"]["trips"]["Row"] }
+        Returns: undefined
+      }
+      cc69_assign_trip: {
+        Args: {
+          p_driver_user_id: string
+          p_hired_driver_mobile?: string
+          p_hired_driver_name?: string
+          p_trip_id: string
+          p_vehicle_id: string
+        }
+        Returns: Json
+      }
+      cc69_driver_valid: {
+        Args: { p_company: string; p_driver: string }
+        Returns: boolean
+      }
+      cc69_return_trip: {
+        Args: { p_note?: string; p_trip_id: string }
+        Returns: undefined
+      }
+      cc70_close_old_qa: { Args: never; Returns: number }
+      cc70_include_qa: { Args: never; Returns: boolean }
+      cc70_is_admin: { Args: never; Returns: boolean }
+      cc70_qa_invoice: { Args: { p_id: string }; Returns: boolean }
+      cc70_qa_order: { Args: { p_id: string }; Returns: boolean }
+      cc70_qa_receipt: { Args: { p_id: string }; Returns: boolean }
+      cc70_row_visible: {
+        Args: { p_row: Json; p_table: string }
+        Returns: boolean
+      }
+      cc70_set_planned_crates: {
+        Args: { p_crates: number; p_trip_id: string }
+        Returns: undefined
+      }
+      cc70_vehicle_qr: {
+        Args: { p_replace?: boolean; p_vehicle_id: string }
+        Returns: {
+          code: string
+          reg_no: string
+          vehicle_id: string
+        }[]
+      }
+      cc71_reorder_couriers: { Args: { p_ids: string[] }; Returns: undefined }
+      cc72_update_staff: {
+        Args: {
+          p_full_name?: string
+          p_photo_path?: string
+          p_set_photo?: boolean
+          p_user_id: string
+        }
+        Returns: undefined
       }
       check_pin: {
         Args: {
@@ -6913,7 +10055,21 @@ export type Database = {
         Returns: undefined
       }
       close_query: { Args: { p_query_id: string }; Returns: undefined }
+      collect_stop_payment: {
+        Args: {
+          p_amount: number
+          p_mode: string
+          p_photo_url?: string
+          p_reference?: string
+          p_stop_id: string
+        }
+        Returns: string
+      }
       confirm_cash_handover: { Args: { p_id: string }; Returns: undefined }
+      confirm_trip_crates_loaded: {
+        Args: { p_crates: number; p_reason?: string; p_trip_id: string }
+        Returns: undefined
+      }
       create_credit_debit_note: {
         Args: {
           p_gst_rate: number
@@ -6940,6 +10096,10 @@ export type Database = {
       current_session_id: { Args: never; Returns: string }
       customer_advance: {
         Args: { p_customer_id: string; p_firm_id?: string }
+        Returns: number
+      }
+      customer_crate_balance: {
+        Args: { p_customer_id: string }
         Returns: number
       }
       customer_location: {
@@ -7091,12 +10251,28 @@ export type Database = {
         }
         Returns: number
       }
+      gate_admit_pre_invite: {
+        Args: { p_details?: Json; p_invite_id: string }
+        Returns: string
+      }
+      gate_admit_request: { Args: { p_request_id: string }; Returns: string }
+      gate_answer: {
+        Args: { p_approve: boolean; p_reason?: string; p_request_id: string }
+        Returns: Json
+      }
       gate_change_guard: {
         Args: { p_mobile: string; p_pin: string; p_selfie: string }
         Returns: Json
       }
+      gate_check: {
+        Args: { p_mobile?: string; p_vehicle_no?: string }
+        Returns: Json
+      }
       gate_entry_in: { Args: { p: Json }; Returns: string }
-      gate_entry_out: { Args: { p_entry_id: string }; Returns: undefined }
+      gate_entry_out: {
+        Args: { p_entry_id: string; p_out_photo?: string }
+        Returns: undefined
+      }
       gate_find_person: { Args: { p_mobile: string }; Returns: Json }
       gate_in: {
         Args: {
@@ -7104,15 +10280,32 @@ export type Database = {
           p_fuel_litres?: number
           p_manual?: boolean
           p_odometer?: number
+          p_reason?: string
           p_trip_id: string
         }
         Returns: undefined
+      }
+      gate_manage_block: { Args: { p: Json }; Returns: string }
+      gate_manage_invite: { Args: { p: Json }; Returns: string }
+      gate_manual_confirm: {
+        Args: { p_id: string; p_kind: string }
+        Returns: Json
+      }
+      gate_manual_search: { Args: { p_q: string }; Returns: Json }
+      gate_mark_phone_approved: {
+        Args: {
+          p_approved_by_user_id: string
+          p_note: string
+          p_request_id: string
+        }
+        Returns: Json
       }
       gate_material_scan: { Args: { p_token: string }; Returns: undefined }
       gate_out: {
         Args: { p_odometer?: number; p_qr_token: string }
         Returns: string
       }
+      gate_overdue_hours: { Args: never; Returns: number }
       gate_parcel_handover: {
         Args: { p_entry_id: string; p_received_by: string }
         Returns: undefined
@@ -7131,11 +10324,49 @@ export type Database = {
           title: string
         }[]
       }
+      gate_register_timeline: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          at: string
+          by_name: string
+          detail: string
+          entry_id: string
+          entry_type: string
+          kind: string
+          photo_path: string
+          title: string
+          vehicle_no: string
+        }[]
+      }
       gate_report_problem: {
         Args: { p_note: string; p_photo?: string; p_type: string }
         Returns: string
       }
+      gate_request_approval: {
+        Args: { p_details: Json; p_host_id?: string }
+        Returns: string
+      }
+      gate_request_recipients: {
+        Args: { p_request_id: string }
+        Returns: {
+          full_name: string
+          id: string
+          is_host: boolean
+          mobile: string
+        }[]
+      }
+      gate_request_status: { Args: { p_request_id: string }; Returns: Json }
       gate_scan_lookup: { Args: { p_token: string }; Returns: Json }
+      gate_staff_directory: {
+        Args: never
+        Returns: {
+          full_name: string
+          id: string
+          mobile: string
+          photo_url: string
+          role_code: string
+        }[]
+      }
       gate_staff_list: {
         Args: never
         Returns: {
@@ -7149,11 +10380,16 @@ export type Database = {
           driver: string
           ended: boolean
           gate_out_at: string
+          gate_out_missing: boolean
           reg_no: string
+          started_at: string
           trip_id: string
           trip_no: string
         }[]
       }
+      gate67_can_read: { Args: { p_id: string }; Returns: boolean }
+      gate67_mobile: { Args: { p: string }; Returns: string }
+      gate67_vehicle: { Args: { p: string }; Returns: string }
       geo_find_shape: {
         Args: { p_kind: string; p_name: string; p_state?: string }
         Returns: {
@@ -7273,23 +10509,28 @@ export type Database = {
           allow_pickup_only: boolean
           allow_spot_sale: boolean
           allow_upi: boolean
+          arrival_distance_limit_m: number
           arrived_button_enabled: boolean
           ask_office_no_reply: string
           ask_office_wait_minutes: number
           auto_credit_block_enabled: boolean
           collect_old_dues: boolean
           company_id: string
+          crates_at_customer_enabled: boolean
           default_language: string
           distributor_reply_minutes: number
           expense_bill_photo_required: boolean
           expense_limit_per_trip: number
           expense_types: string[]
           expenses_enabled: boolean
+          expired_returns_enabled: boolean
           failed_reasons: string[]
+          gate_approval_wait_minutes: number
           gate_pass_print: boolean
           location_at_each_stop: boolean
           location_interval_minutes: number
           location_tracking_enabled: boolean
+          office_emergency_number: string | null
           photo_days_challan: number
           photo_days_cheque: number
           photo_days_delivery: number
@@ -7371,7 +10612,12 @@ export type Database = {
       }
       my_product: { Args: { p_id: string }; Returns: Json }
       my_session_is_valid: { Args: never; Returns: boolean }
+      my_staff_qr: { Args: never; Returns: string }
       my_staff_session_verified: { Args: never; Returns: boolean }
+      my_trip_account: {
+        Args: { p_limit?: number; p_month: string; p_offset?: number }
+        Returns: Json
+      }
       next_document_number: {
         Args: {
           p_date?: string
@@ -7598,6 +10844,10 @@ export type Database = {
             }
             Returns: string
           }
+      record_customer_crates: {
+        Args: { p_left: number; p_picked_up: number; p_stop_id: string }
+        Returns: string
+      }
       record_due_collection: {
         Args: {
           p_amount: number
@@ -7607,6 +10857,15 @@ export type Database = {
           p_reference?: string
           p_stop_id?: string
           p_trip_id: string
+        }
+        Returns: string
+      }
+      record_expired_return: {
+        Args: {
+          p_photo_url: string
+          p_product_id: string
+          p_qty: number
+          p_stop_id: string
         }
         Returns: string
       }
@@ -7665,6 +10924,16 @@ export type Database = {
         }
         Returns: number
       }
+      record_stop_arrival: {
+        Args: {
+          p_latitude?: number
+          p_longitude?: number
+          p_note?: string
+          p_reason?: string
+          p_stop_id: string
+        }
+        Returns: number
+      }
       reject_customer: {
         Args: { p_customer_id: string; p_reason: string }
         Returns: undefined
@@ -7673,6 +10942,7 @@ export type Database = {
         Args: { p_order_id: string; p_reason: string }
         Returns: undefined
       }
+      remove_my_photo: { Args: never; Returns: undefined }
       remove_order_from_trip: {
         Args: { p_order_id: string; p_reason?: string; p_trip_id: string }
         Returns: undefined
@@ -7774,10 +11044,12 @@ export type Database = {
         Args: { p_product_id: string; p_qty: number; p_trip_id: string }
         Returns: undefined
       }
+      set_my_name: { Args: { p_name: string }; Returns: string }
       set_my_order_address: {
         Args: { p_address_id: string; p_order_ids: string[] }
         Returns: undefined
       }
+      set_my_photo: { Args: { p_path: string }; Returns: string }
       set_my_pin: {
         Args: { p_device_id: string; p_device_label?: string; p_pin: string }
         Returns: undefined
@@ -7823,6 +11095,10 @@ export type Database = {
       }
       set_stop_later: {
         Args: { p_later: boolean; p_stop_id: string }
+        Returns: undefined
+      }
+      set_trip_crates_planned: {
+        Args: { p_crates: number; p_trip_id: string }
         Returns: undefined
       }
       set_user_active: {
@@ -7904,6 +11180,7 @@ export type Database = {
         Args: { p_customer_id: string; p_trip_id: string }
         Returns: Json
       }
+      stop_payment_totals: { Args: { p_stop_id: string }; Returns: Json }
       stop_take_udhaar: {
         Args: { p_amount: number; p_stop_id: string }
         Returns: boolean
@@ -7960,6 +11237,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      trip_crates_plan: { Args: { p_trip_id: string }; Returns: number }
       trip_return_expected: {
         Args: { p_trip_id: string }
         Returns: {

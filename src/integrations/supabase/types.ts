@@ -2525,6 +2525,39 @@ export type Database = {
           },
         ]
       }
+      driver_sync_status: {
+        Row: {
+          app_version: string | null
+          company_id: string
+          last_seen_at: string
+          oldest_pending_at: string | null
+          pending_count: number
+          pending_kinds: Json
+          trip_id: string
+          user_id: string
+        }
+        Insert: {
+          app_version?: string | null
+          company_id: string
+          last_seen_at?: string
+          oldest_pending_at?: string | null
+          pending_count?: number
+          pending_kinds?: Json
+          trip_id: string
+          user_id: string
+        }
+        Update: {
+          app_version?: string | null
+          company_id?: string
+          last_seen_at?: string
+          oldest_pending_at?: string | null
+          pending_count?: number
+          pending_kinds?: Json
+          trip_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       expired_scrap_stock: {
         Row: {
           company_id: string
@@ -6501,7 +6534,10 @@ export type Database = {
         Row: {
           company_id: string
           created_at: string
+          credit_note_id: string | null
           customer_id: string
+          decided_at: string | null
+          decided_by: string | null
           driver_user_id: string
           id: string
           office_action: string | null
@@ -6511,6 +6547,7 @@ export type Database = {
           qty: number
           received_at: string | null
           received_qty: number | null
+          replacement_order_id: string | null
           stop_id: string
           trip_id: string
           updated_at: string
@@ -6518,7 +6555,10 @@ export type Database = {
         Insert: {
           company_id: string
           created_at?: string
+          credit_note_id?: string | null
           customer_id: string
+          decided_at?: string | null
+          decided_by?: string | null
           driver_user_id?: string
           id?: string
           office_action?: string | null
@@ -6528,6 +6568,7 @@ export type Database = {
           qty: number
           received_at?: string | null
           received_qty?: number | null
+          replacement_order_id?: string | null
           stop_id: string
           trip_id: string
           updated_at?: string
@@ -6535,7 +6576,10 @@ export type Database = {
         Update: {
           company_id?: string
           created_at?: string
+          credit_note_id?: string | null
           customer_id?: string
+          decided_at?: string | null
+          decided_by?: string | null
           driver_user_id?: string
           id?: string
           office_action?: string | null
@@ -6545,6 +6589,7 @@ export type Database = {
           qty?: number
           received_at?: string | null
           received_qty?: number | null
+          replacement_order_id?: string | null
           stop_id?: string
           trip_id?: string
           updated_at?: string
@@ -10212,6 +10257,24 @@ export type Database = {
         Args: { p_id: string; p_reason: string; p_received: number }
         Returns: undefined
       }
+      cc_cash_mismatches: {
+        Args: { p_from?: string; p_to?: string }
+        Returns: {
+          created_at: string
+          difference: number
+          expected: number
+          from_name: string
+          from_user_id: string
+          id: string
+          mismatch_at: string
+          reason: string
+          received: number
+          to_name: string
+          to_user_id: string
+          trip_id: string
+          trip_no: string
+        }[]
+      }
       cc_create_material_pass: {
         Args: {
           p_approved_by: string
@@ -10226,6 +10289,15 @@ export type Database = {
       }
       cc_delete_scheme: { Args: { p_id: string }; Returns: boolean }
       cc_delivery_appearance: { Args: never; Returns: Json }
+      cc_expired_return_action: {
+        Args: {
+          p_action: string
+          p_id: string
+          p_note?: string
+          p_received_qty?: number
+        }
+        Returns: Json
+      }
       cc_get_scheme: { Args: { p_id: string }; Returns: Json }
       cc_list_drivers: {
         Args: { p_date?: string; p_unit_id?: string }
@@ -10294,6 +10366,21 @@ export type Database = {
         }[]
       }
       cc_notifications: { Args: never; Returns: Json }
+      cc_pending_sync: {
+        Args: { p_min_minutes?: number; p_trip_id?: string }
+        Returns: {
+          app_version: string
+          driver_name: string
+          last_seen_at: string
+          oldest_pending_at: string
+          pending_count: number
+          pending_kinds: Json
+          stuck_minutes: number
+          trip_id: string
+          trip_no: string
+          user_id: string
+        }[]
+      }
       cc_photo_inventory: {
         Args: {
           p_expiring?: boolean
@@ -10689,6 +10776,16 @@ export type Database = {
           trip_no: string
           vehicle_no: string
         }[]
+      }
+      driver_report_sync: {
+        Args: {
+          p_app_version?: string
+          p_kinds?: Json
+          p_oldest?: string
+          p_pending: number
+          p_trip_id: string
+        }
+        Returns: undefined
       }
       edit_order: {
         Args: {

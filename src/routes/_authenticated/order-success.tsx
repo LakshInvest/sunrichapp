@@ -1,3 +1,4 @@
+import { useSales } from "@/lib/sales";
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -42,6 +43,7 @@ type Part = {
 
 function OrderSuccess() {
   const { t } = useTranslation();
+  const salesStore = useSales()?.picked?.business_name ?? null;
   const { lang } = useLang();
   const navigate = useNavigate();
   const deva = lang === "en" ? "" : "font-deva";
@@ -136,6 +138,7 @@ function OrderSuccess() {
           <path className="animate-check-mark" d="M32 50 L44 62 L66 38" fill="none" stroke="var(--primary)" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="60" strokeDashoffset="60" />
         </svg>
         <h1 className="mt-4 text-2xl font-bold text-primary">{t("success.done")}</h1>
+        {salesStore && <p className="mt-1 text-sm font-semibold text-secondary">{t("sales.placedFor", { name: salesStore })}</p>}
         {parts.length > 0 && (
           <p className="mt-1 text-base font-semibold text-foreground" data-testid="delivery-line">
             {formatINR(total)}

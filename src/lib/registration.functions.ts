@@ -70,6 +70,7 @@ export const listCustomerTypes = createServerFn({ method: "GET" })
         "code, name, name_hi, name_mr, description, description_hi, description_mr, icon_key, requires_approval, requires_gps",
       )
       .eq("is_active", true)
+      .eq("show_in_registration" as "is_active", true)
       .order("sort_order");
     if (error) throw new Error(error.message);
     const types: CustomerTypeDto[] = (data ?? []).map((t) => ({
@@ -95,7 +96,13 @@ export const getMyRegistration = createServerFn({ method: "GET" })
       .select("mobile, customer_id")
       .eq("id", context.userId)
       .maybeSingle();
-    if (!prof?.customer_id) return { ...EMPTY_REGISTRATION, mobile: prof?.mobile ?? null };
+    // Salesmen have no own customer; my_customer_id returns their picked store.
+    let cid = prof?.customer_id ?? null;
+    if (!cid) {
+      const { data: picked } = await context.supabase.rpc("my_customer_id");
+      cid = (picked as string | null) ?? null;
+    }
+    if (!cid) return { ...EMPTY_REGISTRATION, mobile: prof?.mobile ?? null };
 
     const { data: c } = await context.supabase
       .from("customers")
@@ -105,9 +112,9 @@ export const getMyRegistration = createServerFn({ method: "GET" })
          latitude, longitude, location_accuracy_m, gstin,
          customer_types(code, name, name_hi, name_mr, requires_gps)`,
       )
-      .eq("id", prof.customer_id)
+      .eq("id", cid)
       .maybeSingle();
-    if (!c) return { ...EMPTY_REGISTRATION, mobile: prof.mobile };
+    if (!c) return { ...EMPTY_REGISTRATION, mobile: prof?.mobile ?? null };
 
     const type = Array.isArray(c.customer_types) ? c.customer_types[0] : c.customer_types;
     return {
@@ -120,7 +127,7 @@ export const getMyRegistration = createServerFn({ method: "GET" })
       requiresGps: type?.requires_gps ?? false,
       businessName: c.business_name ?? null,
       contactName: c.contact_name ?? null,
-      mobile: c.mobile ?? prof.mobile,
+      mobile: c.mobile ?? prof?.mobile ?? null,
       email: c.email ?? null,
       addressLine1: c.address_line1 ?? null,
       addressLine2: c.address_line2 ?? null,

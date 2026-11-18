@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { getMyRegistration } from "@/lib/registration.functions";
 import { isRateLockedStatus, setRateLocked } from "@/lib/rate-lock";
 import { readGate, writeGate } from "@/lib/gate-cache";
+import { clearSales, getSalesInfo, SALES_HIDDEN } from "@/lib/sales";
+import { SalesBar } from "@/components/SalesBar";
 
 /**
  * Auth gate: every route under this pathless layout requires a signed-in
@@ -44,8 +46,23 @@ export const Route = createFileRoute("/_authenticated")({
       reg = await getMyRegistration();
       writeGate(data.user.id, reg);
     }
-    setRateLocked(isRateLockedStatus(reg.status));
     const here = location.pathname;
+    // Salesman (no own customer login): orders for a picked store.
+    const uid = localId ?? (await supabase.auth.getSession()).data.session?.user.id ?? "";
+    const sales = await getSalesInfo(uid);
+    if (sales.isSales) {
+      setRateLocked(false);
+      if (!sales.picked) {
+        if (here !== "/stores") throw redirect({ to: "/stores" });
+        return;
+      }
+      if (SALES_HIDDEN.includes(here)) throw redirect({ to: "/home" });
+      if (here === "/stores") return;
+      if (reg.customerId) return;
+      throw redirect({ to: "/stores" });
+    }
+    if (here === "/stores") throw redirect({ to: "/home" });
+    setRateLocked(isRateLockedStatus(reg.status));
     if (reg.status === "blocked") {
       if (here !== "/hold") throw redirect({ to: "/hold" });
       return;
@@ -82,6 +99,7 @@ function Gate() {
         sessionStorage.setItem("sunrich.loggedOut", "1");
         await queryClient.cancelQueries();
         queryClient.clear();
+        await clearSales();
         await supabase.auth.signOut();
         await navigate({ to: "/auth", replace: true });
       }
@@ -96,6 +114,7 @@ function Gate() {
 
   return (
     <>
+      <SalesBar />
       <Outlet />
       <PermissionsIntro />
     </>

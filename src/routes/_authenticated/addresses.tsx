@@ -20,6 +20,7 @@ import {
 import { useLang } from "@/hooks/use-lang";
 import { useOffline } from "@/hooks/use-offline";
 import { serverMessage } from "@/lib/form-errors";
+import { useSales } from "@/lib/sales";
 import { addressText, labelKey, deleteMyAddress, listMyAddresses, saveMyAddress, type SavedAddress } from "@/lib/addresses";
 
 export const Route = createFileRoute("/_authenticated/addresses")({
@@ -39,6 +40,7 @@ export const Route = createFileRoute("/_authenticated/addresses")({
 
 function Addresses() {
   const { t } = useTranslation();
+  const isSalesMode = !!useSales()?.isSales;
   const { lang } = useLang();
   const navigate = useNavigate();
   const offline = useOffline();
@@ -166,7 +168,7 @@ function Addresses() {
                       {t("addresses.setDefault")}
                     </button>
                   )}
-                  <button
+                  {!isSalesMode && <button
                     type="button"
                     onClick={() => setToDelete(a)}
                     disabled={offline || busy === a.id}
@@ -174,7 +176,7 @@ function Addresses() {
                     className="ml-auto flex min-h-11 min-w-11 items-center justify-center rounded-xl text-destructive disabled:opacity-50"
                   >
                     <Trash2 className="h-4 w-4" aria-hidden />
-                  </button>
+                  </button>}
                 </div>
               </li>
             ))}

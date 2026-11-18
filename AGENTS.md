@@ -37,3 +37,5 @@ Subdirectories `src/lib/` and `src/routes/` have their own `AGENTS.md`; read the
 - Reports use statement balances. Why: notes count once.
 - Scheme displays preserve RPC product details and scheme_info type/free_value fields; replacement labels use the server type. Why: gifts outside the catalogue and expired-return replacements must remain distinguishable without calculating discounts.
 - Product offer boxes display the server's minimum quantity, slab tiers and expiry using existing localized offer labels. Why: a generic slab badge is not the full purchasing rule.
+- Sales mode (`src/lib/sales.ts`): `sales_whoami` is_sales without own customer login → gate sends to `/stores` until `sales_pick_customer`; `my_customer_id` then returns the picked store, so all screens work unchanged; `SalesBar` on top; registration/devices/profile edit/delete hidden; pick cleared on logout. Why: server answers for the picked store.
+- Registration lists only `customer_types.show_in_registration`; a single type is auto-picked. Why: Command Center controls sign-up types.

@@ -30,6 +30,7 @@ import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
+import { clearSales, useSales } from "@/lib/sales";
 import { clearMyPhoto } from "@/lib/profile.functions";
 import { AddressSheet } from "@/components/AddressSheet";
 import { LanguageSheet } from "@/components/LanguageSheet";
@@ -162,6 +163,7 @@ function Account() {
   const [removing, setRemoving] = useState(false);
   const [photoSheetOpen, setPhotoSheetOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const isSalesMode = !!useSales()?.isSales;
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteReason, setDeleteReason] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState(false);
@@ -313,6 +315,7 @@ function Account() {
   };
 
   const signOut = async () => {
+    await clearSales();
     await queryClient.cancelQueries();
     queryClient.clear();
     try {
@@ -383,7 +386,7 @@ function Account() {
                 </span>
               )}
             </div>
-            <button
+            {!isSalesMode && <button
               type="button"
               onClick={() => {
                 setEditName(profile?.name ?? "");
@@ -392,7 +395,7 @@ function Account() {
               className="min-h-11 shrink-0 rounded-xl bg-primary-foreground/15 px-4 text-sm font-bold text-primary-foreground transition active:scale-95"
             >
               {t("account.edit")}
-            </button>
+            </button>}
           </div>
         </div>
         {notActive && (
@@ -451,8 +454,12 @@ function Account() {
         <Separator />
         <MenuItem icon={ChartNoAxesCombined} label={t("reports.title")} onClick={() => navigate({ to: "/reports" })} />
         <Separator />
-        <MenuItem icon={Smartphone} label={t("devices.title")} onClick={() => navigate({ to: "/devices" })} />
-        <Separator />
+        {!isSalesMode && (
+          <>
+            <MenuItem icon={Smartphone} label={t("devices.title")} onClick={() => navigate({ to: "/devices" })} />
+            <Separator />
+          </>
+        )}
         <MenuItem icon={LifeBuoy} label={t("support.title")} badge={openCount} onClick={() => navigate({ to: "/queries" })} />
         <Separator />
         <div className="flex min-h-14 items-center gap-3 px-4">
@@ -622,7 +629,7 @@ function Account() {
                 </button>
               )}
             </div>
-            <button
+            {!isSalesMode && <button
               type="button"
               onClick={() => {
                 setAboutOpen(false);
@@ -634,7 +641,7 @@ function Account() {
             >
               <Trash2 className="h-4 w-4" aria-hidden />
               {t("account.deleteAccount")}
-            </button>
+            </button>}
             <p className="text-xs font-medium text-muted-foreground">
               {t("account.aboutVersion", { version: APP_VERSION })}
             </p>

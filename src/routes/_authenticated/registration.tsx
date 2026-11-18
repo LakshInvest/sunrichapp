@@ -220,12 +220,16 @@ function TypeStep({ onPick }: { onPick: (code: string) => void }) {
   useEffect(() => {
     let active = true;
     void fetchTypes().then((r) => {
-      if (active) setTypes(r.types);
+      if (!active) return;
+      setTypes(r.types);
+      // Only one type open for sign-up: pick it and skip this step.
+      const only = r.types.length === 1 ? r.types[0] : undefined;
+      if (only) onPick(only.code);
     });
     return () => {
       active = false;
     };
-  }, [fetchTypes]);
+  }, [fetchTypes]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="flex flex-col gap-5 animate-in fade-in">
@@ -236,7 +240,7 @@ function TypeStep({ onPick }: { onPick: (code: string) => void }) {
         <h1 className="text-2xl font-bold text-primary">{t("registration.whoTitle")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("registration.whoSubtitle")}</p>
       </div>
-      {types === null && (
+      {(types === null || types.length === 1) && (
         <p className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> {t("registration.loading")}
         </p>

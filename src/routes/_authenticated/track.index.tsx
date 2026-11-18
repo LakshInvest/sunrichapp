@@ -34,6 +34,9 @@ import {
   type OrderDto,
 } from "@/lib/orders";
 import en from "@/locales/en.json";
+import { filterOrderHistory, type OrderFilters } from "@/lib/report-rules";
+import { khataRange } from "@/lib/khata";
+import { istToday } from "@/lib/ist";
 
 export const Route = createFileRoute("/_authenticated/track/")({
   head: () => ({ meta: [
@@ -59,6 +62,16 @@ function MyOrders() {
   const [bills, setBills] = useState<Record<string, OrderBill> | null>(null);
   const [ratings, setRatings] = useState<Record<string, OrderFeedback> | null>(null);
   const [ratingOrder, setRatingOrder] = useState<OrderDto | null>(null);
+  const [filters, setFilters] = useState<OrderFilters>({ status: "all", range: "thisMonth", ...khataRange("thisMonth"), search: "" });
+  const [filtersReady, setFiltersReady] = useState(false);
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("sunrich.orderFilters") ?? "null") as Partial<OrderFilters> | null;
+      if (saved && ["all", "active", "delivered", "cancelled"].includes(saved.status ?? "") && ["thisMonth", "lastMonth", "custom"].includes(saved.range ?? "")) setFilters((old) => ({ ...old, ...saved, search: typeof saved.search === "string" ? saved.search : "", from: /^\d{4}-\d{2}-\d{2}$/.test(saved.from ?? "") ? saved.from ?? old.from : old.from, to: /^\d{4}-\d{2}-\d{2}$/.test(saved.to ?? "") ? saved.to ?? old.to : old.to }));
+    } catch { /* keep defaults */ }
+    setFiltersReady(true);
+  }, []);
+  useEffect(() => { if (filtersReady) try { localStorage.setItem("sunrich.orderFilters", JSON.stringify(filters)); } catch { /* storage unavailable */ } }, [filters, filtersReady]);
   const [homeExtras, setHomeExtras] = useState(() => getHomeExtras());
   const settings = useAppSettings();
   useEffect(() => onHomeExtras(setHomeExtras), []);
@@ -88,8 +101,10 @@ function MyOrders() {
 
   const pull = usePullToRefresh(load);
 
-  const active = useMemo(() => (orders ?? []).filter((o) => statusGroup(o.status) === "active"), [orders]);
-  const past = useMemo(() => (orders ?? []).filter((o) => statusGroup(o.status) !== "active"), [orders]);
+  const period = filters.range === "custom" ? { from: filters.from, to: filters.to } : khataRange(filters.range);
+  const filtered = useMemo(() => filterOrderHistory(orders ?? [], filters, period.from, period.to), [orders, filters, period.from, period.to]);
+  const active = filtered.filter((o) => statusGroup(o.status) === "active");
+  const past = filtered.filter((o) => statusGroup(o.status) !== "active");
   const { setQty } = useCart();
   const products = readCatalogueCache()?.products ?? [];
   const thumb = (pid: string) => {
@@ -189,6 +204,12 @@ function MyOrders() {
       )}
 
       <div className="px-5 pb-28 pt-2">
+        <div className="mb-4 space-y-3">
+          <input type="search" aria-label={t("reports.search")} placeholder={t("reports.search")} value={filters.search} onChange={(e) => setFilters((old) => ({ ...old, search: e.target.value }))} className="min-h-12 w-full rounded-xl border border-input bg-card px-3 text-foreground" />
+          <div className="grid grid-cols-4 gap-1" role="group" aria-label={t("track.title")}>{(["all", "active", "delivered", "cancelled"] as const).map((status) => <Button key={status} variant={filters.status === status ? "secondary" : "outline"} aria-pressed={filters.status === status} onClick={() => setFilters((old) => ({ ...old, status }))} className="h-auto min-h-11 whitespace-normal px-1 text-xs">{t(`reports.${status}`)}</Button>)}</div>
+          <div className="grid grid-cols-3 gap-1">{(["thisMonth", "lastMonth", "custom"] as const).map((range) => <Button key={range} variant={filters.range === range ? "secondary" : "ghost"} aria-pressed={filters.range === range} onClick={() => setFilters((old) => ({ ...old, range }))} className="h-auto min-h-11 whitespace-normal px-1 text-xs">{t(`reports.${range}`)}</Button>)}</div>
+          {filters.range === "custom" && <div className="grid grid-cols-2 gap-2"><label className="min-w-0 text-xs">{t("balance.from")}<input type="date" value={filters.from} max={filters.to} onChange={(e) => setFilters((old) => ({ ...old, from: e.target.value }))} className="mt-1 min-h-11 w-full min-w-0 rounded-lg border border-input bg-card px-2" /></label><label className="min-w-0 text-xs">{t("balance.to")}<input type="date" value={filters.to} min={filters.from} max={istToday()} onChange={(e) => setFilters((old) => ({ ...old, to: e.target.value }))} className="mt-1 min-h-11 w-full min-w-0 rounded-lg border border-input bg-card px-2" /></label></div>}
+        </div>
         {error && orders !== null && <p role="alert" className="mb-3 text-sm text-destructive">{error}</p>}
         {error && orders == null ? (
           <ErrorState message={error} onRetry={() => void load().catch(() => undefined)} />
@@ -207,6 +228,7 @@ function MyOrders() {
           </div>
         ) : (
           <>
+            {filtered.length === 0 && <EmptyState title={t("reports.noMatches")} body="" />}
             {active.length > 0 && (
               <section>
                 <h2 className="mb-2 text-sm font-bold text-muted-foreground">{t("orders2.active")}</h2>

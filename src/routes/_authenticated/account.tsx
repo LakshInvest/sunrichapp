@@ -1,4 +1,5 @@
 import { ownCustomerFilter } from "@/lib/my-customer";
+import { ChartNoAxesCombined } from "lucide-react";
 import { serverMessage } from "@/lib/form-errors";
 import { PageShell } from "@/components/PageShell";
 import { useIsDemo } from "@/hooks/use-demo";
@@ -447,6 +448,8 @@ function Account() {
         )}
         <Separator />
         <MenuItem icon={FileText} label={t("account2.business")} onClick={() => setBizOpen(true)} />
+        <Separator />
+        <MenuItem icon={ChartNoAxesCombined} label={t("reports.title")} onClick={() => navigate({ to: "/reports" })} />
         <Separator />
         <MenuItem icon={Smartphone} label={t("devices.title")} onClick={() => navigate({ to: "/devices" })} />
         <Separator />

@@ -1,4 +1,5 @@
 import { useIsDemo } from "@/hooks/use-demo";
+import { OrderSplitPreview } from "@/components/OrderSplitPreview";
 import { serverMessage } from "@/lib/form-errors";
 import { scrollToFirstError } from "@/lib/form-errors";
 import { advanceAtCheckout, fetchMyAdvance } from "@/lib/khata";
@@ -458,6 +459,8 @@ function Checkout() {
               {t("khata.checkout.advanceUsed")} −{formatINR(advanceAtCheckout(bill, advance).used)}
             </p>
           )}
+
+          <OrderSplitPreview quote={quote} />
 
           {pickup && (
             <label className="mt-4 flex flex-col gap-1.5">

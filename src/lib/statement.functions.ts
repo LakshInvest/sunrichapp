@@ -6,7 +6,7 @@ import { STATEMENT_LINK_SECONDS, statementPath } from "@/lib/statement-rules";
 /** Active customers cannot upload ordinary registration documents; scope this privileged PDF upload to their verified customer. */
 export const uploadStatement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ pdf: z.string().max(7_000_000), filename: z.string().regex(/^Sunrich-statement-\d{4}-\d{2}-\d{2}-to-\d{4}-\d{2}-\d{2}\.pdf$/) }))
+  .inputValidator(z.object({ pdf: z.string().max(7_000_000), filename: z.string().regex(/^Sunrich-(?:statement-\d{4}-\d{2}-\d{2}-to-\d{4}-\d{2}-\d{2}|report-(?:monthly|products|payments)-\d{4}-\d{2}|note-[A-Za-z0-9_-]{1,100})\.pdf$/) }))
   .handler(async ({ data, context }) => {
     const { data: valid, error: sessionError } = await context.supabase.rpc("my_session_is_valid");
     if (sessionError || !valid) throw new Error("Please log in again");

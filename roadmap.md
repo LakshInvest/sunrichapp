@@ -1,3 +1,13 @@
+# Prompt-59
+- [x] Customer-only monthly, product and payment reports with PDF/share; localized canvas PDF checked (32KB).
+- [x] Credit/debit note passbook details and download; preserve statement balances.
+- [x] Checkout preview grouped by quoted firm and fulfiller, same backend rounding.
+- [x] Remembered order status/date/search filters.
+- [x] 206 tests pass, build OK; public login checked at 360/390/412 without overflow/errors; security scan complete, no critical findings. Request publication after commit.
+- [ ] Exact distributor name — quote_my_order / _price_lines returns only fulfiller_customer_id; customers_read_own blocks ordinary customers from reading the distributor. Needs a safe name field in the existing quote from the backend owner; local-distributor fallback shown.
+- [ ] Signed-in report, note, order filters and checkout screen verification — external unmanaged Supabase session unavailable.
+- [ ] Real Android signed-link download and WhatsApp sharing — requires an installed APK and phone.
+
 # Prompt-57
 - [x] Shared content-sized mobile/OTP/PIN card; remaining-height photo. Mobile and PIN verified at all three sizes with simulated keyboard resizing.
 - [x] New favicon, 192/512 install icons, safe-zone maskable 512, apple-touch 180, About/offline and app/product sharing images; white photo logo preserved. Removed unused launch-logo.webp; retained historical CDN assets used by earlier deployments.

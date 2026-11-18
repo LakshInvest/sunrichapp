@@ -25,12 +25,14 @@ import { Route as AuthenticatedHoldRouteImport } from './routes/_authenticated/h
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedKhataRouteImport } from './routes/_authenticated/khata'
+import { Route as AuthenticatedNoteRouteImport } from './routes/_authenticated/note'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedOrderRouteImport } from './routes/_authenticated/order'
 import { Route as AuthenticatedOrderSuccessRouteImport } from './routes/_authenticated/order-success'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
 import { Route as AuthenticatedQueriesRouteImport } from './routes/_authenticated/queries'
 import { Route as AuthenticatedRegistrationRouteImport } from './routes/_authenticated/registration'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedSupportRouteImport } from './routes/_authenticated/support'
 import { Route as AuthenticatedTrackRouteImport } from './routes/_authenticated/track'
 import { Route as AuthenticatedUnderReviewRouteImport } from './routes/_authenticated/under-review'
@@ -125,6 +127,11 @@ const AuthenticatedKhataRoute = AuthenticatedKhataRouteImport.update({
   path: '/khata',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNoteRoute = AuthenticatedNoteRouteImport.update({
+  id: '/note',
+  path: '/note',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedNotificationsRoute =
   AuthenticatedNotificationsRouteImport.update({
     id: '/notifications',
@@ -158,6 +165,11 @@ const AuthenticatedRegistrationRoute =
     path: '/registration',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSupportRoute = AuthenticatedSupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -248,12 +260,14 @@ export interface FileRoutesByFullPath {
   '/home': typeof AuthenticatedHomeRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/khata': typeof AuthenticatedKhataRoute
+  '/note': typeof AuthenticatedNoteRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/order': typeof AuthenticatedOrderRoute
   '/order-success': typeof AuthenticatedOrderSuccessRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/queries': typeof AuthenticatedQueriesRouteWithChildren
   '/registration': typeof AuthenticatedRegistrationRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/support': typeof AuthenticatedSupportRoute
   '/track': typeof AuthenticatedTrackRouteWithChildren
   '/under-review': typeof AuthenticatedUnderReviewRoute
@@ -285,11 +299,13 @@ export interface FileRoutesByTo {
   '/home': typeof AuthenticatedHomeRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/khata': typeof AuthenticatedKhataRoute
+  '/note': typeof AuthenticatedNoteRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/order': typeof AuthenticatedOrderRoute
   '/order-success': typeof AuthenticatedOrderSuccessRoute
   '/payments': typeof AuthenticatedPaymentsRoute
   '/registration': typeof AuthenticatedRegistrationRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/support': typeof AuthenticatedSupportRoute
   '/under-review': typeof AuthenticatedUnderReviewRoute
   '/order/$id': typeof OrderIdRoute
@@ -322,12 +338,14 @@ export interface FileRoutesById {
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
   '/_authenticated/khata': typeof AuthenticatedKhataRoute
+  '/_authenticated/note': typeof AuthenticatedNoteRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/order': typeof AuthenticatedOrderRoute
   '/_authenticated/order-success': typeof AuthenticatedOrderSuccessRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
   '/_authenticated/queries': typeof AuthenticatedQueriesRouteWithChildren
   '/_authenticated/registration': typeof AuthenticatedRegistrationRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/support': typeof AuthenticatedSupportRoute
   '/_authenticated/track': typeof AuthenticatedTrackRouteWithChildren
   '/_authenticated/under-review': typeof AuthenticatedUnderReviewRoute
@@ -361,12 +379,14 @@ export interface FileRouteTypes {
     | '/home'
     | '/inbox'
     | '/khata'
+    | '/note'
     | '/notifications'
     | '/order'
     | '/order-success'
     | '/payments'
     | '/queries'
     | '/registration'
+    | '/reports'
     | '/support'
     | '/track'
     | '/under-review'
@@ -398,11 +418,13 @@ export interface FileRouteTypes {
     | '/home'
     | '/inbox'
     | '/khata'
+    | '/note'
     | '/notifications'
     | '/order'
     | '/order-success'
     | '/payments'
     | '/registration'
+    | '/reports'
     | '/support'
     | '/under-review'
     | '/order/$id'
@@ -434,12 +456,14 @@ export interface FileRouteTypes {
     | '/_authenticated/home'
     | '/_authenticated/inbox'
     | '/_authenticated/khata'
+    | '/_authenticated/note'
     | '/_authenticated/notifications'
     | '/_authenticated/order'
     | '/_authenticated/order-success'
     | '/_authenticated/payments'
     | '/_authenticated/queries'
     | '/_authenticated/registration'
+    | '/_authenticated/reports'
     | '/_authenticated/support'
     | '/_authenticated/track'
     | '/_authenticated/under-review'
@@ -581,6 +605,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedKhataRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/note': {
+      id: '/_authenticated/note'
+      path: '/note'
+      fullPath: '/note'
+      preLoaderRoute: typeof AuthenticatedNoteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/notifications': {
       id: '/_authenticated/notifications'
       path: '/notifications'
@@ -621,6 +652,13 @@ declare module '@tanstack/react-router' {
       path: '/registration'
       fullPath: '/registration'
       preLoaderRoute: typeof AuthenticatedRegistrationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/support': {
@@ -763,12 +801,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
   AuthenticatedKhataRoute: typeof AuthenticatedKhataRoute
+  AuthenticatedNoteRoute: typeof AuthenticatedNoteRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedOrderRoute: typeof AuthenticatedOrderRoute
   AuthenticatedOrderSuccessRoute: typeof AuthenticatedOrderSuccessRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
   AuthenticatedQueriesRoute: typeof AuthenticatedQueriesRouteWithChildren
   AuthenticatedRegistrationRoute: typeof AuthenticatedRegistrationRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedSupportRoute: typeof AuthenticatedSupportRoute
   AuthenticatedTrackRoute: typeof AuthenticatedTrackRouteWithChildren
   AuthenticatedUnderReviewRoute: typeof AuthenticatedUnderReviewRoute
@@ -789,12 +829,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
   AuthenticatedKhataRoute: AuthenticatedKhataRoute,
+  AuthenticatedNoteRoute: AuthenticatedNoteRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedOrderRoute: AuthenticatedOrderRoute,
   AuthenticatedOrderSuccessRoute: AuthenticatedOrderSuccessRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
   AuthenticatedQueriesRoute: AuthenticatedQueriesRouteWithChildren,
   AuthenticatedRegistrationRoute: AuthenticatedRegistrationRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedSupportRoute: AuthenticatedSupportRoute,
   AuthenticatedTrackRoute: AuthenticatedTrackRouteWithChildren,
   AuthenticatedUnderReviewRoute: AuthenticatedUnderReviewRoute,

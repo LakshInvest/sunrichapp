@@ -394,6 +394,10 @@ html[data-launch-hide-logo] .launch-logo,
 html[data-launch-hide-tagline] .launch-tag { display: none; }
 .qty-input { color: var(--primary-foreground); -webkit-text-fill-color: var(--primary-foreground); caret-color: var(--primary-foreground); }
 .keyboard-sheet { bottom: var(--kb, 0px); }
+.report-bar { appearance: none; border: 0; border-radius: var(--radius); overflow: hidden; background: var(--muted); }
+.report-bar::-webkit-progress-bar { background: var(--muted); }
+.report-bar::-webkit-progress-value { background: var(--secondary); border-radius: var(--radius); }
+.report-bar::-moz-progress-bar { background: var(--secondary); border-radius: var(--radius); }
 
 /* The form owns only its content height; the photo takes all remaining space. */
 .auth-brand { flex: 1 1 0%; min-height: 0; }

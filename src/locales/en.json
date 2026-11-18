@@ -1,5 +1,8 @@
 {
   "brand": "Sunrich",
+  "reports": {
+    "title": "Reports", "description": "Your purchases and payments, month by month.", "month": "Month", "monthly": "Purchases", "products": "By product", "payments": "Payments", "orders": "Orders", "packs": "Packs", "value": "Purchase value", "paid": "Paid", "due": "Still due", "opening": "Opening balance", "bills": "Bills", "closing": "Closing balance", "credits": "Credit note", "debits": "Debit note", "sixMonths": "Last 6 months", "share": "Share to WhatsApp", "empty": "No purchases this month", "reason": "Reason", "noteMissing": "This note is not available. Please contact Sunrich.", "split": "This order will be placed in {{count}} parts", "distributor": "Distributor ({{name}})", "localDistributor": "Local distributor", "search": "Order number or product", "all": "All", "active": "Active", "delivered": "Delivered", "cancelled": "Cancelled", "thisMonth": "This month", "lastMonth": "Last month", "custom": "Custom", "noMatches": "No orders match these filters"
+  },
   "paymentReport": {
     "dailyLimit": "Too many payments have been reported today — please contact Sunrich.",
     "duplicate": "This payment has already been reported. Please check its status in Khata.",

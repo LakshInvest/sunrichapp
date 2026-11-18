@@ -109,6 +109,7 @@ function KhataPage() {
   }, [full, shown]);
 
   const openEntry = (r: KhataEntry) => {
+    if (r.rawType === "credit_note" || r.rawType === "debit_note") { void navigate({ to: "/note", search: { number: r.refNo } }); return; }
     if (r.kind !== "bill") return;
     if (r.invoiceId) void navigate({ to: "/invoice/$id", params: { id: r.invoiceId } });
     else if (r.orderId) void navigate({ to: "/track/$id", params: { id: r.orderId } });
@@ -122,6 +123,7 @@ function KhataPage() {
 
       <div className="space-y-5 px-5 pt-5">
         {sumErr ? <ErrorState message={sumErr} onRetry={loadTop} /> : <KhataBalanceCard sum={sum} />}
+        <Button variant="outline" onClick={() => navigate({ to: "/reports" })} className="h-auto min-h-16 w-full justify-between whitespace-normal rounded-xl bg-card px-4 text-left"><span><span className="block font-bold text-primary">{t("reports.title")}</span><span className="text-xs text-muted-foreground">{t("reports.description")}</span></span><FileText className="shrink-0 text-secondary" /></Button>
 
         {topProofs.length > 0 && (
           <section className="space-y-2" aria-label={t("khata.pendingTag")}>
@@ -174,13 +176,14 @@ function KhataPage() {
                       <li key={`${r.refNo}-${i}`}>
                         <button
                           type="button"
-                          disabled={r.kind !== "bill"}
+                          disabled={r.kind !== "bill" && r.kind !== "credit" && r.kind !== "debit"}
                           onClick={() => openEntry(r)}
                           className="grid min-h-12 w-full grid-cols-[1fr_4.25rem_4.25rem_4.75rem] items-center gap-1 px-1 py-1.5 text-left text-xs disabled:cursor-default"
                         >
                           <span className="min-w-0">
-                            <span className="block truncate font-medium text-foreground">{t(`khata.kind.${r.kind}`)}</span>
+                            <span className={`block break-words font-medium ${r.kind === "credit" ? "text-success" : r.kind === "debit" ? "text-destructive" : "text-foreground"}`}>{r.kind === "credit" || r.kind === "debit" ? t(r.kind === "credit" ? "reports.credits" : "reports.debits") : t(`khata.kind.${r.kind}`)}</span>
                             {r.refNo && <span className="block truncate text-[11px] text-muted-foreground">{r.refNo}</span>}
+                            {(r.kind === "credit" || r.kind === "debit") && <span className="block break-words text-[11px] text-muted-foreground">{r.details}</span>}
                           </span>
                           <span className="text-right font-semibold text-destructive">{r.debit > 0 ? formatINR(r.debit) : ""}</span>
                           <span className="text-right font-semibold text-success">{r.credit > 0 ? formatINR(r.credit) : ""}</span>

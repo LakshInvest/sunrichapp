@@ -16,7 +16,7 @@ export type KhataSummary = {
   pendingPayments: number;
 };
 
-export type KhataEntryKind = "bill" | "payment" | "credit" | "adjustment" | "opening";
+export type KhataEntryKind = "bill" | "payment" | "credit" | "debit" | "adjustment" | "opening";
 export type KhataEntry = {
   date: string;
   kind: KhataEntryKind;
@@ -81,6 +81,7 @@ export function entryKind(type: string): KhataEntryKind {
   if (k.includes("invoice")) return "bill";
   if (k.includes("receipt") || k.includes("payment")) return "payment";
   if (k.includes("credit")) return "credit";
+  if (k.includes("debit")) return "debit";
   return "adjustment";
 }
 

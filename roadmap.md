@@ -1,3 +1,9 @@
+# Prompt-62
+- [x] Audited existing offers, quote/free lines/hints, split names, saved orders and monthly benefits; product boxes now include server minimum quantity, slab tiers and expiry. No SQL; reported NotFound.tsx path absent and cn is a defined function.
+- [x] 217 tests passed; build OK. Login and mounted sample quote/product-rule controls checked at 360/390/412 in English/Hindi/Marathi; no overflow or runtime errors, +4 adds exactly four. Read-only inspection confirms customer EXECUTE on my_schemes/quote_my_order and own-order SELECT policies; no blocked inspection. Basic security scan complete, five informational findings, no critical findings; request publication after commit.
+- [ ] Real customer end-to-end verification — external unmanaged Supabase session unavailable.
+- [ ] Android PDF/WhatsApp sharing — requires installed APK and phone.
+
 # Prompt-61
 - [x] Audited existing offers, product badges, server quote/free lines/hints, split names, order history and benefits. Added localized replacement-type labels, compact badges, RPC gift/combo products and server free_value breakdown; no SQL.
 - [x] 217 tests passed; corrected test fixture type and reran 11 scheme tests; build OK. Login plus mounted quote/free/hint/bill/split controls checked at 360/390/412 in en/hi/mr, no overflow or runtime errors; +4 requested exactly four packs.

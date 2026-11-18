@@ -36,3 +36,4 @@ Subdirectories `src/lib/` and `src/routes/` have their own `AGENTS.md`; read the
 - Product extras via `my_product` (`product-extras.ts`); share `/p/$id`. Why: details without price changes.
 - Reports use statement balances. Why: notes count once.
 - Scheme displays preserve RPC product details and scheme_info type/free_value fields; replacement labels use the server type. Why: gifts outside the catalogue and expired-return replacements must remain distinguishable without calculating discounts.
+- Product offer boxes display the server's minimum quantity, slab tiers and expiry using existing localized offer labels. Why: a generic slab badge is not the full purchasing rule.

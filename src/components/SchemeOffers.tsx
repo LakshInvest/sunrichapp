@@ -24,6 +24,10 @@ function useRule() {
   };
 }
 const icons: Record<string, typeof Gift> = { free_qty: Gift, percent_off: Percent, amount_off: BadgeIndianRupee, slab: Layers, combo: Package, bill_value: BadgeIndianRupee };
+function SchemeTerms({ scheme }: { scheme: Scheme }) {
+  const { t } = useTranslation(); const { lang } = useLang();
+  return <>{scheme.min_qty ? <p className="mt-2 text-sm">{t("offers.minimum", { qty: scheme.min_qty })}</p> : null}{scheme.slabs?.map((slab, i) => <p key={i} className="mt-2 text-sm">{t("offers.slabRule", { qty: slab["min_qty"], benefit: slab["discount_percent"] ? t("offers.percent", { percent: slab["discount_percent"] }) : t("offers.amount", { amount: formatINR(Number(slab["discount_amount"] ?? slab["discount_per_pack"] ?? 0)) }) })}</p>)}{scheme.ends_on && <p className="mt-2 text-xs text-muted-foreground">{t("offers.valid", { date: indDate(scheme.ends_on, lang) })}</p>}</>;
+}
 export function SchemeBadge({ product }: { product: CatalogProduct }) {
   const { data = [] } = useSchemes(); const rule = useRule(); const { t } = useTranslation();
   const s = data.find((s) => schemeCovers(s, product));
@@ -32,7 +36,7 @@ export function SchemeBadge({ product }: { product: CatalogProduct }) {
 }
 export function ProductSchemes({ product }: { product: CatalogProduct }) {
   const { data = [], error } = useSchemes(); const { lang } = useLang(); const rule = useRule(); const { t } = useTranslation();
-  return <>{error && <p role="alert" className="mt-3 text-xs text-destructive">{serverMessage(error, t("offers.failed"))}</p>}{data.filter((s) => schemeCovers(s, product)).map((s, i) => <div key={s.id ?? s.scheme_id ?? i} className="mt-4 border-y border-success/20 bg-success/5 py-3"><p className="text-sm font-bold text-success">{schemeText(s, lang)} · {rule(s)}</p><p className="mt-1 text-sm text-foreground">{schemeText(s, lang, "description")}</p></div>)}</>;
+  return <>{error && <p role="alert" className="mt-3 text-xs text-destructive">{serverMessage(error, t("offers.failed"))}</p>}{data.filter((s) => schemeCovers(s, product)).map((s, i) => <div key={s.id ?? s.scheme_id ?? i} className="mt-4 border-y border-success/20 bg-success/5 py-3"><p className="text-sm font-bold text-success">{schemeText(s, lang)} · {rule(s)}</p>{schemeText(s, lang, "description") && <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{schemeText(s, lang, "description")}</p>}<SchemeTerms scheme={s} /></div>)}</>;
 }
 export function SchemeOffers({ products }: { products: CatalogProduct[] }) {
   const { data = [], error, refetch } = useSchemes(); const { t } = useTranslation(); const { lang } = useLang(); const rule = useRule(); const navigate = useNavigate();

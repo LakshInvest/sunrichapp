@@ -274,6 +274,7 @@ export type Database = {
           privacy_md: string | null
           privacy_url: string | null
           same_day_cutoff: string
+          scheme_stacking: string
           show_jar_balance: boolean
           support_email: string | null
           support_hours: string | null
@@ -350,6 +351,7 @@ export type Database = {
           privacy_md?: string | null
           privacy_url?: string | null
           same_day_cutoff?: string
+          scheme_stacking?: string
           show_jar_balance?: boolean
           support_email?: string | null
           support_hours?: string | null
@@ -426,6 +428,7 @@ export type Database = {
           privacy_md?: string | null
           privacy_url?: string | null
           same_day_cutoff?: string
+          scheme_stacking?: string
           show_jar_balance?: boolean
           support_email?: string | null
           support_hours?: string | null
@@ -3741,11 +3744,14 @@ export type Database = {
         Row: {
           cgst: number
           description: string
+          discount_amount: number
+          gross_total: number | null
           gst_rate: number
           hsn_code: string | null
           id: string
           igst: number
           invoice_id: string
+          is_free: boolean
           line_total: number
           order_line_id: string | null
           product_id: string
@@ -3758,11 +3764,14 @@ export type Database = {
         Insert: {
           cgst?: number
           description: string
+          discount_amount?: number
+          gross_total?: number | null
           gst_rate: number
           hsn_code?: string | null
           id?: string
           igst?: number
           invoice_id: string
+          is_free?: boolean
           line_total: number
           order_line_id?: string | null
           product_id: string
@@ -3775,11 +3784,14 @@ export type Database = {
         Update: {
           cgst?: number
           description?: string
+          discount_amount?: number
+          gross_total?: number | null
           gst_rate?: number
           hsn_code?: string | null
           id?: string
           igst?: number
           invoice_id?: string
+          is_free?: boolean
           line_total?: number
           order_line_id?: string | null
           product_id?: string
@@ -3842,6 +3854,7 @@ export type Database = {
           customer_id: string
           customer_name: string | null
           deposit_total: number
+          discount_total: number
           due_date: string | null
           eway_bill_no: string | null
           firm_id: string
@@ -3875,6 +3888,7 @@ export type Database = {
           customer_id: string
           customer_name?: string | null
           deposit_total?: number
+          discount_total?: number
           due_date?: string | null
           eway_bill_no?: string | null
           firm_id: string
@@ -3908,6 +3922,7 @@ export type Database = {
           customer_id?: string
           customer_name?: string | null
           deposit_total?: number
+          discount_total?: number
           due_date?: string | null
           eway_bill_no?: string | null
           firm_id?: string
@@ -4099,9 +4114,12 @@ export type Database = {
           delivery_charge_per_pack: number
           deposit_per_unit: number
           deposit_total: number
+          discount_amount: number
+          gross_total: number | null
           gst_rate: number
           hsn_code: string | null
           id: string
+          is_free: boolean
           line_total: number
           mrp: number | null
           new_containers: number
@@ -4111,6 +4129,7 @@ export type Database = {
           product_id: string
           product_name: string
           qty: number
+          scheme_info: Json
           sort_order: number
           tax_amount: number
           taxable_value: number
@@ -4120,9 +4139,12 @@ export type Database = {
           delivery_charge_per_pack?: number
           deposit_per_unit?: number
           deposit_total?: number
+          discount_amount?: number
+          gross_total?: number | null
           gst_rate?: number
           hsn_code?: string | null
           id?: string
+          is_free?: boolean
           line_total: number
           mrp?: number | null
           new_containers?: number
@@ -4132,6 +4154,7 @@ export type Database = {
           product_id: string
           product_name: string
           qty: number
+          scheme_info?: Json
           sort_order?: number
           tax_amount: number
           taxable_value: number
@@ -4141,9 +4164,12 @@ export type Database = {
           delivery_charge_per_pack?: number
           deposit_per_unit?: number
           deposit_total?: number
+          discount_amount?: number
+          gross_total?: number | null
           gst_rate?: number
           hsn_code?: string | null
           id?: string
+          is_free?: boolean
           line_total?: number
           mrp?: number | null
           new_containers?: number
@@ -4153,6 +4179,7 @@ export type Database = {
           product_id?: string
           product_name?: string
           qty?: number
+          scheme_info?: Json
           sort_order?: number
           tax_amount?: number
           taxable_value?: number
@@ -4178,6 +4205,64 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_schemes: {
+        Row: {
+          created_at: string
+          discount_amount: number
+          free_qty: number
+          free_value: number
+          id: string
+          order_id: string
+          scheme_id: string
+          scheme_name: string | null
+          scheme_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          discount_amount?: number
+          free_qty?: number
+          free_value?: number
+          id?: string
+          order_id: string
+          scheme_id: string
+          scheme_name?: string | null
+          scheme_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          discount_amount?: number
+          free_qty?: number
+          free_value?: number
+          id?: string
+          order_id?: string
+          scheme_id?: string
+          scheme_name?: string | null
+          scheme_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_schemes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_schemes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_schemes_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "schemes"
             referencedColumns: ["id"]
           },
         ]
@@ -4289,6 +4374,7 @@ export type Database = {
           released_at: string | null
           round_off: number
           route_id: string | null
+          scheme_discount: number
           source: string
           status: Database["public"]["Enums"]["order_status"]
           tax_total: number
@@ -4357,6 +4443,7 @@ export type Database = {
           released_at?: string | null
           round_off?: number
           route_id?: string | null
+          scheme_discount?: number
           source?: string
           status?: Database["public"]["Enums"]["order_status"]
           tax_total?: number
@@ -4425,6 +4512,7 @@ export type Database = {
           released_at?: string | null
           round_off?: number
           route_id?: string | null
+          scheme_discount?: number
           source?: string
           status?: Database["public"]["Enums"]["order_status"]
           tax_total?: number
@@ -5694,6 +5782,225 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheme_combo_items: {
+        Row: {
+          id: string
+          product_id: string
+          qty: number
+          scheme_id: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          qty: number
+          scheme_id: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          qty?: number
+          scheme_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheme_combo_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheme_combo_items_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "schemes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheme_slabs: {
+        Row: {
+          discount_per_pack: number | null
+          discount_percent: number | null
+          id: string
+          min_qty: number
+          scheme_id: string
+        }
+        Insert: {
+          discount_per_pack?: number | null
+          discount_percent?: number | null
+          id?: string
+          min_qty: number
+          scheme_id: string
+        }
+        Update: {
+          discount_per_pack?: number | null
+          discount_percent?: number | null
+          id?: string
+          min_qty?: number
+          scheme_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheme_slabs_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "schemes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheme_targets: {
+        Row: {
+          id: string
+          scheme_id: string
+          target_id: string
+          target_kind: string
+        }
+        Insert: {
+          id?: string
+          scheme_id: string
+          target_id: string
+          target_kind: string
+        }
+        Update: {
+          id?: string
+          scheme_id?: string
+          target_id?: string
+          target_kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheme_targets_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "schemes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schemes: {
+        Row: {
+          apply_on_app: boolean
+          apply_on_office: boolean
+          budget_amount: number | null
+          budget_free_qty: number | null
+          buy_qty: number | null
+          code: string | null
+          combinable: boolean
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          description_hi: string | null
+          description_mr: string | null
+          discount_amount: number | null
+          discount_percent: number | null
+          ends_on: string | null
+          free_product_id: string | null
+          free_qty: number | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          max_discount: number | null
+          min_qty: number | null
+          min_value: number | null
+          name: string
+          name_hi: string | null
+          name_mr: string | null
+          per_customer_limit: number | null
+          priority: number
+          repeat_free: boolean
+          scheme_type: string
+          show_in_app: boolean
+          starts_on: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          apply_on_app?: boolean
+          apply_on_office?: boolean
+          budget_amount?: number | null
+          budget_free_qty?: number | null
+          buy_qty?: number | null
+          code?: string | null
+          combinable?: boolean
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_hi?: string | null
+          description_mr?: string | null
+          discount_amount?: number | null
+          discount_percent?: number | null
+          ends_on?: string | null
+          free_product_id?: string | null
+          free_qty?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          max_discount?: number | null
+          min_qty?: number | null
+          min_value?: number | null
+          name: string
+          name_hi?: string | null
+          name_mr?: string | null
+          per_customer_limit?: number | null
+          priority?: number
+          repeat_free?: boolean
+          scheme_type: string
+          show_in_app?: boolean
+          starts_on?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          apply_on_app?: boolean
+          apply_on_office?: boolean
+          budget_amount?: number | null
+          budget_free_qty?: number | null
+          buy_qty?: number | null
+          code?: string | null
+          combinable?: boolean
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_hi?: string | null
+          description_mr?: string | null
+          discount_amount?: number | null
+          discount_percent?: number | null
+          ends_on?: string | null
+          free_product_id?: string | null
+          free_qty?: number | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          max_discount?: number | null
+          min_qty?: number | null
+          min_value?: number | null
+          name?: string
+          name_hi?: string | null
+          name_mr?: string | null
+          per_customer_limit?: number | null
+          priority?: number
+          repeat_free?: boolean
+          scheme_type?: string
+          show_in_app?: boolean
+          starts_on?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schemes_free_product_id_fkey"
+            columns: ["free_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -8047,9 +8354,12 @@ export type Database = {
           delivery_charge_per_pack: number | null
           deposit_per_unit: number | null
           deposit_total: number | null
+          discount_amount: number | null
+          gross_total: number | null
           gst_rate: number | null
           hsn_code: string | null
           id: string | null
+          is_free: boolean | null
           line_total: number | null
           mrp: number | null
           new_containers: number | null
@@ -8059,6 +8369,7 @@ export type Database = {
           product_id: string | null
           product_name: string | null
           qty: number | null
+          scheme_info: Json | null
           sort_order: number | null
           tax_amount: number | null
           taxable_value: number | null
@@ -8068,9 +8379,12 @@ export type Database = {
           delivery_charge_per_pack?: number | null
           deposit_per_unit?: number | null
           deposit_total?: number | null
+          discount_amount?: number | null
+          gross_total?: number | null
           gst_rate?: number | null
           hsn_code?: string | null
           id?: string | null
+          is_free?: boolean | null
           line_total?: number | null
           mrp?: number | null
           new_containers?: number | null
@@ -8080,6 +8394,7 @@ export type Database = {
           product_id?: string | null
           product_name?: string | null
           qty?: number | null
+          scheme_info?: Json | null
           sort_order?: number | null
           tax_amount?: number | null
           taxable_value?: number | null
@@ -8089,9 +8404,12 @@ export type Database = {
           delivery_charge_per_pack?: number | null
           deposit_per_unit?: number | null
           deposit_total?: number | null
+          discount_amount?: number | null
+          gross_total?: number | null
           gst_rate?: number | null
           hsn_code?: string | null
           id?: string | null
+          is_free?: boolean | null
           line_total?: number | null
           mrp?: number | null
           new_containers?: number | null
@@ -8101,6 +8419,7 @@ export type Database = {
           product_id?: string | null
           product_name?: string | null
           qty?: number | null
+          scheme_info?: Json | null
           sort_order?: number | null
           tax_amount?: number | null
           taxable_value?: number | null
@@ -9406,11 +9725,17 @@ export type Database = {
         Args: { p_customer_id: string; p_firm_id: string }
         Returns: number
       }
+      _apply_schemes: {
+        Args: { p_customer_id: string; p_lines: Json; p_office: boolean }
+        Returns: Json
+      }
       _area_for_point: {
         Args: { p_company: string; p_lat: number; p_lng: number }
         Returns: string
       }
       _auto_plan: { Args: { p_company: string; p_date: string }; Returns: Json }
+      _can_manage_schemes: { Args: never; Returns: boolean }
+      _can_view_schemes: { Args: never; Returns: boolean }
       _check_allocations: {
         Args: { p_allocations: Json; p_receipt_id: string }
         Returns: undefined
@@ -9496,6 +9821,52 @@ export type Database = {
           p_type: Database["public"]["Enums"]["doc_series_type"]
         }
         Returns: string
+      }
+      _eligible_schemes: {
+        Args: { p_customer_id: string; p_office: boolean }
+        Returns: {
+          apply_on_app: boolean
+          apply_on_office: boolean
+          budget_amount: number | null
+          budget_free_qty: number | null
+          buy_qty: number | null
+          code: string | null
+          combinable: boolean
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          description_hi: string | null
+          description_mr: string | null
+          discount_amount: number | null
+          discount_percent: number | null
+          ends_on: string | null
+          free_product_id: string | null
+          free_qty: number | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          max_discount: number | null
+          min_qty: number | null
+          min_value: number | null
+          name: string
+          name_hi: string | null
+          name_mr: string | null
+          per_customer_limit: number | null
+          priority: number
+          repeat_free: boolean
+          scheme_type: string
+          show_in_app: boolean
+          starts_on: string
+          updated_at: string
+          updated_by: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "schemes"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       _fifo_allocate: { Args: { p_receipt_id: string }; Returns: number }
       _gate_log: {
@@ -9609,6 +9980,50 @@ export type Database = {
       _refresh_opening_paid: {
         Args: { p_opening_id: string }
         Returns: undefined
+      }
+      _scheme_free_line: {
+        Args: {
+          p_incl: boolean
+          p_parent: Json
+          p_pid: string
+          p_price: number
+          p_qty: number
+          p_s: Database["public"]["Tables"]["schemes"]["Row"]
+          p_sort: number
+        }
+        Returns: Json
+      }
+      _scheme_free_price: {
+        Args: { p_customer_id: string; p_product_id: string }
+        Returns: number
+      }
+      _scheme_hints: {
+        Args: { p_customer_id: string; p_lines: Json; p_office: boolean }
+        Returns: Json
+      }
+      _scheme_line_calc: {
+        Args: {
+          p_qty: number
+          p_room: number
+          p_s: Database["public"]["Tables"]["schemes"]["Row"]
+        }
+        Returns: Record<string, unknown>
+      }
+      _scheme_product_ok: {
+        Args: {
+          p_category_id: string
+          p_product_id: string
+          p_scheme_id: string
+        }
+        Returns: boolean
+      }
+      _scheme_target_ok: {
+        Args: { p_id: string; p_kind: string; p_scheme_id: string }
+        Returns: boolean
+      }
+      _scheme_usage: {
+        Args: { p_scheme_id: string }
+        Returns: Record<string, unknown>
       }
       _set_order_status: {
         Args: {
@@ -9809,7 +10224,9 @@ export type Database = {
         }
         Returns: Json
       }
+      cc_delete_scheme: { Args: { p_id: string }; Returns: boolean }
       cc_delivery_appearance: { Args: never; Returns: Json }
+      cc_get_scheme: { Args: { p_id: string }; Returns: Json }
       cc_list_drivers: {
         Args: { p_date?: string; p_unit_id?: string }
         Returns: {
@@ -9819,6 +10236,28 @@ export type Database = {
           trips_on_date: number
           unit_id: string
           user_id: string
+        }[]
+      }
+      cc_list_schemes: {
+        Args: never
+        Returns: {
+          budget_amount: number
+          budget_free_qty: number
+          code: string
+          combinable: boolean
+          ends_on: string
+          id: string
+          image_url: string
+          is_active: boolean
+          name: string
+          priority: number
+          scheme_type: string
+          show_in_app: boolean
+          starts_on: string
+          status: string
+          used_amount: number
+          used_free: number
+          used_orders: number
         }[]
       }
       cc_logout_session: { Args: { p_session_id: string }; Returns: boolean }
@@ -9895,6 +10334,40 @@ export type Database = {
         Returns: undefined
       }
       cc_save_photo_settings: { Args: { p: Json }; Returns: undefined }
+      cc_save_scheme: { Args: { p: Json }; Returns: string }
+      cc_scheme_preview: {
+        Args: { p_customer_id: string; p_lines: Json; p_mode?: string }
+        Returns: Json
+      }
+      cc_scheme_report: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          customers: number
+          discount_amount: number
+          free_qty: number
+          free_value: number
+          orders: number
+          scheme_id: string
+          scheme_name: string
+          scheme_type: string
+          total_cost: number
+        }[]
+      }
+      cc_scheme_report_orders: {
+        Args: { p_from: string; p_scheme_id: string; p_to: string }
+        Returns: {
+          business_name: string
+          customer_id: string
+          customer_name: string
+          discount_amount: number
+          free_qty: number
+          free_value: number
+          order_date: string
+          order_id: string
+          order_no: string
+          status: string
+        }[]
+      }
       cc_server_action: {
         Args: { p_action: string; p_actor: string; p_data: Json }
         Returns: Json
@@ -9916,6 +10389,10 @@ export type Database = {
           p_session: string
         }
         Returns: Json
+      }
+      cc_set_scheme_active: {
+        Args: { p_active: boolean; p_id: string }
+        Returns: boolean
       }
       cc_set_stop_order: {
         Args: {
@@ -10611,6 +11088,7 @@ export type Database = {
         }[]
       }
       my_product: { Args: { p_id: string }; Returns: Json }
+      my_schemes: { Args: never; Returns: Json }
       my_session_is_valid: { Args: never; Returns: boolean }
       my_staff_qr: { Args: never; Returns: string }
       my_staff_session_verified: { Args: never; Returns: boolean }

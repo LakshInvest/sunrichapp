@@ -10299,6 +10299,7 @@ export type Database = {
         Returns: Json
       }
       cc_get_scheme: { Args: { p_id: string }; Returns: Json }
+      cc_handover_expected: { Args: { p_id: string }; Returns: Json }
       cc_list_drivers: {
         Args: { p_date?: string; p_unit_id?: string }
         Returns: {
@@ -10629,7 +10630,10 @@ export type Database = {
         }
         Returns: string
       }
-      confirm_cash_handover: { Args: { p_id: string }; Returns: undefined }
+      confirm_cash_handover: {
+        Args: { p_id: string; p_note?: string }
+        Returns: undefined
+      }
       confirm_trip_crates_loaded: {
         Args: { p_crates: number; p_reason?: string; p_trip_id: string }
         Returns: undefined

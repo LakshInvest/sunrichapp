@@ -1,3 +1,4 @@
+import { SchemeLinePrice, QuoteFreeLines, SchemeBill, SchemeHints } from "@/components/SchemeQuote";
 import { useIsDemo } from "@/hooks/use-demo";
 import { OrderSplitPreview } from "@/components/OrderSplitPreview";
 import { serverMessage } from "@/lib/form-errors";
@@ -73,7 +74,7 @@ function Checkout() {
   const { lang } = useLang();
   const navigate = useNavigate();
   const offline = useOffline();
-  const { quantities, clear } = useCart();
+  const { quantities, clear, setQty } = useCart();
   const myReg = useServerFn(getMyRegistration);
   const deva = lang === "en" ? "" : "font-deva";
 
@@ -254,13 +255,16 @@ function Checkout() {
     [rows, newc],
   );
 
+  const quoteVersion = useRef(0);
   const refreshQuote = useCallback(async () => {
+    const version = ++quoteVersion.current;
     if (offline || rows.length === 0) return;
     try {
       const [q, other] = await Promise.all([
         quoteMyOrder(linesPayload, mode),
         quoteMyOrder(linesPayload, mode === "pickup" ? "sunrich" : "pickup").catch(() => null),
       ]);
+      if (version !== quoteVersion.current) return;
       setQuote(q);
       setModeTotals({ [mode]: Number(q.items_total) + Number(q.deposit_total ?? 0), ...(other ? { [mode === "pickup" ? "sunrich" : "pickup"]: Number(other.items_total) + Number(other.deposit_total ?? 0) } : {}) });
       setQuoteError(null);
@@ -271,8 +275,9 @@ function Checkout() {
   }, [offline, mode, JSON.stringify(linesPayload)]);
 
   useEffect(() => {
+    setQuote(null);
     const id = setTimeout(() => void refreshQuote(), 350);
-    return () => clearTimeout(id);
+    return () => { ++quoteVersion.current; clearTimeout(id); };
   }, [refreshQuote]);
 
   const deliveryDate = day ?? isoDaysFromToday(1);
@@ -460,6 +465,10 @@ function Checkout() {
             </p>
           )}
 
+          <ul className="mt-4 divide-y divide-border">{quote?.lines.filter((l) => !l.is_free).map((l, i) => <li key={`${l.product_id}-${i}`} className="flex justify-between gap-3 py-3"><span className="min-w-0 break-words text-sm">{l.product_name} · ×{l.qty}</span><SchemeLinePrice gross={l.gross_total} net={l.line_total} discount={l.discount_amount} info={l.scheme_info} /></li>)}</ul>
+          <QuoteFreeLines quote={quote} />
+          <SchemeHints quote={quote} disabled={offline || placing} onAdd={(id, qty) => { const p = products.find((p) => p.id === id); if (p?.canOrder && p.price != null) setQty(id, Math.min((quantities[id] ?? 0) + qty, p.maxOrderQty ?? Infinity)); }} />
+          <SchemeBill quote={quote} />
           <OrderSplitPreview quote={quote} />
 
           {pickup && (

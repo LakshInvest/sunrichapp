@@ -1,10 +1,18 @@
+# Prompt-60
+- [x] Offers row/sheet and product badges/rules in English/Hindi/Marathi.
+- [x] Server quote discounts/free rows/hints/bill and exact names from split[].
+- [x] Saved-order scheme details and monthly benefits report/PDF/share; free gifts excluded from paid reorders.
+- [x] 211 full-suite tests and 3 additional quote-control tests passed; public login checked at 360/390/412; basic security scan no critical findings; request publication after commit. No SQL.
+- [ ] Signed-in offers/cart/reports and exact read access — external unmanaged session unavailable; Supabase read_query inspection refused with expired connector authentication. Reconnect Supabase to inspect my_schemes, quote_my_order and orders/order_lines.
+- [ ] Real Android WhatsApp/PDF sharing — installed APK/phone required.
+
 # Prompt-59
 - [x] Customer-only monthly, product and payment reports with PDF/share; localized canvas PDF checked (32KB).
 - [x] Credit/debit note passbook details and download; preserve statement balances.
 - [x] Checkout preview grouped by quoted firm and fulfiller, same backend rounding.
 - [x] Remembered order status/date/search filters.
 - [x] 206 tests pass, build OK; public login checked at 360/390/412 without overflow/errors; security scan complete, no critical findings. Request publication after commit.
-- [ ] Exact distributor name — quote_my_order / _price_lines returns only fulfiller_customer_id; customers_read_own blocks ordinary customers from reading the distributor. Needs a safe name field in the existing quote from the backend owner; local-distributor fallback shown.
+- [x] Exact distributor names now displayed directly from quote_my_order split[].distributor_name and firm_name per Prompt-60; customer read-back still requires a session.
 - [ ] Signed-in report, note, order filters and checkout screen verification — external unmanaged Supabase session unavailable.
 - [ ] Real Android signed-link download and WhatsApp sharing — requires an installed APK and phone.
 

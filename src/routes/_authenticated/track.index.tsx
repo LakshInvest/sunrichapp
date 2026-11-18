@@ -1,3 +1,4 @@
+import { SchemeLinePrice } from "@/components/SchemeQuote";
 import { fetchMyFeedback, planReorder, type OrderFeedback } from "@/lib/feedback";
 import { RateOrderCard } from "@/components/RateOrderCard";
 import { Button } from "@/components/ui/button";
@@ -143,10 +144,11 @@ function MyOrders() {
               <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${statusChipClass(status)}`}>{t(`status.${status}`)}</span>
             )}
           </div>
-          <ul className="mt-3 space-y-2">{o.lines.map((l) => <li key={l.id} className="flex items-center gap-3"><SmartImage width={44} src={thumb(l.productId)} alt="" className="h-11 w-11 shrink-0 rounded-lg object-contain" /><span className="min-w-0 flex-1 break-words text-sm font-medium text-foreground">{l.productName}</span><span className="shrink-0 text-sm text-muted-foreground">×{l.qty}</span></li>)}</ul>
+          <ul className="mt-3 space-y-2">{o.lines.map((l) => <li key={l.id} className="flex items-center gap-3"><SmartImage width={44} src={thumb(l.productId)} alt="" className="h-11 w-11 shrink-0 rounded-lg object-contain" /><span className="min-w-0 flex-1 break-words text-sm font-medium text-foreground">{l.productName}</span><span className="shrink-0 text-sm text-muted-foreground">×{l.qty}</span>{(l.isFree || (l.discountAmount ?? 0) > 0) && <SchemeLinePrice gross={l.grossTotal} net={l.lineTotal} discount={l.discountAmount} free={l.isFree} info={l.schemeInfo} />}</li>)}</ul>
           <p className="mt-3 flex items-start gap-2 text-sm text-foreground">{o.deliveryMode === "pickup" ? <Factory className="h-4 w-4 shrink-0" /> : <Truck className="h-4 w-4 shrink-0" />}<span>{t(o.deliveryMode === "pickup" ? "orders2.pickup" : "orders2.delivery")} · {o.deliveryMode === "pickup" ? String(homeExtras?.pickup?.["unit_name"] ?? settings?.plantAddress ?? t("checkout2.plantDefault")) : o.deliveryDate ? indDate(o.deliveryDate, lang) : "—"}</span></p>
           {bill && <p className="mt-2 break-words text-xs text-muted-foreground">{t("orders2.billNo")} {bill.no}</p>}
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3"><span className={`text-xs font-semibold ${payment.kind === "paid" ? "text-success" : "text-warning-foreground"}`}>{t("orders2.payment")}: {t(`orders2.paymentState.${payment.kind}`, { amount: formatINR(payment.due) })}</span><span className="text-base font-bold text-primary">{formatINR(o.grandTotal)}</span></div>
+          {!!o.schemeDiscount && <p className="mt-2 text-xs font-semibold text-success">{t("offers.savings")} {formatINR(o.schemeDiscount)}</p>}
           {group === "active" && (
             <ol className="mt-3 flex gap-1" aria-hidden>
               {steps.map((st, i) => (

@@ -1,3 +1,5 @@
+import { SchemeLinePrice, QuoteFreeLines, SchemeBill, SchemeHints } from "@/components/SchemeQuote";
+import { quoteMyOrder, type QuoteResult } from "@/lib/orders";
 import { formatPack } from "@/lib/pack-label";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
@@ -152,11 +154,21 @@ function Cart() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [products, quantities]);
 
+  const [quote, setQuote] = useState<QuoteResult | null>(null);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+  useEffect(() => {
+    let live = true; setQuote(null); setQuoteError(null);
+    if (offline || !rows.length || rows.some((r) => r.product.price == null)) return;
+    const timer = setTimeout(() => {
+      void quoteMyOrder(rows.map((r) => ({ product_id: r.product.id, qty: r.qty, new_containers: r.product.isReturnable ? r.qty : 0 })), rows[0]?.product.defaultMode ?? "sunrich").then((q) => { if (live) setQuote(q); }, (e) => { if (live) setQuoteError(serverMessage(e, t("errors.generic"))); });
+    }, 350);
+    return () => { live = false; clearTimeout(timer); };
+  }, [rows, offline, t]);
   const itemTotal = rows.reduce((sum, r) => sum + (r.product.price ?? 0) * r.qty, 0);
   const hasUnpriced = rows.some((r) => r.product.price === null);
   const settings = useAppSettings();
   const minValue = settings?.minOrderValue ?? 0;
-  const shortfall = minOrderShortfall(itemTotal, minValue);
+  const shortfall = minOrderShortfall(quote?.items_total ?? itemTotal, minValue);
   const jarDeposit = rows.reduce(
     (sum, r) =>
       r.product.price !== null && r.product.isReturnable && r.product.depositAmount != null
@@ -164,7 +176,7 @@ function Cart() {
         : sum,
     0,
   );
-  const grandTotal = itemTotal + jarDeposit;
+  const grandTotal = quote ? quote.items_total + quote.deposit_total : itemTotal + jarDeposit;
   const business = isBusinessType(useTypeCode());
   const savings = rows.reduce((sum, r) => {
     const { price, mrp } = r.product;
@@ -252,11 +264,12 @@ function Cart() {
                         {t("cart.priceUpdated")}
                       </p>
                     )}
-                    <p className="mt-0.5 flex items-baseline gap-1.5 whitespace-nowrap">
+                    {quote?.lines.filter((l) => l.product_id === product.id && !l.is_free).map((l, i) => <SchemeLinePrice key={i} gross={l.gross_total} net={l.line_total} discount={l.discount_amount} info={l.scheme_info} />)}
+                    {!quote && <p className="mt-0.5 flex items-baseline gap-1.5 whitespace-nowrap">
                       <span className={product.price === null ? "text-sm font-semibold text-destructive" : "text-base font-bold text-primary"}>
                         {product.price === null ? t("cart.priceNotAvailable") : formatINR(product.price * qty)}
                       </span>
-                    </p>
+                    </p>}
                     {product.isReturnable && product.depositAmount != null && product.depositAmount > 0 && (
                       <p className="text-[11px] text-muted-foreground">
                         {t("cart.depositLine", { amount: formatINR(product.depositAmount * qty) })}
@@ -300,7 +313,10 @@ function Cart() {
 
             {offline && <p className="mt-3 text-center text-xs text-muted-foreground">{t("offline.cartHint")}</p>}
 
-            <section className="mt-5 rounded-2xl bg-card p-4 shadow-sm">
+            <QuoteFreeLines quote={quote} />
+            <SchemeHints quote={quote} disabled={offline} onAdd={(id, qty) => { const p = products.find((p) => p.id === id); if (p?.canOrder && p.price != null) setQty(id, Math.min((quantities[id] ?? 0) + qty, p.maxOrderQty ?? Infinity)); }} />
+            {quoteError && <p role="alert" className="mt-3 text-sm text-destructive">{quoteError}</p>}
+            {quote ? <SchemeBill quote={quote} /> : <section className="mt-5 rounded-2xl bg-card p-4 shadow-sm">
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>{t("cart.itemTotal")}</span>
                 <span className="font-medium text-foreground">{formatINR(itemTotal)}</span>
@@ -327,7 +343,7 @@ function Cart() {
                   {t("cart.bulkNote")}
                 </p>
               )}
-            </section>
+            </section>}
 
             {shortfall > 0 && (
               <div role="status" className="mt-5 rounded-xl bg-accent/15 px-4 py-3">
@@ -354,7 +370,7 @@ function Cart() {
                 <button
                   type="button"
                   onClick={() => navigate({ to: "/checkout" })}
-                  disabled={offline || shortfall > 0 || hasUnpriced}
+                  disabled={offline || shortfall > 0 || hasUnpriced || !quote}
                   title={hasUnpriced ? t("errors.noPrice") : offline ? t("offline.hint") : undefined}
                   className="mx-auto flex min-h-14 w-full max-w-md items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md shadow-primary/20 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >

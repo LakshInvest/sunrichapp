@@ -1,4 +1,28 @@
 {
+  "offers": {
+  "title": "Offers",
+  "buyFree": "Buy {{buy}}, get {{free}} FREE",
+  "percent": "{{percent}}% OFF",
+  "amount": "{{amount}} OFF per pack",
+  "slab": "Slab offer",
+  "combo": "Combo",
+  "billRule": "Order {{amount}} or more → {{benefit}}",
+  "slabRule": "{{qty}} or more packs → {{benefit}}",
+  "minimum": "Minimum {{qty}} packs",
+  "valid": "Valid till {{date}}",
+  "free": "FREE",
+  "line": "Scheme: {{name}}",
+  "savings": "Scheme savings",
+  "gst": "GST (included)",
+  "freeHint": "Buy {{qty}} more → {{free}} {{product}} free",
+  "slabHint": "Buy {{qty}} more → {{benefit}}",
+  "billHint": "Order {{amount}} more → {{percent}}% OFF",
+  "failed": "Offers could not be loaded. Please try again.",
+  "benefits": "Scheme benefits",
+  "saved": "Total saved",
+  "freePacks": "Free packs received",
+  "empty": "No scheme benefits this month"
+},
   "brand": "Sunrich",
   "reports": {
     "title": "Reports", "description": "Your purchases and payments, month by month.", "month": "Month", "monthly": "Purchases", "products": "By product", "payments": "Payments", "orders": "Orders", "packs": "Packs", "value": "Purchase value", "paid": "Paid", "due": "Still due", "opening": "Opening balance", "bills": "Bills", "closing": "Closing balance", "credits": "Credit note", "debits": "Debit note", "sixMonths": "Last 6 months", "share": "Share to WhatsApp", "empty": "No purchases this month", "reason": "Reason", "noteMissing": "This note is not available. Please contact Sunrich.", "split": "This order will be placed in {{count}} parts", "distributor": "Distributor ({{name}})", "localDistributor": "Local distributor", "search": "Order number or product", "all": "All", "active": "Active", "delivered": "Delivered", "cancelled": "Cancelled", "thisMonth": "This month", "lastMonth": "Last month", "custom": "Custom", "noMatches": "No orders match these filters"

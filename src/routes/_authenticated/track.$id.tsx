@@ -1,3 +1,4 @@
+import { SchemeLinePrice } from "@/components/SchemeQuote";
 import { formatPack, fixName } from "@/lib/pack-label";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { PageShell } from "@/components/PageShell";
@@ -399,7 +400,7 @@ function OrderDetail() {
                   <span className="block truncate font-semibold text-foreground">{fixName(l.productName)}</span>
                   <span className="block text-xs text-muted-foreground">{formatPack(l.packLabel)} · {t("track2.packsTimes", { count: l.qty, price: formatINR(l.unitPrice) })}</span>
                 </span>
-                <span className="font-semibold text-foreground">{formatINR(l.lineTotal)}</span>
+                <SchemeLinePrice gross={l.grossTotal} net={l.lineTotal} discount={l.discountAmount} free={l.isFree} info={l.schemeInfo} />
               </li>
             ))}
           </ul>
@@ -410,6 +411,7 @@ function OrderDetail() {
                 <div className="flex justify-between"><span>{t("cart.jarDeposit")}</span><span className="text-foreground">{formatINR(order.depositTotal)}</span></div>
               </>
             )}
+            {!!order.schemeDiscount && <div className="flex justify-between text-success"><span>{t("offers.savings")}</span><span>{formatINR(order.schemeDiscount)}</span></div>}
             <div className="flex justify-between text-base font-bold text-foreground">
               <span>{t("track2.total")}</span>
               <span className="text-primary">{formatINR(order.grandTotal)}</span>

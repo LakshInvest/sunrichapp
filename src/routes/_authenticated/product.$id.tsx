@@ -1,3 +1,4 @@
+import { ProductSchemes, SchemeBadge } from "@/components/SchemeOffers";
 import { formatPack } from "@/lib/pack-label";
 import appIcon from "@/assets/brand/sunrich-app-icon-final.png.asset.json";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -296,6 +297,8 @@ function ProductDetail() {
           </div>
         )}
 
+        <SchemeBadge product={product} />
+        <ProductSchemes product={product} />
         {extras.highlights.length > 0 && <Highlights items={extras.highlights} />}
 
         <InfoTabs

@@ -57,13 +57,14 @@ export function skipRating(orderId: string): void {
  * many lines were skipped.
  */
 export function planReorder(
-  lines: { productId: string; qty: number }[],
+  lines: { productId: string; qty: number; isFree?: boolean }[],
   products: Pick<CatalogProduct, "id" | "canOrder" | "minOrderQty" | "maxOrderQty" | "price">[],
 ): { add: { productId: string; qty: number }[]; skipped: number } {
   const byId = new Map(products.map((p) => [p.id, p]));
   const add: { productId: string; qty: number }[] = [];
   let skipped = 0;
   for (const l of lines) {
+    if (l.isFree) continue;
     const p = byId.get(l.productId);
     if (!p || !p.canOrder || p.price == null) {
       skipped++;

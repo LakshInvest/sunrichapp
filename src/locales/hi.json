@@ -1,4 +1,28 @@
 {
+  "offers": {
+  "title": "ऑफ़र",
+  "buyFree": "{{buy}} लो, {{free}} फ्री",
+  "percent": "{{percent}}% छूट",
+  "amount": "प्रति पैक {{amount}} छूट",
+  "slab": "स्लैब ऑफ़र",
+  "combo": "कॉम्बो",
+  "billRule": "{{amount}} या अधिक का ऑर्डर → {{benefit}}",
+  "slabRule": "{{qty}} या अधिक पैक → {{benefit}}",
+  "minimum": "कम से कम {{qty}} पैक",
+  "valid": "{{date}} तक मान्य",
+  "free": "फ्री",
+  "line": "योजना: {{name}}",
+  "savings": "योजना बचत",
+  "gst": "GST (शामिल)",
+  "freeHint": "{{qty}} और लें → {{free}} {{product}} फ्री",
+  "slabHint": "{{qty}} और लें → {{benefit}}",
+  "billHint": "{{amount}} और का ऑर्डर करें → {{percent}}% छूट",
+  "failed": "ऑफ़र नहीं मिले। दोबारा कोशिश करें।",
+  "benefits": "योजना लाभ",
+  "saved": "कुल बचत",
+  "freePacks": "मिले हुए फ्री पैक",
+  "empty": "इस महीने कोई योजना लाभ नहीं"
+},
   "brand": "सनरिच",
   "reports": {
     "title": "रिपोर्ट", "description": "हर महीने की आपकी खरीद और भुगतान।", "month": "महीना", "monthly": "खरीद", "products": "उत्पादवार", "payments": "भुगतान", "orders": "ऑर्डर", "packs": "पैक", "value": "खरीद की राशि", "paid": "जमा", "due": "बाकी", "opening": "शुरुआती बाकी", "bills": "बिल", "closing": "अंतिम बाकी", "credits": "क्रेडिट नोट", "debits": "डेबिट नोट", "sixMonths": "पिछले 6 महीने", "share": "WhatsApp पर शेयर करें", "empty": "इस महीने कोई खरीद नहीं", "reason": "कारण", "noteMissing": "यह नोट उपलब्ध नहीं है। सनरिच से बात करें।", "split": "यह ऑर्डर {{count}} हिस्सों में जाएगा", "distributor": "डिस्ट्रिब्यूटर ({{name}})", "localDistributor": "स्थानीय डिस्ट्रिब्यूटर", "search": "ऑर्डर नंबर या उत्पाद", "all": "सभी", "active": "चल रहे", "delivered": "डिलीवर हुए", "cancelled": "रद्द", "thisMonth": "इस महीने", "lastMonth": "पिछले महीने", "custom": "तारीख चुनें", "noMatches": "इन फ़िल्टर में कोई ऑर्डर नहीं मिला"

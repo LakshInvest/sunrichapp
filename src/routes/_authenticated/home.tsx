@@ -1,3 +1,4 @@
+import { SchemeOffers } from "@/components/SchemeOffers";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { sizedUrl } from "@/components/SmartImage";
 import { SmartCard } from "@/components/SmartCard";
@@ -659,6 +660,7 @@ function Home() {
               </div>
             )}
 
+            {!loading && <div className="mt-3"><SchemeOffers products={products} /></div>}
             {!loading && homeExtras?.defaultAreaId === null && (
               <button
                 type="button"

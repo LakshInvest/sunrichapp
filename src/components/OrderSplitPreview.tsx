@@ -4,6 +4,7 @@ import { quoteParts } from "@/lib/report-rules";
 import { formatINR } from "@/lib/catalogue";
 export function OrderSplitPreview({ quote }: { quote: QuoteResult | null }) {
   const { t } = useTranslation(); const parts = quoteParts(quote);
+  if (quote?.split?.length) return <section className="mt-4 border-y border-secondary/30 bg-secondary/5 py-3"><h2 className="text-sm font-bold text-primary">{t("reports.split", { count: quote.split.length })}</h2><ul className="mt-2 space-y-2">{quote.split.map((p, i) => <li key={i} className="flex justify-between gap-3 text-xs"><span className="min-w-0 break-words">{p.firm_name}{p.distributor_name ? ` · ${t("reports.distributor", { name: p.distributor_name })}` : ""} · {t("checkout2.items", { count: p.packs ?? p.items })}</span><span className="shrink-0 font-semibold">{formatINR(p.total)}</span></li>)}</ul></section>;
   if (parts.length < 2) return null;
   return <section className="mt-4 border-y border-secondary/30 bg-secondary/5 py-3" aria-label={t("reports.split", { count: parts.length })}><h2 className="text-sm font-bold text-primary">{t("reports.split", { count: parts.length })}</h2><ul className="mt-2 space-y-2">{parts.map((p) => {
     const line = quote?.lines.find((l) => (l.firm_id ?? null) === p.firmId && (l.fulfiller_customer_id || null) === p.fulfillerId);

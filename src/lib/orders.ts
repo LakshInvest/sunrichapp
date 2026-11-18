@@ -1,3 +1,4 @@
+import type { SchemeInfo, SchemeHint } from "@/lib/scheme-rules";
 import { getMyCustomerId, ownCustomerFilter, NO_CUSTOMER } from "@/lib/my-customer";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +22,10 @@ export type OrderLineDto = {
   lineTotal: number;
   depositTotal: number;
   newContainers: number;
+  grossTotal?: number;
+  discountAmount?: number;
+  isFree?: boolean;
+  schemeInfo?: SchemeInfo[];
 };
 
 export type OrderHistoryRow = { toStatus: string | null; changedAt: string; note: string | null };
@@ -32,6 +37,7 @@ export type OrderDto = {
   holdReason: string | null;
   cancelReason: string | null;
   itemsTotal: number;
+  schemeDiscount?: number;
   depositTotal: number;
   grandTotal: number;
   paidAmount: number;
@@ -67,7 +73,7 @@ export type OrderDto = {
 };
 
 const ORDER_SELECT =
-  "id, customer_id, order_no, status, hold_reason, cancel_reason, items_total, deposit_total, grand_total, amount_paid, payment_status, payment_mode, payment_method, release_batch_at, released_at, is_express, created_at, due_date, delivery_date, delivery_slot, delivery_address_line1, delivery_address_line2, delivery_landmark, delivery_city, delivery_pincode, delivery_latitude, delivery_longitude, notes, fulfiller_customer_id, distributor_status, distributor_assigned_at, business_name, customer_mobile, delivery_mode, pickup_vehicle_no, delivery_otp, order_lines(id, product_id, product_code, product_name, pack_label, qty, unit_price, mrp, line_total, deposit_total, new_containers, sort_order), order_status_history(to_status, changed_at, note)";
+  "id, customer_id, order_no, status, hold_reason, cancel_reason, scheme_discount, items_total, deposit_total, grand_total, amount_paid, payment_status, payment_mode, payment_method, release_batch_at, released_at, is_express, created_at, due_date, delivery_date, delivery_slot, delivery_address_line1, delivery_address_line2, delivery_landmark, delivery_city, delivery_pincode, delivery_latitude, delivery_longitude, notes, fulfiller_customer_id, distributor_status, distributor_assigned_at, business_name, customer_mobile, delivery_mode, pickup_vehicle_no, delivery_otp, order_lines(id, product_id, product_code, product_name, pack_label, qty, unit_price, mrp, line_total, deposit_total, new_containers, gross_total, discount_amount, is_free, scheme_info, sort_order), order_status_history(to_status, changed_at, note)";
 
 function n(v: unknown): number {
   const num = Number(v);
@@ -83,6 +89,7 @@ function mapOrder(r: any): OrderDto {
     holdReason: (r["hold_reason"] as string) ?? null,
     cancelReason: (r["cancel_reason"] as string) ?? null,
     itemsTotal: n(r["items_total"]),
+    schemeDiscount: n(r["scheme_discount"]),
     depositTotal: n(r["deposit_total"]),
     grandTotal: n(r["grand_total"]),
     paidAmount: n(r["amount_paid"]),
@@ -124,6 +131,10 @@ function mapOrder(r: any): OrderDto {
         unitPrice: n(l["unit_price"]),
         mrp: l["mrp"] != null ? n(l["mrp"]) : null,
         lineTotal: n(l["line_total"]),
+        grossTotal: n(l["gross_total"] ?? l["line_total"]),
+        discountAmount: n(l["discount_amount"]),
+        isFree: l["is_free"] === true,
+        schemeInfo: Array.isArray(l["scheme_info"]) ? l["scheme_info"] : [],
         depositTotal: n(l["deposit_total"]),
         newContainers: n(l["new_containers"]),
       }))
@@ -163,7 +174,7 @@ export async function fetchMyOrders(): Promise<OrderDto[]> {
     .select(ORDER_SELECT)
     .eq("customer_id", mine)
     .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
+  if (error) { console.error("orders / order_lines", error); throw new Error(error.message); }
   return ((data ?? []) as any[])
     .filter((r) => mine == null || r["customer_id"] === mine)
     .map(mapOrder);
@@ -178,7 +189,7 @@ export async function fetchInboxOrders(): Promise<OrderDto[]> {
     .select(ORDER_SELECT)
     .eq("fulfiller_customer_id", mine)
     .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
+  if (error) { console.error("orders / order_lines", error); throw new Error(error.message); }
   return ((data ?? []) as any[]).map(mapOrder);
 }
 
@@ -286,7 +297,16 @@ export type QuoteResult = {
     new_containers: number;
     fulfiller_customer_id: string | null;
     firm_id?: string | null;
+    gross_total?: number;
+    discount_amount?: number;
+    is_free?: boolean;
+    scheme_info?: SchemeInfo[];
   }>;
+  items_gross?: number;
+  scheme_discount?: number;
+  schemes?: { scheme_id: string; name: string; saving: number; free_qty: number }[];
+  scheme_hints?: SchemeHint[];
+  split?: { firm_name: string; fulfilled_by: string; distributor_name: string | null; items: number; packs: number; total: number }[];
   items_total: number;
   deposit_total: number;
   tax_total: number;
@@ -306,7 +326,7 @@ export type QuoteResult = {
  */
 export async function quoteMyOrder(lines: QuoteLine[], mode?: "sunrich" | "pickup"): Promise<QuoteResult> {
   const { data, error } = await supabase.rpc("quote_my_order", { p_lines: lines, ...(mode ? { p_mode: mode } : {}) });
-  if (error) throw new Error(error.message);
+  if (error) { console.error("quote_my_order", error); throw new Error(error.message); }
   const q = data as QuoteResult;
   try {
     const cid = await getMyCustomerId();

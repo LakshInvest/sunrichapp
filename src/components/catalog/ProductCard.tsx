@@ -1,3 +1,4 @@
+import { SchemeBadge } from "@/components/SchemeOffers";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Lock, Minus, Plus } from "lucide-react";
@@ -215,6 +216,7 @@ export function ProductCard({
         <p className="truncate text-sm font-bold leading-snug text-foreground">{name}</p>
         <p className="truncate text-xs leading-tight text-muted-foreground">{pack || "\u00a0"}</p>
       </button>
+      <SchemeBadge product={product} />
       <div className="mt-1 flex h-10 items-center gap-2">
         <div className="min-w-0 shrink">{locked || product.price !== null ? <PriceLine product={product} /> : null}</div>
         <div className="ml-auto shrink-0">

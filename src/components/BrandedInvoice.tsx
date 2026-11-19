@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { formatINR } from "@/lib/catalogue";
 import { upiLink, type Invoice } from "@/lib/billing";
@@ -23,7 +24,7 @@ const loc = (v: unknown, lang: string, fb: string): string => {
 const fmtDate = (iso: string | null) =>
   iso ? new Date(iso.length === 10 ? `${iso}T00:00:00` : iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: IST_TZ }) : "—";
 
-export function BrandedInvoice({ inv, firm, lang }: { inv: Invoice; firm: InvoiceFirm | null; lang: string }) {
+export function BrandedInvoice({ inv, firm, lang, gst: gstBlock }: { inv: Invoice; firm: InvoiceFirm | null; lang: string; gst?: ReactNode }) {
   const d = parseDesign(firm?.designJson);
   const on = (k: string, def = true) => (d[k] === undefined ? def : Boolean(d[k]));
   const head = (d["headerColor"] as string) || "#0D3278";
@@ -58,6 +59,7 @@ export function BrandedInvoice({ inv, firm, lang }: { inv: Invoice; firm: Invoic
       </header>
       <div className="h-1" style={{ background: accent }} />
 
+      {gstBlock}
       <section className="grid grid-cols-2 gap-3 p-4">
         <div>
           <p className="font-bold uppercase" style={{ color: accent }}>{loc(d["sellerTitle"], lang, "Sold by")}</p>

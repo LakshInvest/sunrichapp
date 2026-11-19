@@ -1,5 +1,8 @@
 {
-  "loginAccess": {"refused": "This number is not a customer or salesman account. Please use the Delivery app / Command Center.", "approved": "Your account is approved"},
+  "loginAccess": {
+    "refused": "This number is not a customer or salesman account. Please use the Delivery app / Command Center.",
+    "approved": "Your account is approved"
+  },
   "offers": {
     "title": "Offers",
     "buyFree": "Buy {{buy}}, get {{free}} FREE",
@@ -1077,10 +1080,11 @@
     "saved": "Vehicle number saved"
   },
   "dispatch": {
-    "dispatchingNow": "Dispatching now",
-    "leavesToday": "Leaves in today’s {{time}} dispatch",
-    "leavesTomorrow": "Leaves tomorrow {{time}}",
-    "leavesOn": "Leaves {{date}} at {{time}}"
+    "onTheWay": "On the way",
+    "driver": "Driver",
+    "lr": "LR",
+    "dispatchedAt": "Dispatched {{time}}",
+    "call": "Call driver"
   },
   "dates": {
     "today": "Today",
@@ -1138,9 +1142,12 @@
     "kind": {
       "bill": "Bill",
       "payment": "Payment",
-      "credit": "Credit note / return",
+      "credit": "Credit note",
       "adjustment": "Adjustment",
-      "opening": "Opening balance"
+      "opening": "Opening balance",
+      "debit": "Debit note",
+      "advance": "Advance",
+      "other": "Entry"
     },
     "pendingTag": "Verification pending",
     "pendingNote": "Doesn't change your balance until Sunrich verifies it.",
@@ -1407,5 +1414,19 @@
     "placedFor": "Order placed for {{name}}",
     "loadError": "Could not load stores. Please try again.",
     "pickError": "Could not open this store. Please try again."
+  },
+  "gstBill": {
+    "challan": "Challan no.",
+    "testBill": "Test bill",
+    "copyIrn": "Copy IRN",
+    "ack": "Ack no.",
+    "ewb": "E-way bill: {{no}} · valid till {{date}}"
+  },
+  "gstFetch": {
+    "fetch": "Fetch details",
+    "fetching": "Fetching…",
+    "filled": "Details filled from GST – please check",
+    "inactive": "This GSTIN is not active",
+    "failed": "Could not fetch GST details. Please type them."
   }
 }

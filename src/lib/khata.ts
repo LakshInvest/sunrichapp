@@ -16,7 +16,7 @@ export type KhataSummary = {
   pendingPayments: number;
 };
 
-export type KhataEntryKind = "bill" | "payment" | "credit" | "debit" | "adjustment" | "opening";
+export type KhataEntryKind = "bill" | "payment" | "credit" | "debit" | "advance" | "adjustment" | "opening" | "other";
 export type KhataEntry = {
   date: string;
   kind: KhataEntryKind;
@@ -82,8 +82,19 @@ export function entryKind(type: string): KhataEntryKind {
   if (k.includes("receipt") || k.includes("payment")) return "payment";
   if (k.includes("credit")) return "credit";
   if (k.includes("debit")) return "debit";
-  return "adjustment";
+  if (k.includes("advance")) return "advance";
+  if (k.includes("adjust")) return "adjustment";
+  return "other";
 }
+
+/** Row label: known kinds use their translation key; unknown types show the description as-is (never hidden). */
+export function entryLabel(r: Pick<KhataEntry, "kind" | "rawType" | "details">): { key: string } | { text: string } {
+  if (r.kind === "other") return { text: r.details || r.rawType.replace(/_/g, " ") || "—" };
+  return { key: `khata.kind.${r.kind}` };
+}
+/** Tone: credit note green, debit note amber. */
+export const entryTone = (k: KhataEntryKind) =>
+  k === "credit" || k === "payment" || k === "advance" ? "text-success" : k === "debit" ? "text-warning" : "text-foreground";
 
 /** Filter chips on the passbook. */
 export function filterEntries(rows: KhataEntry[], f: "all" | "bills" | "payments"): KhataEntry[] {

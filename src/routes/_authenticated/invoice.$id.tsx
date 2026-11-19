@@ -15,6 +15,8 @@ import { fetchInvoice, type Invoice } from "@/lib/billing";
 import { getInvoiceFirm, type InvoiceFirm } from "@/lib/invoice.functions";
 import { IST_TZ } from "@/lib/ist";
 import { BrandedInvoice } from "@/components/BrandedInvoice";
+import { GstBillDetails, useOrderDispatch } from "@/components/GstBillDetails";
+import type { OrderDispatch } from "@/lib/dispatch";
 
 export const Route = createFileRoute("/_authenticated/invoice/$id")({
   head: () => ({
@@ -33,11 +35,14 @@ export const Route = createFileRoute("/_authenticated/invoice/$id")({
 const fmtDate = (iso: string | null) =>
   iso ? new Date(iso.length === 10 ? `${iso}T00:00:00` : iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: IST_TZ }) : "—";
 
-function shareText(inv: Invoice, firm: InvoiceFirm | null): string {
+function shareText(inv: Invoice, firm: InvoiceFirm | null, d: OrderDispatch | null = null): string {
   const lines = [
     firm?.legalName ?? "Sunrich",
     firm?.gstin ? `GSTIN ${firm.gstin}` : "",
     `Invoice ${inv.invoiceNo} · ${fmtDate(inv.invoiceDate)}`,
+    d?.challanNo ? `Challan ${d.challanNo}` : "",
+    d?.einvoice ? `IRN ${d.einvoice.irn}${d.einvoice.ackNo ? ` · Ack ${d.einvoice.ackNo}` : ""}` : "",
+    d?.ewayBill ? `E-way bill ${d.ewayBill.no}${d.ewayBill.validTill ? ` · valid till ${fmtDate(d.ewayBill.validTill)}` : ""}` : "",
     "",
     ...inv.lines.map((l) => `${l.description} × ${l.qty} = ${formatINR(l.total)}`),
     "",
@@ -60,6 +65,7 @@ function InvoiceScreen() {
   const [firm, setFirm] = useState<InvoiceFirm | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [sharing, setSharing] = useState(false);
+  const dispatch = useOrderDispatch(inv?.orderId);
 
   const load = useCallback(async () => {
     setError(null);
@@ -80,7 +86,7 @@ function InvoiceScreen() {
   const share = async () => {
     if (!inv) return;
     setSharing(true);
-    const text = shareText(inv, firm);
+    const text = shareText(inv, firm, dispatch);
     try {
       if (navigator.share) {
         await navigator.share({ title: `Invoice ${inv.invoiceNo}`, text });
@@ -135,7 +141,7 @@ function InvoiceScreen() {
           </button>
           <button
             type="button"
-            onClick={() => openExternal(`https://wa.me/?text=${encodeURIComponent(shareText(inv, firm))}`)}
+            onClick={() => openExternal(`https://wa.me/?text=${encodeURIComponent(shareText(inv, firm, dispatch))}`)}
             className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-border bg-card text-sm font-semibold"
           >
             <MessageCircle className="h-4 w-4 text-secondary" aria-hidden /> {t("invoice.whatsapp")}
@@ -157,7 +163,7 @@ function InvoiceScreen() {
         ) : inv === null ? (
           <EmptyState title={t("invoice.notFound")} body={t("invoice.notFoundBody")} />
         ) : (
-          <BrandedInvoice inv={inv} firm={firm} lang={lang} />
+          <BrandedInvoice inv={inv} firm={firm} lang={lang} gst={<GstBillDetails d={dispatch} />} />
         )}
       </div>
     </main>

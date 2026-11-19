@@ -13,6 +13,8 @@ import { fetchDeliveryProof, fetchTruckPosition, kmBetween, showDeliveryOtp, typ
 import { toast } from "sonner";
 import { ArrowLeft, Ban, FileText, HelpCircle, Loader2, Repeat2, Truck } from "lucide-react";
 import { fetchInvoiceIdForOrder } from "@/lib/billing";
+import { fetchOrderDispatch, showLivePin, type OrderDispatch } from "@/lib/dispatch";
+import { OnTheWayCard } from "@/components/OnTheWayCard";
 import {
   awaitingPayment,
   canChangePayMethod,
@@ -100,6 +102,7 @@ function OrderDetail() {
   const [payTarget, setPayTarget] = useState<ProofTarget | null>(null);
   const [payInfo, setPayInfo] = useState<FirmPayInfo | null>(null);
   const [truck, setTruck] = useState<{ lat: number; lng: number } | null>(null);
+  const [dispatch, setDispatch] = useState<OrderDispatch | null>(null);
   const [methodOpen, setMethodOpen] = useState(false);
   const [savingMethod, setSavingMethod] = useState(false);
   const { pay: wantPay } = Route.useSearch();
@@ -114,6 +117,8 @@ function OrderDetail() {
       setError(found ? null : "not-found");
       if (found) {
         setInvoiceId(await fetchInvoiceIdForOrder(found.id).catch(() => null));
+        if (["dispatched", "delivered", "closed"].includes(found.status))
+          void fetchOrderDispatch(found.id).then(setDispatch, () => undefined);
         if (["dispatched", "delivered", "closed"].includes(found.status))
           setProof(await fetchDeliveryProof(found.id).catch(() => null));
         if (["placed", "credit_hold"].includes(found.status) && ["upi", "bank"].includes(found.paymentMethod ?? "")) {
@@ -137,8 +142,9 @@ function OrderDetail() {
   // Live truck position while out for delivery (refreshes every 30 s).
   useDataRefresh(load, true);
   const orderStatus = order?.status;
+  const livePin = showLivePin(dispatch);
   useEffect(() => {
-    if (orderStatus !== "dispatched") {
+    if (orderStatus !== "dispatched" || !livePin) {
       setTruck(null);
       return;
     }
@@ -150,7 +156,7 @@ function OrderDetail() {
       on = false;
       clearInterval(t);
     };
-  }, [id, orderStatus]);
+  }, [id, orderStatus, livePin]);
 
   useEffect(() => {
     void load();
@@ -306,7 +312,7 @@ function OrderDetail() {
         </button>
       </header>
 
-      {!pickupOrder && !isCancelled && (
+      {!pickupOrder && !isCancelled && !(order.status === "dispatched" && dispatch && !livePin) && (
         <div className="relative">
           <MapPreview lat={mapLat} lng={mapLng} truck={truck} interactive address={addrLines.join(", ")} className="h-[45vh] min-h-56 w-full" />
           {truckKm != null && (
@@ -385,6 +391,7 @@ function OrderDetail() {
           )}
         </section>
 
+        {order.status === "dispatched" && <OnTheWayCard d={dispatch} lang={lang} />}
         {showDeliveryOtp(order.status, order.deliveryOtp) && <DeliveryOtpCard otp={order.deliveryOtp!} />}
         {pickupOrder && !isCancelled && !isDelivered && (
           <PickupPass order={order} lang={lang} offline={offline} onChanged={() => void load()} />

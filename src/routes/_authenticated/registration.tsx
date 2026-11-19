@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { clearGate } from "@/lib/gate-cache";
 import { requestDataRefresh } from "@/lib/data-refresh";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from "react";
+import { fillFromGst, gstInactive, lookupGstin } from "@/lib/dispatch";
 import { useTranslation } from "react-i18next";
 import {
   Building2,
@@ -391,6 +392,24 @@ function DetailsStep({
 
   const offline = useOffline();
   const [pinLookup, setPinLookup] = useState(false);
+  const [gst, setGst] = useState<{ busy: boolean; note: "filled" | "failed" | null; error: string; inactive: boolean }>({ busy: false, note: null, error: "", inactive: false });
+  const gstTried = useRef(new Set<string>());
+  const fetchGst = useCallback(async (raw: string) => {
+    const g = raw.trim().toUpperCase();
+    if (!isValidGstin(g) || gstTried.current.has(g)) return;
+    gstTried.current.add(g);
+    setGst({ busy: true, note: null, error: "", inactive: false });
+    const r = await lookupGstin(g);
+    if (r.ok) {
+      setFields((f) => fillFromGst(f, r.result));
+      setGst({ busy: false, note: "filled", error: "", inactive: gstInactive(r.result) });
+    } else {
+      setGst({ busy: false, note: "failed", error: r.error.length <= 120 ? r.error : "", inactive: false });
+    }
+  }, []);
+  useEffect(() => {
+    if (isBusiness && fields.gstin.trim().length === 15) void fetchGst(fields.gstin);
+  }, [fields.gstin, isBusiness, fetchGst]);
 
   /** Fills City (District) and State from the 6-digit pincode; still editable. */
   const lookupPincode = async (pin: string) => {
@@ -546,6 +565,14 @@ function DetailsStep({
             onChange={set("gstin")}
             maxLength={15}
           />
+          {isValidGstin(fields.gstin.trim().toUpperCase()) && (
+            <button type="button" disabled={gst.busy || offline || gstTried.current.has(fields.gstin.trim().toUpperCase())} onClick={() => void fetchGst(fields.gstin)} className="mt-2 min-h-11 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-secondary disabled:opacity-60">
+              {gst.busy ? t("gstFetch.fetching") : t("gstFetch.fetch")}
+            </button>
+          )}
+          {gst.note === "filled" && <p className="mt-1 text-xs text-success">{t("gstFetch.filled")}</p>}
+          {gst.inactive && <p className="mt-1 text-xs font-semibold text-destructive">{t("gstFetch.inactive")}</p>}
+          {gst.note === "failed" && <p className="mt-1 text-xs text-muted-foreground">{gst.error || t("gstFetch.failed")}</p>}
         </Field>
       )}
       {isBusiness && (

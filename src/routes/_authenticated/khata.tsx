@@ -10,6 +10,13 @@ import { PageShell } from "@/components/PageShell";
 import { BottomNav } from "@/components/BottomNav";
 import { KhataBalanceCard } from "@/components/KhataBalanceCard";
 import { SheetDrawer } from "@/components/SheetDrawer";
+import { entryLabel, entryTone, type KhataEntryKind } from "@/lib/khata";
+import { ArrowDownLeft, ArrowUpRight, CircleDot, FileMinus, FilePlus, Receipt as ReceiptIcon, Scale, Wallet, type LucideIcon } from "lucide-react";
+
+const KIND_ICON: Record<KhataEntryKind, LucideIcon> = {
+  bill: ReceiptIcon, payment: ArrowDownLeft, credit: FileMinus, debit: FilePlus,
+  advance: Wallet, adjustment: Scale, opening: CircleDot, other: ArrowUpRight,
+};
 import { EmptyState, ErrorState } from "@/components/catalog/states";
 import { Button } from "@/components/ui/button";
 import { useLang } from "@/hooks/use-lang";
@@ -186,9 +193,9 @@ function KhataPage() {
                           className="grid min-h-12 w-full grid-cols-[1fr_4.25rem_4.25rem_4.75rem] items-center gap-1 px-1 py-1.5 text-left text-xs disabled:cursor-default"
                         >
                           <span className="min-w-0">
-                            <span className={`block break-words font-medium ${r.kind === "credit" ? "text-success" : r.kind === "debit" ? "text-destructive" : "text-foreground"}`}>{r.kind === "credit" || r.kind === "debit" ? t(r.kind === "credit" ? "reports.credits" : "reports.debits") : t(`khata.kind.${r.kind}`)}</span>
+                            <span className={`flex items-center gap-1 break-words font-medium ${entryTone(r.kind)}`}>{(() => { const I = KIND_ICON[r.kind]; return <I className="h-3.5 w-3.5 shrink-0" aria-hidden />; })()}{(() => { const l = entryLabel(r); return "key" in l ? t(l.key) : l.text; })()}</span>
                             {r.refNo && <span className="block truncate text-[11px] text-muted-foreground">{r.refNo}</span>}
-                            {(r.kind === "credit" || r.kind === "debit") && <span className="block break-words text-[11px] text-muted-foreground">{r.details}</span>}
+                            {(r.kind === "credit" || r.kind === "debit" || r.kind === "adjustment" || r.kind === "advance") && r.details && <span className="block break-words text-[11px] text-muted-foreground">{r.details}</span>}
                           </span>
                           <span className="text-right font-semibold text-destructive">{r.debit > 0 ? formatINR(r.debit) : ""}</span>
                           <span className="text-right font-semibold text-success">{r.credit > 0 ? formatINR(r.credit) : ""}</span>

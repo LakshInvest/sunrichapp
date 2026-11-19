@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Briefcase, Building2, Check, Crosshair, Home as HomeIcon, MapPin, MoreVertical, Plus, Store, Warehouse } from "lucide-react";
 import { SheetDrawer } from "@/components/SheetDrawer";
-import { AddressEditor } from "@/components/AddressEditor";
+// Map/Places code loads only when the editor opens, never in the Home chunk.
+const AddressEditor = lazy(() => import("@/components/AddressEditor").then((m) => ({ default: m.AddressEditor })));
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
@@ -165,7 +166,7 @@ export function AddressSwitcher({
         </div>
       </SheetDrawer>
 
-      <AddressEditor
+      {editorOpen && <Suspense fallback={null}><AddressEditor
         open={editorOpen}
         onOpenChange={setEditorOpen}
         address={editing}
@@ -176,7 +177,7 @@ export function AddressSwitcher({
           if (!editing) setSelectedAddressId(id);
           void onChanged();
         }}
-      />
+      /></Suspense>}
 
       <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
         <AlertDialogContent className="mx-auto max-w-sm rounded-2xl">

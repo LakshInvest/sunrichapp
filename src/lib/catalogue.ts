@@ -151,17 +151,27 @@ function mapProduct(r: RawProduct): CatalogProduct {
 }
 
 /** Cached copy younger than this is served without a network round-trip. */
-export const CATALOGUE_FRESH_MS = 5 * 60_000;
+export const CATALOGUE_FRESH_MS = 60_000;
 let inflight: Promise<CatalogData> | null = null;
+const catalogueListeners = new Set<(data: CatalogData) => void>();
+export function onCatalogue(listener: (data: CatalogData) => void) {
+  catalogueListeners.add(listener);
+  return () => { catalogueListeners.delete(listener); };
+}
 
 /**
- * Stale-while-revalidate: a cache under 5 min old is returned as-is; pass
+ * Stale-while-revalidate: a cache under 60 seconds old is returned as-is; pass
  * `{ force: true }` (pull-to-refresh, retry) to always hit the network.
  */
 export async function fetchCatalogue(opts: { force?: boolean } = {}): Promise<CatalogData> {
   if (!opts.force) {
     const cached = readCatalogueCache();
-    if (cached && Date.now() - cached.fetchedAt < CATALOGUE_FRESH_MS) return cached;
+    if (cached) {
+      if (Date.now() - cached.fetchedAt >= CATALOGUE_FRESH_MS) {
+        void fetchCatalogue({ force: true }).catch(() => undefined);
+      }
+      return cached;
+    }
   }
   inflight ??= loadCatalogue().finally(() => {
     inflight = null;
@@ -222,6 +232,12 @@ export function onHomeExtras(fn: (x: HomeExtras) => void): () => void {
 /** Last get_home() extras, or null before the first load. */
 export function getHomeExtras(): HomeExtras | null {
   return homeExtras;
+}
+
+/** Lightweight balance polling updates Home without fetching its whole catalogue. */
+export function publishKhataSummary(summary: { due: number; advance: number; balance: number; creditLimit: number; available: number; overdue: number; oldestUnpaid: string | null; pendingPayments: number }) {
+  if (!homeExtras) return;
+  setHomeExtras({ ...homeExtras, khata: { due: summary.due, advance: summary.advance, balance: summary.balance, credit_limit: summary.creditLimit, available: summary.available, overdue: summary.overdue, oldest_unpaid: summary.oldestUnpaid, pending_payments: summary.pendingPayments } });
 }
 
 async function loadCatalogue(): Promise<CatalogData> {
@@ -318,13 +334,14 @@ export function readCatalogueCache(): CatalogData | null {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as CatalogData;
-    return parsed && Array.isArray(parsed.products) ? parsed : null;
+    return parsed && Array.isArray(parsed.products) && Date.now() - parsed.fetchedAt <= 10 * 60_000 ? parsed : null;
   } catch {
     return null;
   }
 }
 
 function writeCatalogueCache(data: CatalogData): void {
+  catalogueListeners.forEach((listener) => listener(data));
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(data));
   } catch {

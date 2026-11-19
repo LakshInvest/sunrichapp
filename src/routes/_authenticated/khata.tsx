@@ -79,22 +79,25 @@ function KhataPage() {
   const [rowsErr, setRowsErr] = useState<string | null>(null);
   const [stmtOpen, setStmtOpen] = useState(false);
 
-  const loadTop = useCallback(() => {
+  const loadTop = useCallback((force = false) => {
     setSumErr(null);
-    return Promise.all([swr("khata.sum", fetchKhataSummary).then(setSum, (e) => setSumErr(serverMessage(e, t("errors.generic")))),
-    swr("khata.proofs", fetchKhataProofs).then(setProofs, () => undefined)]);
+    return Promise.all([swr("khata.sum", fetchKhataSummary, force).then(setSum, (e) => setSumErr(serverMessage(e, t("errors.generic")))),
+    swr("khata.proofs", fetchKhataProofs, force).then(setProofs, () => undefined)]);
   }, [t]);
   useEffect(() => { void loadTop(); }, [loadTop]);
 
-  const loadRows = useCallback(() => {
+  const loadRows = useCallback((force = false) => {
     const key: string | null = "khata.rows.all";
 
     setRowsErr(null);
     const get = () => fetchKhataEntries(period.from, period.to);
-    return (key ? swr(key, get) : get()).then(setRows, (e) => setRowsErr(serverMessage(e, t("errors.generic"))));
+    return (key ? swr(key, get, force) : get()).then(setRows, (e) => setRowsErr(serverMessage(e, t("errors.generic"))));
   }, [period.from, period.to, range, t]);
   useEffect(() => { void loadRows(); }, [loadRows]);
-  useDataRefresh(() => Promise.all([loadTop(), loadRows()]), true);
+  useDataRefresh(() => Promise.all([loadTop(true), loadRows(true)]), async () => {
+    const fresh = await swr("khata.sum", fetchKhataSummary, true);
+    setSum(fresh);
+  });
 
   // Pending at the top; rejected ones from the last 30 days so the reason is seen.
   const cutoff = new Date(Date.now() - 30 * 864e5).toISOString();
@@ -118,7 +121,7 @@ function KhataPage() {
   };
 
   return (
-    <PageShell className={`pb-48 ${deva}`} onRefresh={() => Promise.all([loadTop(), loadRows()])}>
+    <PageShell className={`pb-48 ${deva}`} onRefresh={() => Promise.all([loadTop(true), loadRows(true)])}>
       <header className="sticky top-0 z-20 flex items-center gap-2 bg-background/95 px-5 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md">
         <h1 className="min-w-0 flex-1 truncate text-2xl font-bold text-primary">{t("khata.title")}</h1>
       </header>

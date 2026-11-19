@@ -318,7 +318,8 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     font-variant-numeric: tabular-nums;
-    padding-top: env(safe-area-inset-top);
+    /* Each screen/header owns its safe area; never add it a second time here. */
+    padding-top: 0;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }

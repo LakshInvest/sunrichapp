@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { clearSales, getSalesInfo, parseWhoami } from "@/lib/sales";
+import { clearSales, getSalesInfo, parseWhoami, useSales } from "@/lib/sales";
+import { act, renderHook } from "@testing-library/react";
 const { rpc } = vi.hoisted(() => ({ rpc: vi.fn() }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { rpc } }));
 beforeEach(async () => { rpc.mockResolvedValue({ data: null, error: null }); await clearSales(); rpc.mockReset(); });
@@ -30,5 +31,19 @@ describe("sales mode", () => {
   it("hides sales controls when the request throws", async () => {
     rpc.mockRejectedValueOnce(new Error("offline"));
     expect((await getSalesInfo("u")).isSales).toBe(false);
+  });
+  it("keeps the confirmed store throughout a background whoami request", async () => {
+    const picked = { id: "demo-distributor", business_name: "Demo Distributor Store" };
+    rpc.mockResolvedValueOnce({ data: { is_sales: true, picked }, error: null });
+    await getSalesInfo("u");
+    const hook = renderHook(() => useSales());
+    let resolve: ((value: { data: unknown; error: null }) => void) | undefined;
+    rpc.mockImplementationOnce(() => new Promise((done) => { resolve = done; }));
+    let refreshing: Promise<unknown> | undefined;
+    act(() => { refreshing = getSalesInfo("u", true); });
+    expect(hook.result.current?.picked).toEqual(picked);
+    await act(async () => { resolve?.({ data: { is_sales: true, picked }, error: null }); await refreshing; });
+    expect(hook.result.current?.picked).toEqual(picked);
+    hook.unmount();
   });
 });

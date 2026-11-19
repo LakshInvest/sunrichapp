@@ -9,6 +9,12 @@ import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   tanstackStart: {
+    router: {
+      codeSplittingOptions: {
+        // Home stays in the primary bundle; all other screens split normally.
+        splitBehavior: ({ routeId }: { routeId: string }) => routeId === "/_authenticated/home" ? [] : undefined,
+      },
+    },
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },

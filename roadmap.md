@@ -1,3 +1,10 @@
+# Prompt-67
+- [x] Fast 4G + 4× CPU throttle, 394×674 Chromium: store selection → first usable Home 28.135s before / 6.453s after; Orders title 1.071s / 0.638s; Khata title 0.488s / 0.686s. Cached repeated Orders 0.629–0.962s; Khata 0.548–0.613s. Product opens 0.867–1.300s after; no comparable before product timing. Cold login usable 5.181s before / 4.584s after. Development-preview single runs, not physical Android or production benchmarks; Home target not reached.
+- [x] Same-session sales checks no longer clear the store bar; body safe-area duplicate removed; fixed 4:3 banner and image dimensions, readable location pill. No SQL.
+- [x] 60-second query/read freshness, ten-minute persisted screen copies, in-flight deduplication, parallel sales/profile and orders/invoice requests, lightweight Home/Khata/Orders polling; full catalogue only on explicit refresh/resume. Home unsplit, other routes split through TanStack. Storage renditions request 400px products / 1080px banners with original fallback.
+- [x] 246 tests passed; build OK; two-minute signed-in Demo Distributor Home sampled 1175 times: hero top 40px, height 295.5px, store bar 40px, gap 0, skeleton count 0; polling and focus refetch observed, no browser errors. Current reported main.tsx file is absent.
+- [ ] Physical Android verification and production target measurements — requires installed phone and published changes; not published because not requested.
+
 # Prompt-66
 - [x] Customer-first PIN/staff fallback, staff OTP identity and session recording before sales validation/store routing; no SQL. Bounce caused by customer-only profile rejection before staff PIN RPC and registration racing record_login.
 - [x] Shared foreground/resume/network refresh; priority screens poll every 30 seconds with background pause; list pull refresh, action signals and approval transition.

@@ -30,6 +30,7 @@ import { formatINR } from "@/lib/catalogue";
 import { indDate, statusChipClass } from "@/lib/order-format";
 import {
   fetchMyOrders,
+  ordersChanged,
   markOrdersSeen,
   statusGroup,
   buildTimeline,
@@ -61,8 +62,8 @@ function MyOrders() {
 
   const [orders, setOrders] = useState<OrderDto[] | null>(() => readSwr<OrderDto[]>("orders"));
   const [error, setError] = useState<string | null>(null);
-  const [bills, setBills] = useState<Record<string, OrderBill> | null>(null);
-  const [ratings, setRatings] = useState<Record<string, OrderFeedback> | null>(null);
+  const [bills, setBills] = useState<Record<string, OrderBill> | null>(() => readSwr("orders.bills"));
+  const [ratings, setRatings] = useState<Record<string, OrderFeedback> | null>(() => readSwr("orders.ratings"));
   const [ratingOrder, setRatingOrder] = useState<OrderDto | null>(null);
   const [filters, setFilters] = useState<OrderFilters>({ status: "all", range: "thisMonth", ...khataRange("thisMonth"), search: "" });
   const [filtersReady, setFiltersReady] = useState(false);
@@ -78,16 +79,18 @@ function MyOrders() {
   const settings = useAppSettings();
   useEffect(() => onHomeExtras(setHomeExtras), []);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (force = false) => {
     try {
-      const list = await swr("orders", fetchMyOrders);
-      setOrders(list);
-      setError(null);
-      const cid = await ownCustomerFilter();
-      const { data: invoices, error: billError } = await supabase.from("invoices").select("id, order_id, invoice_no, grand_total, amount_paid").eq("customer_id", cid).neq("status", "cancelled").order("invoice_date");
-      if (billError) throw billError;
-      setBills(Object.fromEntries((invoices ?? []).map((b) => [b.order_id, { id: b.id, no: b.invoice_no, total: Number(b.grand_total), paid: Number(b.amount_paid) }])));
-      fetchMyFeedback(list.filter((o) => statusGroup(o.status) === "delivered").map((o) => o.id)).then(setRatings, (e) => console.warn("order ratings", e));
+      const [list] = await Promise.all([
+        swr("orders", fetchMyOrders, force).then((list) => { setOrders(list); setError(null); return list; }),
+        swr("orders.bills", async () => {
+          const cid = await ownCustomerFilter();
+          const { data: invoices, error } = await supabase.from("invoices").select("id, order_id, invoice_no, grand_total, amount_paid").eq("customer_id", cid).neq("status", "cancelled").order("invoice_date");
+          if (error) throw error;
+          return Object.fromEntries((invoices ?? []).map((b) => [b.order_id, { id: b.id, no: b.invoice_no, total: Number(b.grand_total), paid: Number(b.amount_paid) }]));
+        }, force).then(setBills),
+      ]);
+      void swr("orders.ratings", () => fetchMyFeedback(list.filter((o) => statusGroup(o.status) === "delivered").map((o) => o.id)), force).then(setRatings, (e) => console.warn("order ratings", e));
     } catch (e) {
       setError(serverMessage(e, t("common.loadError")));
       throw e;
@@ -100,8 +103,10 @@ function MyOrders() {
 
   }, [load]);
 
-  useDataRefresh(load, true);
-  const pull = usePullToRefresh(load);
+  useDataRefresh(() => load(true), async () => {
+    if (!orders || await ordersChanged(orders)) await load(true);
+  });
+  const pull = usePullToRefresh(() => load(true));
 
   const period = filters.range === "custom" ? { from: filters.from, to: filters.to } : khataRange(filters.range);
   const filtered = useMemo(() => filterOrderHistory(orders ?? [], filters, period.from, period.to), [orders, filters, period.from, period.to]);

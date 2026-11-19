@@ -183,6 +183,19 @@ export async function fetchMyOrders(): Promise<OrderDto[]> {
     .map(mapOrder);
 }
 
+/** Tiny status read; full lines/history are reloaded only when an order changed. */
+export async function ordersChanged(orders: OrderDto[]): Promise<boolean> {
+  const cid = await ownCustomerFilter();
+  const { data, error } = await supabase.from("orders")
+    .select("id, status, amount_paid, grand_total, payment_status")
+    .eq("customer_id", cid);
+  if (error) throw error;
+  return (data ?? []).length !== orders.length || (data ?? []).some((row) => {
+    const old = orders.find((o) => o.id === row.id);
+    return !old || old.status !== row.status || old.paidAmount !== n(row.amount_paid) || old.grandTotal !== n(row.grand_total) || old.paymentStatus !== row.payment_status;
+  });
+}
+
 /** Orders routed to me as the area distributor (Inbox). */
 export async function fetchInboxOrders(): Promise<OrderDto[]> {
   const mine = await getMyCustomerId();

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { swr } from "@/lib/swr-cache";
 
 export type ProductExtras = {
   images: { url: string; alt: string | null }[];
@@ -74,9 +75,11 @@ export function parseProductExtras(raw: unknown, lang: string): ProductExtras {
 }
 
 export async function fetchProductExtras(id: string): Promise<unknown> {
-  const { data, error } = await supabase.rpc("my_product", { p_id: id });
-  if (error) throw error;
-  return data;
+  return swr(`product.${id}`, async () => {
+    const { data, error } = await supabase.rpc("my_product", { p_id: id });
+    if (error) throw error;
+    return data;
+  });
 }
 
 export const productShareUrl = (id: string) => `https://user.sunrich.in/p/${id}`;

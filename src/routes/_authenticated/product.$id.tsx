@@ -29,6 +29,7 @@ import {
   formatINR,
   loc,
   readCatalogueCache,
+  onCatalogue,
   saveCartPrice,
   type CatalogData,
 } from "@/lib/catalogue";
@@ -62,6 +63,7 @@ function ProductDetail() {
   const business = isBusinessType(useTypeCode());
 
   const [data, setData] = useState<CatalogData | null>(() => readCatalogueCache());
+  useEffect(() => onCatalogue(setData), []);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(!readCatalogueCache());
   const [slide, setSlide] = useState(0);
@@ -94,7 +96,7 @@ function ProductDetail() {
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
+    if (!readCatalogueCache()) setLoading(true);
     load()
       .catch(() => undefined)
       .finally(() => {

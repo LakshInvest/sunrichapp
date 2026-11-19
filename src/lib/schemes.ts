@@ -19,5 +19,5 @@ export const schemesQuery = queryOptions({
 export function useSchemes() {
   const [cid, setCid] = useState<string | null>(null);
   useEffect(() => { let live = true; void ownCustomerFilter().then((id) => { if (live) setCid(id); }); return () => { live = false; }; }, []);
-  return useQuery({ ...schemesQuery, queryKey: ["customer-schemes", cid ?? ""], enabled: !!cid, refetchOnMount: "always", refetchOnWindowFocus: "always", refetchOnReconnect: "always" });
+  return useQuery({ ...schemesQuery, queryKey: ["customer-schemes", cid ?? ""], enabled: !!cid });
 }

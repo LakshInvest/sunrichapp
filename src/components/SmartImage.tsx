@@ -57,6 +57,10 @@ export function SmartImage({
 /** Supabase public storage URLs can be served resized via the render endpoint. */
 export function sizedUrl(src: string, width?: number): string {
   if (!width || !src.includes("/storage/v1/object/public/")) return src;
-  const url = src.replace("/storage/v1/object/public/", "/storage/v1/render/image/public/");
-  return `${url}${url.includes("?") ? "&" : "?"}width=${width * 2}&resize=contain&quality=75`;
+  const url = new URL(src.replace("/storage/v1/object/public/", "/storage/v1/render/image/public/"));
+  url.searchParams.set("width", String(width));
+  url.searchParams.set("resize", "contain");
+  url.searchParams.set("quality", "75");
+  // Supabase negotiates WebP automatically; retain original URL fallback above.
+  return url.toString();
 }

@@ -1,7 +1,5 @@
 import { SchemeOffers } from "@/components/SchemeOffers";
 import { useDataRefresh } from "@/hooks/use-data-refresh";
-import { refreshAppSettings } from "@/lib/app-settings";
-import { useQueryClient } from "@tanstack/react-query";
 import { isRefreshForeground } from "@/lib/data-refresh";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { sizedUrl } from "@/components/SmartImage";
@@ -49,7 +47,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
 import { useFavourites } from "@/hooks/use-favourites";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
-import { fetchMyOrders, useDistributorNav, type OrderDto } from "@/lib/orders";
+import { fetchMyOrders, ordersChanged, useDistributorNav, type OrderDto } from "@/lib/orders";
 import { hasUnreadNotices } from "@/lib/notifications";
 import { planReorder } from "@/lib/feedback";
 import { useAppSettings } from "@/lib/app-settings";
@@ -59,7 +57,11 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { pickupInfo } from "@/lib/catalogue";
 import { getDocumentRequirements, getMyRegistration, type RegistrationDto } from "@/lib/registration.functions";
 import { writeGate } from "@/lib/gate-cache";
-import { swr } from "@/lib/swr-cache";
+import { readGate } from "@/lib/gate-cache";
+import { useSales } from "@/lib/sales";
+import { fetchKhataSummary } from "@/lib/khata";
+import { publishKhataSummary } from "@/lib/catalogue";
+import { readSwr, swr } from "@/lib/swr-cache";
 import { useRouter } from "@tanstack/react-router";
 import { hasMissingDocs, isRateLockedStatus, setRateLocked } from "@/lib/rate-lock";
 import { Link } from "@tanstack/react-router";
@@ -73,6 +75,7 @@ import {
   onHomeExtras,
   getHomeExtras,
   readCatalogueCache,
+  onCatalogue,
   saveCartPrice,
   type CatalogData,
 } from "@/lib/catalogue";
@@ -113,9 +116,9 @@ function Home() {
     return () => clearTimeout(id);
   }, [routerForPreload]);
   const { t } = useTranslation();
+  const sales = useSales();
   const { lang } = useLang();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { isDistributor, newCount } = useDistributorNav();
   const { quantities, setQty, clear, count } = useCart();
   const offline = useOffline();
@@ -124,6 +127,7 @@ function Home() {
   const [data, setData] = useState<CatalogData | null>(() => readCatalogueCache());
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(!readCatalogueCache());
+  useEffect(() => onCatalogue(setData), []);
   const [search, setSearch] = useState("");
   const [recents, setRecents] = useState<string[]>(() => loadRecentSearches());
   const [pickupSheet, setPickupSheet] = useState(false);
@@ -198,17 +202,21 @@ function Home() {
   const loadReg = useCallback(async () => {
     const r = await myReg();
     setReg(r);
-    setRateLocked(isRateLockedStatus(r.status));
+    setRateLocked(!sales?.isSales && isRateLockedStatus(r.status));
     void supabase.auth.getSession().then(({ data }) => data.session && writeGate(data.session.user.id, r));
     if (isRateLockedStatus(r.status) && r.customerId) {
       const d = await myDocs().catch(() => null);
       setDocsMissing(d ? hasMissingDocs(d.requirements, d.uploaded) : false);
     } else setDocsMissing(false);
     return r;
-  }, [myReg, myDocs]);
+  }, [myReg, myDocs, sales?.isSales]);
   useEffect(() => {
     let active = true;
-    void loadReg().catch(() => undefined);
+    void supabase.auth.getSession().then(({ data }) => {
+      const cached = data.session ? readGate(data.session.user.id) : null;
+      if (cached) setReg(cached.reg);
+      else void loadReg().catch(() => undefined);
+    });
     return () => {
       active = false;
     };
@@ -260,7 +268,7 @@ function Home() {
     let active = true;
     void (async () => {
       try {
-        const list = await fetchMyOrders();
+        const list = await swr("orders", fetchMyOrders);
         const done = list.filter((o) => o.status === "delivered" || o.status === "closed");
         if (!active) return;
         setLastDelivered(done[0] ?? null);
@@ -285,14 +293,28 @@ function Home() {
     void navigate({ to: "/cart" });
   };
 
+  const refreshOrders = async (force = false) => {
+    const list = await swr("orders", fetchMyOrders, force);
+    setLastDelivered(list.find((o) => o.status === "delivered" || o.status === "closed") ?? null);
+    setOutForDelivery(list.find((o) => o.status === "dispatched") ?? null);
+  };
+  const refreshSummary = async () => {
+    await Promise.all([
+      swr("khata.sum", fetchKhataSummary, true).then(publishKhataSummary),
+      hasUnreadNotices().then(setOrderUpdates),
+    ]);
+  };
+  const pollHome = async () => {
+    await Promise.all([refreshSummary(), ordersChanged(readSwr<OrderDto[]>("orders") ?? []).then((changed) => changed ? refreshOrders(true) : undefined)]);
+  };
   const refreshHome = async () => {
-    await Promise.all([load(true), loadReg(), refreshAppSettings(), queryClient.invalidateQueries(),
-      hasUnreadNotices().then(setOrderUpdates), fetchMyOrders().then((list) => {
+    await Promise.all([load(true), refreshSummary(),
+      swr("orders", fetchMyOrders, true).then((list) => {
         setLastDelivered(list.find((o) => o.status === "delivered" || o.status === "closed") ?? null);
         setOutForDelivery(list.find((o) => o.status === "dispatched") ?? null);
       })]);
   };
-  useDataRefresh(refreshHome, true);
+  useDataRefresh(refreshHome, pollHome);
   const pull = usePullToRefresh(refreshHome);
   const deliveryBell = isDistributor && settings?.distributorDeliveryEnabled === true;
 
@@ -552,14 +574,14 @@ function Home() {
       ) : (
         <>
           {activeBanners.length > 0 ? (
-            <HeroCarousel banners={activeBanners} lang={lang} onOpen={(b) => openBanner(b.linkType, b.linkValue)} fallback={null}
+            <HeroCarousel banners={activeBanners} lang={lang} safeTop={!sales?.isSales} onOpen={(b) => openBanner(b.linkType, b.linkValue)} fallback={null}
               overlay={
               <div className="flex items-start justify-between">
                 <button
                   type="button"
                   onClick={() => setAddressOpen(true)}
                   aria-label={`${headerLabel}: ${areaLabel}`}
-                  className="flex min-h-11 min-w-0 max-w-[75%] items-start gap-1.5 text-left"
+                  className="flex min-h-11 min-w-0 max-w-[75%] items-start gap-1.5 rounded-full bg-foreground/65 px-3 py-1.5 text-left"
                 >
                   <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary-foreground/90" />
                   <span className="min-w-0">
@@ -583,20 +605,20 @@ function Home() {
               }
             />
           ) : (
-          <div className="relative aspect-[4/3] w-full overflow-hidden bg-hero">
+          <div data-home-hero className="relative aspect-[4/3] w-full overflow-hidden bg-hero">
             {hero?.backgroundImageUrl && (
-              <img src={sizedUrl(hero.backgroundImageUrl, 1080)} alt="" fetchPriority="high" decoding="async"
+              <img src={sizedUrl(hero.backgroundImageUrl, 1080)} alt="" width={1080} height={810} loading="eager" fetchPriority="high" decoding="async"
                 onError={(e) => { const img = e.currentTarget; if (hero.backgroundImageUrl && img.src !== hero.backgroundImageUrl) img.src = hero.backgroundImageUrl; else img.hidden = true; }}
                 className="absolute inset-0 h-full w-full object-cover" />
             )}
             <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-primary/60 to-transparent" aria-hidden />
-            <div className="absolute inset-x-0 top-0 px-4 pt-[max(0.5rem,env(safe-area-inset-top))]">
+            <div className={`absolute inset-x-0 top-0 px-4 ${sales?.isSales ? "pt-2" : "pt-[max(0.5rem,env(safe-area-inset-top))]"}`}>
               <div className="flex items-start justify-between">
                 <button
                   type="button"
                   onClick={() => setAddressOpen(true)}
                   aria-label={`${headerLabel}: ${areaLabel}`}
-                  className="flex min-h-11 min-w-0 max-w-[75%] items-start gap-1.5 text-left"
+                  className="flex min-h-11 min-w-0 max-w-[75%] items-start gap-1.5 rounded-full bg-foreground/65 px-3 py-1.5 text-left"
                 >
                   <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary-foreground/90" />
                   <span className="min-w-0">

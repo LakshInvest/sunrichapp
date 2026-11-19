@@ -35,6 +35,17 @@ describe("foreground refresh", () => {
     expect(refresh).toHaveBeenCalledTimes(1);
     hook.unmount();
   });
+  it("polls only the small query, but actions refresh the whole screen", async () => {
+    vi.useFakeTimers();
+    const full = vi.fn(); const small = vi.fn();
+    const hook = renderHook(() => useDataRefresh(full, small));
+    await act(() => vi.advanceTimersByTimeAsync(30_000));
+    expect(small).toHaveBeenCalledTimes(1);
+    expect(full).not.toHaveBeenCalled();
+    await act(async () => requestDataRefresh());
+    expect(full).toHaveBeenCalledTimes(1);
+    hook.unmount();
+  });
 });
 describe("distributor delivery switch", () => {
   it("is off by default and only true enables it", () => {

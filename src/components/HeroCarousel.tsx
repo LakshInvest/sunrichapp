@@ -13,12 +13,14 @@ export function HeroCarousel({
   onOpen,
   overlay,
   fallback,
+  safeTop = true,
 }: {
   banners: CatalogBanner[];
   lang: string;
   onOpen: (b: CatalogBanner) => void;
   overlay: ReactNode;
   fallback: ReactNode;
+  safeTop?: boolean;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [index, setIndex] = useState(0);
@@ -36,7 +38,7 @@ export function HeroCarousel({
   }, [index, paused, banners, go]);
 
   return (
-    <div className="relative">
+    <div data-home-hero className="relative aspect-[4/3] w-full overflow-hidden bg-primary">
       {banners.length === 0 ? (
         fallback
       ) : (
@@ -66,6 +68,9 @@ export function HeroCarousel({
                   alt=""
                   loading={i === 0 ? "eager" : "lazy"}
                   decoding="async"
+                  width={1080}
+                  height={810}
+                  fetchPriority={i === 0 ? "high" : "auto"}
                   onError={(e) => {
                     const img = e.currentTarget;
                     if (b.imageUrl && img.src !== b.imageUrl) img.src = b.imageUrl;
@@ -78,7 +83,7 @@ export function HeroCarousel({
         </div>
       )}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-primary/70 to-transparent" aria-hidden />
-      <div className="absolute inset-x-0 top-0 px-5 pt-[max(0.5rem,env(safe-area-inset-top))]">{overlay}</div>
+      <div className={`absolute inset-x-0 top-0 px-5 ${safeTop ? "pt-[max(0.5rem,env(safe-area-inset-top))]" : "pt-2"}`}>{overlay}</div>
       {banners.length > 1 && (
         <div className="pointer-events-none absolute inset-x-0 bottom-11 flex justify-center gap-1.5" aria-hidden>
           {banners.map((b, i) => (

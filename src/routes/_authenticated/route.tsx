@@ -11,6 +11,7 @@ import { SalesBar } from "@/components/SalesBar";
 import { useDataRefresh } from "@/hooks/use-data-refresh";
 import { permittedAppAccount } from "@/lib/login-rules";
 import { isRefreshForeground } from "@/lib/data-refresh";
+import { swr } from "@/lib/swr-cache";
 
 /**
  * Auth gate: every route under this pathless layout requires a signed-in
@@ -26,35 +27,18 @@ export const Route = createFileRoute("/_authenticated")({
     // background. The session-cancellation check in Gate always runs.
     const { data: local } = await supabase.auth.getSession();
     const localId = local.session?.user.id;
-    const cached = localId ? readGate(localId) : null;
-    let reg;
-    if (cached && localId) {
-      reg = cached.reg;
-      if (cached.stale) {
-        void getMyRegistration()
-          .then((r) => {
-            writeGate(localId, r);
-            // Status changed since the saved check: reload so routing re-applies.
-            // Foreground refresh applies changed status without a full-page reload.
-            setRateLocked(isRateLockedStatus(r.status));
-          })
-          .catch(() => undefined);
-      }
-    } else {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        throw redirect({ to: "/auth" });
-      }
-      reg = await getMyRegistration();
-      writeGate(data.user.id, reg);
-    }
     const here = location.pathname;
     // Salesman (no own customer login): orders for a picked store.
-    const uid = localId ?? (await supabase.auth.getSession()).data.session?.user.id ?? "";
-    const sales = await getSalesInfo(uid);
-    const { data: profile, error: profileError } = await supabase.from("user_profiles").select("user_type").eq("id", uid).maybeSingle();
-    if (profileError) throw profileError;
-    if (!permittedAppAccount(profile?.user_type, sales.isSales)) {
+    if (!localId) throw redirect({ to: "/auth" });
+    const [sales, userType] = await Promise.all([
+      getSalesInfo(localId),
+      swr(`account-type.${localId}`, async () => {
+        const { data: profile, error } = await supabase.from("user_profiles").select("user_type").eq("id", localId).maybeSingle();
+        if (error) throw error;
+        return profile?.user_type ?? null;
+      }),
+    ]);
+    if (!permittedAppAccount(userType, sales.isSales)) {
       await supabase.auth.signOut();
       throw redirect({ to: "/auth" });
     }
@@ -68,6 +52,10 @@ export const Route = createFileRoute("/_authenticated")({
       if (here === "/stores") return;
       return;
     }
+    // Sales staff do not need a customer registration read before Home can render.
+    const cached = readGate(localId);
+    const reg = cached?.reg ?? await getMyRegistration();
+    if (!cached) writeGate(localId, reg);
     if (here === "/stores") throw redirect({ to: "/home" });
     setRateLocked(isRateLockedStatus(reg.status));
     if (reg.status === "blocked") {
@@ -96,11 +84,13 @@ function Gate() {
   useDataRefresh(async () => {
     const { data } = await supabase.auth.getSession();
     if (!data.session) return;
-    await getSalesInfo(data.session.user.id, true);
-    const reg = await getMyRegistration();
+    const old = readGate(data.session.user.id)?.reg;
+    const [sales, reg] = await Promise.all([getSalesInfo(data.session.user.id, true), getMyRegistration()]);
     writeGate(data.session.user.id, reg);
-    setRateLocked(isRateLockedStatus(reg.status));
-    await router.invalidate();
+    setRateLocked(!sales.isSales && isRateLockedStatus(reg.status));
+    if (!old || old.status !== reg.status || old.customerId !== reg.customerId || (sales.isSales && !sales.picked && pathname !== "/stores") || (!sales.isSales && pathname === "/stores")) {
+      await router.invalidate();
+    }
   });
   const { queryClient } = Route.useRouteContext();
 

@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { requestDataRefresh } from "@/lib/data-refresh";
 import { clearUserCaches } from "@/lib/swr-cache";
 import { clearMyCustomer } from "@/lib/my-customer";
+import { clearGate } from "@/lib/gate-cache";
 
 export type SalesStore = { id: string; business_name: string; contact_name?: string | null | undefined; mobile?: string | null | undefined; city?: string | null | undefined };
 export type SalesInfo = { uid: string; isSales: boolean; picked: SalesStore | null };
@@ -30,7 +31,9 @@ export function parseWhoami(uid: string, w: unknown): SalesInfo {
 export async function getSalesInfo(uid: string, force = false): Promise<SalesInfo> {
   if (pending && pendingUid === uid) return pending;
   if (!force && info?.uid === uid) return info;
-  save(null);
+  // Preserve the confirmed same-session snapshot while a refresh is pending.
+  // A failed response still disables sales mode below; changing identity clears immediately.
+  if (info?.uid !== uid) save(null);
   const version = ++generation;
   pendingUid = uid;
   pending = (async () => {
@@ -50,6 +53,7 @@ export async function pickStore(uid: string, id: string | null): Promise<void> {
   const { data, error } = await supabase.rpc("sales_pick_customer", { p_customer_id: id as string });
   if (error) throw error;
   clearMyCustomer();
+  clearGate();
   clearUserCaches();
   const d = data as { picked: string | null } & Partial<SalesStore>;
   save({ uid, isSales: true, picked: id && d?.picked ? { id, business_name: d.business_name ?? "", contact_name: d.contact_name, mobile: d.mobile, city: d.city } : null });

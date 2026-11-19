@@ -14,8 +14,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
 import { useFavourites } from "@/hooks/use-favourites";
 import { useRateLocked } from "@/lib/rate-lock";
-import { openPriceRequestChat } from "@/lib/price-request";
-import { fetchCatalogue, formatINR, loc, readCatalogueCache, saveCartPrice, type CatalogData } from "@/lib/catalogue";
+import { fetchCatalogue, loc, readCatalogueCache, saveCartPrice, type CatalogData } from "@/lib/catalogue";
 
 export const Route = createFileRoute("/_authenticated/category/$code")({
   head: ({ params }) => ({
@@ -52,10 +51,6 @@ function CategoryPage() {
   const products = data?.products ?? [];
   const cat = data?.categories.find((c) => c.code === code);
   const list = useMemo(() => products.filter((p) => p.categoryCode === code), [products, code]);
-  const total = Object.entries(quantities).reduce((sum, [id, qty]) => {
-    const p = products.find((x) => x.id === id);
-    return p?.price != null ? sum + p.price * qty : sum;
-  }, 0);
   const deva = lang === "en" ? "" : "font-deva";
 
   return (
@@ -88,8 +83,7 @@ function CategoryPage() {
                     setQty(p.id, p.minOrderQty || 1);
                     if (p.price != null) saveCartPrice(p.id, p.price);
                   }}
-                  onPriceRequest={() => void openPriceRequestChat(p, lang, navigate)}
-                  onInc={() => setQty(p.id, Math.min((quantities[p.id] ?? 0) + 1, p.maxOrderQty ?? Infinity))}
+                                    onInc={() => setQty(p.id, Math.min((quantities[p.id] ?? 0) + 1, p.maxOrderQty ?? Infinity))}
                   onDec={() => setQty(p.id, (quantities[p.id] ?? 0) - 1)}
                   onSetQty={(n) => setQty(p.id, p.maxOrderQty != null ? Math.min(n, p.maxOrderQty) : n)}
                 />
@@ -98,7 +92,7 @@ function CategoryPage() {
           </div>
         )}
       </div>
-      <CartBar count={count} total={formatINR(total)} pending={locked} onOpen={() => void navigate({ to: "/cart" })} onClear={() => setConfirmClear(true)} />
+      <CartBar items={Object.keys(quantities).length} packs={count} pending={locked} onOpen={() => void navigate({ to: "/cart" })} onClear={() => setConfirmClear(true)} />
       <ClearCartDialog
         open={confirmClear}
         onOpenChange={setConfirmClear}

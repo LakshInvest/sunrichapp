@@ -4,7 +4,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { BookOpen, Home, Package, UserRound, type LucideIcon } from "lucide-react";
-import { hasOrderUpdates } from "@/lib/orders";
+import { fetchActionCount } from "@/lib/quote-flow";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/hooks/use-cart";
 
@@ -21,14 +21,10 @@ export function BottomNav() {
   const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { count: cartCount } = useCart();
-  const [ordersChanged, setOrdersChanged] = useState(false);
+  const [actionCount, setActionCount] = useState(0);
   useEffect(() => {
-    if (pathname.startsWith("/track")) {
-      setOrdersChanged(false);
-      return;
-    }
     let active = true;
-    void hasOrderUpdates().then((v) => active && setOrdersChanged(v));
+    void fetchActionCount().then((v) => active && setActionCount(v), () => undefined);
     return () => {
       active = false;
     };
@@ -93,8 +89,10 @@ export function BottomNav() {
                     {cartCount > 99 ? "99+" : cartCount}
                   </span>
                 )}
-                {to === "/track" && ordersChanged && (
-                  <span aria-hidden className="absolute -right-1 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-card bg-destructive" />
+                {to === "/track" && actionCount > 0 && (
+                  <span aria-label={t("quote.actionNeeded")} className="absolute -top-1 right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-card bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                    {actionCount > 9 ? "9+" : actionCount}
+                  </span>
                 )}
                 {to === "/account" && replied && (
                   <span aria-hidden className="absolute -right-1 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-card bg-secondary" />

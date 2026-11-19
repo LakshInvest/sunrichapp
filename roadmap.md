@@ -1,3 +1,10 @@
+# Prompt-70
+- [x] Prices removed from Home/category/product/cart bar; "Price on request" gone; any product can be added.
+- [x] Step flow cart → mode → address → date → note → review → request_quote → success; tested as 9999900000 (MFOR/26-27/00006, 00007) and salesman 9999900003 for Demo Retailer (00008, "Order by salesman").
+- [x] Status-driven order page, notes (tested), reject sheet, requote, payment section, tracking/parts; Orders tab chips/badge; Offers page; Help & Tickets (TKT-00001 created for 00007); push order_id opens order.
+- [ ] Rate-sent → approve → UPI "TEST123" → payment check, and reject sheet — waits on Sunrich sending a rate from Command Center.
+- [ ] Physical Android checks (UPI auto-UTR, push tap).
+
 # Prompt-67
 - [x] Fast 4G + 4× CPU throttle, 394×674 Chromium: store selection → first usable Home 28.135s before / 6.453s after; Orders title 1.071s / 0.638s; Khata title 0.488s / 0.686s. Cached repeated Orders 0.629–0.962s; Khata 0.548–0.613s. Product opens 0.867–1.300s after; no comparable before product timing. Cold login usable 5.181s before / 4.584s after. Development-preview single runs, not physical Android or production benchmarks; Home target not reached.
 - [x] Same-session sales checks no longer clear the store bar; body safe-area duplicate removed; fixed 4:3 banner and image dimensions, readable location pill. No SQL.

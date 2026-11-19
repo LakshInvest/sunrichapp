@@ -14,6 +14,7 @@ import { useLang } from "@/hooks/use-lang";
 import { useOffline } from "@/hooks/use-offline";
 import { prepareUpload } from "@/lib/image-compress";
 import { getMyRegistration } from "@/lib/registration.functions";
+import { TICKET_TOPICS, fetchMyMainOrders, raiseTicket, type MainOrder } from "@/lib/quote-flow";
 
 export const Route = createFileRoute("/_authenticated/queries/ask")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -36,11 +37,7 @@ export const Route = createFileRoute("/_authenticated/queries/ask")({
   component: AskQuery,
 });
 
-const TOPICS = [
-  { context: "general", key: "queries.ask.topicGeneral" },
-  { context: "order", key: "queries.ask.topicOrder" },
-  { context: "payment", key: "queries.ask.topicPayment" },
-] as const;
+const UUID = /^[0-9a-f-]{36}$/i;
 
 function AskQuery() {
   const { topic = "general", order, subject: preSubject, message: preMessage, product: productParam } = Route.useSearch();
@@ -51,8 +48,11 @@ function AskQuery() {
   const offline = useOffline();
   const myReg = useServerFn(getMyRegistration);
 
-  const [context, setContext] = useState<string>(productChip ? "general" : topic === "order" ? "order" : "general");
-  const [subject, setSubject] = useState<string>(order ? `Order ${order}` : preSubject ?? "");
+  const [context, setContext] = useState<string>(productChip ? "rate" : (TICKET_TOPICS as readonly string[]).includes(topic) ? topic : order ? "delivery" : "other");
+  const [orderId, setOrderId] = useState<string | null>(order && UUID.test(order) ? order : null);
+  const [myOrders, setMyOrders] = useState<MainOrder[]>([]);
+  useEffect(() => { void fetchMyMainOrders().then(setMyOrders, () => undefined); }, []);
+  const [subject, setSubject] = useState<string>(preSubject ?? "");
   const [message, setMessage] = useState<string>(preMessage ?? "");
   const [file, setFile] = useState<File | null>(null);
   const [customerId, setCustomerId] = useState<string | null>(null);
@@ -117,23 +117,17 @@ function AskQuery() {
         }
         attachmentName = file.name;
       }
-      const rpcArgs: {
-        p_subject: string;
-        p_message: string;
-        p_context: string;
-        p_attachment_path?: string;
-        p_attachment_name?: string;
-      } = {
-        p_subject: subj,
-        p_message: body,
-        p_context: context,
-      };
-      if (attachmentPath) rpcArgs.p_attachment_path = attachmentPath;
-      if (attachmentName) rpcArgs.p_attachment_name = attachmentName;
-      const { data: queryId, error: rpcErr } = await supabase.rpc("customer_raise_query", rpcArgs);
-      if (rpcErr) throw new Error(rpcErr.message);
-      toast.success(t("queries.ask.sent"));
-      await navigate({ to: "/queries/$id", params: { id: String(queryId) } });
+      const r = await raiseTicket({ category: context, subject: subj, message: body, orderId, attachmentPath: attachmentPath ?? null, attachmentName: attachmentName ?? null });
+      const obj = (r && typeof r === "object" ? r : {}) as Record<string, unknown>;
+      const ticketNo = typeof obj["ticket_no"] === "string" ? obj["ticket_no"] : undefined;
+      let queryId = typeof r === "string" ? r : (Object.values(obj).find((v) => typeof v === "string" && UUID.test(v) && v !== orderId) as string | undefined);
+      if (!queryId && ticketNo) {
+        const { data: q } = await supabase.from("customer_queries").select("id").eq("ticket_no", ticketNo).maybeSingle();
+        queryId = q?.id;
+      }
+      toast.success(ticketNo ? t("quote.ticketCreated", { no: ticketNo }) : t("queries.ask.sent"));
+      if (queryId) await navigate({ to: "/queries/$id", params: { id: queryId } });
+      else await navigate({ to: "/queries" });
     } catch (e) {
       setError(serverMessage(e, t("queries.errSend")));
     } finally {
@@ -155,7 +149,7 @@ function AskQuery() {
         >
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
-        <p className="min-w-0 flex-1 truncate text-base font-bold text-foreground">{t("queries.ask.title")}</p>
+        <p className="min-w-0 flex-1 truncate text-base font-bold text-foreground">{t("quote.newTicket")}</p>
       </header>
 
       <div className="flex-1 px-5 pb-10 pt-5">
@@ -174,20 +168,20 @@ function AskQuery() {
         {!productChip && (
         <>
         <p className="text-sm font-medium text-foreground">{t("queries.ask.topicLabel")}</p>
-        <div className="mt-2 flex gap-2" role="group" aria-label={t("queries.ask.topicLabel")}>
-          {TOPICS.map((topic) => (
+        <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label={t("queries.ask.topicLabel")}>
+          {TICKET_TOPICS.map((topic) => (
             <button
-              key={topic.context}
+              key={topic}
               type="button"
-              onClick={() => setContext(topic.context)}
-              aria-pressed={context === topic.context}
-              className={`min-h-11 flex-1 rounded-xl border px-3 text-sm font-semibold transition active:scale-95 ${
-                context === topic.context
+              onClick={() => setContext(topic)}
+              aria-pressed={context === topic}
+              className={`min-h-11 rounded-full border px-4 text-sm font-semibold transition active:scale-95 ${
+                context === topic
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-card text-foreground"
               }`}
             >
-              {t(topic.key)}
+              {t(`quote.topic.${topic}`)}
             </button>
           ))}
         </div>
@@ -195,6 +189,14 @@ function AskQuery() {
         )}
 
         <label className="mt-5 flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-foreground">{t("quote.ticketOrder")}</span>
+          <select value={orderId ?? ""} onChange={(e) => setOrderId(e.target.value || null)} className="min-h-12 rounded-xl border border-input bg-card px-3 text-base text-foreground">
+            <option value="">{t("quote.noOrder")}</option>
+            {myOrders.map((o) => <option key={o.id} value={o.id}>{o.orderNo}</option>)}
+          </select>
+        </label>
+
+        <label className="mt-4 flex flex-col gap-1.5">
           <span className="text-sm font-medium text-foreground">{t("queries.ask.subjectLabel")}</span>
           <input
             value={subject}

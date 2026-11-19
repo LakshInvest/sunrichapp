@@ -5,84 +5,18 @@ import { Lock, Minus, Plus } from "lucide-react";
 import { useRateLocked } from "@/lib/rate-lock";
 import { useRouter } from "@tanstack/react-router";
 import { SmartImage } from "@/components/SmartImage";
-import { isBusinessType, useTypeCode } from "@/lib/customer-type";
 import { formatPack, fixName } from "@/lib/pack-label";
-import { formatINR, loc, priceSave, type CatalogProduct } from "@/lib/catalogue";
+import { loc, type CatalogProduct } from "@/lib/catalogue";
 
-/** Price + struck MRP on one line. Shared by cards, the detail screen and the cart. */
-export function PriceLine({ product, size = "card" }: { product: CatalogProduct; size?: "card" | "detail" }) {
-  const { t } = useTranslation();
-  const locked = useRateLocked();
-  if (locked) {
-    return (
-      <span className="flex min-w-0 flex-col leading-tight">
-        {product.mrp !== null && (
-          <span className={`text-muted-foreground ${size === "detail" ? "text-sm" : "text-[11px]"}`}>
-            {t("catalog.mrp", { amount: formatINR(product.mrp) })}
-          </span>
-        )}
-        <span className={`flex items-center gap-1 font-semibold text-foreground ${size === "detail" ? "text-base" : "text-xs"}`}>
-          <Lock className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />
-          {t("catalog.rateAfterApproval")}
-        </span>
-      </span>
-    );
-  }
-  if (product.price === null) {
-    return <span className="text-sm font-semibold text-foreground">{t("catalog.priceOnRequest")}</span>;
-  }
-  return (
-    <span className="flex min-w-0 items-baseline gap-1.5 whitespace-nowrap">
-      <span className={`font-bold text-primary ${size === "detail" ? "text-2xl" : "text-[17px] leading-none"}`}>
-        {formatINR(product.price)}
-      </span>
-      {size === "detail" && product.mrp !== null && product.mrp > product.price && (
-        <span className="truncate text-sm text-muted-foreground line-through">{formatINR(product.mrp)}</span>
-      )}
-    </span>
-  );
+/** Rates are never shown before a quote (Prompt-70); kept as no-ops for older callers. */
+export function PriceLine(_: { product: CatalogProduct; size?: "card" | "detail" }) {
+  return null;
 }
-
-/** Save + deposit lines under the price row. */
-export function PriceExtras({ product, size = "card" }: { product: CatalogProduct; size?: "card" | "detail" }) {
-  const { t } = useTranslation();
-  const locked = useRateLocked();
-  const save = priceSave(product);
-  const saveKey = isBusinessType(useTypeCode()) ? "product2.margin" : "catalog.save";
-  const deposit = product.isReturnable && product.depositAmount != null && product.depositAmount > 0;
-  if (locked || (save === null && !deposit)) return null;
-  const small = size === "detail" ? "text-sm" : "text-[11px]";
-  return (
-    <div className="mt-1 space-y-0.5 leading-tight">
-      {save !== null && (
-        <p className={`whitespace-nowrap font-semibold text-success ${small}`}>
-          {t(saveKey, { amount: formatINR(save) })}
-        </p>
-      )}
-      {deposit && (
-        <p className={`whitespace-nowrap text-muted-foreground ${small}`}>
-          {t("catalog.depositLine", { amount: formatINR(product.depositAmount) })}
-        </p>
-      )}
-    </div>
-  );
+export function PriceExtras(_: { product: CatalogProduct; size?: "card" | "detail" }) {
+  return null;
 }
-
-export function PriceBlock({
-  product,
-  className,
-  size = "card",
-}: {
-  product: CatalogProduct;
-  className?: string;
-  size?: "card" | "detail";
-}) {
-  return (
-    <div className={className}>
-      <PriceLine product={product} size={size} />
-      <PriceExtras product={product} size={size} />
-    </div>
-  );
+export function PriceBlock(_: { product: CatalogProduct; className?: string; size?: "card" | "detail" }) {
+  return null;
 }
 
 /** "− 5 +" stepper; tapping the number lets the customer type a quantity (0 removes). */
@@ -182,7 +116,6 @@ export function ProductCard({
   onInc,
   onDec,
   onSetQty,
-  onPriceRequest,
   onPrefetch,
 }: {
   product: CatalogProduct;
@@ -218,14 +151,9 @@ export function ProductCard({
       </button>
       <SchemeBadge product={product} />
       <div className="mt-1 flex h-10 items-center gap-2">
-        <div className="min-w-0 shrink">{locked || product.price !== null ? <PriceLine product={product} /> : null}</div>
         <div className="ml-auto shrink-0">
-        {locked ? null : product.price === null ? (
-          onPriceRequest ? (
-            <button type="button" onClick={onPriceRequest} className="flex h-9 items-center justify-center rounded-full bg-secondary/15 px-3 text-xs font-bold text-primary active:scale-95">
-              {t("catalog.priceOnRequest")}
-            </button>
-          ) : null
+        {locked ? (
+          <span className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground"><Lock className="h-3.5 w-3.5 text-accent" aria-hidden />{t("cart.orderingAfterApproval")}</span>
         ) : qty === 0 ? (
           <button
             type="button"

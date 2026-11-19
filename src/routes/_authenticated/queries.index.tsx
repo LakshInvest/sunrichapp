@@ -7,11 +7,9 @@ import { useTranslation } from "react-i18next";
 import { ArrowLeft, ChevronRight, MessageCircle, MessageCircleQuestion, Phone, Plus } from "lucide-react";
 import en from "@/locales/en.json";
 import { supabase } from "@/integrations/supabase/client";
-import { isPriceRequestSubject } from "@/lib/price-request";
 import { ErrorState } from "@/components/catalog/states";
 import { useAppSettings, waLink } from "@/lib/app-settings";
 import { openExternal } from "@/lib/native";
-import { QueryChip } from "@/components/QueryChip";
 import { useLang } from "@/hooks/use-lang";
 
 export const Route = createFileRoute("/_authenticated/queries/")({
@@ -34,6 +32,8 @@ type Summary = {
   status: string;
   preview: string | null;
   updatedAt: string;
+  ticketNo: string | null;
+  category: string | null;
 };
 
 function timeLabel(iso: string, lang: string): string {
@@ -42,6 +42,7 @@ function timeLabel(iso: string, lang: string): string {
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Asia/Kolkata",
   }).format(new Date(iso));
 }
 
@@ -56,7 +57,7 @@ function QueriesList() {
   const load = useCallback(async () => {
     const { data: qs, error } = await supabase
       .from("customer_queries")
-      .select("id, subject, status, created_at, updated_at")
+      .select("id, subject, status, created_at, updated_at, ticket_no, category")
       .eq("customer_id", await ownCustomerFilter())
       .order("created_at", { ascending: false });
     if (error) {
@@ -85,6 +86,8 @@ function QueriesList() {
         status: q.status,
         preview: previews.get(q.id) || null,
         updatedAt: q.updated_at,
+        ticketNo: (q as { ticket_no?: string | null }).ticket_no ?? null,
+        category: (q as { category?: string | null }).category ?? null,
       })),
     );
   }, []);
@@ -106,7 +109,7 @@ function QueriesList() {
         >
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </button>
-        <h1 className="min-w-0 flex-1 truncate text-lg font-bold text-foreground">{t("support.title")}</h1>
+        <h1 className="min-w-0 flex-1 truncate text-lg font-bold text-foreground">{t("quote.helpTickets")}</h1>
       </header>
 
       <div className="px-5 pt-4">
@@ -135,7 +138,7 @@ function QueriesList() {
           </div>
         )}
 
-        <h2 className="mt-5 text-base font-bold text-foreground">{t("queries.title")}</h2>
+        <h2 className="mt-5 text-base font-bold text-foreground">{t("quote.tickets")}</h2>
 
         {rows === null && <p className="mt-10 text-center text-sm text-muted-foreground">{t("registration.loading")}</p>}
 
@@ -162,13 +165,9 @@ function QueriesList() {
               <div className="min-w-0 flex-1">
                 <div className="flex min-w-0 items-center gap-2">
                   <p className="min-w-0 truncate text-[15px] font-bold text-foreground">{q.subject}</p>
-                  {isPriceRequestSubject(q.subject) && (
-                    <span className="shrink-0 rounded-full bg-secondary/15 px-2 py-0.5 text-[11px] font-bold text-secondary">
-                      {t("queries.priceRequestTag")}
-                    </span>
-                  )}
-                  <QueryChip status={q.status} />
+                  <TicketChip status={q.status} />
                 </div>
+                {(q.ticketNo || q.category) && <p className="text-xs font-semibold text-muted-foreground">{[q.ticketNo, q.category ? t(`quote.topic.${q.category}`, { defaultValue: q.category }) : null].filter(Boolean).join(" · ")}</p>}
                 {q.preview && <p className="mt-0.5 truncate text-sm text-muted-foreground">{q.preview}</p>}
                 <p className="mt-1 text-xs text-muted-foreground">{timeLabel(q.updatedAt, lang)}</p>
               </div>
@@ -186,9 +185,17 @@ function QueriesList() {
           data-testid="ask-question"
         >
           <Plus className="h-5 w-5" aria-hidden />
-          {t("queries.ask.fab")}
+          {t("quote.newTicket")}
         </button>
       </div>
     </PageShell>
   );
+}
+
+/** answered = waiting for Sunrich (Open), open = Sunrich replied (In progress), closed. */
+function TicketChip({ status }: { status: string }) {
+  const { t } = useTranslation();
+  const k = status === "closed" ? "closed" : status === "open" ? "progress" : "open";
+  const cls = k === "closed" ? "bg-muted text-muted-foreground" : k === "progress" ? "bg-secondary/15 text-primary" : "bg-warning/20 text-warning-foreground";
+  return <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${cls}`}>{t(`quote.ticket.${k}`)}</span>;
 }

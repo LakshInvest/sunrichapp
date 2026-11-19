@@ -49,7 +49,7 @@ export function SmartCard({
         {pick.kind === "dispatched" && t("smart.dispatched")}
         {pick.kind === "reorder" && lastDelivered && (
           <span className="block truncate">
-            {lastDelivered.lines.map((l) => lineShort(l.packLabel, l.productName, l.qty)).join(", ")} · {formatINR(lastDelivered.grandTotal)}
+            {lastDelivered.lines.map((l) => lineShort(l.packLabel, l.productName, l.qty)).join(", ")}
           </span>
         )}
       </p>

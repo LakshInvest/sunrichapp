@@ -39,7 +39,6 @@ import { pickSelected, shortArea, useSelectedAddressId } from "@/lib/selected-ad
 import { ClearCartDialog } from "@/components/ClearCartDialog";
 import { CategoryTiles } from "@/components/catalog/CategoryTiles";
 import { ProductCard } from "@/components/catalog/ProductCard";
-import { openPriceRequestChat } from "@/lib/price-request";
 import { SearchBox } from "@/components/catalog/SearchBox";
 import { NoResultsState, ChipsSkeleton, GridSkeleton, BannerSkeleton, HeroSkeleton, ErrorState } from "@/components/catalog/states";
 import { useLang } from "@/hooks/use-lang";
@@ -68,7 +67,6 @@ import { Link } from "@tanstack/react-router";
 import {
   addRecentSearch,
   fetchCatalogue,
-  formatINR,
   loadRecentSearches,
   loc,
   matchesSearch,
@@ -340,14 +338,6 @@ function Home() {
     [products, search],
   );
 
-  const total = useMemo(
-    () =>
-      Object.entries(quantities).reduce((sum, [id, qty]) => {
-        const product = products.find((p) => p.id === id);
-        return product?.price != null ? sum + product.price * qty : sum;
-      }, 0),
-    [quantities, products],
-  );
 
   const selectedAddr = pickSelected(addrList, selectedId);
   const headerLabel = selectedAddr ? t(labelKey(selectedAddr.label)) : t("addresses.labels.shop");
@@ -489,8 +479,7 @@ function Home() {
                       setQty(p.id, p.minOrderQty || 1);
                       if (p.price != null) saveCartPrice(p.id, p.price);
                     }}
-                    onPriceRequest={() => void openPriceRequestChat(p, lang, navigate)}
-                    onInc={() => {
+                                        onInc={() => {
                       const max = p.maxOrderQty ?? Infinity;
                       const next = Math.min((quantities[p.id] ?? 0) + 1, max);
                       setQty(p.id, next);
@@ -526,8 +515,7 @@ function Home() {
                     setQty(p.id, p.minOrderQty || 1);
                     if (p.price != null) saveCartPrice(p.id, p.price);
                   }}
-                  onPriceRequest={() => void openPriceRequestChat(p, lang, navigate)}
-                  onInc={() => {
+                                    onInc={() => {
                     const max = p.maxOrderQty ?? Infinity;
                     setQty(p.id, Math.min((quantities[p.id] ?? 0) + 1, max));
                   }}
@@ -759,8 +747,8 @@ function Home() {
           </div>
 
           <CartBar
-            count={count}
-            total={formatINR(total)}
+            items={Object.keys(quantities).length}
+            packs={count}
             pending={pending}
             onOpen={() => void navigate({ to: "/cart" })}
             onClear={() => setConfirmClear(true)}

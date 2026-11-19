@@ -48,3 +48,25 @@ export function SchemeOffers({ products }: { products: CatalogProduct[] }) {
     return <Button key={s.id ?? s.scheme_id ?? i} variant="ghost" className="block h-auto w-64 shrink-0 snap-start overflow-hidden rounded-xl border border-border bg-card p-0 text-left whitespace-normal" onClick={() => setSelected(s)}>{s.image_url ? <SmartImage src={s.image_url} alt="" width={360} className="aspect-[2/1] w-full object-cover" /> : <div className="flex aspect-[2/1] items-center justify-center bg-secondary/10"><Icon className="!h-10 !w-10 text-secondary" /></div>}<div className="p-3"><p className="break-words text-sm font-bold">{schemeText(s, lang)}</p><p className="mt-1 text-xs font-semibold text-success">{rule(s)}</p>{s.ends_on && <p className="mt-1 text-xs text-muted-foreground">{t("offers.valid", { date: indDate(s.ends_on, lang) })}</p>}</div></Button>;
   })}</div><SheetDrawer open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>{selected && <div className="overflow-y-auto px-5 pb-8"><DrawerTitle className="mt-3 break-words text-lg">{schemeText(selected, lang)}</DrawerTitle><DrawerDescription className="mt-2 whitespace-pre-wrap">{schemeText(selected, lang, "description") || rule(selected)}</DrawerDescription>{selected.image_url && <SmartImage src={selected.image_url} alt="" className="mt-3 aspect-[2/1] w-full rounded-xl object-cover" />}<p className="mt-3 font-semibold text-success">{rule(selected)}</p>{selected.min_qty ? <p className="mt-2 text-sm">{t("offers.minimum", { qty: selected.min_qty })}</p> : null}{selected.ends_on && <p className="mt-2 text-xs text-muted-foreground">{t("offers.valid", { date: indDate(selected.ends_on, lang) })}</p>}{selected.slabs?.map((r, i) => <p key={i} className="mt-2 text-sm">{t("offers.slabRule", { qty: r["min_qty"], benefit: r["discount_percent"] ? t("offers.percent", { percent: r["discount_percent"] }) : t("offers.amount", { amount: formatINR(Number(r["discount_amount"] ?? r["discount_per_pack"] ?? 0)) }) })}</p>)}<ul className="mt-4 divide-y divide-border">{schemeProducts(selected, products, lang).map((p) => <li key={p.id}><Button variant="ghost" className="h-auto min-h-16 w-full justify-start whitespace-normal px-0 text-left" onClick={() => { setSelected(null); void navigate({ to: "/product/$id", params: { id: p.id } }); }}><SmartImage src={p.imageUrl} width={48} alt="" className="h-12 w-12 shrink-0 object-contain" /><span className="min-w-0 break-words">{p.name}{p.qty != null && <span> · ×{p.qty}</span>}</span></Button></li>)}</ul></div>}</SheetDrawer></section>;
 }
+/** Full-page list for Account → Offers (Prompt-70 §6): rules only, never prices. */
+export function OffersList({ products }: { products: CatalogProduct[] }) {
+  const { data, error, refetch, isLoading } = useSchemes(); const { t } = useTranslation(); const { lang } = useLang(); const rule = useRule();
+  if (error) return <div><p role="alert" className="text-sm text-destructive">{serverMessage(error, t("offers.failed"))}</p><Button variant="ghost" onClick={() => void refetch()}>{t("common.retry")}</Button></div>;
+  if (isLoading || !data) return <div className="space-y-3">{[0, 1].map((i) => <div key={i} className="h-48 animate-pulse rounded-2xl bg-muted" />)}</div>;
+  if (!data.length) return <p className="pt-10 text-center text-sm text-muted-foreground">{t("quote.noOffers")}</p>;
+  return <ul className="space-y-3">{data.map((s, i) => {
+    const Icon = icons[s.scheme_type] ?? Gift;
+    const items = schemeProducts(s, products, lang);
+    return <li key={s.id ?? s.scheme_id ?? i} className="overflow-hidden rounded-2xl bg-card shadow-sm">
+      {s.image_url ? <SmartImage src={s.image_url} alt="" width={420} className="aspect-[2/1] w-full object-cover" /> : <div className="flex aspect-[3/1] items-center justify-center bg-secondary/10"><Icon className="h-10 w-10 text-secondary" /></div>}
+      <div className="p-4">
+        <p className="text-base font-bold text-foreground">{schemeText(s, lang)}</p>
+        <p className="mt-1 text-sm font-bold text-success">{rule(s)}</p>
+        {schemeText(s, lang, "description") && <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{schemeText(s, lang, "description")}</p>}
+        <SchemeTerms scheme={s} />
+        {items.length > 0 && <p className="mt-2 text-xs text-foreground">{items.map((p) => p.name).join(", ")}</p>}
+        <p className="mt-2 text-[11px] text-muted-foreground">{t("quote.offerAuto")}</p>
+      </div>
+    </li>;
+  })}</ul>;
+}

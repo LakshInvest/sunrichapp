@@ -14,11 +14,9 @@ import { SmartImage } from "@/components/SmartImage";
 import { ImageViewer } from "@/components/ImageViewer";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { ErrorState, EmptyState, GridSkeleton } from "@/components/catalog/states";
-import { PriceBlock, QtyStepper } from "@/components/catalog/ProductCard";
-import { perUnit, rupees2 } from "@/lib/price-math";
+import { QtyStepper } from "@/components/catalog/ProductCard";
 import { isBusinessType, useTypeCode } from "@/lib/customer-type";
 import { useRateLocked } from "@/lib/rate-lock";
-import { openPriceRequestChat } from "@/lib/price-request";
 import { useLang } from "@/hooks/use-lang";
 import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
@@ -26,7 +24,6 @@ import { useFavourites } from "@/hooks/use-favourites";
 import {
   clampQty,
   fetchCatalogue,
-  formatINR,
   loc,
   readCatalogueCache,
   onCatalogue,
@@ -60,7 +57,6 @@ function ProductDetail() {
   const fav = useFavourites();
   const deva = lang === "en" ? "" : "font-deva";
   const rateLocked = useRateLocked();
-  const business = isBusinessType(useTypeCode());
 
   const [data, setData] = useState<CatalogData | null>(() => readCatalogueCache());
   useEffect(() => onCatalogue(setData), []);
@@ -182,11 +178,7 @@ function ProductDetail() {
   }
 
   const canOrder = product.canOrder;
-  const unit = perUnit(product);
-  const cartTotal = Object.entries(quantities).reduce((sum, [pid, q]) => {
-    const p = data?.products.find((x) => x.id === pid);
-    return p?.price != null ? sum + p.price * q : sum;
-  }, 0);
+
   const blocked = !canOrder;
 
   return (
@@ -276,29 +268,6 @@ function ProductDetail() {
           {packLine(product, volume, lang, t)}
         </p>
 
-        {rateLocked || product.price === null ? (
-          <PriceBlock product={product} size="detail" className="mt-4" />
-        ) : (
-          <div className="mt-4 space-y-0.5" data-testid="product-price">
-            <p className="text-lg text-foreground">
-              <span className="text-2xl font-bold text-primary">{formatINR(product.price)}</span>
-              <span className="text-muted-foreground"> / {t("product2.pack")}</span>
-              <span className="text-xs text-muted-foreground"> {t("product3.inclGst")}</span>
-              {unit.rate != null && <span className="text-sm text-muted-foreground"> · {t("product2.perBottle", { amount: rupees2(unit.rate) })}</span>}
-            </p>
-            {unit.mrp != null ? (
-              <p className="text-sm text-muted-foreground">{t("product2.mrpPerBottle", { amount: rupees2(unit.mrp) })}</p>
-            ) : product.mrp != null && product.mrp > product.price ? (
-              <p className="text-sm text-muted-foreground">{t("catalog.mrp", { amount: formatINR(product.mrp) })}</p>
-            ) : null}
-            {unit.saving != null && (
-              <p className="text-sm font-semibold text-success">
-                {t(business ? "product2.margin" : "product2.save", { amount: formatINR(unit.saving) })}
-              </p>
-            )}
-          </div>
-        )}
-
         <SchemeBadge product={product} />
         <ProductSchemes product={product} />
         {extras.highlights.length > 0 && <Highlights items={extras.highlights} />}
@@ -313,7 +282,7 @@ function ProductDetail() {
           }}
         />
 
-        {(product.minOrderQty > 1 || product.maxOrderQty != null) && product.price !== null && !rateLocked && (
+        {(product.minOrderQty > 1 || product.maxOrderQty != null) && !rateLocked && (
           <p className="mt-2 text-center text-xs text-muted-foreground">
             {t("product.qtyLimits", {
               min: product.minOrderQty,
@@ -321,7 +290,7 @@ function ProductDetail() {
             })}
           </p>
         )}
-        {product.bulkThresholdQty != null && qty >= product.bulkThresholdQty && product.price !== null && (
+        {product.bulkThresholdQty != null && qty >= product.bulkThresholdQty && (
           <p className="mt-3 rounded-xl bg-accent/15 px-3 py-2 text-center text-xs font-medium text-accent-foreground">
             {t("cart.bulkNote")}
           </p>
@@ -347,9 +316,7 @@ function ProductDetail() {
                     <p className="mt-2 line-clamp-2 min-h-10 text-sm font-bold leading-snug text-foreground">
                       {loc(s.name, lang)}
                     </p>
-                    <p className="text-sm font-bold text-primary">
-                      {rateLocked ? `🔒 ${t("catalog.rateAfterApproval")}` : s.price === null ? t("catalog.priceOnRequest") : formatINR(s.price)}
-                    </p>
+
                   </button>
                 </div>
               ))}
@@ -366,15 +333,7 @@ function ProductDetail() {
               🔒 {t("catalog.rateAfterApproval")}
             </p>
           ) : (<>
-          {product.price === null ? (
-            <button
-              type="button"
-              onClick={() => void openPriceRequestChat(product, lang, navigate)}
-              className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl border border-secondary/50 bg-secondary/10 text-base font-semibold text-secondary-foreground transition active:scale-[0.98]"
-            >
-              {t("catalog.priceOnRequest")}
-            </button>
-          ) : qty > 0 ? (
+          {qty > 0 ? (
             <>
               <div className="w-32 shrink-0">
                 <QtyStepper
@@ -391,7 +350,7 @@ function ProductDetail() {
                 onClick={() => navigate({ to: "/cart" })}
                 className="flex min-h-12 flex-1 items-center justify-center gap-1 rounded-xl bg-secondary text-sm font-semibold text-secondary-foreground shadow-md transition active:scale-[0.98]"
               >
-                {t("product2.viewCart", { amount: formatINR(cartTotal) })}
+                {t("quote.goAhead")}
               </button>
             </>
           ) : (

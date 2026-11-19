@@ -1,3 +1,4 @@
+import { Gift } from "lucide-react";
 import { ownCustomerFilter } from "@/lib/my-customer";
 import { ChartNoAxesCombined } from "lucide-react";
 import { serverMessage } from "@/lib/form-errors";
@@ -460,7 +461,9 @@ function Account() {
             <Separator />
           </>
         )}
-        <MenuItem icon={LifeBuoy} label={t("support.title")} badge={openCount} onClick={() => navigate({ to: "/queries" })} />
+        <MenuItem icon={Gift} label={t("quote.offers")} onClick={() => navigate({ to: "/offers" })} />
+        <Separator />
+        <MenuItem icon={LifeBuoy} label={t("quote.helpTickets")} badge={openCount} onClick={() => navigate({ to: "/queries" })} />
         <Separator />
         <div className="flex min-h-14 items-center gap-3 px-4">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary/10">

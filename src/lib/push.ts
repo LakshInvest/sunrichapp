@@ -63,7 +63,10 @@ function regFlag(v: boolean | null): boolean {
 }
 
 function openPushUrl(data: unknown) {
-  const url = (data as Record<string, unknown> | undefined)?.["url"];
+  const d = data as Record<string, unknown> | undefined;
+  const orderId = d?.["order_id"];
+  if (typeof orderId === "string" && /^[0-9a-f-]{36}$/i.test(orderId)) return window.location.assign(`/track/${orderId}`);
+  const url = d?.["url"];
   if (typeof url === "string" && url.startsWith("/") && !url.startsWith("//")) window.location.assign(url);
 }
 

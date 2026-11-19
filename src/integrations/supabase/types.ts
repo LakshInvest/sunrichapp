@@ -228,6 +228,7 @@ export type Database = {
           delivery_charge_per_pack: number
           delivery_days_ahead: number
           delivery_slots: Json
+          distributor_delivery_enabled: boolean
           einvoice_enabled: boolean
           ewaybill_enabled: boolean
           ewaybill_limit_inter: number
@@ -311,6 +312,7 @@ export type Database = {
           delivery_charge_per_pack?: number
           delivery_days_ahead?: number
           delivery_slots?: Json
+          distributor_delivery_enabled?: boolean
           einvoice_enabled?: boolean
           ewaybill_enabled?: boolean
           ewaybill_limit_inter?: number
@@ -394,6 +396,7 @@ export type Database = {
           delivery_charge_per_pack?: number
           delivery_days_ahead?: number
           delivery_slots?: Json
+          distributor_delivery_enabled?: boolean
           einvoice_enabled?: boolean
           ewaybill_enabled?: boolean
           ewaybill_limit_inter?: number

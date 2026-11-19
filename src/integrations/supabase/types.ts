@@ -11734,6 +11734,7 @@ export type Database = {
         }[]
       }
       my_khata_summary: { Args: never; Returns: Json }
+      my_order_dispatch: { Args: { p_order_id: string }; Returns: Json }
       my_order_truck: {
         Args: { p_order_id: string }
         Returns: {

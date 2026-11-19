@@ -1,4 +1,5 @@
 {
+  "loginAccess": {"refused": "यह नंबर ग्राहक या सेल्समैन का नहीं है। कृपया Delivery ऐप / Command Center का उपयोग करें।", "approved": "आपका खाता मंज़ूर हो गया है"},
   "offers": {
     "title": "ऑफ़र",
     "buyFree": "{{buy}} लो, {{free}} फ्री",

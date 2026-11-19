@@ -1,3 +1,4 @@
+import { requestDataRefresh } from "@/lib/data-refresh";
 import { ownCustomerFilter } from "@/lib/my-customer";
 /** Checkout payment methods, payment proofs and dispatch-time helpers.
  *  Writes go through the existing SECURITY DEFINER RPCs only; reads are RLS-scoped. */
@@ -46,6 +47,7 @@ export function validUtr(v: string): boolean {
 export async function setOrderPaymentMethod(orderIds: string[], method: PayMethod): Promise<void> {
   const { error } = await supabase.rpc("set_order_payment_method", { p_order_ids: orderIds, p_method: method });
   if (error) throw new Error(error.message);
+  requestDataRefresh();
 }
 
 export type ProofInput = {
@@ -72,6 +74,7 @@ export async function submitPaymentProof(input: ProofInput): Promise<string> {
   if (input.orderId) args["p_order_id"] = input.orderId;
   const { data, error } = await supabase.rpc("submit_payment_proof", args);
   if (error) throw new Error(error.message);
+  requestDataRefresh();
   return String(data);
 }
 

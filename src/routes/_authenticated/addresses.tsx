@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
+import { PageShell } from "@/components/PageShell";
+import { useDataRefresh } from "@/hooks/use-data-refresh";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -65,6 +67,7 @@ function Addresses() {
     void load();
   }, [load]);
 
+  useDataRefresh(load);
   const makeDefault = async (a: SavedAddress) => {
     setBusy(a.id);
     try {
@@ -94,8 +97,7 @@ function Addresses() {
   };
 
   return (
-    <main className={`mx-auto min-h-screen max-w-md bg-background pb-28 ${deva}`}>
-      <OfflineBanner />
+    <PageShell onRefresh={load} className={`pb-28 ${deva}`}>
       <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <button
           type="button"
@@ -227,6 +229,6 @@ function Addresses() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </main>
+    </PageShell>
   );
 }

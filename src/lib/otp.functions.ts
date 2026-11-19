@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { customerThenStaff } from "@/lib/login-rules";
 
 // Error codes are translated in the browser (auth.errors.*).
 export type OtpResult =
@@ -66,13 +67,14 @@ export const sendOtp = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // New numbers may sign up: only existing profiles are gated here.
-    const { data: profile } = await supabaseAdmin
+    const { data: customer } = await supabaseAdmin
       .from("user_profiles")
       .select("id, full_name, user_type, is_active")
       .in("mobile", variants(m10))
       .eq("user_type", "customer")
       .limit(1)
       .maybeSingle();
+    const profile = customer ?? (await supabaseAdmin.from("user_profiles").select("id, full_name, user_type, is_active").in("mobile", variants(m10)).eq("user_type", "staff").limit(1).maybeSingle()).data;
     if (profile) {
       if (!profile.is_active) return { ok: false, code: "blocked" };
     }
@@ -197,13 +199,14 @@ export const verifyOtp = createServerFn({ method: "POST" })
     const mobile = `+91${m10}`;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: profile } = await supabaseAdmin
+    const { data: customer } = await supabaseAdmin
       .from("user_profiles")
       .select("id, user_type, is_active")
       .in("mobile", variants(m10))
       .eq("user_type", "customer")
       .limit(1)
       .maybeSingle();
+    const profile = customer ?? (await supabaseAdmin.from("user_profiles").select("id, user_type, is_active").in("mobile", variants(m10)).eq("user_type", "staff").limit(1).maybeSingle()).data;
     if (profile) {
       if (!profile.is_active) return { ok: false, code: "blocked" };
     }
@@ -213,7 +216,7 @@ export const verifyOtp = createServerFn({ method: "POST" })
       .select("id, user_id, code_hash, attempts, max_attempts, expires_at")
       .eq("destination", mobile)
       .eq("purpose", "app_login")
-      // Ignore codes tied to another (staff) account of this number.
+      // Match the selected customer-first identity, including staff OTPs.
       .or(profile ? `user_id.is.null,user_id.eq.${profile.id}` : "user_id.is.null")
       .is("consumed_at", null)
       .order("created_at", { ascending: false })
@@ -350,7 +353,7 @@ export const pinInfo = createServerFn({ method: "POST" })
     const m10 = data.mobile.replace(/\D/g, "").slice(-10);
     if (!mobileSchema.safeParse(m10).success) return { hasPin: false };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const profile = await customerProfile(supabaseAdmin, m10);
+    const profile = await customerProfile(supabaseAdmin, m10) ?? (await supabaseAdmin.from("user_profiles").select("id, is_active").in("mobile", variants(m10)).eq("user_type", "staff").limit(1).maybeSingle()).data;
     if (!profile || !profile.is_active) return { hasPin: false };
     const lock = await pinLock(supabaseAdmin, profile.id);
     if (lock.none) return { hasPin: false };
@@ -376,17 +379,18 @@ export const pinLogin = createServerFn({ method: "POST" })
     // check_pin (database) accepts the PIN on any phone and trusts new phones;
     // always send this phone's real device id.
     const profile = await customerProfile(supabaseAdmin, m10);
-    if (!profile) return { ok: false, status: "not_registered" };
-    const lock = await pinLock(supabaseAdmin, profile.id);
-    if (lock.none) return { ok: false, status: "pin_not_set" };
-    if (lock.lockedMinutes) return { ok: false, status: "locked_use_otp", lockMinutes: lock.lockedMinutes };
+    if (profile) {
+      const lock = await pinLock(supabaseAdmin, profile.id);
+      if (lock.none) return { ok: false, status: "pin_not_set" };
+      if (lock.lockedMinutes) return { ok: false, status: "locked_use_otp", lockMinutes: lock.lockedMinutes };
+    }
 
-    const { data: rows, error } = await supabaseAdmin.rpc("check_pin_login", {
+    const { data: rows, error } = await customerThenStaff((kind) => supabaseAdmin.rpc("check_pin_login", {
       p_mobile: `+91${m10}`,
       p_device_id: data.deviceId,
       p_pin: data.pin,
-      p_user_type: "customer",
-    });
+      p_user_type: kind,
+    }));
     if (error) {
       console.error("check_pin_login failed", error.message);
       return { ok: false, status: "generic" };
@@ -396,15 +400,17 @@ export const pinLogin = createServerFn({ method: "POST" })
 
     const result = row.out_result ?? "";
     if (result !== "ok" || !row.out_user_id) {
-      if (result.startsWith("wrong_pin") || result === "locked_use_otp") {
-        const fails = await countFail(supabaseAdmin, profile.id);
+      if (result === "locked_use_otp") return { ok: false, status: "locked_use_otp", lockMinutes: PIN_LOCK_MINUTES };
+      if (result.startsWith("wrong_pin")) {
+        const failedProfile = profile ?? (await supabaseAdmin.from("user_profiles").select("id").in("mobile", variants(m10)).eq("user_type", "staff").limit(1).maybeSingle()).data;
+        const fails = row.out_user_id ? await countFail(supabaseAdmin, row.out_user_id) : failedProfile ? await countFail(supabaseAdmin, failedProfile.id) : PIN_MAX_TRIES;
         if (fails >= PIN_MAX_TRIES) return { ok: false, status: "locked_use_otp", lockMinutes: PIN_LOCK_MINUTES };
         return { ok: false, status: "wrong_pin", triesLeft: PIN_MAX_TRIES - fails };
       }
       const known = ["not_registered", "device_not_trusted", "pin_not_set", "locked_use_otp"] as const;
       return { ok: false, status: (known as readonly string[]).includes(result) ? (result as (typeof known)[number]) : "generic" };
     }
-    await supabaseAdmin.from("user_pins").update({ failed_attempts: 0 }).eq("user_id", profile.id);
+    await supabaseAdmin.from("user_pins").update({ failed_attempts: 0 }).eq("user_id", row.out_user_id);
 
     // check_pin_login returns the sign-in email, saving a user lookup.
     const email = row.out_email;

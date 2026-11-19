@@ -1,3 +1,4 @@
+import { useDataRefresh } from "@/hooks/use-data-refresh";
 import { ownCustomerFilter } from "@/lib/my-customer";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
@@ -90,10 +91,10 @@ function QueriesList() {
 
   useEffect(() => {
     void load();
-    const id = setInterval(() => void load(), 60_000);
-    return () => clearInterval(id);
+
   }, [load]);
 
+  useDataRefresh(load, true);
   return (
     <PageShell className={`pb-[calc(6rem+env(safe-area-inset-bottom))] ${lang === "en" ? "" : "font-deva"}`} onRefresh={load}>
       <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))]">

@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { PageShell } from "@/components/PageShell";
+import { useDataRefresh } from "@/hooks/use-data-refresh";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft } from "lucide-react";
@@ -16,11 +18,11 @@ import { openPriceRequestChat } from "@/lib/price-request";
 import { fetchCatalogue, formatINR, loc, readCatalogueCache, saveCartPrice, type CatalogData } from "@/lib/catalogue";
 
 export const Route = createFileRoute("/_authenticated/category/$code")({
-  head: () => ({
+  head: ({ params }) => ({
     meta: [
-      { title: en.home.metaTitle },
+      { title: `${params.code} products — Sunrich` },
       { name: "description", content: en.home.metaDescription },
-      { property: "og:title", content: en.home.metaTitle },
+      { property: "og:title", content: `${params.code} products — Sunrich` },
       { property: "og:description", content: en.home.metaDescription },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -45,6 +47,8 @@ function CategoryPage() {
     void fetchCatalogue().then(setData).catch(() => undefined);
   }, []);
 
+  const refresh = () => fetchCatalogue({ force: true }).then(setData);
+  useDataRefresh(refresh);
   const products = data?.products ?? [];
   const cat = data?.categories.find((c) => c.code === code);
   const list = useMemo(() => products.filter((p) => p.categoryCode === code), [products, code]);
@@ -55,7 +59,7 @@ function CategoryPage() {
   const deva = lang === "en" ? "" : "font-deva";
 
   return (
-    <main className={`min-h-screen bg-background pb-44 ${deva}`}>
+    <PageShell onRefresh={refresh} className={`pb-44 ${deva}`}>
       <header className="relative z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <button type="button" onClick={() => navigate({ to: "/home" })} aria-label={t("registration.back")} className="flex h-11 w-11 items-center justify-center rounded-xl">
           <ArrowLeft className="h-5 w-5" />
@@ -103,6 +107,6 @@ function CategoryPage() {
           setConfirmClear(false);
         }}
       />
-    </main>
+    </PageShell>
   );
 }

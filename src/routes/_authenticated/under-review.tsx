@@ -10,6 +10,10 @@ import { SupportBlock } from "@/components/LegalPage";
 import { Button } from "@/components/ui/button";
 import { fetchAppInfo, type AppInfo } from "@/lib/app-info";
 import { useLang } from "@/hooks/use-lang";
+import { useDataRefresh } from "@/hooks/use-data-refresh";
+import { writeGate } from "@/lib/gate-cache";
+import { setRateLocked } from "@/lib/rate-lock";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/under-review")({
   ssr: false,
@@ -29,7 +33,8 @@ export const Route = createFileRoute("/_authenticated/under-review")({
 
 /** Full-screen status shown while an admin reviews the registration. */
 function UnderReview() {
-  const reg = Route.useLoaderData();
+  const initial = Route.useLoaderData();
+  const [reg, setReg] = useState(initial);
   const { t } = useTranslation();
   const { lang } = useLang();
   const navigate = useNavigate();
@@ -44,6 +49,20 @@ function UnderReview() {
       active = false;
     };
   }, []);
+
+  useDataRefresh(async () => {
+    const fresh = await getMyRegistration();
+    setReg(fresh);
+    const { data } = await supabase.auth.getSession();
+    if (data.session) writeGate(data.session.user.id, fresh);
+    if (fresh.status === "active") {
+      setRateLocked(false);
+      toast.success(t("loginAccess.approved"));
+      await navigate({ to: "/home", replace: true });
+    } else if (fresh.status !== "pending_approval") {
+      await navigate({ to: fresh.status === "blocked" ? "/hold" : "/registration", replace: true });
+    }
+  }, true);
 
   const signOut = async () => {
     await queryClient.cancelQueries();

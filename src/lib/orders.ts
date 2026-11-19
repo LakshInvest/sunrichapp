@@ -2,6 +2,9 @@ import type { SchemeInfo, SchemeHint } from "@/lib/scheme-rules";
 import { getMyCustomerId, ownCustomerFilter, NO_CUSTOMER } from "@/lib/my-customer";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { requestDataRefresh } from "@/lib/data-refresh";
+import { useDataRefresh } from "@/hooks/use-data-refresh";
+import { useAppSettings } from "@/lib/app-settings";
 
 /**
  * Customer order data layer, read through the browser Supabase client so the
@@ -383,12 +386,14 @@ export async function placeMyOrder(
 ): Promise<PlacedOrder[]> {
   const { data, error } = await supabase.rpc("place_my_order", notes ? { p_lines: lines, p_delivery: delivery, p_notes: notes } : { p_lines: lines, p_delivery: delivery });
   if (error) throw new Error(error.message);
+  requestDataRefresh();
   return (data ?? []) as PlacedOrder[];
 }
 
 export async function cancelMyOrder(orderId: string, reason: string): Promise<void> {
   const { error } = await supabase.rpc("cancel_order", { p_order_id: orderId, p_reason: reason });
   if (error) throw new Error(error.message);
+  requestDataRefresh();
 }
 
 export async function distributorRespond(orderId: string, accept: boolean, reason?: string): Promise<void> {
@@ -396,6 +401,7 @@ export async function distributorRespond(orderId: string, accept: boolean, reaso
   if (reason) args.p_reason = reason;
   const { error } = await supabase.rpc("distributor_respond", args);
   if (error) throw new Error(error.message);
+  requestDataRefresh();
 }
 
 export async function distributorMarkDelivered(orderId: string, delivered: boolean, reason?: string): Promise<void> {
@@ -403,6 +409,7 @@ export async function distributorMarkDelivered(orderId: string, delivered: boole
   if (reason) args.p_reason = reason;
   const { error } = await supabase.rpc("distributor_mark_delivered", args);
   if (error) throw new Error(error.message);
+  requestDataRefresh();
 }
 
 export type CreditStatus = {
@@ -463,29 +470,18 @@ export async function resolveIsDistributor(): Promise<boolean> {
 export function useDistributorNav(): { isDistributor: boolean; newCount: number } {
   const [isDistributor, setIsDistributor] = useState(cachedIsDistributor);
   const [newCount, setNewCount] = useState(0);
-
-  useEffect(() => {
-    let active = true;
-    const load = async () => {
-      const is = cachedIsDistributor() ? true : await resolveIsDistributor();
-      if (!active || !is) return;
-      setIsDistributor(true);
-      try {
-        const list = await fetchInboxOrders();
-        if (active) setNewCount(list.filter((o) => inboxGroup(o) === "new").length);
-      } catch {
-        /* offline — keep the last count */
-      }
-    };
-    void load();
-    const id = setInterval(() => void load(), 60_000);
-    return () => {
-      active = false;
-      clearInterval(id);
-    };
-  }, []);
-
-  return { isDistributor, newCount };
+  const settings = useAppSettings();
+  const enabled = settings?.distributorDeliveryEnabled === true;
+  const load = useCallback(async () => {
+    const is = await resolveIsDistributor();
+    setIsDistributor(is);
+    if (!is || !enabled) { setNewCount(0); return; }
+    try { const list = await fetchInboxOrders(); setNewCount(list.filter((o) => inboxGroup(o) === "new").length); }
+    catch { /* keep the last good count */ }
+  }, [enabled]);
+  useEffect(() => { void load(); }, [load]);
+  useDataRefresh(load, enabled);
+  return { isDistributor, newCount: enabled ? newCount : 0 };
 }
 
 /* ---------- misc helpers ---------- */
@@ -539,4 +535,5 @@ export async function setOrderDeliveryMode(orderId: string, mode: DeliveryMode, 
     ...(mode === "pickup" && vehicleNo?.trim() ? { p_vehicle_no: vehicleNo.trim() } : {}),
   });
   if (error) throw new Error(error.message);
+  requestDataRefresh();
 }

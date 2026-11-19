@@ -1,6 +1,8 @@
 import { SchemeLinePrice } from "@/components/SchemeQuote";
 import { formatPack, fixName } from "@/lib/pack-label";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { useDataRefresh } from "@/hooks/use-data-refresh";
+import { isRefreshForeground } from "@/lib/data-refresh";
 import { PageShell } from "@/components/PageShell";
 import { serverMessage } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -133,6 +135,7 @@ function OrderDetail() {
   }, [id]);
 
   // Live truck position while out for delivery (refreshes every 30 s).
+  useDataRefresh(load, true);
   const orderStatus = order?.status;
   useEffect(() => {
     if (orderStatus !== "dispatched") {
@@ -140,7 +143,7 @@ function OrderDetail() {
       return;
     }
     let on = true;
-    const tick = () => void fetchTruckPosition(id).then((p) => on && setTruck(p ? { lat: p.lat, lng: p.lng } : null));
+    const tick = () => { if (!isRefreshForeground()) return; void fetchTruckPosition(id).then((p) => on && setTruck(p ? { lat: p.lat, lng: p.lng } : null)); };
     tick();
     const t = setInterval(tick, 30_000);
     return () => {
@@ -151,8 +154,7 @@ function OrderDetail() {
 
   useEffect(() => {
     void load();
-    const timer = setInterval(() => void load(), 60_000);
-    return () => clearInterval(timer);
+
   }, [load]);
 
   useEffect(() => {

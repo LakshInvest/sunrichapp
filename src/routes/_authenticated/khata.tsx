@@ -1,4 +1,5 @@
 import { readSwr, swr } from "@/lib/swr-cache";
+import { useDataRefresh } from "@/hooks/use-data-refresh";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -80,19 +81,20 @@ function KhataPage() {
 
   const loadTop = useCallback(() => {
     setSumErr(null);
-    swr("khata.sum", fetchKhataSummary).then(setSum, (e) => setSumErr(serverMessage(e, t("errors.generic"))));
-    swr("khata.proofs", fetchKhataProofs).then(setProofs, () => setProofs([]));
+    return Promise.all([swr("khata.sum", fetchKhataSummary).then(setSum, (e) => setSumErr(serverMessage(e, t("errors.generic")))),
+    swr("khata.proofs", fetchKhataProofs).then(setProofs, () => undefined)]);
   }, [t]);
-  useEffect(loadTop, [loadTop]);
+  useEffect(() => { void loadTop(); }, [loadTop]);
 
   const loadRows = useCallback(() => {
     const key: string | null = "khata.rows.all";
-    setRows(key ? readSwr<KhataEntry[]>(key) : null);
+
     setRowsErr(null);
     const get = () => fetchKhataEntries(period.from, period.to);
-    (key ? swr(key, get) : get()).then(setRows, (e) => setRowsErr(serverMessage(e, t("errors.generic"))));
+    return (key ? swr(key, get) : get()).then(setRows, (e) => setRowsErr(serverMessage(e, t("errors.generic"))));
   }, [period.from, period.to, range, t]);
-  useEffect(loadRows, [loadRows]);
+  useEffect(() => { void loadRows(); }, [loadRows]);
+  useDataRefresh(() => Promise.all([loadTop(), loadRows()]), true);
 
   // Pending at the top; rejected ones from the last 30 days so the reason is seen.
   const cutoff = new Date(Date.now() - 30 * 864e5).toISOString();

@@ -1,5 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useDataRefresh } from "@/hooks/use-data-refresh";
+import { PageShell } from "@/components/PageShell";
 import { useTranslation } from "react-i18next";
 import { Loader2, Search, Store } from "lucide-react";
 import { toast } from "sonner";
@@ -36,6 +38,12 @@ function Stores() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
+  const load = useCallback(async () => {
+    const { data, error } = await supabase.rpc("sales_my_customers", q.trim() ? { p_q: q.trim() } : {});
+    if (error) { toast.error(serverMessage(error, t("sales.loadError"))); return; }
+    setRows((data as Row[] | null) ?? []);
+  }, [q, t]);
+  useDataRefresh(load);
   useEffect(() => {
     let live = true;
     const h = setTimeout(() => {
@@ -77,7 +85,7 @@ function Stores() {
   const date = (s: string | null) => (s ? new Date(s).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" }) : "—");
 
   return (
-    <main className={`mx-auto min-h-dvh max-w-md bg-background px-5 pb-10 pt-[max(1.5rem,env(safe-area-inset-top))] ${font}`}>
+    <PageShell onRefresh={load} className={`px-5 pb-10 pt-[max(1.5rem,env(safe-area-inset-top))] ${font}`}>
       <h1 className="text-2xl font-bold text-primary">{t("sales.title")}</h1>
       <p className="mt-1 text-sm text-muted-foreground">{t("sales.subtitle")}</p>
       <label className="mt-4 flex min-h-12 items-center gap-2 rounded-xl border border-border bg-card px-3 shadow-sm">
@@ -115,6 +123,6 @@ function Stores() {
       <button type="button" onClick={() => void logout()} className="mt-8 min-h-11 w-full text-sm font-semibold text-muted-foreground underline">
         {t("account.logout")}
       </button>
-    </main>
+    </PageShell>
   );
 }

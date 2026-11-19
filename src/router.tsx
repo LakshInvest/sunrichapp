@@ -4,7 +4,7 @@ import { routeTree } from "./routeTree.gen";
 import { AppLoader } from "./components/AppLoader";
 
 export const getRouter = () => {
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnMount: "always", refetchOnWindowFocus: "always", refetchOnReconnect: "always" } } });
 
   const router = createRouter({
     routeTree,

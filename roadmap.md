@@ -1,3 +1,10 @@
+# Prompt-66
+- [x] Customer-first PIN/staff fallback, staff OTP identity and session recording before sales validation/store routing; no SQL. Bounce caused by customer-only profile rejection before staff PIN RPC and registration racing record_login.
+- [x] Shared foreground/resume/network refresh; priority screens poll every 30 seconds with background pause; list pull refresh, action signals and approval transition.
+- [x] Distributor delivery flag gates bell/list/count. 240 tests passed, 43 focused tests rerun, build OK. Real demo salesman login, store picker, Home/cart/checkout, order MFOR/26-27/00003 (₹120) placed and read back, logout; customer login and disabled bell → notifications verified. Home 360/390/412, no overflow/errors; focus and network refresh verified.
+- [ ] Real staff-without-sales refusal and OTP — no supplied non-sales test account or real OTP.
+- [ ] Live approval transition and Android resume/background hardware checks — requires pending account status change and installed phone; rule/hook tests cover refresh and permission behavior. Not published (not requested in Prompt-66).
+
 # Prompt-65
 - [x] Registration always shows active types, disables closed types, retains forms, and supports step/back controls and closed-type rejection.
 - [x] Bottom navigation excludes Inbox; distributor Home bell preserves its list and count; pending approval opens submitted details/support only.

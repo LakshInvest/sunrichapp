@@ -8,6 +8,9 @@ import { isRateLockedStatus, setRateLocked } from "@/lib/rate-lock";
 import { readGate, writeGate } from "@/lib/gate-cache";
 import { clearSales, getSalesInfo, SALES_HIDDEN } from "@/lib/sales";
 import { SalesBar } from "@/components/SalesBar";
+import { useDataRefresh } from "@/hooks/use-data-refresh";
+import { permittedAppAccount } from "@/lib/login-rules";
+import { isRefreshForeground } from "@/lib/data-refresh";
 
 /**
  * Auth gate: every route under this pathless layout requires a signed-in
@@ -28,12 +31,11 @@ export const Route = createFileRoute("/_authenticated")({
     if (cached && localId) {
       reg = cached.reg;
       if (cached.stale) {
-        const before = reg;
         void getMyRegistration()
           .then((r) => {
             writeGate(localId, r);
             // Status changed since the saved check: reload so routing re-applies.
-            if (r.status !== before.status || r.customerId !== before.customerId) window.location.reload();
+            // Foreground refresh applies changed status without a full-page reload.
             setRateLocked(isRateLockedStatus(r.status));
           })
           .catch(() => undefined);
@@ -50,6 +52,12 @@ export const Route = createFileRoute("/_authenticated")({
     // Salesman (no own customer login): orders for a picked store.
     const uid = localId ?? (await supabase.auth.getSession()).data.session?.user.id ?? "";
     const sales = await getSalesInfo(uid);
+    const { data: profile, error: profileError } = await supabase.from("user_profiles").select("user_type").eq("id", uid).maybeSingle();
+    if (profileError) throw profileError;
+    if (!permittedAppAccount(profile?.user_type, sales.isSales)) {
+      await supabase.auth.signOut();
+      throw redirect({ to: "/auth" });
+    }
     if (sales.isSales) {
       setRateLocked(false);
       if (!sales.picked) {
@@ -58,8 +66,7 @@ export const Route = createFileRoute("/_authenticated")({
       }
       if (SALES_HIDDEN.includes(here)) throw redirect({ to: "/home" });
       if (here === "/stores") return;
-      if (reg.customerId) return;
-      throw redirect({ to: "/stores" });
+      return;
     }
     if (here === "/stores") throw redirect({ to: "/home" });
     setRateLocked(isRateLockedStatus(reg.status));
@@ -86,30 +93,21 @@ function Gate() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const router = useRouter();
-  useEffect(() => {
-    let stopped = false;
-    const refresh = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (stopped || !data.session) return;
-      await getSalesInfo(data.session.user.id, true);
-      if (!stopped) await router.invalidate();
-    };
-    const onVisible = () => { if (document.visibilityState === "visible") void refresh(); };
-    document.addEventListener("visibilitychange", onVisible);
-    let remove: (() => void) | undefined;
-    void import("@/lib/native").then(async ({ isNative }) => {
-      if (!isNative()) return;
-      const { App } = await import("@capacitor/app");
-      const handle = await App.addListener("appStateChange", ({ isActive }) => { if (isActive) void refresh(); });
-      if (stopped) void handle.remove(); else remove = () => { void handle.remove(); };
-    });
-    return () => { stopped = true; document.removeEventListener("visibilitychange", onVisible); remove?.(); };
-  }, [router]);
+  useDataRefresh(async () => {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) return;
+    await getSalesInfo(data.session.user.id, true);
+    const reg = await getMyRegistration();
+    writeGate(data.session.user.id, reg);
+    setRateLocked(isRateLockedStatus(reg.status));
+    await router.invalidate();
+  });
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
     let stopped = false;
     const check = async () => {
+      if (!isRefreshForeground()) return;
       const { data: sid, error: sidErr } = await supabase.rpc("current_session_id");
       if (stopped || sidErr) return; // network hiccup: try again next tick
       const { data: row, error } = sid

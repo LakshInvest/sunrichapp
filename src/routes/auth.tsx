@@ -32,6 +32,8 @@ import { getBrandPhotos, type BrandPhotos } from "@/lib/brand-photos.functions";
 import { brandVisibility, cacheBrandPhotos, loginText, pickPhoto } from "@/lib/brand-photos";
 import { useAppSettings } from "@/lib/app-settings";
 import { cn } from "@/lib/utils";
+import { getSalesInfo } from "@/lib/sales";
+import { permittedAppAccount } from "@/lib/login-rules";
 import {
   getDeviceId,
   getDeviceLabel,
@@ -66,6 +68,8 @@ export const Route = createFileRoute("/auth")({
     // only a returning signed-in user pays for the registration lookup.
     const { data } = await supabase.auth.getSession();
     if (data.session?.user) {
+      const sales = await getSalesInfo(data.session.user.id);
+      if (sales.isSales) throw redirect({ to: sales.picked ? "/home" : "/stores" });
       const reg = await getMyRegistration();
       if (!reg.customerId || reg.status === "draft" || reg.status === "rejected") {
         throw redirect({ to: "/registration" });
@@ -494,10 +498,24 @@ function Login() {
 
   /** Home when registration is done, registration placeholder when it isn't. */
   const routeAfterLogin = async () => {
-    sessionStorage.removeItem(AUTH_FLOW_KEY);
-    const [reg, { data: sess }] = await Promise.all([myCustomer(), supabase.auth.getSession()]);
-    // Seed the auth gate so Home doesn't repeat the same checks.
+    const { data: sess } = await supabase.auth.getSession();
     const uid = sess.session?.user.id;
+    if (!uid) return;
+    const sales = await getSalesInfo(uid, true);
+    const { data: profile, error: profileError } = await supabase.from("user_profiles").select("user_type").eq("id", uid).maybeSingle();
+    if (profileError) throw profileError;
+    if (!permittedAppAccount(profile?.user_type, sales.isSales)) {
+      await supabase.auth.signOut();
+      sessionStorage.removeItem(AUTH_FLOW_KEY);
+      setError(t("loginAccess.refused"));
+      return;
+    }
+    sessionStorage.removeItem(AUTH_FLOW_KEY);
+    if (sales.isSales) {
+      await navigate({ to: sales.picked ? "/home" : "/stores", replace: true });
+      return;
+    }
+    const reg = await myCustomer();
     if (uid) writeGate(uid, reg);
     if (!reg.customerId || reg.status === "draft" || reg.status === "rejected") {
       await navigate({ to: "/registration" });
@@ -571,6 +589,11 @@ function Login() {
     if (rlErr) {
       setError(rlErr.message);
       return;
+    }
+    const { data: current } = await supabase.auth.getSession();
+    if (current.session) {
+      const { data: profile } = await supabase.from("user_profiles").select("user_type").eq("id", current.session.user.id).maybeSingle();
+      if (profile?.user_type === "staff" && !(await getSalesInfo(current.session.user.id, true)).isSales) return routeAfterLogin();
     }
     if (setLastMobile(mobile)) setLastMobileState(mobile);
     if (forcePin) return goSetPin();
@@ -698,30 +721,19 @@ function Login() {
         setError(t("auth.errors.generic"));
         return;
       }
-      // Record the session and fetch registration side by side.
-      sessionStorage.removeItem(AUTH_FLOW_KEY);
-      const [{ error: rlErr }, reg, { data: sess }] = await Promise.all([
-        supabase.rpc("record_login", {
+      // Sales and registration RPCs require record_login to finish first.
+      const { error: rlErr } = await supabase.rpc("record_login", {
           p_user_agent: navigator.userAgent.slice(0, 500),
           p_login_method: "pin",
-        }),
-        myCustomer(),
-        supabase.auth.getSession(),
-      ]);
+        });
       if (rlErr) {
         setError(rlErr.message);
         return;
       }
       setLastMobile(m);
       setPinOk(true);
-      const uid = sess.session?.user.id;
-      if (uid) writeGate(uid, reg);
       await new Promise((res) => setTimeout(res, 150));
-      if (!reg.customerId || reg.status === "draft" || reg.status === "rejected") {
-        await navigate({ to: "/registration" });
-        return;
-      }
-      await navigate({ to: reg.status === "blocked" ? "/hold" : "/home" });
+      await routeAfterLogin();
     } catch {
       setError(t("auth.errors.generic"));
     } finally {

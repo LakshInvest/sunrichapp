@@ -1,4 +1,5 @@
 {
+  "loginAccess": {"refused": "This number is not a customer or salesman account. Please use the Delivery app / Command Center.", "approved": "Your account is approved"},
   "offers": {
     "title": "Offers",
     "buyFree": "Buy {{buy}}, get {{free}} FREE",

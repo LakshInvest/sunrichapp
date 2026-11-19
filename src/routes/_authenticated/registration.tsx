@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { clearGate } from "@/lib/gate-cache";
+import { requestDataRefresh } from "@/lib/data-refresh";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -713,6 +714,7 @@ function DocsStep({
         setError(serverMessage(rpcErr, t("registration.errUpload")));
         return;
       }
+      requestDataRefresh();
       await load();
     } catch (e) {
       setError(serverMessage(e, t("registration.errUpload")));
@@ -745,6 +747,7 @@ function DocsStep({
         setError(serverMessage(rpcErr, t("registration.errGeneric")));
         return;
       }
+      requestDataRefresh();
       await onSubmitted();
     } catch (e) {
       if (isClosedRegistrationTypeError(e)) { onClosedType(e); return; }

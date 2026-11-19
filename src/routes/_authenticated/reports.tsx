@@ -1,7 +1,7 @@
 import { schemeBenefits } from "@/lib/scheme-rules";
 import { Suspense, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Download, Share2, Loader2 } from "lucide-react";
@@ -30,9 +30,10 @@ type Tab = "monthly" | "products" | "payments" | "benefits";
 function Reports() {
   const { t } = useTranslation(); const { lang } = useLang(); const navigate = useNavigate();
   const [month, setMonth] = useState(istMonth); const [tab, setTab] = useState<Tab>("monthly");
+  const queryClient = useQueryClient();
   const months = reportMonths();
   const monthName = (m: string) => new Intl.DateTimeFormat(`${lang}-IN`, { month: "long", year: "numeric", timeZone: IST_TZ }).format(new Date(`${m}-01T12:00:00+05:30`));
-  return <PageShell className={`pb-8 ${lang === "en" ? "" : "font-deva"}`}>
+  return <PageShell onRefresh={() => queryClient.invalidateQueries({ queryKey: ["reports"] })} className={`pb-8 ${lang === "en" ? "" : "font-deva"}`}>
     <header className="flex items-center gap-2 px-3 pt-3"><Button variant="ghost" size="icon" aria-label={t("registration.back")} onClick={() => navigate({ to: "/account" })}><ArrowLeft /></Button><h1 className="text-xl font-bold text-primary">{t("reports.title")}</h1></header>
     <div className="px-5"><label className="mt-4 block text-sm font-semibold">{t("reports.month")}<select value={month} onChange={(e) => setMonth(e.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-input bg-card px-3">{months.map((m) => <option key={m} value={m}>{monthName(m)}</option>)}</select></label>
     <div role="tablist" className="my-4 grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">{(["monthly", "products", "payments", "benefits"] as const).map((k) => <Button key={k} role="tab" aria-selected={tab === k} variant={tab === k ? "secondary" : "ghost"} onClick={() => setTab(k)} className="h-auto min-h-12 whitespace-normal px-1 text-xs">{t(k === "benefits" ? "offers.benefits" : `reports.${k}`)}</Button>)}</div>

@@ -41,6 +41,7 @@ export type AppSettings = {
   launchImageUrl: string | null;
   loginImageUrl: string | null;
   allCategoryImageUrl: string | null;
+  distributorDeliveryEnabled: boolean;
 };
 
 const KEY = "sunrich.appSettings.v1";
@@ -83,6 +84,7 @@ export function mapSettings(r: Record<string, unknown>): AppSettings {
     launchImageUrl: blank(r["launch_image_url"]),
     loginImageUrl: blank(r["login_image_url"]),
     allCategoryImageUrl: blank(r["all_category_image_url"]),
+    distributorDeliveryEnabled: r["distributor_delivery_enabled"] === true,
   };
 }
 

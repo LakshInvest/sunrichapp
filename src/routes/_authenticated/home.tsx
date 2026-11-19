@@ -1,4 +1,8 @@
 import { SchemeOffers } from "@/components/SchemeOffers";
+import { useDataRefresh } from "@/hooks/use-data-refresh";
+import { refreshAppSettings } from "@/lib/app-settings";
+import { useQueryClient } from "@tanstack/react-query";
+import { isRefreshForeground } from "@/lib/data-refresh";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { sizedUrl } from "@/components/SmartImage";
 import { SmartCard } from "@/components/SmartCard";
@@ -111,6 +115,7 @@ function Home() {
   const { t } = useTranslation();
   const { lang } = useLang();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { isDistributor, newCount } = useDistributorNav();
   const { quantities, setQty, clear, count } = useCart();
   const offline = useOffline();
@@ -229,6 +234,7 @@ function Home() {
   useEffect(() => {
     let active = true;
     const check = async () => {
+      if (!isRefreshForeground()) return;
       try {
         const has = await hasUnreadNotices();
         if (active) setOrderUpdates(has);
@@ -279,7 +285,16 @@ function Home() {
     void navigate({ to: "/cart" });
   };
 
-  const pull = usePullToRefresh(() => Promise.all([load(true), loadReg()]));
+  const refreshHome = async () => {
+    await Promise.all([load(true), loadReg(), refreshAppSettings(), queryClient.invalidateQueries(),
+      hasUnreadNotices().then(setOrderUpdates), fetchMyOrders().then((list) => {
+        setLastDelivered(list.find((o) => o.status === "delivered" || o.status === "closed") ?? null);
+        setOutForDelivery(list.find((o) => o.status === "dispatched") ?? null);
+      })]);
+  };
+  useDataRefresh(refreshHome, true);
+  const pull = usePullToRefresh(refreshHome);
+  const deliveryBell = isDistributor && settings?.distributorDeliveryEnabled === true;
 
   const products = data?.products ?? [];
   const deva = lang === "en" ? "" : "font-deva";
@@ -557,12 +572,12 @@ function Home() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => navigate({ to: isDistributor ? "/inbox" : "/notifications" })}
+                  onClick={() => navigate({ to: deliveryBell ? "/inbox" : "/notifications" })}
                   aria-label={t("home.updatesBell")}
                   className="relative flex h-10 w-10 items-center justify-center rounded-full"
                 >
                   <Bell className="h-5 w-5 text-primary-foreground" />
-                  {isDistributor && newCount > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-bold text-accent-foreground">{newCount > 99 ? "99+" : newCount}</span> : orderUpdates && <span aria-hidden className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent" />}
+                  {deliveryBell && newCount > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-bold text-accent-foreground">{newCount > 99 ? "99+" : newCount}</span> : orderUpdates && <span aria-hidden className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent" />}
                 </button>
               </div>
               }
@@ -594,12 +609,12 @@ function Home() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => navigate({ to: isDistributor ? "/inbox" : "/notifications" })}
+                  onClick={() => navigate({ to: deliveryBell ? "/inbox" : "/notifications" })}
                   aria-label={t("home.updatesBell")}
                   className="relative flex h-10 w-10 items-center justify-center rounded-full"
                 >
                   <Bell className="h-5 w-5 text-primary-foreground" />
-                  {isDistributor && newCount > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-bold text-accent-foreground">{newCount > 99 ? "99+" : newCount}</span> : orderUpdates && <span aria-hidden className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent" />}
+                  {deliveryBell && newCount > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-bold text-accent-foreground">{newCount > 99 ? "99+" : newCount}</span> : orderUpdates && <span aria-hidden className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent" />}
                 </button>
               </div>
             </div>

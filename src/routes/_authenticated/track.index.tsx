@@ -11,6 +11,7 @@ import { useAppSettings } from "@/lib/app-settings";
 import { serverMessage } from "@/lib/form-errors";
 import { readSwr, swr } from "@/lib/swr-cache";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useDataRefresh } from "@/hooks/use-data-refresh";
 import { PageShell } from "@/components/PageShell";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -96,10 +97,10 @@ function MyOrders() {
   useEffect(() => {
     void load().catch(() => undefined);
     markOrdersSeen();
-    const id = setInterval(() => void load().catch(() => undefined), 60_000);
-    return () => clearInterval(id);
+
   }, [load]);
 
+  useDataRefresh(load, true);
   const pull = usePullToRefresh(load);
 
   const period = filters.range === "custom" ? { from: filters.from, to: filters.to } : khataRange(filters.range);

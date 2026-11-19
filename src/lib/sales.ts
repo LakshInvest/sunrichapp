@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { requestDataRefresh } from "@/lib/data-refresh";
+import { clearUserCaches } from "@/lib/swr-cache";
 import { clearMyCustomer } from "@/lib/my-customer";
 
 export type SalesStore = { id: string; business_name: string; contact_name?: string | null | undefined; mobile?: string | null | undefined; city?: string | null | undefined };
@@ -48,8 +50,10 @@ export async function pickStore(uid: string, id: string | null): Promise<void> {
   const { data, error } = await supabase.rpc("sales_pick_customer", { p_customer_id: id as string });
   if (error) throw error;
   clearMyCustomer();
+  clearUserCaches();
   const d = data as { picked: string | null } & Partial<SalesStore>;
   save({ uid, isSales: true, picked: id && d?.picked ? { id, business_name: d.business_name ?? "", contact_name: d.contact_name, mobile: d.mobile, city: d.city } : null });
+  requestDataRefresh();
 }
 
 /** Call before sign-out: clears the picked store on the server and locally. */

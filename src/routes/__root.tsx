@@ -29,6 +29,9 @@ import { AppGate } from "@/components/AppGate";
 import { MessageCardHost, showMessage } from "@/components/MessageCard";
 import { InAppPushHost } from "@/components/InAppPush";
 import { refreshPushToken } from "@/lib/push";
+import { requestDataRefresh, onDataRefresh, setRefreshForeground } from "@/lib/data-refresh";
+import { refreshAppSettings } from "@/lib/app-settings";
+import { focusManager, onlineManager } from "@tanstack/react-query";
 
 function NotFoundComponent() {
   return (
@@ -143,6 +146,41 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   const [askExit, setAskExit] = useState(false);
+  useEffect(() => {
+    let stopped = false;
+    let last = 0;
+    const refresh = () => {
+      if (document.visibilityState !== "visible" || !navigator.onLine || Date.now() - last < 500) return;
+      last = Date.now(); requestDataRefresh();
+    };
+    const visible = () => { focusManager.setFocused(document.visibilityState === "visible"); if (document.visibilityState === "visible") refresh(); };
+    const online = () => { onlineManager.setOnline(true); refresh(); };
+    const offline = () => onlineManager.setOnline(false);
+    const off = onDataRefresh(() => {
+      void supabase.auth.getSession().then(({ data }) => {
+        if (!data.session || stopped) return;
+        void queryClient.invalidateQueries(); void refreshAppSettings();
+      });
+    });
+    document.addEventListener("visibilitychange", visible);
+    window.addEventListener("focus", refresh); window.addEventListener("online", online); window.addEventListener("offline", offline);
+    const remove: (() => void)[] = [];
+    void import("@/lib/native").then(async ({ isNative }) => {
+      if (!isNative() || stopped) return;
+      const { App } = await import("@capacitor/app");
+      const { Network } = await import("@capacitor/network");
+      const handles = await Promise.all([
+        App.addListener("appStateChange", ({ isActive }) => { setRefreshForeground(isActive); focusManager.setFocused(isActive); if (isActive) refresh(); }),
+        Network.addListener("networkStatusChange", ({ connected }) => { onlineManager.setOnline(connected); if (connected) refresh(); }),
+      ]);
+      for (const handle of handles) { if (stopped) void handle.remove(); else remove.push(() => { void handle.remove(); }); }
+    });
+    return () => {
+      stopped = true; off(); remove.forEach((f) => f());
+      document.removeEventListener("visibilitychange", visible);
+      window.removeEventListener("focus", refresh); window.removeEventListener("online", online); window.removeEventListener("offline", offline);
+    };
+  }, [queryClient]);
 
   // Keep the router and query cache in sync with auth identity changes.
   useEffect(() => {

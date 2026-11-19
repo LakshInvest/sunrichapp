@@ -1,5 +1,8 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PageShell } from "@/components/PageShell";
+import { useAppSettings } from "@/lib/app-settings";
+import { useDataRefresh } from "@/hooks/use-data-refresh";
+import { isRefreshForeground } from "@/lib/data-refresh";
 import { serverMessage } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -53,6 +56,9 @@ function Inbox() {
   const { t } = useTranslation();
   const { lang } = useLang();
   const offline = useOffline();
+  const settings = useAppSettings();
+  const enabled = settings?.distributorDeliveryEnabled === true;
+  useEffect(() => { if (settings && !enabled) void navigate({ to: "/notifications", replace: true }); }, [settings, enabled, navigate]);
   const deva = lang === "en" ? "" : "font-deva";
 
   const [orders, setOrders] = useState<OrderDto[] | null>(null);
@@ -67,11 +73,12 @@ function Inbox() {
   const seenNew = useRef<Set<string> | null>(null);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 30_000);
+    const id = setInterval(() => { if (isRefreshForeground()) setNow(Date.now()); }, 30_000);
     return () => clearInterval(id);
   }, []);
 
   const load = useCallback(async () => {
+    if (!enabled) return;
     try {
       const list = await fetchInboxOrders();
       const pending = list.filter((o) => o.distributorStatus === "pending").map((o) => o.id);
@@ -89,13 +96,9 @@ function Inbox() {
     } catch (e) {
       setError((e as Error).message);
     }
-  }, []);
-
-  useEffect(() => {
-    void load();
-    const id = setInterval(() => void load(), 30_000);
-    return () => clearInterval(id);
-  }, [load]);
+  }, [enabled]);
+  useEffect(() => { void load(); }, [load]);
+  useDataRefresh(load, enabled);
 
   const counts = useMemo(() => {
     const map: Record<InboxTab, number> = { new: 0, toDeliver: 0, done: 0 };
@@ -165,8 +168,9 @@ function Inbox() {
       tab === key ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"
     }`;
 
+  if (!enabled) return null;
   return (
-    <PageShell className={`pb-28 ${deva}`}>
+    <PageShell onRefresh={load} className={`pb-28 ${deva}`}>
       <header className="border-b border-border bg-background px-5 pb-3 pt-[max(1.5rem,env(safe-area-inset-top))]">
         <div className="flex items-center gap-2"><Button variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label={t("registration.back")} onClick={() => void navigate({ to: "/home" })}><ArrowLeft /></Button><h1 className="text-2xl font-bold text-primary">{t("inbox.title")}</h1></div>
         <div className="mt-3 flex items-center gap-1 rounded-full border border-border bg-card p-1" role="group" aria-label={t("inbox.title")}>

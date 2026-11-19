@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { PageShell } from "@/components/PageShell";
+import { useDataRefresh } from "@/hooks/use-data-refresh";
 import { serverMessage } from "@/lib/form-errors";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
@@ -49,7 +50,7 @@ function Notifications() {
 
   const load = useCallback(() => {
     setErr(null);
-    fetchNotices().then(
+    return fetchNotices().then(
       (l) => {
         setSeen(readNoticesSeen());
         setList(l);
@@ -59,7 +60,8 @@ function Notifications() {
       (e: Error) => setErr(serverMessage(e, t("errors.generic"))),
     );
   }, []);
-  useEffect(load, [load]);
+  useEffect(() => { void load(); }, [load]);
+  useDataRefresh(load);
 
   const open = (n: Notice) => {
     if (n.target.to === "/track/$id") void navigate({ to: "/track/$id", params: { id: n.target.id } });
@@ -69,7 +71,7 @@ function Notifications() {
   };
 
   return (
-    <PageShell className={`pb-10 ${lang === "en" ? "" : "font-deva"}`}>
+    <PageShell onRefresh={load} className={`pb-10 ${lang === "en" ? "" : "font-deva"}`}>
       <header className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-card/95 px-2 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] backdrop-blur-md">
         <button type="button" onClick={() => navigate({ to: "/home" })} aria-label={t("registration.back")} className="flex h-11 w-11 items-center justify-center rounded-xl">
           <ArrowLeft className="h-5 w-5" aria-hidden />

@@ -64,12 +64,12 @@ export function HeroCarousel({
             >
               {b.imageUrl && (
                 <img
-                  src={sizedUrl(b.imageUrl, 1080)}
+                  src={sizedUrl(b.imageUrl, 828)}
                   alt=""
                   loading={i === 0 ? "eager" : "lazy"}
                   decoding="async"
-                  width={1080}
-                  height={810}
+                  width={828}
+                  height={621}
                   fetchPriority={i === 0 ? "high" : "auto"}
                   onError={(e) => {
                     const img = e.currentTarget;

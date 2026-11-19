@@ -135,7 +135,7 @@ export function CatalogueImage({
   alt: string;
   className?: string | undefined;
 }) {
-  return <SmartImage src={src} alt={alt} className={className} />;
+  return <SmartImage width={400} src={src} alt={alt} className={className} />;
 }
 
 /** Shows "Taking longer than usual… Retry" once `loading` has lasted 10 s. */

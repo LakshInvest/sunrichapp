@@ -224,7 +224,9 @@ function Home() {
 
   useEffect(() => {
     let active = true;
-    void supabase.auth.getUser().then(async ({ data }) => {
+    // Local session read (no network round-trip) so this query starts with the others.
+    void supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const data = { user: session?.user };
       if (!active || !data.user) return;
       const { data: p } = await supabase
         .from("user_profiles")
@@ -607,7 +609,7 @@ function Home() {
           ) : (
           <div data-home-hero className="relative aspect-[4/3] w-full overflow-hidden bg-hero">
             {hero?.backgroundImageUrl && (
-              <img src={sizedUrl(hero.backgroundImageUrl, 1080)} alt="" width={1080} height={810} loading="eager" fetchPriority="high" decoding="async"
+              <img src={sizedUrl(hero.backgroundImageUrl, 828)} alt="" width={828} height={621} loading="eager" fetchPriority="high" decoding="async"
                 onError={(e) => { const img = e.currentTarget; if (hero.backgroundImageUrl && img.src !== hero.backgroundImageUrl) img.src = hero.backgroundImageUrl; else img.hidden = true; }}
                 className="absolute inset-0 h-full w-full object-cover" />
             )}

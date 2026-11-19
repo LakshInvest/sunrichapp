@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { sizedUrl } from "@/components/SmartImage";
 
 /** Fixed soft pastel palette (never dark), assigned by position. */
 export const TILE_TINTS = ["#E3F4F9", "#E6EEFB", "#FBF4DC", "#E3F5EC", "#FCEBE1"] as const;
@@ -43,11 +44,13 @@ function TileArt({ tile }: { tile: Tile }) {
   useEffect(() => {
     if (!tile.imageUrl) return;
     let live = true;
-    void isCutout(tile.imageUrl).then((cut) => {
+    // Small (WebP-negotiated) copy for both the transparency check and display.
+    const small = sizedUrl(tile.imageUrl, 240);
+    void isCutout(small).then((cut) => {
       if (!live) return;
-      if (cut) setSrc({ url: tile.imageUrl!, multiply: false });
+      if (cut) setSrc({ url: small, multiply: false });
       else if (tile.fallbackImage) setSrc({ url: tile.fallbackImage, multiply: true });
-      else setSrc({ url: tile.imageUrl!, multiply: true });
+      else setSrc({ url: small, multiply: true });
     });
     return () => {
       live = false;
@@ -62,7 +65,11 @@ function TileArt({ tile }: { tile: Tile }) {
       decoding="async"
       className="h-[80%] w-[80%] object-contain"
       style={src.multiply ? { mixBlendMode: "multiply" } : undefined}
-      onError={(e) => (e.currentTarget.hidden = true)}
+      onError={(e) => {
+        const img = e.currentTarget;
+        if (src.url !== tile.imageUrl && tile.imageUrl && !img.dataset["plain"]) { img.dataset["plain"] = "1"; img.src = tile.imageUrl; }
+        else img.hidden = true;
+      }}
     />
   );
 }

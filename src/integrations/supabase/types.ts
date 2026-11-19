@@ -228,9 +228,15 @@ export type Database = {
           delivery_charge_per_pack: number
           delivery_days_ahead: number
           delivery_slots: Json
+          einvoice_enabled: boolean
+          ewaybill_enabled: boolean
+          ewaybill_limit_inter: number
+          ewaybill_limit_intra: number
           feedback_enabled: boolean
           google_routes_enabled: boolean
           google_routes_min_stops: number
+          gsp_mode: string
+          gsp_provider: string
           holidays: string[]
           latest_app_version: string
           launch_image_url: string | null
@@ -305,9 +311,15 @@ export type Database = {
           delivery_charge_per_pack?: number
           delivery_days_ahead?: number
           delivery_slots?: Json
+          einvoice_enabled?: boolean
+          ewaybill_enabled?: boolean
+          ewaybill_limit_inter?: number
+          ewaybill_limit_intra?: number
           feedback_enabled?: boolean
           google_routes_enabled?: boolean
           google_routes_min_stops?: number
+          gsp_mode?: string
+          gsp_provider?: string
           holidays?: string[]
           latest_app_version?: string
           launch_image_url?: string | null
@@ -382,9 +394,15 @@ export type Database = {
           delivery_charge_per_pack?: number
           delivery_days_ahead?: number
           delivery_slots?: Json
+          einvoice_enabled?: boolean
+          ewaybill_enabled?: boolean
+          ewaybill_limit_inter?: number
+          ewaybill_limit_intra?: number
           feedback_enabled?: boolean
           google_routes_enabled?: boolean
           google_routes_min_stops?: number
+          gsp_mode?: string
+          gsp_provider?: string
           holidays?: string[]
           latest_app_version?: string
           launch_image_url?: string | null
@@ -1802,6 +1820,7 @@ export type Database = {
           requires_approval: boolean
           requires_gps: boolean
           route_via_distributor: boolean
+          show_in_registration: boolean
           sort_order: number
           updated_at: string
         }
@@ -1831,6 +1850,7 @@ export type Database = {
           requires_approval?: boolean
           requires_gps?: boolean
           route_via_distributor?: boolean
+          show_in_registration?: boolean
           sort_order?: number
           updated_at?: string
         }
@@ -1860,6 +1880,7 @@ export type Database = {
           requires_approval?: boolean
           requires_gps?: boolean
           route_via_distributor?: boolean
+          show_in_registration?: boolean
           sort_order?: number
           updated_at?: string
         }
@@ -2153,7 +2174,9 @@ export type Database = {
           collect_old_dues: boolean
           company_id: string
           crates_at_customer_enabled: boolean
+          crates_enabled: boolean
           default_language: string
+          diesel_enabled: boolean
           distributor_reply_minutes: number
           expense_bill_photo_required: boolean
           expense_limit_per_trip: number
@@ -2163,10 +2186,12 @@ export type Database = {
           expired_returns_enabled: boolean
           failed_reasons: string[]
           gate_approval_wait_minutes: number
+          gate_control_enabled: boolean
           gate_pass_print: boolean
           location_at_each_stop: boolean
           location_interval_minutes: number
           location_tracking_enabled: boolean
+          odometer_enabled: boolean
           office_emergency_number: string | null
           photo_days_challan: number
           photo_days_cheque: number
@@ -2217,7 +2242,9 @@ export type Database = {
           collect_old_dues?: boolean
           company_id: string
           crates_at_customer_enabled?: boolean
+          crates_enabled?: boolean
           default_language?: string
+          diesel_enabled?: boolean
           distributor_reply_minutes?: number
           expense_bill_photo_required?: boolean
           expense_limit_per_trip?: number
@@ -2227,10 +2254,12 @@ export type Database = {
           expired_returns_enabled?: boolean
           failed_reasons?: string[]
           gate_approval_wait_minutes?: number
+          gate_control_enabled?: boolean
           gate_pass_print?: boolean
           location_at_each_stop?: boolean
           location_interval_minutes?: number
           location_tracking_enabled?: boolean
+          odometer_enabled?: boolean
           office_emergency_number?: string | null
           photo_days_challan?: number
           photo_days_cheque?: number
@@ -2281,7 +2310,9 @@ export type Database = {
           collect_old_dues?: boolean
           company_id?: string
           crates_at_customer_enabled?: boolean
+          crates_enabled?: boolean
           default_language?: string
+          diesel_enabled?: boolean
           distributor_reply_minutes?: number
           expense_bill_photo_required?: boolean
           expense_limit_per_trip?: number
@@ -2291,10 +2322,12 @@ export type Database = {
           expired_returns_enabled?: boolean
           failed_reasons?: string[]
           gate_approval_wait_minutes?: number
+          gate_control_enabled?: boolean
           gate_pass_print?: boolean
           location_at_each_stop?: boolean
           location_interval_minutes?: number
           location_tracking_enabled?: boolean
+          odometer_enabled?: boolean
           office_emergency_number?: string | null
           photo_days_challan?: number
           photo_days_cheque?: number
@@ -3779,6 +3812,81 @@ export type Database = {
           },
         ]
       }
+      gsp_tokens: {
+        Row: {
+          company_id: string
+          expires_at: string
+          gstin: string
+          kind: string
+          mode: string
+          sek: string | null
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          expires_at: string
+          gstin: string
+          kind: string
+          mode: string
+          sek?: string | null
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          expires_at?: string
+          gstin?: string
+          kind?: string
+          mode?: string
+          sek?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      gst_api_log: {
+        Row: {
+          action: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          error: string | null
+          id: string
+          invoice_id: string | null
+          mode: string | null
+          ok: boolean
+          request: Json | null
+          response: Json | null
+        }
+        Insert: {
+          action: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          error?: string | null
+          id?: string
+          invoice_id?: string | null
+          mode?: string | null
+          ok?: boolean
+          request?: Json | null
+          response?: Json | null
+        }
+        Update: {
+          action?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          error?: string | null
+          id?: string
+          invoice_id?: string | null
+          mode?: string | null
+          ok?: boolean
+          request?: Json | null
+          response?: Json | null
+        }
+        Relationships: []
+      }
       guard_shifts: {
         Row: {
           company_id: string
@@ -3922,6 +4030,7 @@ export type Database = {
           billing_address: string | null
           business_name: string | null
           cgst: number
+          challan_no: string | null
           company_id: string
           created_at: string
           created_by: string | null
@@ -3931,9 +4040,19 @@ export type Database = {
           deposit_total: number
           discount_total: number
           due_date: string | null
+          einv_cancel_reason: string | null
+          einv_cancelled_at: string | null
+          einv_error: string | null
+          einv_status: string
           eway_bill_no: string | null
+          ewb_date: string | null
+          ewb_error: string | null
+          ewb_status: string
+          ewb_valid_till: string | null
+          ewb_vehicle_no: string | null
           firm_id: string
           grand_total: number
+          gst_mode: string | null
           id: string
           igst: number
           invoice_date: string
@@ -3945,6 +4064,7 @@ export type Database = {
           place_of_supply: string | null
           round_off: number
           sgst: number
+          signed_qr: string | null
           status: string
           taxable_value: number
           trip_id: string | null
@@ -3956,6 +4076,7 @@ export type Database = {
           billing_address?: string | null
           business_name?: string | null
           cgst?: number
+          challan_no?: string | null
           company_id: string
           created_at?: string
           created_by?: string | null
@@ -3965,9 +4086,19 @@ export type Database = {
           deposit_total?: number
           discount_total?: number
           due_date?: string | null
+          einv_cancel_reason?: string | null
+          einv_cancelled_at?: string | null
+          einv_error?: string | null
+          einv_status?: string
           eway_bill_no?: string | null
+          ewb_date?: string | null
+          ewb_error?: string | null
+          ewb_status?: string
+          ewb_valid_till?: string | null
+          ewb_vehicle_no?: string | null
           firm_id: string
           grand_total?: number
+          gst_mode?: string | null
           id?: string
           igst?: number
           invoice_date?: string
@@ -3979,6 +4110,7 @@ export type Database = {
           place_of_supply?: string | null
           round_off?: number
           sgst?: number
+          signed_qr?: string | null
           status?: string
           taxable_value?: number
           trip_id?: string | null
@@ -3990,6 +4122,7 @@ export type Database = {
           billing_address?: string | null
           business_name?: string | null
           cgst?: number
+          challan_no?: string | null
           company_id?: string
           created_at?: string
           created_by?: string | null
@@ -3999,9 +4132,19 @@ export type Database = {
           deposit_total?: number
           discount_total?: number
           due_date?: string | null
+          einv_cancel_reason?: string | null
+          einv_cancelled_at?: string | null
+          einv_error?: string | null
+          einv_status?: string
           eway_bill_no?: string | null
+          ewb_date?: string | null
+          ewb_error?: string | null
+          ewb_status?: string
+          ewb_valid_till?: string | null
+          ewb_vehicle_no?: string | null
           firm_id?: string
           grand_total?: number
+          gst_mode?: string | null
           id?: string
           igst?: number
           invoice_date?: string
@@ -4013,6 +4156,7 @@ export type Database = {
           place_of_supply?: string | null
           round_off?: number
           sgst?: number
+          signed_qr?: string | null
           status?: string
           taxable_value?: number
           trip_id?: string | null
@@ -6193,6 +6337,7 @@ export type Database = {
           name_hi: string | null
           name_mr: string | null
           sort_order: number
+          uqc: string | null
         }
         Insert: {
           code: string
@@ -6204,6 +6349,7 @@ export type Database = {
           name_hi?: string | null
           name_mr?: string | null
           sort_order?: number
+          uqc?: string | null
         }
         Update: {
           code?: string
@@ -6215,6 +6361,7 @@ export type Database = {
           name_hi?: string | null
           name_mr?: string | null
           sort_order?: number
+          uqc?: string | null
         }
         Relationships: [
           {
@@ -6444,6 +6591,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      transporters: {
+        Row: {
+          city: string | null
+          company_id: string
+          contact_name: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          mobile: string | null
+          name: string
+          transporter_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          company_id: string
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          mobile?: string | null
+          name: string
+          transporter_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          company_id?: string
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          mobile?: string | null
+          name?: string
+          transporter_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       trip_alerts: {
         Row: {
@@ -7224,6 +7413,7 @@ export type Database = {
           crates_returned: number | null
           created_at: string
           customer_vehicle_no: string | null
+          dispatch_mode: string | null
           driver_started_at: string | null
           driver_user_id: string | null
           end_odometer: number | null
@@ -7246,6 +7436,7 @@ export type Database = {
           id: string
           loaded_at: string | null
           loaded_by: string | null
+          lr_no: string | null
           planned_by: string | null
           returns_received_at: string | null
           route_id: string | null
@@ -7258,6 +7449,7 @@ export type Database = {
           start_odometer_photo_url: string | null
           start_selfie_url: string | null
           status: Database["public"]["Enums"]["trip_status"]
+          transporter_id: string | null
           trip_date: string
           trip_no: string
           trip_type: string
@@ -7278,6 +7470,7 @@ export type Database = {
           crates_returned?: number | null
           created_at?: string
           customer_vehicle_no?: string | null
+          dispatch_mode?: string | null
           driver_started_at?: string | null
           driver_user_id?: string | null
           end_odometer?: number | null
@@ -7300,6 +7493,7 @@ export type Database = {
           id?: string
           loaded_at?: string | null
           loaded_by?: string | null
+          lr_no?: string | null
           planned_by?: string | null
           returns_received_at?: string | null
           route_id?: string | null
@@ -7312,6 +7506,7 @@ export type Database = {
           start_odometer_photo_url?: string | null
           start_selfie_url?: string | null
           status?: Database["public"]["Enums"]["trip_status"]
+          transporter_id?: string | null
           trip_date?: string
           trip_no: string
           trip_type?: string
@@ -7332,6 +7527,7 @@ export type Database = {
           crates_returned?: number | null
           created_at?: string
           customer_vehicle_no?: string | null
+          dispatch_mode?: string | null
           driver_started_at?: string | null
           driver_user_id?: string | null
           end_odometer?: number | null
@@ -7354,6 +7550,7 @@ export type Database = {
           id?: string
           loaded_at?: string | null
           loaded_by?: string | null
+          lr_no?: string | null
           planned_by?: string | null
           returns_received_at?: string | null
           route_id?: string | null
@@ -7366,6 +7563,7 @@ export type Database = {
           start_odometer_photo_url?: string | null
           start_selfie_url?: string | null
           status?: Database["public"]["Enums"]["trip_status"]
+          transporter_id?: string | null
           trip_date?: string
           trip_no?: string
           trip_type?: string
@@ -7396,6 +7594,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "trips_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "transporters"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "trips_unit_id_fkey"
             columns: ["unit_id"]
             isOneToOne: false
@@ -7415,6 +7620,8 @@ export type Database = {
         Row: {
           address_line1: string | null
           address_line2: string | null
+          can_dispatch: boolean
+          can_produce: boolean
           city: string | null
           code: string
           company_id: string
@@ -7424,6 +7631,7 @@ export type Database = {
           daily_capacity: number | null
           display_name: string | null
           firm_id: string
+          gstin: string | null
           id: string
           is_active: boolean
           latitude: number | null
@@ -7443,6 +7651,8 @@ export type Database = {
         Insert: {
           address_line1?: string | null
           address_line2?: string | null
+          can_dispatch?: boolean
+          can_produce?: boolean
           city?: string | null
           code: string
           company_id: string
@@ -7452,6 +7662,7 @@ export type Database = {
           daily_capacity?: number | null
           display_name?: string | null
           firm_id: string
+          gstin?: string | null
           id?: string
           is_active?: boolean
           latitude?: number | null
@@ -7471,6 +7682,8 @@ export type Database = {
         Update: {
           address_line1?: string | null
           address_line2?: string | null
+          can_dispatch?: boolean
+          can_produce?: boolean
           city?: string | null
           code?: string
           company_id?: string
@@ -7480,6 +7693,7 @@ export type Database = {
           daily_capacity?: number | null
           display_name?: string | null
           firm_id?: string
+          gstin?: string | null
           id?: string
           is_active?: boolean
           latitude?: number | null
@@ -9928,6 +10142,10 @@ export type Database = {
         Args: { p_company: string; p_lat: number; p_lng: number }
         Returns: string
       }
+      _audit_area: { Args: { p_entity: string }; Returns: string }
+      _audit_field: { Args: { p_key: string }; Returns: string }
+      _audit_thing: { Args: { p_entity: string }; Returns: string }
+      _audit_val: { Args: { p_key: string; p_val: Json }; Returns: string }
       _auto_plan: { Args: { p_company: string; p_date: string }; Returns: Json }
       _can_manage_schemes: { Args: never; Returns: boolean }
       _can_view_schemes: { Args: never; Returns: boolean }
@@ -10017,6 +10235,10 @@ export type Database = {
         }
         Returns: string
       }
+      _einv_payload: {
+        Args: { p_invoice_id: string; p_over?: Json }
+        Returns: Json
+      }
       _eligible_schemes: {
         Args: { p_customer_id: string; p_office: boolean }
         Returns: {
@@ -10064,6 +10286,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      _ewb_payload: {
+        Args: { p_invoice_id: string; p_opt?: Json }
+        Returns: Json
+      }
       _fifo_allocate: { Args: { p_receipt_id: string }; Returns: number }
       _gate_log: {
         Args: { p_kind: string; p_label: string; p_mode: string; p_ref: string }
@@ -10077,6 +10303,21 @@ export type Database = {
         Returns: string
       }
       _geo_rings: { Args: { b: Json }; Returns: Json[] }
+      _gst_clean: { Args: { p: string; p_max: number }; Returns: string }
+      _gst_save: {
+        Args: {
+          p_action: string
+          p_data: Json
+          p_error: string
+          p_invoice_id: string
+          p_mode: string
+          p_ok: boolean
+          p_request: Json
+          p_response: Json
+          p_user: string
+        }
+        Returns: Json
+      }
       _hav_km: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
@@ -10444,6 +10685,28 @@ export type Database = {
           id: number
         }[]
       }
+      cc_audit_log_readable: {
+        Args: {
+          p_actor?: string
+          p_area?: string
+          p_from?: string
+          p_limit?: number
+          p_offset?: number
+          p_search?: string
+          p_show_logins?: boolean
+          p_to?: string
+        }
+        Returns: {
+          action: string
+          area: string
+          changes: Json
+          created_at: string
+          entity_type: string
+          id: number
+          summary: string
+          who: string
+        }[]
+      }
       cc_can_edit_delivery_appearance: { Args: never; Returns: boolean }
       cc_cash_mismatch: {
         Args: { p_id: string; p_reason: string; p_received: number }
@@ -10481,6 +10744,10 @@ export type Database = {
       }
       cc_delete_scheme: { Args: { p_id: string }; Returns: boolean }
       cc_delivery_appearance: { Args: never; Returns: Json }
+      cc_dispatch_orders: {
+        Args: { p: Json; p_order_ids: string[] }
+        Returns: Json
+      }
       cc_expired_return_action: {
         Args: {
           p_action: string
@@ -10545,6 +10812,36 @@ export type Database = {
       cc_move_stops: {
         Args: { p_stop_ids: string[]; p_to_trip_id: string }
         Returns: number
+      }
+      cc_new_document_series: {
+        Args: {
+          p_doc_type: Database["public"]["Enums"]["doc_series_type"]
+          p_financial_year: string
+          p_firm_id: string
+          p_next_number?: number
+          p_padding: number
+          p_prefix: string
+        }
+        Returns: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          doc_type: Database["public"]["Enums"]["doc_series_type"]
+          financial_year: string
+          firm_id: string
+          id: string
+          is_active: boolean
+          next_number: number
+          padding: number
+          prefix: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "document_series"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       cc_notification_extras: {
         Args: never
@@ -11235,6 +11532,15 @@ export type Database = {
         }
       }
       get_home: { Args: never; Returns: Json }
+      gst_can_act: { Args: { p_action?: string }; Returns: boolean }
+      gst_doc_rules: {
+        Args: {
+          p_customer_gstin: string
+          p_interstate: boolean
+          p_value: number
+        }
+        Returns: Json
+      }
       has_perm: {
         Args: { p_action: string; p_module: string }
         Returns: boolean
@@ -11342,7 +11648,9 @@ export type Database = {
           collect_old_dues: boolean
           company_id: string
           crates_at_customer_enabled: boolean
+          crates_enabled: boolean
           default_language: string
+          diesel_enabled: boolean
           distributor_reply_minutes: number
           expense_bill_photo_required: boolean
           expense_limit_per_trip: number
@@ -11352,10 +11660,12 @@ export type Database = {
           expired_returns_enabled: boolean
           failed_reasons: string[]
           gate_approval_wait_minutes: number
+          gate_control_enabled: boolean
           gate_pass_print: boolean
           location_at_each_stop: boolean
           location_interval_minutes: number
           location_tracking_enabled: boolean
+          odometer_enabled: boolean
           office_emergency_number: string | null
           photo_days_challan: number
           photo_days_cheque: number

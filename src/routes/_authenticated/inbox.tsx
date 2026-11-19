@@ -5,9 +5,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { SlotText } from "@/components/SlotText";
 import { toast } from "sonner";
-import { Check, CheckCheck, Clock, Copy, Inbox as InboxIcon, MapPin, Phone, X } from "lucide-react";
+import { ArrowLeft, Check, CheckCheck, Clock, Copy, Inbox as InboxIcon, MapPin, Phone, X } from "lucide-react";
 import en from "@/locales/en.json";
-import { BottomNav } from "@/components/BottomNav";
+import { Button } from "@/components/ui/button";
 import { SheetDrawer } from "@/components/SheetDrawer";
 import {
   DrawerDescription,
@@ -49,6 +49,7 @@ const MapPreview = lazy(() => import("@/components/MapPreview"));
 type ReasonKind = "reject" | "notDelivered" | null;
 
 function Inbox() {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { lang } = useLang();
   const offline = useOffline();
@@ -166,8 +167,8 @@ function Inbox() {
 
   return (
     <PageShell className={`pb-28 ${deva}`}>
-      <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-5 pb-3 pt-[max(1.5rem,env(safe-area-inset-top))] backdrop-blur-md">
-        <h1 className="text-2xl font-bold text-primary">{t("inbox.title")}</h1>
+      <header className="border-b border-border bg-background px-5 pb-3 pt-[max(1.5rem,env(safe-area-inset-top))]">
+        <div className="flex items-center gap-2"><Button variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label={t("registration.back")} onClick={() => void navigate({ to: "/home" })}><ArrowLeft /></Button><h1 className="text-2xl font-bold text-primary">{t("inbox.title")}</h1></div>
         <div className="mt-3 flex items-center gap-1 rounded-full border border-border bg-card p-1" role="group" aria-label={t("inbox.title")}>
           <button type="button" onClick={() => setTab("new")} aria-pressed={tab === "new"} className={tabCls("new")}>
             {t("inbox.tabNew")} {counts.new > 0 && <span className="text-xs opacity-80">{counts.new}</span>}
@@ -377,7 +378,6 @@ function Inbox() {
         </div>
       </SheetDrawer>
 
-      <BottomNav />
     </PageShell>
   );
 }

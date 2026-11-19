@@ -45,7 +45,7 @@ import { useCart } from "@/hooks/use-cart";
 import { useOffline } from "@/hooks/use-offline";
 import { useFavourites } from "@/hooks/use-favourites";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
-import { fetchMyOrders, type OrderDto } from "@/lib/orders";
+import { fetchMyOrders, useDistributorNav, type OrderDto } from "@/lib/orders";
 import { hasUnreadNotices } from "@/lib/notifications";
 import { planReorder } from "@/lib/feedback";
 import { useAppSettings } from "@/lib/app-settings";
@@ -111,6 +111,7 @@ function Home() {
   const { t } = useTranslation();
   const { lang } = useLang();
   const navigate = useNavigate();
+  const { isDistributor, newCount } = useDistributorNav();
   const { quantities, setQty, clear, count } = useCart();
   const offline = useOffline();
   const fav = useFavourites();
@@ -556,12 +557,12 @@ function Home() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => navigate({ to: "/notifications" })}
+                  onClick={() => navigate({ to: isDistributor ? "/inbox" : "/notifications" })}
                   aria-label={t("home.updatesBell")}
                   className="relative flex h-10 w-10 items-center justify-center rounded-full"
                 >
                   <Bell className="h-5 w-5 text-primary-foreground" />
-                  {orderUpdates && <span aria-hidden className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent" />}
+                  {isDistributor && newCount > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-bold text-accent-foreground">{newCount > 99 ? "99+" : newCount}</span> : orderUpdates && <span aria-hidden className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent" />}
                 </button>
               </div>
               }
@@ -593,12 +594,12 @@ function Home() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => navigate({ to: "/notifications" })}
+                  onClick={() => navigate({ to: isDistributor ? "/inbox" : "/notifications" })}
                   aria-label={t("home.updatesBell")}
                   className="relative flex h-10 w-10 items-center justify-center rounded-full"
                 >
                   <Bell className="h-5 w-5 text-primary-foreground" />
-                  {orderUpdates && <span aria-hidden className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent" />}
+                  {isDistributor && newCount > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-bold text-accent-foreground">{newCount > 99 ? "99+" : newCount}</span> : orderUpdates && <span aria-hidden className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent" />}
                 </button>
               </div>
             </div>

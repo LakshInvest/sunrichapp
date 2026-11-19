@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { clearGate } from "@/lib/gate-cache";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Building2,
@@ -21,6 +21,8 @@ import {
 import en from "@/locales/en.json";
 import { scrollToFirstError, serverMessage } from "@/lib/form-errors";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { previousRegistrationStep, preselectedRegistrationType, isClosedRegistrationTypeError } from "@/lib/registration-validation";
 import { Logo } from "@/components/Logo";
 import { LocationPicker, useReverseAddress } from "@/components/LocationPicker";
 import { DEFAULT_LOCATION, type LocationValue } from "@/components/locationShared";
@@ -75,26 +77,26 @@ function pl(v: DbLocalized | null | undefined, lang: string): string {
 
 function initialStep(reg: RegistrationDto): Step {
   if (!reg.customerId) return "type";
-  if (reg.status === "draft") return "docs";
+  if (reg.status === "draft") return "type";
   if (reg.status === "rejected") return "rejected";
   return "type";
 }
 
-function StepIndicator({ current }: { current: number }) {
+function StepIndicator({ current, reached, onStep }: { current: number; reached: number; onStep: (step: number) => void }) {
   const { t } = useTranslation();
   const labels = [t("registration.stepType"), t("registration.stepDetails"), t("registration.stepDocuments")];
   return (
-    <div className="mb-8 flex items-center justify-center gap-2 text-xs font-semibold">
+    <div className="mb-5 flex flex-wrap items-center justify-center gap-1 text-xs font-semibold">
       {labels.map((label, i) => (
         <div key={label} className="flex items-center gap-2">
           {i > 0 && <span className="h-px w-4 bg-border" aria-hidden />}
-          <span
-            className={`rounded-full px-3 py-1 ${
+          <Button variant="ghost" disabled={i + 1 > reached} onClick={() => onStep(i + 1)}
+            className={`min-h-11 rounded-full px-2 py-1 ${
               current === i + 1 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
             }`}
           >
             {i + 1} · {label}
-          </span>
+          </Button>
         </div>
       ))}
     </div>
@@ -114,6 +116,39 @@ function Wizard() {
   const docsMode = !!wantDocs && reg0.status === "pending_approval" && !!reg0.customerId;
   const [step, setStep] = useState<Step>(() => (docsMode ? "docs" : initialStep(reg0)));
   const [typeCode, setTypeCode] = useState<string | null>(reg0.typeCode);
+  const [typeList, setTypeList] = useState<CustomerTypeDto[] | null>(null);
+  const [typeError, setTypeError] = useState<string | null>(null);
+  const [detailsVisited, setDetailsVisited] = useState(docsMode || reg0.status === "rejected");
+  const [docsVisited, setDocsVisited] = useState(docsMode);
+  const fetchTypes = useServerFn(listCustomerTypes);
+  useEffect(() => {
+    let active = true;
+    void fetchTypes().then(({ types }) => {
+      if (!active) return;
+      setTypeList(types);
+      setTypeCode((selected) => preselectedRegistrationType(types, selected));
+    }).catch((e) => active && setTypeError(serverMessage(e, t("registration.errGeneric"))));
+    return () => { active = false; };
+  }, [fetchTypes, t]);
+  const backRef = useRef<() => void>(() => undefined);
+  const back = async () => {
+    if (step === "type") {
+      await supabase.auth.signOut();
+      await navigate({ to: "/auth", replace: true });
+    } else if (step === "details" || step === "docs") setStep(previousRegistrationStep(step) as Step);
+    else setStep("type");
+  };
+  backRef.current = () => { void back(); };
+  useEffect(() => {
+    const onBack = (event: Event) => { event.preventDefault(); backRef.current(); };
+    window.addEventListener("sunrich:back", onBack);
+    return () => window.removeEventListener("sunrich:back", onBack);
+  }, []);
+  const closedType = (e: unknown) => {
+    setTypeError(serverMessage(e, t("registration.errGeneric")));
+    setStep("type");
+    void fetchTypes().then(({ types }) => setTypeList(types)).catch(() => undefined);
+  };
 
   // Anyone already registered belongs on Home, not in the wizard
   // (but let the success screen show after a fresh signup).
@@ -136,38 +171,43 @@ function Wizard() {
   return (
     <main className={`mx-auto min-h-dvh max-w-md overflow-x-clip bg-background px-5 pb-36 pt-[max(2rem,env(safe-area-inset-top))] ${font}`}>
       {(step === "type" || step === "details" || step === "docs") && (
-        <StepIndicator current={step === "type" ? 1 : step === "details" ? 2 : 3} />
+        <>
+          <Button variant="ghost" size="icon" className="mb-2 min-h-11 min-w-11" aria-label={t("registration.back")} onClick={() => void back()}><ChevronLeft /></Button>
+          <StepIndicator current={step === "type" ? 1 : step === "details" ? 2 : 3} reached={docsVisited ? 3 : detailsVisited ? 2 : 1} onStep={(n) => { if (n > 1 && !typeList?.some((ty) => ty.code === typeCode && ty.selectable)) return; setStep(n === 1 ? "type" : n === 2 ? "details" : "docs"); }} />
+          {step !== "type" && <div className="mb-5 flex items-center justify-between gap-2"><span className="rounded-full bg-secondary/15 px-3 py-2 text-sm text-primary">{t("registration.registeringAs", { type: pl(typeList?.find((ty) => ty.code === typeCode)?.name ?? reg.typeName, lang) })}</span><Button variant="link" className="min-h-11" onClick={() => setStep("type")}>{t("registration.changeType")}</Button></div>}
+        </>
       )}
 
       {step === "type" && (
-        <TypeStep
-          onPick={(code) => {
-            setTypeCode(code);
-            setStep("details");
-          }}
-        />
+        <TypeStep types={typeList} selected={typeCode} error={typeError} onSelect={setTypeCode} onNext={() => { setDetailsVisited(true); setStep("details"); }} />
       )}
-      {step === "details" && typeCode && (
+      {detailsVisited && typeCode && (
+        <div hidden={step !== "details"}>
         <DetailsStep
           reg={reg}
           typeCode={typeCode}
-          onBack={() => setStep(reg.customerId && (reg.status === "draft" || reg.status === "rejected") ? "docs" : "type")}
+          onBack={() => setStep("type")}
+          onClosedType={closedType}
           onSaved={async (fresh) => {
             setReg(fresh);
             if (fresh.status === "active") setStep("done");
-            else if (fresh.customerId) setStep("docs");
+            else if (fresh.customerId) { setDocsVisited(true); setStep("docs"); }
           }}
         />
+        </div>
       )}
-      {step === "docs" && reg.customerId && (
+      {docsVisited && reg.customerId && (
+        <div hidden={step !== "docs"}>
         <DocsStep
           reg={reg}
-          onEditDetails={() => setStep("details")}
+          onEditDetails={() => { setDetailsVisited(true); setStep("details"); }}
+          onClosedType={closedType}
           onSubmitted={async () => {
             await refresh();
             await navigate({ to: "/home", replace: true });
           }}
         />
+        </div>
       )}
       {step === "rejected" && (
         <div className="flex flex-col gap-6 animate-in fade-in">
@@ -184,7 +224,7 @@ function Wizard() {
           </div>
           <button
             type="button"
-            onClick={() => setStep("details")}
+            onClick={() => { setDetailsVisited(true); setStep("details"); }}
             className="flex min-h-14 w-full items-center justify-center rounded-xl bg-primary text-lg font-semibold text-primary-foreground shadow-md transition active:scale-[0.98]"
           >
             {t("registration.editAndResubmit")}
@@ -211,61 +251,25 @@ function Wizard() {
   );
 }
 
-function TypeStep({ onPick }: { onPick: (code: string) => void }) {
+function TypeStep({ types, selected, error, onSelect, onNext }: { types: CustomerTypeDto[] | null; selected: string | null; error: string | null; onSelect: (code: string) => void; onNext: () => void }) {
   const { t } = useTranslation();
   const { lang } = useLang();
-  const fetchTypes = useServerFn(listCustomerTypes);
-  const [types, setTypes] = useState<CustomerTypeDto[] | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    void fetchTypes().then((r) => {
-      if (!active) return;
-      setTypes(r.types);
-      // Only one type open for sign-up: pick it and skip this step.
-      const only = r.types.length === 1 ? r.types[0] : undefined;
-      if (only) onPick(only.code);
-    });
-    return () => {
-      active = false;
-    };
-  }, [fetchTypes]); // eslint-disable-line react-hooks/exhaustive-deps
-
   return (
     <div className="flex flex-col gap-5 animate-in fade-in">
-      <div className="flex justify-center">
-        <Logo />
-      </div>
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-primary">{t("registration.whoTitle")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("registration.whoSubtitle")}</p>
-      </div>
-      {(types === null || types.length === 1) && (
-        <p className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> {t("registration.loading")}
-        </p>
-      )}
+      <div className="flex justify-center"><Logo /></div>
+      <div className="text-center"><h1 className="text-2xl font-bold text-primary">{t("registration.whoTitle")}</h1><p className="mt-1 text-sm text-muted-foreground">{t("registration.whoSubtitle")}</p></div>
+      {types === null && <p className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />{t("registration.loading")}</p>}
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
       <div className="flex flex-col gap-3">
         {(types ?? []).map((ty) => {
           const Icon = TYPE_ICONS[ty.iconKey] ?? Package;
-          return (
-            <button
-              key={ty.code}
-              type="button"
-              onClick={() => onPick(ty.code)}
-              className="flex min-h-20 items-center gap-4 rounded-2xl border border-border bg-card p-4 text-left shadow-sm transition active:scale-[0.99]"
-            >
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-secondary">
-                <Icon className="h-6 w-6" aria-hidden />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-base font-bold text-primary">{pl(ty.name, lang)}</span>
-                <span className="mt-0.5 block text-sm text-muted-foreground">{pl(ty.description, lang)}</span>
-              </span>
-            </button>
-          );
+          return <Button key={ty.code} variant="outline" disabled={!ty.selectable} aria-pressed={selected === ty.code} onClick={() => onSelect(ty.code)} className={`h-auto min-h-20 justify-start gap-4 whitespace-normal rounded-2xl p-4 text-left ${selected === ty.code ? "border-secondary bg-secondary/10" : "bg-card"}`}>
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-secondary"><Icon className="h-6 w-6" /></span>
+            <span className="min-w-0"><span className="block text-base font-bold text-primary">{pl(ty.name, lang)}</span>{pl(ty.description, lang) && <span className="mt-0.5 block text-sm text-muted-foreground">{pl(ty.description, lang)}</span>}{!ty.selectable && <span className="mt-1 block text-xs text-muted-foreground">{t("registration.notAvailable")}</span>}</span>
+          </Button>;
         })}
       </div>
+      <Button className="min-h-14 w-full text-base" disabled={!types?.some((ty) => ty.code === selected && ty.selectable)} onClick={onNext}>{t("registration.next")}</Button>
     </div>
   );
 }
@@ -313,10 +317,12 @@ function DetailsStep({
   typeCode,
   onBack,
   onSaved,
+  onClosedType,
 }: {
   reg: RegistrationDto;
   typeCode: string;
   onBack: () => void;
+  onClosedType: (error: unknown) => void;
   onSaved: (fresh: RegistrationDto) => void | Promise<void>;
 }) {
   const { t } = useTranslation();
@@ -451,6 +457,7 @@ function DetailsStep({
       };
       const { error: rpcErr } = await supabase.rpc("start_registration", args);
       if (rpcErr) {
+        if (isClosedRegistrationTypeError(rpcErr)) { onClosedType(rpcErr); return; }
         setError(serverMessage(rpcErr, t("registration.errGeneric")));
         return;
       }
@@ -458,6 +465,7 @@ function DetailsStep({
       clearGate();
       await onSaved(fresh);
     } catch (e) {
+      if (isClosedRegistrationTypeError(e)) { onClosedType(e); return; }
       setError(serverMessage(e, t("registration.errGeneric")));
     } finally {
       setBusy(false);
@@ -616,9 +624,11 @@ function DocsStep({
   reg,
   onEditDetails,
   onSubmitted,
+  onClosedType,
 }: {
   reg: RegistrationDto;
   onEditDetails: () => void;
+  onClosedType: (error: unknown) => void;
   onSubmitted: () => void | Promise<void>;
 }) {
   const { t } = useTranslation();
@@ -731,11 +741,13 @@ function DocsStep({
     try {
       const { error: rpcErr } = await supabase.rpc("submit_registration");
       if (rpcErr) {
+        if (isClosedRegistrationTypeError(rpcErr)) { onClosedType(rpcErr); return; }
         setError(serverMessage(rpcErr, t("registration.errGeneric")));
         return;
       }
       await onSubmitted();
     } catch (e) {
+      if (isClosedRegistrationTypeError(e)) { onClosedType(e); return; }
       setError(serverMessage(e, t("registration.errGeneric")));
     } finally {
       setSubmitting(false);

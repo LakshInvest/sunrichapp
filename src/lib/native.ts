@@ -103,6 +103,7 @@ export async function initNative(opts: {
       history.back();
       return;
     }
+    if (!window.dispatchEvent(new Event("sunrich:back", { cancelable: true }))) return;
     if (opts.isHome()) {
       // Home asks "Exit app?"; a second back press while asked exits.
       const now = Date.now();

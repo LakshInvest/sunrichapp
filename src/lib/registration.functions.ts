@@ -11,6 +11,7 @@ export type CustomerTypeDto = {
   iconKey: string;
   requiresApproval: boolean;
   requiresGps: boolean;
+  selectable: boolean;
 };
 
 export type RegistrationDto = {
@@ -67,11 +68,11 @@ export const listCustomerTypes = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("customer_types")
       .select(
-        "code, name, name_hi, name_mr, description, description_hi, description_mr, icon_key, requires_approval, requires_gps",
+        "code, name, name_hi, name_mr, description, description_hi, description_mr, icon_key, requires_approval, requires_gps, show_in_registration",
       )
       .eq("is_active", true)
-      .eq("show_in_registration" as "is_active", true)
-      .order("sort_order");
+      .order("sort_order")
+      .order("name");
     if (error) throw new Error(error.message);
     const types: CustomerTypeDto[] = (data ?? []).map((t) => ({
       code: t.code,
@@ -84,6 +85,7 @@ export const listCustomerTypes = createServerFn({ method: "GET" })
       iconKey: t.icon_key ?? "home",
       requiresApproval: t.requires_approval,
       requiresGps: t.requires_gps,
+      selectable: t.show_in_registration === true,
     }));
     return { types };
   });

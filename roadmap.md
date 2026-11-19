@@ -1,3 +1,10 @@
+# Prompt-65
+- [x] Registration always shows active types, disables closed types, retains forms, and supports step/back controls and closed-type rejection.
+- [x] Bottom navigation excludes Inbox; distributor Home bell preserves its list and count; pending approval opens submitted details/support only.
+- [x] Sales controls require a successful current-session sales_whoami response, refreshed on resume; errors hide controls. No SQL.
+- [x] 230 tests passed; 20 focused tests rerun after final changes; build OK. Public login checked at 360/390/412 with no overflow or runtime errors. Reported utils.ts assignment absent (standard cn helper).
+- [ ] Real customer/salesman and Android hardware-back verification — external unmanaged session and installed phone unavailable.
+
 # Prompt-62
 - [x] Audited existing offers, quote/free lines/hints, split names, saved orders and monthly benefits; product boxes now include server minimum quantity, slab tiers and expiry. No SQL; reported NotFound.tsx path absent and cn is a defined function.
 - [x] 217 tests passed; build OK. Login and mounted sample quote/product-rule controls checked at 360/390/412 in English/Hindi/Marathi; no overflow or runtime errors, +4 adds exactly four. Read-only inspection confirms customer EXECUTE on my_schemes/quote_my_order and own-order SELECT policies; no blocked inspection. Basic security scan complete, five informational findings, no critical findings; request publication after commit.

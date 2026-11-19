@@ -1,6 +1,6 @@
 import { AppLoader } from "@/components/AppLoader";
 import { PermissionsIntro } from "@/components/PermissionsIntro";
-import { Outlet, redirect, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Outlet, redirect, createFileRoute, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyRegistration } from "@/lib/registration.functions";
@@ -67,9 +67,10 @@ export const Route = createFileRoute("/_authenticated")({
       if (here !== "/hold") throw redirect({ to: "/hold" });
       return;
     }
-    // Pending customers browse (rates hidden) but cannot reach cart/checkout.
-    if (reg.status === "pending_approval" && (here === "/cart" || here === "/checkout")) {
-      throw redirect({ to: "/home" });
+    // Awaiting approval is a support/details-only screen, not a catalogue.
+    if (reg.status === "pending_approval") {
+      if (here !== "/under-review") throw redirect({ to: "/under-review" });
+      return;
     }
     if ((!reg.customerId || reg.status === "draft" || reg.status === "rejected") && here !== "/registration") {
       throw redirect({ to: "/registration" });
@@ -83,6 +84,27 @@ export const Route = createFileRoute("/_authenticated")({
 /** Signs the user out when their session row is missing or revoked. Checks on load and every 60s. */
 function Gate() {
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const router = useRouter();
+  useEffect(() => {
+    let stopped = false;
+    const refresh = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (stopped || !data.session) return;
+      await getSalesInfo(data.session.user.id, true);
+      if (!stopped) await router.invalidate();
+    };
+    const onVisible = () => { if (document.visibilityState === "visible") void refresh(); };
+    document.addEventListener("visibilitychange", onVisible);
+    let remove: (() => void) | undefined;
+    void import("@/lib/native").then(async ({ isNative }) => {
+      if (!isNative()) return;
+      const { App } = await import("@capacitor/app");
+      const handle = await App.addListener("appStateChange", ({ isActive }) => { if (isActive) void refresh(); });
+      if (stopped) void handle.remove(); else remove = () => { void handle.remove(); };
+    });
+    return () => { stopped = true; document.removeEventListener("visibilitychange", onVisible); remove?.(); };
+  }, [router]);
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
@@ -116,7 +138,7 @@ function Gate() {
     <>
       <SalesBar />
       <Outlet />
-      <PermissionsIntro />
+      {pathname !== "/under-review" && <PermissionsIntro />}
     </>
   );
 }

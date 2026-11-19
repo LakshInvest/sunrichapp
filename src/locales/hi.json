@@ -430,7 +430,11 @@
     "yourName": "आपका नाम",
     "state": "राज्य",
     "statePlaceholder": "पिनकोड से भरा जाएगा",
-    "changeLocation": "बदलें"
+    "changeLocation": "बदलें",
+    "notAvailable": "अभी उपलब्ध नहीं",
+    "registeringAs": "पंजीकरण प्रकार: {{type}}",
+    "changeType": "बदलें",
+    "next": "आगे"
   },
   "status": {
     "active": "सक्रिय",

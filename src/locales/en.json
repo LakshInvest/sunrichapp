@@ -430,7 +430,11 @@
     "rejectedBody": "Reason: {{reason}}",
     "editAndResubmit": "Edit and resubmit",
     "yourName": "Your name",
-    "changeLocation": "Change"
+    "changeLocation": "Change",
+    "notAvailable": "Not available now",
+    "registeringAs": "Registering as: {{type}}",
+    "changeType": "Change",
+    "next": "Next"
   },
   "status": {
     "active": "Active",

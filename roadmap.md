@@ -308,3 +308,13 @@ Constraint: existing DB tables/RPCs/policies/buckets only (user-managed backend)
 - [ ] Run database/20261103_app_redesign.sql — WAITING on user
 - [ ] Signed-in screen photos — BLOCKED: test browser can't sign in to this user-managed backend
 - [ ] Map in APK — needs the error code shown on the phone (now displayed under the map fallback)
+
+# Prompt-75 (Play Store finish)
+- [ ] 1. Account "Phone notifications" switch: reason sheet → Android permission → register → my_push_token_save(token,'android',lang,version); OFF → my_push_token_remove; remember state; denied → settings message + Open settings.
+- [ ] 2. Notification channel id `orders` "Order updates" (hi/mr names), high importance, sound, at app start; push tap opens order via order_id.
+- [ ] 3. Permission reason sheets (camera/location/notifications) with Continue/Not now, en/hi/mr.
+- [ ] 4. Payment screenshot via system photo picker (Camera plugin, source Photos).
+- [ ] 5. Order amounts: line = qty×rate; Subtotal → −Discount+reason → bold Total; never pre-discounted lines.
+- [ ] 6. Prompt-74 leftover checks: product/cart/S1,S3,S10 at 360/390/412 + tablet; hi/mr screens.
+- [ ] 7. Reviewer login 9999900000/1234 fresh install, sample orders visible.
+- [ ] 8. Full app pass + 1080×2400 Play screenshots in docs/play-screenshots/.

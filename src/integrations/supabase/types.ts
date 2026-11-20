@@ -11582,6 +11582,7 @@ export type Database = {
         Returns: undefined
       }
       _stop_credit_note: { Args: { p_stop_id: string }; Returns: undefined }
+      _title_name: { Args: { p: string }; Returns: string }
       add_customer_document: {
         Args: {
           p_doc_number?: string
@@ -11965,6 +11966,10 @@ export type Database = {
         Args: { p_note?: string; p_order_id: string; p_pod_photo_path?: string }
         Returns: Json
       }
+      cc_mark_not_delivered: {
+        Args: { p_order_id: string; p_reason: string }
+        Returns: Json
+      }
       cc_mark_ready_to_deliver: { Args: { p_order_id: string }; Returns: Json }
       cc_mark_redelivery: {
         Args: { p_order_id: string; p_reason: string }
@@ -12175,7 +12180,12 @@ export type Database = {
         }[]
       }
       cc_send_quote: {
-        Args: { p_lines: Json; p_note?: string; p_order_id: string }
+        Args: {
+          p_lines: Json
+          p_note?: string
+          p_order_id: string
+          p_valid_hours?: number
+        }
         Returns: Json
       }
       cc_server_action: {
@@ -12252,6 +12262,10 @@ export type Database = {
           pincode: string
           updated_at: string
         }[]
+      }
+      cc_update_dispatch_vehicle: {
+        Args: { p: Json; p_order_id: string }
+        Returns: Json
       }
       cc_update_ticket: {
         Args: { p_assigned_to?: string; p_status?: string; p_ticket_id: string }

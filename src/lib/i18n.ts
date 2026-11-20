@@ -14,6 +14,10 @@ if (!i18n.isInitialized) {
     lng: "en",
     fallbackLng: "en",
     interpolation: { escapeValue: false },
+    saveMissing: import.meta.env.DEV,
+    missingKeyHandler: (lngs, _ns, key) => {
+      if (import.meta.env.DEV && lngs.some((l) => l === "hi" || l === "mr")) console.warn(`[i18n] missing key for ${lngs.join(",")}: ${key}`);
+    },
   });
 }
 

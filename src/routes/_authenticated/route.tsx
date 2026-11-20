@@ -2,6 +2,7 @@ import { AppLoader } from "@/components/AppLoader";
 import { PermissionsIntro } from "@/components/PermissionsIntro";
 import { Outlet, redirect, createFileRoute, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { useLiveNotices } from "@/hooks/use-live-notices";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyRegistration } from "@/lib/registration.functions";
 import { isRateLockedStatus, setRateLocked } from "@/lib/rate-lock";
@@ -93,6 +94,7 @@ function Gate() {
     }
   });
   const { queryClient } = Route.useRouteContext();
+  useLiveNotices();
 
   useEffect(() => {
     let stopped = false;

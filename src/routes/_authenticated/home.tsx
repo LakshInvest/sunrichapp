@@ -47,7 +47,7 @@ import { useOffline } from "@/hooks/use-offline";
 import { useFavourites } from "@/hooks/use-favourites";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { fetchMyOrders, ordersChanged, useDistributorNav, type OrderDto } from "@/lib/orders";
-import { hasUnreadNotices } from "@/lib/notifications";
+import { onNoticeArrived, unreadNoticeCount } from "@/lib/app-notices";
 import { planReorder } from "@/lib/feedback";
 import { useAppSettings } from "@/lib/app-settings";
 import { toast } from "sonner";
@@ -133,7 +133,8 @@ function Home() {
   const [bannerIndex, setBannerIndex] = useState(0);
   const [reg, setReg] = useState<RegistrationDto | null>(null);
   const [profile, setProfile] = useState({ name: "", photoUrl: null as string | null });
-  const [orderUpdates, setOrderUpdates] = useState(false);
+  const [orderUpdates, setOrderUpdates] = useState(0);
+  useEffect(() => onNoticeArrived(() => void unreadNoticeCount().then(setOrderUpdates, () => undefined)), []);
   const [addressOpen, setAddressOpen] = useState(false);
   const [addrList, setAddrList] = useState<SavedAddress[]>([]);
   const selectedId = useSelectedAddressId();
@@ -244,7 +245,7 @@ function Home() {
     const check = async () => {
       if (!isRefreshForeground()) return;
       try {
-        const has = await hasUnreadNotices();
+        const has = await unreadNoticeCount();
         if (active) setOrderUpdates(has);
       } catch {
         /* offline — keep current state */
@@ -301,7 +302,7 @@ function Home() {
   const refreshSummary = async () => {
     await Promise.all([
       swr("khata.sum", fetchKhataSummary, true).then(publishKhataSummary),
-      hasUnreadNotices().then(setOrderUpdates),
+      unreadNoticeCount().then(setOrderUpdates),
     ]);
   };
   const pollHome = async () => {
@@ -589,7 +590,7 @@ function Home() {
                   className="relative flex h-10 w-10 items-center justify-center rounded-full"
                 >
                   <Bell className="h-5 w-5 text-primary-foreground" />
-                  {deliveryBell && newCount > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-bold text-accent-foreground">{newCount > 99 ? "99+" : newCount}</span> : orderUpdates && <span aria-hidden className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent" />}
+                  {deliveryBell && newCount > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-bold text-accent-foreground">{newCount > 99 ? "99+" : newCount}</span> : orderUpdates > 0 && <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold text-destructive-foreground">{orderUpdates > 99 ? "99+" : orderUpdates}</span>}
                 </button>
               </div>
               }
@@ -626,7 +627,7 @@ function Home() {
                   className="relative flex h-10 w-10 items-center justify-center rounded-full"
                 >
                   <Bell className="h-5 w-5 text-primary-foreground" />
-                  {deliveryBell && newCount > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-bold text-accent-foreground">{newCount > 99 ? "99+" : newCount}</span> : orderUpdates && <span aria-hidden className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-primary bg-accent" />}
+                  {deliveryBell && newCount > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-bold text-accent-foreground">{newCount > 99 ? "99+" : newCount}</span> : orderUpdates > 0 && <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold text-destructive-foreground">{orderUpdates > 99 ? "99+" : orderUpdates}</span>}
                 </button>
               </div>
             </div>

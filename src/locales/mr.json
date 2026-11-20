@@ -1039,7 +1039,8 @@
       "pay_verified": "{{amount}} चे पेमेंट तपासले. नवीन बॅलन्स {{balance}}",
       "pay_rejected": "{{amount}} चे पेमेंट स्वीकारले नाही: {{reason}}",
       "pay_verified_adv": "{{amount}} चे पेमेंट तपासले. अ‍ॅडव्हान्स {{balance}}"
-    }
+    },
+    "markAll": "सर्व वाचले म्हणून खूण करा"
   },
   "push": {
     "title": "ऑर्डर अपडेट हवे?",
@@ -1468,7 +1469,7 @@
     "approve": "मंजूर करा",
     "reject": "नाकारा",
     "approved": "मंजूर झाले",
-    "talkFirst": "एकदा बोलायला आवडेल का?",
+    "talkFirst": "आधी आमच्याशी बोलायला आवडेल का?",
     "callUs": "कॉल करा",
     "rejectYes": "नाही, नाकारा",
     "reasonTitle": "कारण (ऐच्छिक)",
@@ -1478,7 +1479,7 @@
     "requote": "नवीन दर मागा",
     "payRejected": "पेमेंट स्वीकारले नाही",
     "paySent": "पेमेंट पाठवले – तपासले जात आहे",
-    "payChecking": "पेमेंट तपासले जात आहे",
+    "payChecking": "तुमचे पेमेंट तपासले जात आहे",
     "actionError": "काहीतरी चुकले. पुन्हा प्रयत्न करा.",
     "packs_one": "{{count}} पॅक",
     "packs_other": "{{count}} पॅक",
@@ -1496,11 +1497,12 @@
       "sunrich": "सनरिच"
     },
     "track": {
-      "approved": "पेमेंट पडताळले",
-      "allotted": "माल अलॉट झाला",
-      "ready_to_dispatch": "गाडी तयार",
-      "dispatched": "निघाले",
-      "delivered": "डिलिव्हर झाले"
+      "approved": "पेमेंट",
+      "allotted": "पॅकिंग",
+      "ready_to_dispatch": "निघण्यास तयार",
+      "dispatched": "वाटेत",
+      "delivered": "डिलिव्हर झाले",
+      "rate": "दर मंजूर"
     },
     "payTitle": "भरायची रक्कम",
     "requiredMethod": "सनरिचने {{mode}} ने पेमेंट मागितले आहे",
@@ -1573,6 +1575,62 @@
       "processing": "पॅक झाले",
       "credit_hold": "वाट"
     },
-    "shopAddress": "नोंदणीकृत दुकानाचा पत्ता"
+    "shopAddress": "नोंदणीकृत दुकानाचा पत्ता",
+    "subtotal": "उप-एकूण",
+    "freeOffer_one": "मोफत × {{count}} (ऑफर)",
+    "freeOffer_other": "मोफत × {{count}} (ऑफर)",
+    "plant": "प्लांट",
+    "leftPlant": "प्लांटमधून निघाले {{at}}",
+    "deliveredAt": "पोहोचले {{at}}",
+    "podPhoto": "डिलिव्हरी फोटो",
+    "noPhoto": "फोटो नाही",
+    "bill": "बिल",
+    "downloadBill": "बिल डाउनलोड करा (PDF)",
+    "billSoon": "बिल PDF लवकरच तयार होईल",
+    "billError": "बिल उघडले नाही. पुन्हा प्रयत्न करा.",
+    "einv": "ई-इनव्हॉइस ✓",
+    "ewb": "ई-वे बिल {{no}}"
+  },
+  "appNotice": {
+    "request_received": {
+      "title": "विनंती मिळाली",
+      "line": "आम्हाला तुमची ऑर्डर विनंती {{order_no}} मिळाली आहे."
+    },
+    "quote_ready": {
+      "title": "दर तयार आहेत",
+      "line": "{{order_no}} चे दर तयार आहेत – एकूण {{amount}}. {{valid_till}} पूर्वी खात्री करा."
+    },
+    "quote_expiry_reminder": {
+      "title": "दर ऑफर संपत आहे",
+      "line": "{{order_no}} ची ऑफर {{valid_till}} ला संपेल."
+    },
+    "quote_expired": {
+      "title": "दर ऑफर संपली",
+      "line": "तुम्ही {{order_no}} साठी नवीन दर मागू शकता."
+    },
+    "payment_verified": {
+      "title": "पेमेंट मिळाले",
+      "line": "{{order_no}} साठी {{paid_amount}} मिळाले."
+    },
+    "payment_rejected": {
+      "title": "पेमेंट स्वीकारले नाही",
+      "line": "{{order_no}}: {{reason}}. कृपया पुन्हा पेमेंट करा."
+    },
+    "payment_mode_changed": {
+      "title": "पेमेंटची पद्धत बदलली",
+      "line": "{{order_no}} आता {{mode}} आहे."
+    },
+    "dispatched": {
+      "title": "ऑर्डर वाटेत आहे",
+      "line": "{{order_no}} गाडी {{vehicle_no}} मधून निघाली. बिल {{bill_no}}."
+    },
+    "delivered": {
+      "title": "ऑर्डर पोहोचली",
+      "line": "{{order_no}} पोहोचली आहे."
+    },
+    "other": {
+      "title": "अपडेट",
+      "line": "{{order_no}} वर अपडेट आहे."
+    }
   }
 }

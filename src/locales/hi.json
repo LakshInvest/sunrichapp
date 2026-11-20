@@ -1039,7 +1039,8 @@
       "pay_verified": "{{amount}} का भुगतान जाँचा गया। नया बैलेंस {{balance}}",
       "pay_rejected": "{{amount}} का भुगतान स्वीकार नहीं: {{reason}}",
       "pay_verified_adv": "{{amount}} का भुगतान जाँचा गया। एडवांस {{balance}}"
-    }
+    },
+    "markAll": "सब पढ़ा हुआ करें"
   },
   "push": {
     "title": "ऑर्डर अपडेट पाएँ?",
@@ -1468,9 +1469,9 @@
     "approve": "मंज़ूर करें",
     "reject": "रिजेक्ट करें",
     "approved": "मंज़ूर हो गया",
-    "talkFirst": "एक बार बात करना चाहेंगे?",
+    "talkFirst": "क्या आप पहले हमसे बात करना चाहेंगे?",
     "callUs": "कॉल करें",
-    "rejectYes": "नहीं, रिजेक्ट करो",
+    "rejectYes": "नहीं, अस्वीकार करें",
     "reasonTitle": "वजह (ज़रूरी नहीं)",
     "reasonPlaceholder": "जैसे: रेट ज़्यादा है",
     "expiredTitle": "यह रेट खत्म हो गया",
@@ -1478,7 +1479,7 @@
     "requote": "नया रेट माँगो",
     "payRejected": "पेमेंट स्वीकार नहीं हुआ",
     "paySent": "पेमेंट भेज दिया – चेक हो रहा है",
-    "payChecking": "पेमेंट चेक हो रहा है",
+    "payChecking": "आपका पेमेंट जाँचा जा रहा है",
     "actionError": "कुछ गड़बड़ हुई। फिर कोशिश करें।",
     "packs_one": "{{count}} पैक",
     "packs_other": "{{count}} पैक",
@@ -1496,11 +1497,12 @@
       "sunrich": "सनरिच"
     },
     "track": {
-      "approved": "पेमेंट वेरिफ़ाई हुआ",
-      "allotted": "माल अलॉट हुआ",
-      "ready_to_dispatch": "गाड़ी तैयार",
-      "dispatched": "निकल गया",
-      "delivered": "डिलीवर हुआ"
+      "approved": "पेमेंट",
+      "allotted": "पैकिंग",
+      "ready_to_dispatch": "निकलने को तैयार",
+      "dispatched": "रास्ते में",
+      "delivered": "डिलीवर हुआ",
+      "rate": "रेट मंज़ूर"
     },
     "payTitle": "देने की रकम",
     "requiredMethod": "सनरिच ने {{mode}} से पेमेंट माँगा है",
@@ -1573,6 +1575,62 @@
       "processing": "पैक हुआ",
       "credit_hold": "इंतज़ार"
     },
-    "shopAddress": "रजिस्टर्ड दुकान का पता"
+    "shopAddress": "रजिस्टर्ड दुकान का पता",
+    "subtotal": "उप-योग",
+    "freeOffer_one": "मुफ़्त × {{count}} (ऑफ़र)",
+    "freeOffer_other": "मुफ़्त × {{count}} (ऑफ़र)",
+    "plant": "प्लांट",
+    "leftPlant": "प्लांट से निकला {{at}}",
+    "deliveredAt": "डिलीवर हुआ {{at}}",
+    "podPhoto": "डिलीवरी फ़ोटो",
+    "noPhoto": "फ़ोटो नहीं",
+    "bill": "बिल",
+    "downloadBill": "बिल डाउनलोड करें (PDF)",
+    "billSoon": "बिल PDF जल्द तैयार होगा",
+    "billError": "बिल नहीं खुला। फिर से कोशिश करें।",
+    "einv": "ई-इनवॉइस ✓",
+    "ewb": "ई-वे बिल {{no}}"
+  },
+  "appNotice": {
+    "request_received": {
+      "title": "अनुरोध मिला",
+      "line": "हमें आपका ऑर्डर अनुरोध {{order_no}} मिल गया है।"
+    },
+    "quote_ready": {
+      "title": "रेट तैयार हैं",
+      "line": "{{order_no}} के रेट तैयार हैं – कुल {{amount}}। {{valid_till}} से पहले पुष्टि करें।"
+    },
+    "quote_expiry_reminder": {
+      "title": "रेट ऑफ़र ख़त्म होने वाला है",
+      "line": "{{order_no}} का ऑफ़र {{valid_till}} पर ख़त्म होगा।"
+    },
+    "quote_expired": {
+      "title": "रेट ऑफ़र ख़त्म हो गया",
+      "line": "आप {{order_no}} के लिए नया रेट माँग सकते हैं।"
+    },
+    "payment_verified": {
+      "title": "पेमेंट मिल गया",
+      "line": "{{order_no}} के लिए {{paid_amount}} मिल गए।"
+    },
+    "payment_rejected": {
+      "title": "पेमेंट स्वीकार नहीं हुआ",
+      "line": "{{order_no}}: {{reason}}। कृपया फिर से पेमेंट करें।"
+    },
+    "payment_mode_changed": {
+      "title": "पेमेंट का तरीका बदला",
+      "line": "{{order_no}} अब {{mode}} है।"
+    },
+    "dispatched": {
+      "title": "ऑर्डर रास्ते में है",
+      "line": "{{order_no}} गाड़ी {{vehicle_no}} में निकला। बिल {{bill_no}}।"
+    },
+    "delivered": {
+      "title": "ऑर्डर डिलीवर हुआ",
+      "line": "{{order_no}} डिलीवर हो गया है।"
+    },
+    "other": {
+      "title": "अपडेट",
+      "line": "{{order_no}} पर अपडेट है।"
+    }
   }
 }

@@ -1039,7 +1039,8 @@
       "pay_verified": "Payment of {{amount}} verified. New balance {{balance}}",
       "pay_rejected": "Payment of {{amount}} not accepted: {{reason}}",
       "pay_verified_adv": "Payment of {{amount}} verified. Advance {{balance}}"
-    }
+    },
+    "markAll": "Mark all as read"
   },
   "push": {
     "title": "Get order updates?",
@@ -1256,8 +1257,8 @@
     "pickupSave": "(save {{amount}})"
   },
   "upi": {
-    "launchError": "UPI app nahi khula, QR scan karke ya UPI ID copy karke pay karein",
-    "appMissing": "Ye app phone mein nahi hai",
+    "launchError": "The UPI app did not open. Scan the QR or copy the UPI ID to pay.",
+    "appMissing": "This app is not on your phone",
     "copyId": "Copy UPI ID",
     "payNow": "Pay now",
     "payAmount": "Pay {{amount}} with UPI app",
@@ -1365,7 +1366,7 @@
     "moreItems": "+{{count}} more"
   },
   "permissions": {
-    "title": "Sunrich ko ye chahiye",
+    "title": "Sunrich needs these",
     "subtitle": "Allow once, so everything works smoothly.",
     "notifications": "Notifications",
     "notificationsReason": "Order and payment updates",
@@ -1374,7 +1375,7 @@
     "camera": "Camera",
     "cameraReason": "Payment screenshot or photo",
     "allow": "Allow",
-    "later": "Baad mein",
+    "later": "Later",
     "settings": "Open settings"
   },
   "messages": {
@@ -1457,7 +1458,7 @@
     "sentBody": "Sunrich will send the rate soon",
     "viewOrder": "View order",
     "help": "Help",
-    "bySalesman": "Order by salesman",
+    "bySalesman": "Placed by salesman",
     "waitingTitle": "Waiting for rate",
     "rateCame": "Rate has come",
     "timeLeft": "{{h}} h {{m}} min left",
@@ -1468,9 +1469,9 @@
     "approve": "Approve",
     "reject": "Reject",
     "approved": "Approved",
-    "talkFirst": "Would you like to talk once?",
+    "talkFirst": "Would you like to talk to us first?",
     "callUs": "Call us",
-    "rejectYes": "No, reject it",
+    "rejectYes": "No, reject",
     "reasonTitle": "Reason (optional)",
     "reasonPlaceholder": "E.g. rate is high",
     "expiredTitle": "This rate has expired",
@@ -1478,7 +1479,7 @@
     "requote": "Ask for a new rate",
     "payRejected": "Payment was not accepted",
     "paySent": "Payment sent – being checked",
-    "payChecking": "Payment is being checked",
+    "payChecking": "Your payment is being checked",
     "actionError": "Something went wrong. Please try again.",
     "packs_one": "{{count}} pack",
     "packs_other": "{{count}} packs",
@@ -1496,11 +1497,12 @@
       "sunrich": "Sunrich"
     },
     "track": {
-      "approved": "Payment verified",
-      "allotted": "Stock allotted",
-      "ready_to_dispatch": "Vehicle ready",
-      "dispatched": "Dispatched",
-      "delivered": "Delivered"
+      "approved": "Payment",
+      "allotted": "Packing",
+      "ready_to_dispatch": "Ready to leave",
+      "dispatched": "On the way",
+      "delivered": "Delivered",
+      "rate": "Rate approved"
     },
     "payTitle": "Amount to pay",
     "requiredMethod": "Sunrich has asked for payment by {{mode}}",
@@ -1573,6 +1575,62 @@
       "processing": "Packed",
       "credit_hold": "Waiting"
     },
-    "shopAddress": "Registered shop address"
+    "shopAddress": "Registered shop address",
+    "subtotal": "Subtotal",
+    "freeOffer_one": "Free × {{count}} (offer)",
+    "freeOffer_other": "Free × {{count}} (offer)",
+    "plant": "Plant",
+    "leftPlant": "Left the plant {{at}}",
+    "deliveredAt": "Delivered {{at}}",
+    "podPhoto": "Delivery photo",
+    "noPhoto": "No photo",
+    "bill": "Bill",
+    "downloadBill": "Download bill (PDF)",
+    "billSoon": "Bill PDF will be ready soon",
+    "billError": "Could not open the bill. Please try again.",
+    "einv": "E-invoice ✓",
+    "ewb": "E-way bill {{no}}"
+  },
+  "appNotice": {
+    "request_received": {
+      "title": "Request received",
+      "line": "We got your order request {{order_no}}."
+    },
+    "quote_ready": {
+      "title": "Rates ready",
+      "line": "Rates for {{order_no}} are ready – total {{amount}}. Confirm before {{valid_till}}."
+    },
+    "quote_expiry_reminder": {
+      "title": "Rate offer ending",
+      "line": "Offer for {{order_no}} ends at {{valid_till}}."
+    },
+    "quote_expired": {
+      "title": "Rate offer ended",
+      "line": "You can ask for a new rate for {{order_no}}."
+    },
+    "payment_verified": {
+      "title": "Payment received",
+      "line": "{{paid_amount}} received for {{order_no}}."
+    },
+    "payment_rejected": {
+      "title": "Payment not accepted",
+      "line": "{{order_no}}: {{reason}}. Please pay again."
+    },
+    "payment_mode_changed": {
+      "title": "Payment mode changed",
+      "line": "{{order_no}} is now {{mode}}."
+    },
+    "dispatched": {
+      "title": "Order on the way",
+      "line": "{{order_no}} left in {{vehicle_no}}. Bill {{bill_no}}."
+    },
+    "delivered": {
+      "title": "Order delivered",
+      "line": "{{order_no}} has been delivered."
+    },
+    "other": {
+      "title": "Update",
+      "line": "There is an update on {{order_no}}."
+    }
   }
 }

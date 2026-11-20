@@ -119,7 +119,7 @@ export function AddressSwitcher({
                       <span className="flex items-center gap-2 text-sm font-bold text-foreground">
                         {t(labelKey(a.label))}
                         {a.isDefault && (
-                          <span className="rounded-full bg-accent/20 px-2 py-0.5 text-[11px] font-semibold">{t("addresses.default")}</span>
+                          <span className="rounded-full bg-accent/20 px-2 py-0.5 text-xs font-semibold">{t("addresses.default")}</span>
                         )}
                       </span>
                       <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">{addressText(a)}</span>

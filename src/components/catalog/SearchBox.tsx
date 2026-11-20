@@ -40,7 +40,7 @@ export function SearchBox({
       </div>
       {showRecents && (
         <div className="absolute inset-x-0 top-full z-40 mt-1.5 rounded-2xl border border-border bg-card p-2 shadow-xl">
-          <p className="flex items-center gap-1.5 px-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <p className="flex items-center gap-1.5 px-2 pb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             <Clock className="h-3.5 w-3.5" aria-hidden />
             {t("catalog.recentSearches")}
           </p>

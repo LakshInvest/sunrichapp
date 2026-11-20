@@ -84,13 +84,13 @@ export function BottomNav() {
                 {to === "/home" && cartCount > 0 && (
                   <span
                     aria-label={`${t("home.cart")}: ${cartCount}`}
-                    className="absolute -top-1 right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-card bg-accent px-1 text-[10px] font-bold text-accent-foreground"
+                    className="absolute -top-1 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-card bg-accent px-1 text-xs font-bold text-accent-foreground"
                   >
                     {cartCount > 99 ? "99+" : cartCount}
                   </span>
                 )}
                 {to === "/track" && actionCount > 0 && (
-                  <span aria-label={t("quote.actionNeeded")} className="absolute -top-1 right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-card bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                  <span aria-label={t("quote.actionNeeded")} className="absolute -top-1 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-card bg-destructive px-1 text-xs font-bold text-destructive-foreground">
                     {actionCount > 9 ? "9+" : actionCount}
                   </span>
                 )}

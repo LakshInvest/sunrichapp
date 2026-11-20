@@ -108,7 +108,7 @@ function Devices() {
                     <p className="truncate text-sm font-semibold">
                       {d.device_label || t("devices.phone")}
                       {self && (
-                        <span className="ml-2 rounded-full bg-secondary/15 px-2 py-0.5 text-[11px] font-bold text-secondary">{t("devices.thisPhone")}</span>
+                        <span className="ml-2 rounded-full bg-secondary/15 px-2 py-0.5 text-xs font-bold text-secondary">{t("devices.thisPhone")}</span>
                       )}
                     </p>
                     <p className="text-xs text-muted-foreground">

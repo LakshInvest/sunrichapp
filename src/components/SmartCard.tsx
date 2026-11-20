@@ -56,11 +56,11 @@ export function SmartCard({
       <button
         type="button"
         onClick={() => (pick.kind === "overdue" ? onPay() : pick.kind === "dispatched" ? outForDelivery && onTrack(outForDelivery.id) : onReorder())}
-        className="min-h-10 shrink-0 rounded-full bg-primary px-4 text-xs font-bold text-primary-foreground"
+        className="min-h-11 shrink-0 rounded-full bg-primary px-4 text-xs font-bold text-primary-foreground"
       >
         {t(pick.kind === "overdue" ? "smart.pay" : pick.kind === "dispatched" ? "smart.track" : "smart.reorder")}
       </button>
-      <button type="button" onClick={close} aria-label={t("smart.dismiss")} className="absolute right-1 top-1 flex h-9 w-9 items-center justify-center text-muted-foreground">
+      <button type="button" onClick={close} aria-label={t("smart.dismiss")} className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center text-muted-foreground">
         <X className="h-4 w-4" aria-hidden />
       </button>
     </div>

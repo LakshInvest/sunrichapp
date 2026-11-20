@@ -241,7 +241,7 @@ export function ProofChip({ status }: { status: string }) {
         ? "bg-destructive/10 text-destructive"
         : "bg-accent/15 text-accent-foreground";
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${cls}`}>
+    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${cls}`}>
       {status === "verified" ? <CheckCircle2 className="h-3 w-3" aria-hidden /> : status === "rejected" ? <XCircle className="h-3 w-3" aria-hidden /> : <Clock className="h-3 w-3" aria-hidden />}
       {t(`payments.proof.${status}`, { defaultValue: status })}
     </span>
@@ -262,7 +262,7 @@ export function CopyRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-3 border-b border-border py-2 last:border-none">
       <div className="min-w-0">
-        <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
         <p className="truncate font-mono text-sm font-semibold text-foreground">{value}</p>
       </div>
       <button

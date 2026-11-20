@@ -216,7 +216,7 @@ function Inbox() {
                 >
                   <div className="flex items-center justify-between gap-3">
                     <p className="text-sm font-bold text-foreground">{o.orderNo}</p>
-                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${statusChipClass(o.status)}`}>
+                    <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${statusChipClass(o.status)}`}>
                       {t(`status.${o.status}`)}
                     </span>
                   </div>
@@ -225,7 +225,7 @@ function Inbox() {
                     const late = mins >= 60;
                     return (
                       <p
-                        className={`mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                        className={`mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${
                           late ? "bg-warning/15 text-warning" : "bg-secondary/10 text-secondary"
                         }`}
                       >

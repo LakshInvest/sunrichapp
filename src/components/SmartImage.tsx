@@ -13,6 +13,7 @@ export function SmartImage({
   className,
   width,
   eager,
+  caption,
 }: {
   src?: string | null | undefined;
   alt: string;
@@ -20,6 +21,7 @@ export function SmartImage({
   iconClassName?: string | undefined;
   width?: number | undefined;
   eager?: boolean | undefined;
+  caption?: string | undefined;
 }) {
   const [failed, setFailed] = useState(false);
   const [plain, setPlain] = useState(false);
@@ -27,8 +29,9 @@ export function SmartImage({
 
   if (!src || failed) {
     return (
-      <div role="img" aria-label={alt} className={`flex items-center justify-center bg-muted ${className ?? ""}`}>
+      <div role="img" aria-label={alt} className={`flex flex-col items-center justify-center gap-1 bg-muted ${className ?? ""}`}>
         <Milk aria-hidden strokeWidth={1.25} className="h-1/3 max-h-12 w-auto text-muted-foreground/60" />
+        {caption && <span className="px-1 text-center text-xs font-medium text-muted-foreground">{caption}</span>}
       </div>
     );
   }

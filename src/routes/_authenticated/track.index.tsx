@@ -59,7 +59,7 @@ function MyOrders() {
         <h1 className="text-2xl font-bold text-primary">{t("track.title")}</h1>
         <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto">
           {(["all", "action", "active", "done"] as const).map((f) => (
-            <button key={f} type="button" aria-pressed={filter === f} onClick={() => setFilter(f)} className={`min-h-10 shrink-0 rounded-full px-4 text-sm font-semibold ${filter === f ? "bg-primary text-primary-foreground" : "bg-card text-foreground shadow-sm"}`}>{t(`quote.filter.${f}`)}</button>
+            <button key={f} type="button" aria-pressed={filter === f} onClick={() => setFilter(f)} className={`min-h-11 shrink-0 rounded-full px-4 text-sm font-semibold ${filter === f ? "bg-primary text-primary-foreground" : "bg-card text-foreground shadow-sm"}`}>{t(`quote.filter.${f}`)}</button>
           ))}
         </div>
       </header>
@@ -81,8 +81,8 @@ function MyOrders() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0"><p className="truncate text-sm font-bold text-primary">{o.orderNo}</p><p className="text-xs text-muted-foreground">{indDate(o.createdAt, lang)}</p></div>
                       <div className="flex shrink-0 flex-col items-end gap-1">
-                        <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${TONE_CLASS[statusTone(o.status)]}`}>{t(`quote.status.${o.status}`, { defaultValue: t(`status.${o.status}`, { defaultValue: o.status }) })}</span>
-                        {needsAction(o.status) && <span className="rounded-full bg-destructive px-2 py-0.5 text-[10px] font-bold text-destructive-foreground">{t("quote.actionNeeded")}</span>}
+                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${TONE_CLASS[statusTone(o.status)]}`}>{t(`quote.status.${o.status}`, { defaultValue: t(`status.${o.status}`, { defaultValue: o.status }) })}</span>
+                        {needsAction(o.status) && <span className="rounded-full bg-destructive px-2 py-0.5 text-xs font-bold text-destructive-foreground">{t("quote.actionNeeded")}</span>}
                       </div>
                     </div>
                     <p className="mt-2 line-clamp-2 text-sm text-foreground">{o.lines.filter((l) => !l.isFree).map((l) => `${l.name} ×${l.qty}`).join(", ")}</p>

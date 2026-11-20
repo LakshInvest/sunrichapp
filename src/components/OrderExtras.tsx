@@ -54,7 +54,7 @@ export function DeliveredLines({ order, proof }: { order: OrderDto; proof: Deliv
                   {issues.map((k) => (
                     <span
                       key={k}
-                      className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${k === "short" ? "bg-accent/20 text-accent-foreground" : "bg-destructive/10 text-destructive"}`}
+                      className={`rounded-full px-2 py-0.5 text-xs font-bold ${k === "short" ? "bg-accent/20 text-accent-foreground" : "bg-destructive/10 text-destructive"}`}
                     >
                       {t(`pod.issue.${k}`, { count: k === "short" ? d.short : k === "damaged" ? d.damaged : d.refused })}
                     </span>
@@ -79,7 +79,7 @@ export function ProofOfDelivery({ proof }: { proof: DeliveryProof }) {
     <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
       <p className="text-sm font-bold">{t("pod.title")}</p>
       {proof.otpVerified && (
-        <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-secondary/15 px-2.5 py-1 text-[11px] font-bold text-primary">
+        <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-secondary/15 px-2.5 py-1 text-xs font-bold text-primary">
           <BadgeCheck className="h-3.5 w-3.5" aria-hidden /> {t("pod.otpVerified")}
         </p>
       )}

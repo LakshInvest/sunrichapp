@@ -791,7 +791,7 @@ function DocsStep({
         ? t("registration.badgeOptional")
         : t("registration.badgeAnyOne");
   const badgeClass =
-    "rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-secondary/15 text-secondary";
+    "rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide bg-secondary/15 text-secondary";
 
   const uploadRow = (code: string) => {
     const doc = uploadedFor(code);

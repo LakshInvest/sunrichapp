@@ -32,7 +32,7 @@ export function SchemeBadge({ product }: { product: CatalogProduct }) {
   const { data = [] } = useSchemes(); const rule = useRule(); const { t } = useTranslation();
   const s = data.find((s) => schemeCovers(s, product));
   const badge = s?.scheme_type === "free_qty" ? t("offers.freeBadge", { buy: s.buy_qty, free: s.free_qty }) : s?.scheme_type === "amount_off" ? t("offers.amountBadge", { amount: formatINR(s.discount_amount ?? 0) }) : s ? rule(s) : "";
-  return s ? <span className="mt-1 block w-fit max-w-full rounded-lg bg-success/10 px-2 py-1 text-[10px] font-bold text-success">{badge}</span> : null;
+  return s ? <span className="mt-1 block w-fit max-w-full rounded-lg bg-success/10 px-2 py-1 text-xs font-bold text-success">{badge}</span> : null;
 }
 export function ProductSchemes({ product }: { product: CatalogProduct }) {
   const { data = [], error } = useSchemes(); const { lang } = useLang(); const rule = useRule(); const { t } = useTranslation();
@@ -65,7 +65,7 @@ export function OffersList({ products }: { products: CatalogProduct[] }) {
         {schemeText(s, lang, "description") && <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{schemeText(s, lang, "description")}</p>}
         <SchemeTerms scheme={s} />
         {items.length > 0 && <p className="mt-2 text-xs text-foreground">{items.map((p) => p.name).join(", ")}</p>}
-        <p className="mt-2 text-[11px] text-muted-foreground">{t("quote.offerAuto")}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{t("quote.offerAuto")}</p>
       </div>
     </li>;
   })}</ul>;

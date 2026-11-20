@@ -123,7 +123,7 @@ function MenuItem({
       </span>
       <span className="flex-1 truncate text-[15px] font-medium text-foreground">{label}</span>
       {!!badge && badge > 0 && (
-        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[11px] font-bold text-primary-foreground">
+        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-bold text-primary-foreground">
           {badge}
         </span>
       )}
@@ -477,7 +477,7 @@ function Account() {
                 type="button"
                 aria-pressed={lang === l}
                 onClick={() => choose(l)}
-                className={`min-h-9 min-w-11 rounded-full px-2 text-xs font-bold ${lang === l ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+                className={`min-h-11 min-w-11 rounded-full px-2 text-xs font-bold ${lang === l ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
               >
                 {l === "en" ? "EN" : l === "hi" ? "हिं" : "मरा"}
               </button>

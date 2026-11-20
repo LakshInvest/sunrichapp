@@ -197,5 +197,5 @@ function TicketChip({ status }: { status: string }) {
   const { t } = useTranslation();
   const k = status === "closed" ? "closed" : status === "open" ? "progress" : "open";
   const cls = k === "closed" ? "bg-muted text-muted-foreground" : k === "progress" ? "bg-secondary/15 text-primary" : "bg-warning/20 text-warning-foreground";
-  return <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${cls}`}>{t(`quote.ticket.${k}`)}</span>;
+  return <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold ${cls}`}>{t(`quote.ticket.${k}`)}</span>;
 }

@@ -15,7 +15,7 @@ export function QueryChip({ status, className }: { status: string; className?: s
   return (
     <span
       className={cn(
-        "inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-bold",
+        "inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-bold",
         styles,
         className,
       )}

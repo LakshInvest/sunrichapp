@@ -10,9 +10,9 @@ export function brandVisibility(settings: Record<string, unknown> = {}) {
   };
 }
 
-/** Source order: own setting → Home hero photo → none (navy). */
-export function pickPhoto(own: string | null | undefined, hero: string | null | undefined): string | null {
-  return own || hero || null;
+/** Only the screen's own Command Center photo; never the Home banner. None → brand blue. */
+export function pickPhoto(own: string | null | undefined, _hero?: string | null | undefined): string | null {
+  return own || null;
 }
 
 /** Save the resolved URLs where the inline launch script and the login screen read them. */
@@ -34,9 +34,7 @@ export function cacheBrandPhotos(p: BrandPhotos): void {
     if (p.logo) localStorage.setItem("sunrich.logoImg", p.logo);
     else localStorage.removeItem("sunrich.logoImg");
     if (p.texts) localStorage.setItem("sunrich.loginTexts", JSON.stringify(p.texts));
-    // Hero photo fallback: keep the bottle/hand (right side) in view.
-    if (!p.launch && p.hero) localStorage.setItem("sunrich.launchPos", "70% center");
-    else localStorage.removeItem("sunrich.launchPos");
+    localStorage.removeItem("sunrich.launchPos");
   } catch {
     /* best effort */
   }

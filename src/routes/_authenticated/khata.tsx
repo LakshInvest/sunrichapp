@@ -155,7 +155,7 @@ function KhataPage() {
                 role="tab"
                 aria-selected={filter === f}
                 onClick={() => setFilter(f)}
-                className={`min-h-10 rounded-lg text-sm font-semibold ${filter === f ? "bg-card text-primary shadow-sm" : "text-muted-foreground"}`}
+                className={`min-h-11 rounded-lg text-sm font-semibold ${filter === f ? "bg-card text-primary shadow-sm" : "text-muted-foreground"}`}
               >
                 {t(`khata.filter.${f}`)}
               </button>
@@ -174,7 +174,7 @@ function KhataPage() {
             <EmptyState title={t("khata.noEntries")} body="" />
           ) : (
             <div className="mt-4" data-testid="khata-entries">
-              <div className="grid grid-cols-[1fr_4.25rem_4.25rem_4.75rem] gap-1 px-1 pb-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              <div className="grid grid-cols-[1fr_4.25rem_4.25rem_4.75rem] gap-1 px-1 pb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
                 <span>{t("khata2.colDate")}</span>
                 <span className="text-right">{t("khata2.colBill")}</span>
                 <span className="text-right">{t("khata2.colPaid")}</span>
@@ -194,8 +194,8 @@ function KhataPage() {
                         >
                           <span className="min-w-0">
                             <span className={`flex items-center gap-1 break-words font-medium ${entryTone(r.kind)}`}>{(() => { const I = KIND_ICON[r.kind]; return <I className="h-3.5 w-3.5 shrink-0" aria-hidden />; })()}{(() => { const l = entryLabel(r); return "key" in l ? t(l.key) : l.text; })()}</span>
-                            {r.refNo && <span className="block truncate text-[11px] text-muted-foreground">{r.refNo}</span>}
-                            {(r.kind === "credit" || r.kind === "debit" || r.kind === "adjustment" || r.kind === "advance") && r.details && <span className="block break-words text-[11px] text-muted-foreground">{r.details}</span>}
+                            {r.refNo && <span className="block truncate text-xs text-muted-foreground">{r.refNo}</span>}
+                            {(r.kind === "credit" || r.kind === "debit" || r.kind === "adjustment" || r.kind === "advance") && r.details && <span className="block break-words text-xs text-muted-foreground">{r.details}</span>}
                           </span>
                           <span className="text-right font-semibold text-destructive">{r.debit > 0 ? formatINR(r.debit) : ""}</span>
                           <span className="text-right font-semibold text-success">{r.credit > 0 ? formatINR(r.credit) : ""}</span>
@@ -258,7 +258,7 @@ function ProofRow({ p }: { p: KhataProof }) {
           {t("khata.kind.payment")} · {formatINR(p.amount)}
         </span>
         <span
-          className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${
+          className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${
             pending ? "bg-accent/20 text-accent-foreground" : "bg-destructive/10 text-destructive"
           }`}
         >
@@ -275,7 +275,7 @@ function ProofRow({ p }: { p: KhataProof }) {
       ) : (
         <>
           <span className="mt-1 block text-xs font-medium text-destructive">✕ {t("khata2.rejected", { reason: p.rejectReason || t("khata2.noReason") })}</span>
-          <Link to="/khata/pay" className="mt-2 inline-flex min-h-10 items-center rounded-full border border-destructive/40 px-4 text-xs font-bold text-destructive">
+          <Link to="/khata/pay" className="mt-2 inline-flex min-h-11 items-center rounded-full border border-destructive/40 px-4 text-xs font-bold text-destructive">
             {t("khata2.sendAgain")}
           </Link>
         </>

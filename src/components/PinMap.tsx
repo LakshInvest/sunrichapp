@@ -87,7 +87,7 @@ export function PinMap({
       <div className={`${className} flex items-center justify-center gap-2 bg-muted text-muted-foreground`}>
         <MapPin className="h-4 w-4 text-secondary" aria-hidden />
         <span className="text-xs font-medium">📍 {value.lat.toFixed(4)}, {value.lng.toFixed(4)}</span>
-        {getMapsError() && <span className="text-[10px] opacity-60" data-testid="maps-error">{getMapsError()}</span>}
+        {getMapsError() && <span className="text-xs opacity-60" data-testid="maps-error">{getMapsError()}</span>}
       </div>
     );
   }

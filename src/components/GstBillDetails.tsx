@@ -34,7 +34,7 @@ export function GstBillDetails({ d }: { d: OrderDispatch | null }) {
       {e && (
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 space-y-1">
-            {e.sandbox && <span data-testid="test-bill" className="inline-block rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">{t("gstBill.testBill")}</span>}
+            {e.sandbox && <span data-testid="test-bill" className="inline-block rounded bg-muted px-1.5 py-0.5 text-xs font-semibold text-muted-foreground">{t("gstBill.testBill")}</span>}
             <p className="flex items-center gap-1" data-testid="irn">
               <span className="text-muted-foreground">IRN </span><b className="break-all print:hidden">{shortIrn(e.irn)}</b><b className="hidden break-all print:inline">{e.irn}</b>
               <button type="button" onClick={() => void copy(e.irn)} aria-label={t("gstBill.copyIrn")} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-secondary print:hidden"><Copy className="h-3.5 w-3.5" /></button>

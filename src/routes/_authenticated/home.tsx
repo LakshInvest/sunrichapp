@@ -428,7 +428,7 @@ function Home() {
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/60 to-primary/10" aria-hidden />
                 <div className="relative z-10 flex max-w-[75%] flex-col gap-1 p-4">
                   {banner.tag && (
-                    <span className="w-fit rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-bold text-accent-foreground">
+                    <span className="w-fit rounded-full bg-accent px-2.5 py-0.5 text-xs font-bold text-accent-foreground">
                       {loc(banner.tag, lang)}
                     </span>
                   )}
@@ -587,7 +587,7 @@ function Home() {
                   type="button"
                   onClick={() => navigate({ to: deliveryBell ? "/inbox" : "/notifications" })}
                   aria-label={t("home.updatesBell")}
-                  className="relative flex h-10 w-10 items-center justify-center rounded-full"
+                  className="relative flex h-11 w-11 items-center justify-center rounded-full"
                 >
                   <Bell className="h-5 w-5 text-primary-foreground" />
                   {deliveryBell && newCount > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-bold text-accent-foreground">{newCount > 99 ? "99+" : newCount}</span> : orderUpdates > 0 && <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold text-destructive-foreground">{orderUpdates > 99 ? "99+" : orderUpdates}</span>}
@@ -624,7 +624,7 @@ function Home() {
                   type="button"
                   onClick={() => navigate({ to: deliveryBell ? "/inbox" : "/notifications" })}
                   aria-label={t("home.updatesBell")}
-                  className="relative flex h-10 w-10 items-center justify-center rounded-full"
+                  className="relative flex h-11 w-11 items-center justify-center rounded-full"
                 >
                   <Bell className="h-5 w-5 text-primary-foreground" />
                   {deliveryBell && newCount > 0 ? <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-bold text-accent-foreground">{newCount > 99 ? "99+" : newCount}</span> : orderUpdates > 0 && <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold text-destructive-foreground">{orderUpdates > 99 ? "99+" : orderUpdates}</span>}

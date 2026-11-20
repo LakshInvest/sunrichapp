@@ -93,7 +93,7 @@ function Message({
         }`}
       >
         {staff && (
-          <p className="mb-0.5 text-[11px] font-bold text-secondary">
+          <p className="mb-0.5 text-xs font-bold text-secondary">
             {t("queries.staffLabel", { name: staffName || "Sunrich" })}
           </p>
         )}
@@ -127,7 +127,7 @@ function Message({
             {broken && <span className="sr-only">{t("queries.attachFailed")}</span>}
           </a>
         )}
-        <p className={`mt-1 text-[11px] ${staff ? "text-muted-foreground" : "text-primary-foreground/70"}`}>
+        <p className={`mt-1 text-xs ${staff ? "text-muted-foreground" : "text-primary-foreground/70"}`}>
           {timeLabel(m.createdAt, lang)}
         </p>
       </div>
@@ -311,7 +311,7 @@ function Thread() {
             <p className="min-w-0 truncate text-sm font-semibold text-foreground">
               {parsePriceRequestSubject(query.subject)?.label}
             </p>
-            <span className="ml-auto shrink-0 rounded-full bg-secondary/15 px-2 py-0.5 text-[11px] font-bold text-secondary">
+            <span className="ml-auto shrink-0 rounded-full bg-secondary/15 px-2 py-0.5 text-xs font-bold text-secondary">
               {t("queries.priceRequestTag")}
             </span>
           </div>

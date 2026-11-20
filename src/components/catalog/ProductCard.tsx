@@ -143,30 +143,30 @@ export function ProductCard({
   return (
     <div className="flex h-full flex-col rounded-2xl bg-card p-2 shadow-[0_1px_8px_-2px_color-mix(in_oklab,var(--primary)_14%,transparent)]">
       <button type="button" onClick={onOpen} onPointerDown={prefetch} aria-label={name} className="block aspect-square w-full overflow-hidden rounded-xl bg-card">
-        <SmartImage width={400} src={product.imageUrl ?? product.images[0] ?? null} alt={name} className="h-full w-full bg-card object-contain mix-blend-multiply" />
+        <SmartImage width={400} src={product.imageUrl ?? product.images[0] ?? null} alt={name} caption={pack || undefined} className="h-full w-full bg-card object-contain mix-blend-multiply" />
       </button>
-      <button type="button" onClick={onOpen} className="mt-1 text-left">
+      <button type="button" onClick={onOpen} className="mt-1 min-h-11 text-left">
         <p className="truncate text-sm font-bold leading-snug text-foreground">{name}</p>
         <p className="truncate text-xs leading-tight text-muted-foreground">{pack || "\u00a0"}</p>
       </button>
       <SchemeBadge product={product} />
-      <div className="mt-1 flex h-10 items-center gap-2">
+      <div className="mt-1 flex h-11 items-center gap-2">
         <div className="ml-auto shrink-0">
         {locked ? (
-          <span className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground"><Lock className="h-3.5 w-3.5 text-accent" aria-hidden />{t("cart.orderingAfterApproval")}</span>
+          <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground"><Lock className="h-3.5 w-3.5 text-accent" aria-hidden />{t("cart.orderingAfterApproval")}</span>
         ) : qty === 0 ? (
           <button
             type="button"
             onClick={onAdd}
             disabled={disabled}
             title={blocked ? t("cart.orderingAfterApproval") : offline ? t("offline.hint") : undefined}
-            className="flex h-9 items-center justify-center gap-0.5 rounded-full bg-primary px-3 text-sm font-bold text-primary-foreground shadow-sm transition active:scale-95 disabled:opacity-50"
+            className="flex h-11 items-center justify-center gap-0.5 rounded-full bg-primary px-3 text-sm font-bold text-primary-foreground shadow-sm transition active:scale-95 disabled:opacity-50"
           >
             <Plus className="h-4 w-4" aria-hidden />
             {t("home.addToCart")}
           </button>
         ) : (
-          <QtyStepper compact className="h-9 w-[100px]" qty={qty} onInc={onInc} onDec={onDec} onSet={(n) => (onSetQty ? onSetQty(n) : n === 0 && onDec())} max={product.maxOrderQty} />
+          <QtyStepper compact className="h-11 w-[100px]" qty={qty} onInc={onInc} onDec={onDec} onSet={(n) => (onSetQty ? onSetQty(n) : n === 0 && onDec())} max={product.maxOrderQty} />
         )}
         </div>
       </div>

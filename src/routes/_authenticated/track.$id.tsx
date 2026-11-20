@@ -155,9 +155,9 @@ function OrderPage() {
                     <div className="mt-1.5 flex items-center justify-between gap-2">
                       <span className="text-xs text-muted-foreground">{formatINR(i.rate ?? 0)} × {q}</span>
                       <span className="flex items-center rounded-full border border-border">
-                        <button type="button" aria-label={t("home.decreaseQty")} onClick={() => setEdits((e) => ({ ...e, [i.line_id]: Math.max(0, q - 1) }))} className="flex h-9 w-9 items-center justify-center"><Minus className="h-4 w-4" /></button>
+                        <button type="button" aria-label={t("home.decreaseQty")} onClick={() => setEdits((e) => ({ ...e, [i.line_id]: Math.max(0, q - 1) }))} className="flex h-11 w-11 items-center justify-center"><Minus className="h-4 w-4" /></button>
                         <input inputMode="numeric" aria-label={t("home.typeQty")} value={q} onChange={(e) => setEdits((x) => ({ ...x, [i.line_id]: parseInt(e.target.value.replace(/\D/g, "") || "0", 10) }))} className="w-10 bg-transparent text-center text-sm font-bold outline-none" />
-                        <button type="button" aria-label={t("home.increaseQty")} onClick={() => setEdits((e) => ({ ...e, [i.line_id]: q + 1 }))} className="flex h-9 w-9 items-center justify-center"><Plus className="h-4 w-4" /></button>
+                        <button type="button" aria-label={t("home.increaseQty")} onClick={() => setEdits((e) => ({ ...e, [i.line_id]: q + 1 }))} className="flex h-11 w-11 items-center justify-center"><Plus className="h-4 w-4" /></button>
                       </span>
                     </div>
                     {!!i.discount && <p className="mt-1 text-xs font-semibold text-success">{t("quote.discount")} −{formatINR(i.discount)}</p>}
@@ -235,7 +235,7 @@ function OrderPage() {
         ))}
         {step >= 0 && !(x && x.parts.length > 0) && d.parts.map((p) => (
           <section key={p.order_no} className="rounded-2xl bg-card p-4 shadow-sm">
-            <div className="flex items-center justify-between gap-2"><p className="text-sm font-bold text-primary">{p.order_no}</p><span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${TONE_CLASS[statusTone(p.status)]}`}>{t(`quote.status.${p.status}`, { defaultValue: p.status })}</span></div>
+            <div className="flex items-center justify-between gap-2"><p className="text-sm font-bold text-primary">{p.order_no}</p><span className={`rounded-full px-2 py-0.5 text-xs font-bold ${TONE_CLASS[statusTone(p.status)]}`}>{t(`quote.status.${p.status}`, { defaultValue: p.status })}</span></div>
             {p.packs != null && <p className="mt-1 text-xs text-muted-foreground">{t("quote.packs", { count: p.packs })}</p>}
             {p.vehicle_no && <p className="mt-2 flex items-center gap-2 text-base font-bold tracking-wide text-foreground"><Truck className="h-4 w-4 text-secondary" />{p.vehicle_no}</p>}
             {p.transporter && <p className="text-xs text-muted-foreground">{p.transporter}</p>}
@@ -249,9 +249,9 @@ function OrderPage() {
         {o.delivery_mode !== "pickup" && o.address && <p className="rounded-2xl bg-card p-4 text-sm text-foreground shadow-sm"><span className="block text-xs font-semibold text-muted-foreground">{t("quote.step.address")}</span>{o.address}</p>}
 
         <section className="rounded-2xl bg-card p-4 shadow-sm">
-          <div className="flex items-center justify-between"><p className="text-sm font-bold text-foreground">{t("quote.notes")}</p><button type="button" disabled={offline} onClick={() => setNoteOpen(true)} className="flex min-h-10 items-center gap-1 rounded-xl px-2 text-sm font-bold text-primary disabled:opacity-50"><StickyNote className="h-4 w-4" />{t("quote.writeNote")}</button></div>
+          <div className="flex items-center justify-between"><p className="text-sm font-bold text-foreground">{t("quote.notes")}</p><button type="button" disabled={offline} onClick={() => setNoteOpen(true)} className="flex min-h-11 items-center gap-1 rounded-xl px-2 text-sm font-bold text-primary disabled:opacity-50"><StickyNote className="h-4 w-4" />{t("quote.writeNote")}</button></div>
           {d.notes.length === 0 ? <p className="mt-1 text-xs text-muted-foreground">{t("quote.noNotes")}</p> : (
-            <ul className="mt-2 space-y-2">{d.notes.map((n, i) => <li key={i} className="rounded-xl bg-muted px-3 py-2"><p className="text-sm text-foreground">{n.body}</p><p className="mt-0.5 text-[11px] text-muted-foreground">{who(n.by)} · {indDateTime(n.at, lang)}</p></li>)}</ul>
+            <ul className="mt-2 space-y-2">{d.notes.map((n, i) => <li key={i} className="rounded-xl bg-muted px-3 py-2"><p className="text-sm text-foreground">{n.body}</p><p className="mt-0.5 text-xs text-muted-foreground">{who(n.by)} · {indDateTime(n.at, lang)}</p></li>)}</ul>
           )}
         </section>
 
@@ -292,5 +292,5 @@ function OrderPage() {
 }
 
 function FreeTag({ t }: { t: (k: string) => string }) {
-  return <span className="ml-1.5 rounded bg-success/15 px-1.5 py-0.5 text-[10px] font-bold text-success">{t("quote.free")}</span>;
+  return <span className="ml-1.5 rounded bg-success/15 px-1.5 py-0.5 text-xs font-bold text-success">{t("quote.free")}</span>;
 }

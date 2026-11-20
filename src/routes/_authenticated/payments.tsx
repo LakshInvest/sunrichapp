@@ -204,7 +204,7 @@ function BillsTab({ lang }: { lang: string }) {
                   <div className="flex items-center justify-between gap-3">
                     <p className="min-w-0 truncate text-sm font-bold text-foreground">{b.refNo}</p>
                     {b.daysOverdue > 0 && (
-                      <span className="shrink-0 rounded-full bg-destructive/10 px-2.5 py-1 text-[11px] font-bold text-destructive">
+                      <span className="shrink-0 rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-bold text-destructive">
                         {t("payments.overdueChip")}
                       </span>
                     )}
@@ -448,7 +448,7 @@ function StatementTab({ lang }: { lang: string }) {
                   <div className="shrink-0 text-right">
                     {r.debit > 0 && <p className="text-sm font-semibold text-foreground">{formatINR(r.debit)}</p>}
                     {r.credit > 0 && <p className="text-sm font-semibold text-success">−{formatINR(r.credit)}</p>}
-                    <p className="text-[11px] text-muted-foreground">{formatINR(r.balance)}</p>
+                    <p className="text-xs text-muted-foreground">{formatINR(r.balance)}</p>
                   </div>
                 </div>
               </li>
@@ -458,7 +458,7 @@ function StatementTab({ lang }: { lang: string }) {
             <span className="text-sm font-semibold text-foreground">{t("payments.closing")}</span>
             <span className="text-base font-bold text-primary">{formatINR(closing)}</span>
           </div>
-          <p className="mt-2 text-center text-[11px] text-muted-foreground">
+          <p className="mt-2 text-center text-xs text-muted-foreground">
             {t("payments.debit")} · {t("payments.credit")}
           </p>
         </>

@@ -129,5 +129,5 @@ export function PayCard({
 export function PayChip({ k, tone }: { k: string; tone: "ok" | "amber" | "grey" }) {
   const { t } = useTranslation();
   const cls = tone === "ok" ? "bg-secondary/15 text-primary" : tone === "amber" ? "bg-warning/20 text-warning-foreground" : "bg-muted text-muted-foreground";
-  return <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold ${cls}`}>{t(`pay.chip.${k}`)}</span>;
+  return <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${cls}`}>{t(`pay.chip.${k}`)}</span>;
 }

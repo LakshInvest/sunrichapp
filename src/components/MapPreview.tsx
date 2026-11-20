@@ -73,7 +73,7 @@ export default function MapPreview({
       <div className={`${className} flex flex-col items-center justify-center gap-1 bg-muted px-3 text-center text-muted-foreground`}>
         <MapPin className="h-6 w-6 text-secondary" aria-hidden />
         {address && <span className="line-clamp-2 text-xs font-medium text-foreground">{address}</span>}
-        {getMapsError() && <span className="text-[10px] opacity-60" data-testid="maps-error">{getMapsError()}</span>}
+        {getMapsError() && <span className="text-xs opacity-60" data-testid="maps-error">{getMapsError()}</span>}
       </div>
     );
   }

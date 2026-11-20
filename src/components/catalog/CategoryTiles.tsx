@@ -85,7 +85,7 @@ export function CategoryTiles({ tiles, onOpen }: { tiles: Tile[]; onOpen: (code:
           className="flex w-[calc((100vw-1.5rem-2.25rem)/4)] max-w-[88px] shrink-0 flex-col items-center gap-1.5 text-center transition active:scale-95"
         >
           <span
-            className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl"
+            className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl"
             style={{ backgroundColor: TILE_TINTS[i % TILE_TINTS.length] }}
           >
             <TileArt tile={tile} />

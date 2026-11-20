@@ -14,7 +14,7 @@ import { openExternal } from "@/lib/native";
 export function DeliveryOtpCard({ otp }: { otp: string }) {
   const { t } = useTranslation();
   return (
-    <section className="mt-4 rounded-2xl border-2 border-secondary bg-secondary/10 p-4 text-center" aria-live="polite">
+    <section className="mt-4 rounded-xl border-2 border-secondary bg-secondary/10 p-4 text-center" aria-live="polite">
       <p className="flex items-center justify-center gap-2 text-sm font-bold">
         <KeyRound className="h-4 w-4 text-secondary" aria-hidden /> {t("pod.otpTitle")}
       </p>
@@ -33,7 +33,7 @@ export function DeliveredLines({ order, proof }: { order: OrderDto; proof: Deliv
   const empties = proof.lines.reduce((s, l) => s + l.empties, 0);
   if (!proof.lines.length) return null;
   return (
-    <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
+    <section className="mt-4 rounded-xl border border-border bg-card p-4 shadow-sm">
       <p className="flex items-center gap-2 text-sm font-bold">
         <PackageCheck className="h-4 w-4 text-secondary" aria-hidden /> {t("pod.deliveredTitle")}
       </p>
@@ -76,7 +76,7 @@ export function ProofOfDelivery({ proof }: { proof: DeliveryProof }) {
   const { t, i18n } = useTranslation();
   if (!proof.deliveredAt && !proof.photoUrl && !proof.signatureUrl) return null;
   return (
-    <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
+    <section className="mt-4 rounded-xl border border-border bg-card p-4 shadow-sm">
       <p className="text-sm font-bold">{t("pod.title")}</p>
       {proof.otpVerified && (
         <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-secondary/15 px-2.5 py-1 text-xs font-bold text-primary">
@@ -143,7 +143,7 @@ export function PickupPass({ order, lang, onChanged, offline }: { order: OrderDt
     }
   };
   return (
-    <section className="mt-4 overflow-hidden rounded-2xl border border-primary/30 bg-card shadow-sm">
+    <section className="mt-4 overflow-hidden rounded-xl border border-primary/30 bg-card shadow-sm">
       <div className="flex items-center gap-2 bg-primary px-4 py-2.5 text-primary-foreground">
         <Ticket className="h-4 w-4" aria-hidden />
         <p className="text-sm font-bold">{t("pickupPass.title")}</p>

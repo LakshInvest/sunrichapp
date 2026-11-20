@@ -365,7 +365,13 @@
     "deleteSubject": "Delete my account",
     "deleteMessage": "Please delete my account. Reason: {{reason}}",
     "deleteSentTitle": "Request sent",
-    "deleteSentBody": "Request sent. Sunrich will contact you within 7 days."
+    "deleteSentBody": "Request sent. Sunrich will contact you within 7 days.",
+    "deletePoint1": "Your account will be closed within 7 days.",
+    "deletePoint2": "Your name, contact and address details will be removed.",
+    "deletePoint3": "Bills and tax records are kept for the time required by law.",
+    "deletePoint4": "Unpaid bills must be cleared first.",
+    "deletePending": "Delete request received – we will close your account within 7 days",
+    "deleteMine": "Delete my account"
   },
   "register": {
     "title": "Complete your registration",
@@ -1019,7 +1025,18 @@
     "deleteStep2": "Go to Account.",
     "deleteStep3": "Tap “Delete account” and confirm.",
     "deleteStep4": "We will finish within 30 days and tell you on WhatsApp.",
-    "deleteKept": "Bills and tax records are kept as long as the law requires."
+    "deleteKept": "Bills and tax records are kept as long as the law requires.",
+    "readInEnglish": "Read in English. This page is available in English only.",
+    "agreePre": "By continuing you agree to the",
+    "agreeAnd": "and",
+    "webIntro": "Ask us to delete your Sunrich account. Enter the mobile number you sign in with.",
+    "mobile": "Mobile number",
+    "reason": "Reason (optional)",
+    "understand": "I understand my account will be closed within 7 days, and bills and tax records are kept as required by law.",
+    "send": "Send request",
+    "inAppTitle": "Delete from inside the App",
+    "mobileErr": "Enter a 10-digit mobile number",
+    "sent": "Request received."
   },
   "notices": {
     "title": "Notifications",

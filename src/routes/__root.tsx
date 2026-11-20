@@ -243,7 +243,7 @@ function RootComponent() {
       <InAppPushHost />
       {askExit && (
         <div role="alertdialog" aria-modal className="fixed inset-0 z-[80] flex items-center justify-center bg-primary/60 px-6 backdrop-blur-sm">
-          <div className="w-full max-w-xs rounded-2xl bg-card p-5 text-center shadow-xl">
+          <div className="w-full max-w-xs rounded-xl bg-card p-5 text-center shadow-xl">
             <h2 className="text-lg font-bold text-foreground">{i18n.t("native.exitTitle")}</h2>
             <p className="mt-1 text-sm text-muted-foreground">{i18n.t("native.exitBody")}</p>
             <div className="mt-4 flex gap-2">

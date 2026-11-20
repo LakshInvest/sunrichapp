@@ -60,7 +60,7 @@ function Support() {
 
       <div className="px-5 pt-5">
         <p className="text-sm text-muted-foreground">{t("support.intro")}</p>
-        <section className="mt-4 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <section className="mt-4 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           {s?.supportPhone && (
             <Row icon={Phone} label={t("support.call")} sub={s.supportPhone} onClick={() => openExternal(`tel:${s.supportPhone}`)} />
           )}

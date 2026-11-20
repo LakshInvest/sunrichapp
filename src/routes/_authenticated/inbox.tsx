@@ -192,7 +192,7 @@ function Inbox() {
         ) : orders == null ? (
           <div className="space-y-3">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-32 animate-pulse rounded-2xl bg-muted" />
+              <div key={i} className="h-32 animate-pulse rounded-xl bg-muted" />
             ))}
           </div>
         ) : visible.length === 0 ? (
@@ -210,7 +210,7 @@ function Inbox() {
               return (
                 <li
                   key={o.id}
-                  className={`rounded-2xl border bg-card p-4 shadow-sm transition ${
+                  className={`rounded-xl border bg-card p-4 shadow-sm transition ${
                     isNew ? "border-secondary/50 shadow-secondary/20" : "border-border"
                   }`}
                 >

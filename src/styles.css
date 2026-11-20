@@ -69,6 +69,7 @@
 }
 
 :root {
+  color-scheme: light only;
   /* Sunrich brand: navy #0D3278, aqua #0AAAED, background #F4F7FB */
   --brand-primary: #0d3278;
   --brand-accent: #0aaaed;

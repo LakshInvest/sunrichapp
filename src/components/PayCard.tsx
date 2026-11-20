@@ -59,7 +59,7 @@ export function PayCard({
   };
 
   return (
-    <div className="rounded-2xl bg-card p-4 text-left shadow-sm" data-testid={`pay-card-${method}`}>
+    <div className="rounded-xl bg-card p-4 text-left shadow-sm" data-testid={`pay-card-${method}`}>
       <p className="text-sm font-bold text-foreground">{title ?? (method === "upi" ? t("upi.payNow") : t("success.bankTitle"))}</p>
 
       {!hasDetails ? (

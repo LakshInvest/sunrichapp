@@ -9,7 +9,7 @@ export function OnTheWayCard({ d, lang }: { d: OrderDispatch | null; lang: strin
   if (!showOnTheWay(d) || !d) return null;
   const tel = callHref(d);
   return (
-    <section className="rounded-2xl border border-border bg-card p-4 shadow-sm" data-testid="on-the-way">
+    <section className="rounded-xl border border-border bg-card p-4 shadow-sm" data-testid="on-the-way">
       <p className="flex items-center gap-2 text-sm font-bold text-secondary"><Truck className="h-4 w-4" aria-hidden /> {t("dispatch.onTheWay")}</p>
       {d.vehicleNo && <p className="mt-2 text-2xl font-extrabold tracking-wide text-primary">{d.vehicleNo}</p>}
       {d.driverName && <p className="mt-1 text-sm text-foreground">{t("dispatch.driver")}: <b>{d.driverName}</b></p>}

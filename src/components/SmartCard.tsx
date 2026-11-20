@@ -38,7 +38,7 @@ export function SmartCard({
   };
   const first = lastDelivered?.lines[0];
   return (
-    <div className="relative mx-5 mb-2 mt-3 flex min-h-16 items-center gap-3 rounded-2xl bg-card p-3 pr-10 shadow-sm" data-testid={`smart-${pick.kind}`}>
+    <div className="relative mx-5 mb-2 mt-3 flex min-h-16 items-center gap-3 rounded-xl bg-card p-3 pr-10 shadow-sm" data-testid={`smart-${pick.kind}`}>
       {pick.kind === "reorder" && first && (
         <span className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-muted">
           <SmartImage width={48} src={thumb(first.productId)} alt="" className="h-12 w-12 object-contain p-1" />

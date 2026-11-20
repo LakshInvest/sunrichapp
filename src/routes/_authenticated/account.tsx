@@ -32,6 +32,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { clearSales, useSales } from "@/lib/sales";
+import { removePushToken } from "@/lib/push";
+
+const DELETE_KEY = "sunrich.deleteRequested";
 import { clearMyPhoto } from "@/lib/profile.functions";
 import { AddressSheet } from "@/components/AddressSheet";
 import { LanguageSheet } from "@/components/LanguageSheet";
@@ -170,6 +173,11 @@ function Account() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteDone, setDeleteDone] = useState(false);
+  const [deleteMsg, setDeleteMsg] = useState("");
+  const [deletePending, setDeletePending] = useState(false);
+  useEffect(() => {
+    try { setDeletePending(localStorage.getItem(DELETE_KEY) === "1"); } catch { /* ignore */ }
+  }, []);
   const settings = useAppSettings();
   const [jars, setJars] = useState<{ productId: string; balance: number }[]>([]);
   const cameraInput = useRef<HTMLInputElement>(null);
@@ -319,6 +327,7 @@ function Account() {
     await clearSales();
     await queryClient.cancelQueries();
     queryClient.clear();
+    await removePushToken();
     try {
       await supabase.rpc("record_logout");
     } catch {
@@ -332,12 +341,12 @@ function Account() {
     if (!deleteConfirm || deleting) return;
     setDeleting(true);
     try {
-      const { error } = await supabase.rpc("customer_raise_query", {
-        p_subject: t("account.deleteSubject"),
-        p_message: t("account.deleteMessage", { reason: deleteReason || "—" }),
-        p_context: "account_deletion",
-      });
+      const { data, error } = await supabase.rpc("my_request_account_deletion", deleteReason.trim() ? { p_reason: deleteReason.trim() } : {});
       if (error) throw error;
+      const msg = (data as { message?: string } | null)?.message;
+      setDeleteMsg(typeof msg === "string" && msg ? msg : t("account.deleteSentBody"));
+      try { localStorage.setItem(DELETE_KEY, "1"); } catch { /* ignore */ }
+      setDeletePending(true);
       setDeleteDone(true);
     } catch (e) {
       toast.error(serverMessage(e, t("queries.errSend")));
@@ -354,7 +363,7 @@ function Account() {
       <h1 className="text-2xl font-bold text-primary">{t("account.title")}</h1>
 
       {/* Profile header card */}
-      <section className="mt-3 overflow-hidden rounded-2xl bg-card shadow-sm">
+      <section className="mt-3 overflow-hidden rounded-xl bg-card shadow-sm">
         <div className="bg-primary px-5 py-6">
           <div className="flex items-center gap-4">
             <button
@@ -414,7 +423,7 @@ function Account() {
       </section>
 
       {settings?.showJarBalance && jars.length > 0 && (
-        <section className="mt-4 flex items-start gap-3 rounded-2xl border border-secondary/30 bg-secondary/5 p-4">
+        <section className="mt-4 flex items-start gap-3 rounded-xl border border-secondary/30 bg-secondary/5 p-4">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary/15">
             <GlassWater className="h-5 w-5 text-secondary" aria-hidden />
           </span>
@@ -444,7 +453,7 @@ function Account() {
 
 
       {/* One clean list */}
-      <section className="mt-4 rounded-2xl bg-card shadow-sm">
+      <section className="mt-4 rounded-xl bg-card shadow-sm">
         {settings?.multipleAddresses === false ? (
           <MenuItem icon={MapPin} label={t("account.deliveryAddress")} onClick={() => setAddressOpen(true)} />
         ) : (
@@ -518,6 +527,7 @@ function Account() {
         </div>
       </SheetDrawer>
 
+      {deletePending && <p className="mx-4 mb-24 rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{t("account.deletePending")}</p>}
       <BottomNav />
 
       <AddressSheet
@@ -645,6 +655,7 @@ function Account() {
               <Trash2 className="h-4 w-4" aria-hidden />
               {t("account.deleteAccount")}
             </button>}
+            {deletePending && <p className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{t("account.deletePending")}</p>}
             <p className="text-xs font-medium text-muted-foreground">
               {t("account.aboutVersion", { version: APP_VERSION })}
             </p>
@@ -654,7 +665,7 @@ function Account() {
 
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="mx-auto max-w-sm rounded-2xl">
+        <DialogContent className="mx-auto max-w-sm rounded-xl">
           <DialogHeader>
             <DialogTitle>{t("account.editNameTitle")}</DialogTitle>
           </DialogHeader>
@@ -677,7 +688,7 @@ function Account() {
       </Dialog>
 
       <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
-        <AlertDialogContent className="mx-auto max-w-sm rounded-2xl">
+        <AlertDialogContent className="mx-auto max-w-sm rounded-xl">
           <AlertDialogHeader>
             <AlertDialogTitle>{t("account.logoutTitle")}</AlertDialogTitle>
             <AlertDialogDescription>{t("account.logoutBody")}</AlertDialogDescription>
@@ -695,13 +706,13 @@ function Account() {
       </AlertDialog>
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent className="mx-auto max-w-sm rounded-2xl">
+        <DialogContent className="mx-auto max-w-sm rounded-xl">
           {deleteDone ? (
             <>
               <DialogHeader>
                 <DialogTitle>{t("account.deleteSentTitle")}</DialogTitle>
               </DialogHeader>
-              <p className="text-sm text-muted-foreground">{t("account.deleteSentBody")}</p>
+              <p className="text-sm text-muted-foreground">{deleteMsg || t("account.deleteSentBody")}</p>
               <Button onClick={() => void signOut()} className="min-h-12 rounded-xl">
                 {t("account.logout")}
               </Button>
@@ -711,19 +722,20 @@ function Account() {
               <DialogHeader>
                 <DialogTitle>{t("account.deleteAccount")}</DialogTitle>
               </DialogHeader>
-              <p className="text-sm leading-relaxed text-muted-foreground">{t("account.deleteBody")}</p>
+              <ul className="list-disc space-y-1 pl-5 text-sm leading-relaxed text-muted-foreground">
+                {(["deletePoint1", "deletePoint2", "deletePoint3", "deletePoint4"] as const).map((k) => (
+                  <li key={k}>{t(`account.${k}`)}</li>
+                ))}
+              </ul>
               <label className="flex flex-col gap-1.5">
                 <span className="text-sm font-medium text-foreground">{t("account.deleteReason")}</span>
-                <select
+                <textarea
                   value={deleteReason}
-                  onChange={(e) => setDeleteReason(e.target.value)}
-                  className="min-h-12 rounded-xl border border-input bg-card px-3 text-base text-foreground outline-none focus:border-secondary"
-                >
-                  <option value="">{t("account.deleteReasonNone")}</option>
-                  <option value={t("account.deleteReason1")}>{t("account.deleteReason1")}</option>
-                  <option value={t("account.deleteReason2")}>{t("account.deleteReason2")}</option>
-                  <option value={t("account.deleteReason3")}>{t("account.deleteReason3")}</option>
-                </select>
+                  onChange={(e) => setDeleteReason(e.target.value.slice(0, 300))}
+                  rows={3}
+                  placeholder={t("account.deleteReasonNone")}
+                  className="rounded-xl border border-input bg-card px-3 py-2 text-base text-foreground outline-none focus:border-secondary"
+                />
               </label>
               <label className="flex items-start gap-2.5">
                 <input
@@ -740,7 +752,7 @@ function Account() {
                 disabled={!deleteConfirm || deleting || offline}
                 className="min-h-12 rounded-xl"
               >
-                {deleting ? t("account.saving") : t("account.deleteRequest")}
+                {deleting ? t("account.saving") : t("account.deleteMine")}
               </Button>
               {offline && <p className="text-center text-xs text-muted-foreground">{t("offline.hint")}</p>}
             </>

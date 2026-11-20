@@ -36,8 +36,8 @@ export function PaySection({ orderId, orderNo, offline, onDone }: { orderId: str
     return () => { live = false; };
   }, [orderId, t]);
 
-  if (loadErr) return <p role="alert" className="rounded-2xl bg-card p-4 text-sm text-destructive shadow-sm">{loadErr}</p>;
-  if (!opts) return <div className="h-40 animate-pulse rounded-2xl bg-muted" />;
+  if (loadErr) return <p role="alert" className="rounded-xl bg-card p-4 text-sm text-destructive shadow-sm">{loadErr}</p>;
+  if (!opts) return <div className="h-40 animate-pulse rounded-xl bg-muted" />;
 
   const to = opts.pay_to ?? {};
   const payee = to.payee || to.firm || "";
@@ -71,7 +71,7 @@ export function PaySection({ orderId, orderNo, offline, onDone }: { orderId: str
   };
 
   return (
-    <section className="rounded-2xl bg-card p-4 shadow-sm" id="pay-now">
+    <section className="rounded-xl bg-card p-4 shadow-sm" id="pay-now">
       <p className="text-xs font-semibold text-muted-foreground">{t("quote.payTitle")}</p>
       <p className="text-3xl font-bold text-primary">{formatINR(opts.amount)}</p>
       {opts.required_method && <p className="mt-1 text-xs font-semibold text-accent-foreground">{t("quote.requiredMethod", { mode: t(`quote.method.${opts.required_method}`, { defaultValue: opts.required_method }) })}</p>}
@@ -79,7 +79,7 @@ export function PaySection({ orderId, orderNo, offline, onDone }: { orderId: str
         {opts.methods.map((m) => {
           const Icon = ICON[m];
           return (
-            <button key={m} type="button" aria-pressed={method === m} onClick={() => { setMethod(m); setErr(null); }} className={`flex min-h-20 flex-col items-center justify-center gap-1 rounded-2xl border-2 bg-background p-2 text-sm font-bold text-foreground ${method === m ? "border-secondary" : "border-transparent"}`}>
+            <button key={m} type="button" aria-pressed={method === m} onClick={() => { setMethod(m); setErr(null); }} className={`flex min-h-20 flex-col items-center justify-center gap-1 rounded-xl border-2 bg-background p-2 text-sm font-bold text-foreground ${method === m ? "border-secondary" : "border-transparent"}`}>
               <Icon className="h-6 w-6 text-secondary" />{t(`quote.method.${m}`)}
             </button>
           );

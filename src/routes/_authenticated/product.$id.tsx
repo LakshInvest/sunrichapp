@@ -231,6 +231,7 @@ function ProductDetail() {
           <div className="w-full shrink-0 snap-center">
             <SmartImage
               src={null}
+              caption={packLine(product, volume, lang, t) || undefined}
               alt={loc(product.name, lang)}
               className="aspect-square w-full object-cover"
             />
@@ -306,7 +307,7 @@ function ProductDetail() {
                   <button
                     type="button"
                     onClick={() => navigate({ to: "/product/$id", params: { id: s.id } })}
-                    className="block w-full overflow-hidden rounded-2xl border border-border bg-card p-2.5 text-left shadow-sm transition active:scale-[0.98]"
+                    className="block w-full overflow-hidden rounded-xl border border-border bg-card p-2.5 text-left shadow-sm transition active:scale-[0.98]"
                   >
                     <SmartImage width={160}
                       src={s.imageUrl ?? s.images[0] ?? null}

@@ -56,7 +56,7 @@ function ListSkeleton() {
   return (
     <div className="mt-3 space-y-3">
       {[0, 1, 2].map((i) => (
-        <div key={i} className="h-20 animate-pulse rounded-2xl bg-muted" />
+        <div key={i} className="h-20 animate-pulse rounded-xl bg-muted" />
       ))}
     </div>
   );
@@ -114,7 +114,7 @@ function Payments() {
 
       <div className="px-5 pt-5">
         {hasCredit && credit && tab === "bills" && (
-          <section className="mb-5 rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <section className="mb-5 rounded-xl border border-border bg-card p-4 shadow-sm">
             <p className="flex items-center gap-2 text-sm font-bold text-foreground">
               <Wallet className="h-4 w-4 text-secondary" aria-hidden />
               {t("payments.creditTitle")}
@@ -225,12 +225,12 @@ function BillsTab({ lang }: { lang: string }) {
                     <Link
                       to="/invoice/$id"
                       params={{ id: b.refId }}
-                      className="block rounded-2xl border border-border bg-card p-4 shadow-sm transition active:scale-[0.99]"
+                      className="block rounded-xl border border-border bg-card p-4 shadow-sm transition active:scale-[0.99]"
                     >
                       {body}
                     </Link>
                   ) : (
-                    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">{body}</div>
+                    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">{body}</div>
                   )}
                 </li>
               );
@@ -241,7 +241,7 @@ function BillsTab({ lang }: { lang: string }) {
       {paid.length > 0 && (
         <section className="mt-6">
           <h2 className="text-base font-bold text-foreground">{t("payments.paidBills")}</h2>
-          <ul className="mt-3 divide-y divide-border rounded-2xl border border-border bg-card">
+          <ul className="mt-3 divide-y divide-border rounded-xl border border-border bg-card">
             {paid.map((b) => (
               <li key={b.id}>
                 <Link to="/invoice/$id" params={{ id: b.id }} className="flex min-h-14 items-center gap-3 px-4 py-3">
@@ -274,7 +274,7 @@ function ReceiptsTab({ lang }: { lang: string }) {
     );
   if (!data.length) return <EmptyState title={t("payments.noReceiptsTitle")} body={t("payments.noReceiptsBody")} />;
   return (
-    <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
+    <ul className="divide-y divide-border rounded-xl border border-border bg-card">
       {data.map((r) => (
         <li key={r.id} className="flex min-h-14 items-center gap-3 px-4 py-3">
           <div className="min-w-0 flex-1">
@@ -333,7 +333,7 @@ function MineTab({ lang }: { lang: string }) {
     <>
       <ul className="space-y-3">
         {proofs.map((p) => (
-          <li key={p.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <li key={p.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <p className="min-w-0 truncate text-sm font-bold text-foreground">
                 {t(`payments.mode.${p.method}`, { defaultValue: p.method })}
@@ -403,7 +403,7 @@ function StatementTab({ lang }: { lang: string }) {
 
   return (
     <>
-      <div className="flex items-center justify-between gap-2 rounded-2xl border border-border bg-card p-1.5">
+      <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-card p-1.5">
         <button
           type="button"
           onClick={() => setMonth((v) => shiftMonth(v, -1))}
@@ -434,7 +434,7 @@ function StatementTab({ lang }: { lang: string }) {
         <EmptyState title={t("payments.noEntriesTitle")} body={t("payments.noEntriesBody")} />
       ) : (
         <>
-          <ul className="mt-4 divide-y divide-border rounded-2xl border border-border bg-card">
+          <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-card">
             {data.map((r, i) => (
               <li key={`${r.refNo}-${i}`} className="px-4 py-3">
                 <div className="flex items-start justify-between gap-3">
@@ -454,7 +454,7 @@ function StatementTab({ lang }: { lang: string }) {
               </li>
             ))}
           </ul>
-          <div className="mt-3 flex items-center justify-between rounded-2xl bg-primary/5 px-4 py-3">
+          <div className="mt-3 flex items-center justify-between rounded-xl bg-primary/5 px-4 py-3">
             <span className="text-sm font-semibold text-foreground">{t("payments.closing")}</span>
             <span className="text-base font-bold text-primary">{formatINR(closing)}</span>
           </div>

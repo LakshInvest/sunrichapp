@@ -154,9 +154,9 @@ function InvoiceScreen() {
         ) : inv === undefined ? (
           <>
             <div className="space-y-3">
-              <div className="h-24 animate-pulse rounded-2xl bg-muted" />
-              <div className="h-48 animate-pulse rounded-2xl bg-muted" />
-              <div className="h-32 animate-pulse rounded-2xl bg-muted" />
+              <div className="h-24 animate-pulse rounded-xl bg-muted" />
+              <div className="h-48 animate-pulse rounded-xl bg-muted" />
+              <div className="h-32 animate-pulse rounded-xl bg-muted" />
             </div>
             <SlowNotice loading onRetry={() => void load()} />
           </>

@@ -2,7 +2,7 @@ import appIcon from "@/assets/brand/sunrich-app-icon-final.png.asset.json";
 import { markFirstScreen } from "@/lib/native";
 import { AppLoader } from "@/components/AppLoader";
 import { BottleLoader } from "@/components/BottleLoader";
-import { createFileRoute, redirect, useNavigate, useRouter } from "@tanstack/react-router";
+import { Link, createFileRoute, redirect, useNavigate, useRouter } from "@tanstack/react-router";
 import { writeGate } from "@/lib/gate-cache";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent } from "react";
@@ -175,7 +175,7 @@ function WaterBox({
     <div
       style={checking ? { animationDelay: `${index * 0.12}s` } : undefined}
       className={cn(
-        "relative h-14 overflow-hidden rounded-2xl border transition",
+        "relative h-14 overflow-hidden rounded-xl border transition",
         size === "lg" ? "w-14" : "w-11",
         filled && !success && "animate-box-pop",
         checking && "animate-pin-wave",
@@ -961,6 +961,12 @@ function Login() {
               </button>
               <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
                 <span aria-hidden>🔒</span> {t("auth.secureNote")}
+              </p>
+              <p className="text-center text-xs text-muted-foreground">
+                {t("legal.agreePre")}{" "}
+                <Link to="/terms" className="font-medium text-primary underline underline-offset-2">{t("legal.terms")}</Link>{" "}
+                {t("legal.agreeAnd")}{" "}
+                <Link to="/privacy" className="font-medium text-primary underline underline-offset-2">{t("legal.privacy")}</Link>
               </p>
             </form>
           )}

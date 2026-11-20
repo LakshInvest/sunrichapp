@@ -154,7 +154,7 @@ function AskQuery() {
 
       <div className="flex-1 px-5 pb-10 pt-5">
         {productChip && (
-          <div className="mb-4 flex items-center gap-3 rounded-2xl border border-secondary/30 bg-secondary/10 px-3 py-2.5">
+          <div className="mb-4 flex items-center gap-3 rounded-xl border border-secondary/30 bg-secondary/10 px-3 py-2.5">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-card">
               <Package className="h-5 w-5 text-secondary" aria-hidden />
             </span>

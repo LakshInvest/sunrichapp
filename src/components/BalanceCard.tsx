@@ -9,9 +9,9 @@ export function BalanceCard({ bal, compact }: { bal: Balance | null; compact?: b
   const { t } = useTranslation();
   const { lang } = useLang();
   if (!bal)
-    return <div className="h-36 animate-pulse rounded-2xl bg-muted" aria-busy aria-label={t("common.loading")} />;
+    return <div className="h-36 animate-pulse rounded-xl bg-muted" aria-busy aria-label={t("common.loading")} />;
   return (
-    <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+    <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
       <p className="flex items-center gap-2 text-sm font-bold">
         <Wallet className="h-4 w-4 text-secondary" aria-hidden /> {t("balance.title")}
       </p>

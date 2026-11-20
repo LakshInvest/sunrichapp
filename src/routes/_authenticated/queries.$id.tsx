@@ -86,7 +86,7 @@ function Message({
     <div className={`flex items-start gap-2 ${staff ? "" : "flex-row-reverse"}`}>
       {staff && <StaffAvatar />}
       <div
-        className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[15px] shadow-sm ${
+        className={`max-w-[80%] rounded-xl px-3.5 py-2.5 text-[15px] shadow-sm ${
           staff
             ? "rounded-tl-sm border border-border bg-card text-foreground"
             : "rounded-tr-sm bg-primary text-primary-foreground"
@@ -304,7 +304,7 @@ function Thread() {
       <div ref={listRef} data-scroll-area className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4">
         {missing && <p className="mt-10 text-center text-sm text-muted-foreground">{t("queries.notFound")}</p>}
         {query && parsePriceRequestSubject(query.subject) && (
-          <div className="mb-3 flex items-center gap-2.5 rounded-2xl border border-secondary/30 bg-secondary/10 px-3 py-2">
+          <div className="mb-3 flex items-center gap-2.5 rounded-xl border border-secondary/30 bg-secondary/10 px-3 py-2">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-card">
               <Package className="h-4.5 w-4.5 text-secondary" aria-hidden />
             </span>
@@ -356,7 +356,7 @@ function Thread() {
                 disabled={!canAttach || sending || offline}
                 title={!canAttach ? t("queries.attachLocked") : offline ? t("offline.hint") : t("queries.camera")}
                 aria-label={t("queries.camera")}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-border bg-background text-foreground transition active:scale-95 disabled:opacity-40"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-foreground transition active:scale-95 disabled:opacity-40"
               >
                 <Camera className="h-5 w-5" aria-hidden />
               </button>
@@ -366,7 +366,7 @@ function Thread() {
                 disabled={!canAttach || sending || offline}
                 title={!canAttach ? t("queries.attachLocked") : offline ? t("offline.hint") : t("queries.chooseFile")}
                 aria-label={t("queries.chooseFile")}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-border bg-background text-foreground transition active:scale-95 disabled:opacity-40"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-foreground transition active:scale-95 disabled:opacity-40"
               >
                 <Paperclip className="h-5 w-5" aria-hidden />
               </button>
@@ -375,14 +375,14 @@ function Thread() {
                 onChange={(e) => setText(e.target.value)}
                 placeholder={t("queries.replyPlaceholder")}
                 aria-label={t("queries.replyPlaceholder")}
-                className="min-h-11 min-w-0 flex-1 rounded-2xl border border-border bg-background px-4 text-[15px] text-foreground outline-none placeholder:text-muted-foreground"
+                className="min-h-11 min-w-0 flex-1 rounded-xl border border-border bg-background px-4 text-[15px] text-foreground outline-none placeholder:text-muted-foreground"
               />
               <button
                 type="button"
                 onClick={() => void send()}
                 disabled={sending || offline || (!text.trim() && !file)}
                 aria-label={t("queries.send")}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm transition active:scale-95 disabled:opacity-40"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm transition active:scale-95 disabled:opacity-40"
               >
                 <Send className="h-5 w-5" aria-hidden />
               </button>

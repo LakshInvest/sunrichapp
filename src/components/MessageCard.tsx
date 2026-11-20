@@ -58,12 +58,12 @@ export function MessageCardHost() {
       onClick={dismissMessage}
     >
       <div
-        className="w-full max-w-xs rounded-2xl bg-card p-6 text-center shadow-xl animate-in zoom-in-95 duration-200"
+        className="w-full max-w-xs rounded-xl bg-card p-6 text-center shadow-xl animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <svg
           viewBox="0 0 60 60"
-          className="mx-auto h-20 w-20 rounded-2xl bg-secondary/10 p-3 text-secondary"
+          className="mx-auto h-20 w-20 rounded-xl bg-secondary/10 p-3 text-secondary"
           fill="none"
           stroke="currentColor"
           strokeWidth="2.5"

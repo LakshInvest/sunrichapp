@@ -299,7 +299,7 @@ function PayPage() {
           </div>
 
           {mode === "upi" && (
-            <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
+            <section className="space-y-3 rounded-xl border border-border bg-card p-4">
               {info === undefined ? (
                 <div className="h-24 animate-pulse rounded-xl bg-muted" />
               ) : info?.upiId ? (
@@ -348,7 +348,7 @@ function PayPage() {
           )}
 
           {mode === "cash" && (
-            <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
+            <section className="space-y-3 rounded-xl border border-border bg-card p-4">
               <p className="text-sm font-semibold">{t("khata.pay.cashTo")}</p>
               <div role="radiogroup" className="grid grid-cols-3 gap-2">
                 {(["office", "salesman", "driver"] as const).map((c) => (
@@ -376,7 +376,7 @@ function PayPage() {
           )}
 
           {mode === "bank" && (
-            <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
+            <section className="space-y-3 rounded-xl border border-border bg-card p-4">
               {info?.bank && (
                 <div>
                   <p className="text-sm font-semibold">{t("khata.pay.bankDetails")}</p>
@@ -398,7 +398,7 @@ function PayPage() {
           )}
 
           {mode === "cheque" && (
-            <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
+            <section className="space-y-3 rounded-xl border border-border bg-card p-4">
               <label className="block text-sm font-semibold">
                 {t("khata.pay.chequeNo")}
                 <input inputMode="numeric" value={chequeNo} onChange={(e) => setChequeNo(e.target.value.slice(0, 12))} className={field(errs["chequeNo"])} />
@@ -458,7 +458,7 @@ function AmountOption({ active, onClick, label, value }: { active: boolean; onCl
       role="radio"
       aria-checked={active}
       onClick={onClick}
-      className={`flex min-h-14 w-full items-center justify-between gap-3 rounded-2xl border-2 px-4 text-left ${
+      className={`flex min-h-14 w-full items-center justify-between gap-3 rounded-xl border-2 px-4 text-left ${
         active ? "border-primary bg-primary/5" : "border-border bg-card"
       }`}
     >

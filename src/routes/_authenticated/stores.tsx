@@ -98,7 +98,7 @@ function Stores() {
         </p>
       )}
       {rows?.length === 0 && (
-        <div className="mt-10 rounded-2xl bg-card p-6 text-center shadow-sm">
+        <div className="mt-10 rounded-xl bg-card p-6 text-center shadow-sm">
           <Store className="mx-auto h-8 w-8 text-secondary" aria-hidden />
           <p className="mt-2 font-semibold text-foreground">{q ? t("sales.noMatch") : t("sales.none")}</p>
         </div>
@@ -106,7 +106,7 @@ function Stores() {
       <ul className="mt-4 space-y-3">
         {rows?.map((r) => (
           <li key={r.id}>
-            <button type="button" onClick={() => void pick(r)} disabled={!!busy} className={`w-full rounded-2xl border bg-card p-4 text-left shadow-sm transition active:scale-[0.99] disabled:opacity-60 ${sales?.picked?.id === r.id ? "border-secondary" : "border-border"}`}>
+            <button type="button" onClick={() => void pick(r)} disabled={!!busy} className={`w-full rounded-xl border bg-card p-4 text-left shadow-sm transition active:scale-[0.99] disabled:opacity-60 ${sales?.picked?.id === r.id ? "border-secondary" : "border-border"}`}>
               <div className="flex items-start gap-2">
                 <p className="min-w-0 flex-1 truncate text-base font-bold text-primary">{r.business_name}</p>
                 {busy === r.id && <Loader2 className="h-4 w-4 animate-spin" />}

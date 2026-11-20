@@ -18,8 +18,8 @@ export function SwipeToRemove({
   const width = useRef(1);
 
   return (
-    <li className="relative overflow-hidden rounded-2xl">
-      {dx !== 0 && <div aria-hidden className="absolute inset-0 flex items-center justify-end rounded-2xl bg-destructive px-5 text-destructive-foreground">
+    <li className="relative overflow-hidden rounded-xl">
+      {dx !== 0 && <div aria-hidden className="absolute inset-0 flex items-center justify-end rounded-xl bg-destructive px-5 text-destructive-foreground">
         <Trash2 className="h-5 w-5" />
         <span className="ml-2 text-sm font-semibold">{label}</span>
       </div>}

@@ -44,7 +44,7 @@ export function AddressSheet({
           <DrawerDescription className="sr-only">{t("account.deliveryAddress")}</DrawerDescription>
         </DrawerHeader>
         <div className="px-4 pb-8">
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
             <div className="flex items-center gap-2.5">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary/15">
                 <MapPin className="h-4 w-4 text-secondary" aria-hidden />

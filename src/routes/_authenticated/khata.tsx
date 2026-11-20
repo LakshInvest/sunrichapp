@@ -250,7 +250,7 @@ function ProofRow({ p }: { p: KhataProof }) {
   const pending = p.status === "pending";
   return (
     <div
-      className={`rounded-2xl border px-4 py-3 ${pending ? "border-dashed border-accent/60 bg-accent/10" : "border-destructive/30 bg-destructive/5"}`}
+      className={`rounded-xl border px-4 py-3 ${pending ? "border-dashed border-accent/60 bg-accent/10" : "border-destructive/30 bg-destructive/5"}`}
       data-testid={pending ? "proof-pending" : "proof-rejected"}
     >
       <div className="flex items-center justify-between gap-3">

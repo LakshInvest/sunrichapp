@@ -160,7 +160,7 @@ function QueriesList() {
               key={q.id}
               to="/queries/$id"
               params={{ id: q.id }}
-              className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition active:scale-[0.99]"
+              className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm transition active:scale-[0.99]"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex min-w-0 items-center gap-2">

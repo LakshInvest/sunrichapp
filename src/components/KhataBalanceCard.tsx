@@ -5,7 +5,7 @@ import { balanceTone, type KhataSummary } from "@/lib/khata";
 /** Khata top: "Your balance ₹X" (red) + overdue, "₹X advance" (green) or "All clear ✓". Never the credit limit. */
 export function KhataBalanceCard({ sum }: { sum: KhataSummary | null; compact?: boolean }) {
   const { t } = useTranslation();
-  if (!sum) return <div className="h-24 animate-pulse rounded-2xl bg-muted" aria-busy aria-label={t("common.loading")} />;
+  if (!sum) return <div className="h-24 animate-pulse rounded-xl bg-muted" aria-busy aria-label={t("common.loading")} />;
   const tone = balanceTone(sum.balance);
   return (
     <section className="py-2" data-testid="khata-balance">

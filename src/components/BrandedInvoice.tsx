@@ -48,7 +48,7 @@ export function BrandedInvoice({ inv, firm, lang, gst: gstBlock }: { inv: Invoic
   }
 
   return (
-    <article className={`invoice-a4 overflow-hidden rounded-2xl border border-border bg-card text-foreground shadow-sm print:rounded-none print:border-0 print:shadow-none ${small ? "text-[10px]" : "text-[11px]"}`}>
+    <article className={`invoice-a4 overflow-hidden rounded-xl border border-border bg-card text-foreground shadow-sm print:rounded-none print:border-0 print:shadow-none ${small ? "text-[10px]" : "text-[11px]"}`}>
       <header className="flex items-start gap-3 p-4" style={{ background: head, color: "#fff" }}>
         {firm?.logoUrl && <img src={firm.logoUrl} alt="" className="h-12 w-12 shrink-0 rounded-lg bg-card object-contain p-1" />}
         <div className="min-w-0 flex-1">

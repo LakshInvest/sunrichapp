@@ -90,7 +90,7 @@ export function AddressSwitcher({
             type="button"
             onClick={() => openEditor(null, true)}
             disabled={offline}
-            className="mt-3 flex min-h-14 w-full items-center gap-3 rounded-2xl border border-border bg-card px-4 text-left transition active:scale-[0.99] disabled:opacity-50"
+            className="mt-3 flex min-h-14 w-full items-center gap-3 rounded-xl border border-border bg-card px-4 text-left transition active:scale-[0.99] disabled:opacity-50"
           >
             <Crosshair className="h-5 w-5 text-secondary" aria-hidden />
             <span className="text-sm font-semibold text-primary">{t("switcher.useCurrent")}</span>
@@ -104,7 +104,7 @@ export function AddressSwitcher({
               const Icon = LABEL_ICONS[a.label] ?? MapPin;
               const sel = a.id === selectedId;
               return (
-                <li key={a.id} className={`flex items-start gap-1 rounded-2xl border bg-card ${sel ? "border-primary" : "border-border"}`}>
+                <li key={a.id} className={`flex items-start gap-1 rounded-xl border bg-card ${sel ? "border-primary" : "border-border"}`}>
                   <button
                     type="button"
                     onClick={() => {
@@ -180,7 +180,7 @@ export function AddressSwitcher({
       /></Suspense>}
 
       <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
-        <AlertDialogContent className="mx-auto max-w-sm rounded-2xl">
+        <AlertDialogContent className="mx-auto max-w-sm rounded-xl">
           <AlertDialogHeader>
             <AlertDialogTitle>{t("addresses.deleteTitle")}</AlertDialogTitle>
             <AlertDialogDescription>{toDelete ? addressText(toDelete) : ""}</AlertDialogDescription>

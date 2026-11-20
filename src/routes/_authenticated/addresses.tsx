@@ -116,7 +116,7 @@ function Addresses() {
         ) : !list ? (
           <div className="space-y-3">
             {[0, 1].map((i) => (
-              <div key={i} className="h-28 animate-pulse rounded-2xl bg-muted" />
+              <div key={i} className="h-28 animate-pulse rounded-xl bg-muted" />
             ))}
           </div>
         ) : list.length === 0 ? (
@@ -132,7 +132,7 @@ function Addresses() {
         ) : (
           <ul className="space-y-3">
             {list.map((a) => (
-              <li key={a.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+              <li key={a.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-secondary" aria-hidden />
                   <span className="rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-bold text-primary">{t(labelKey(a.label))}</span>
@@ -213,7 +213,7 @@ function Addresses() {
       />
 
       <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
-        <AlertDialogContent className="mx-auto max-w-sm rounded-2xl">
+        <AlertDialogContent className="mx-auto max-w-sm rounded-xl">
           <AlertDialogHeader>
             <AlertDialogTitle>{t("addresses.deleteTitle")}</AlertDialogTitle>
             <AlertDialogDescription>{toDelete ? addressText(toDelete) : ""}</AlertDialogDescription>

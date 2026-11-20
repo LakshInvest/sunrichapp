@@ -107,7 +107,7 @@ function OrderPage() {
   );
 
   if (error && !d) return <PageShell>{header}<div className="px-5 pt-10"><ErrorState message={error} onRetry={() => void load()} /></div></PageShell>;
-  if (!d) return <PageShell>{header}<div className="space-y-3 px-5 pt-3">{[0, 1, 2].map((i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-muted" />)}</div></PageShell>;
+  if (!d) return <PageShell>{header}<div className="space-y-3 px-5 pt-3">{[0, 1, 2].map((i) => <div key={i} className="h-28 animate-pulse rounded-xl bg-muted" />)}</div></PageShell>;
 
   const o = d.order;
   const st = o.status;
@@ -135,7 +135,7 @@ function OrderPage() {
         </div>
 
         {st === "quote_requested" && (
-          <section className="rounded-2xl bg-card p-5 text-center shadow-sm">
+          <section className="rounded-xl bg-card p-5 text-center shadow-sm">
             <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-warning/20"><Clock className="h-7 w-7 animate-pulse text-warning-foreground" /></span>
             <p className="mt-3 text-lg font-bold text-primary">{t("quote.waitingTitle")}</p>
             <p className="mt-1 text-sm text-muted-foreground">{t("quote.sentBody")}</p>
@@ -144,7 +144,7 @@ function OrderPage() {
         )}
 
         {st === "quote_sent" && (
-          <section className="rounded-2xl bg-card p-4 shadow-sm">
+          <section className="rounded-xl bg-card p-4 shadow-sm">
             <div className="flex items-center justify-between gap-2"><p className="text-lg font-bold text-primary">{t("quote.rateCame")}</p>{left && <span className="rounded-full bg-warning/20 px-2.5 py-1 text-xs font-bold text-warning-foreground">{t("quote.timeLeft", { h: left.hours, m: left.minutes })}</span>}</div>
             <ul className="mt-3 divide-y divide-border">
               {paid.map((i) => {
@@ -180,7 +180,7 @@ function OrderPage() {
         )}
 
         {(st === "quote_expired" || st === "quote_rejected") && (
-          <section className="rounded-2xl bg-card p-5 text-center shadow-sm">
+          <section className="rounded-xl bg-card p-5 text-center shadow-sm">
             <p className="text-lg font-bold text-foreground">{t(st === "quote_expired" ? "quote.expiredTitle" : "quote.rejectedTitle")}</p>
             <div className="mt-3 text-left">{itemsPlain}</div>
             <button type="button" disabled={busy || offline} onClick={() => void act(() => requoteOrder(id), t("quote.sentTitle"))} className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary font-bold text-primary-foreground disabled:opacity-50"><RefreshCw className="h-4 w-4" />{t("quote.requote")}</button>
@@ -189,13 +189,13 @@ function OrderPage() {
 
         {(st === "quote_accepted" || st === "payment_rejected") && (
           <>
-            {st === "payment_rejected" && <p role="alert" className="rounded-2xl bg-destructive/10 p-4 text-sm font-semibold text-destructive">{t("quote.payRejected")}{lastReject?.reject_reason ? `: ${lastReject.reject_reason}` : ""}</p>}
+            {st === "payment_rejected" && <p role="alert" className="rounded-xl bg-destructive/10 p-4 text-sm font-semibold text-destructive">{t("quote.payRejected")}{lastReject?.reject_reason ? `: ${lastReject.reject_reason}` : ""}</p>}
             <PaySection orderId={id} orderNo={o.order_no} offline={offline} onDone={() => { toast.success(t("quote.paySent")); requestDataRefresh(); void load(); }} />
           </>
         )}
 
         {st === "payment_submitted" && (
-          <section className="rounded-2xl bg-card p-5 text-center shadow-sm">
+          <section className="rounded-xl bg-card p-5 text-center shadow-sm">
             <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent/20"><Loader2 className="h-7 w-7 animate-spin text-accent-foreground" /></span>
             <p className="mt-3 text-lg font-bold text-primary">{t("quote.payChecking")}</p>
             {d.payments[0] && <p className="mt-1 text-sm text-muted-foreground">{t(`quote.method.${d.payments[0].method}`, { defaultValue: d.payments[0].method })}{d.payments[0].reference ? ` · ${d.payments[0].reference}` : ""} · {formatINR(d.payments[0].amount ?? o.grand_total ?? 0)}</p>}
@@ -203,7 +203,7 @@ function OrderPage() {
         )}
 
         {step >= 0 && (
-          <section className="rounded-2xl bg-card p-4 shadow-sm">
+          <section className="rounded-xl bg-card p-4 shadow-sm">
             <ol className="space-y-3">
               <li className="flex items-center gap-3"><span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-primary-foreground"><Check className="h-4 w-4" /></span><span className="text-sm font-bold text-foreground">{t("quote.track.rate")}</span></li>
               {TRACK_STEPS.map((s, i) => (
@@ -234,7 +234,7 @@ function OrderPage() {
           </section>
         ))}
         {step >= 0 && !(x && x.parts.length > 0) && d.parts.map((p) => (
-          <section key={p.order_no} className="rounded-2xl bg-card p-4 shadow-sm">
+          <section key={p.order_no} className="rounded-xl bg-card p-4 shadow-sm">
             <div className="flex items-center justify-between gap-2"><p className="text-sm font-bold text-primary">{p.order_no}</p><span className={`rounded-full px-2 py-0.5 text-xs font-bold ${TONE_CLASS[statusTone(p.status)]}`}>{t(`quote.status.${p.status}`, { defaultValue: p.status })}</span></div>
             {p.packs != null && <p className="mt-1 text-xs text-muted-foreground">{t("quote.packs", { count: p.packs })}</p>}
             {p.vehicle_no && <p className="mt-2 flex items-center gap-2 text-base font-bold tracking-wide text-foreground"><Truck className="h-4 w-4 text-secondary" />{p.vehicle_no}</p>}
@@ -244,11 +244,11 @@ function OrderPage() {
           </section>
         ))}
 
-        {st === "cancelled" && <section className="rounded-2xl bg-muted p-4"><p className="font-bold text-muted-foreground">{t("status.cancelled")}</p>{cancelNote && <p className="mt-1 text-sm text-muted-foreground">{cancelNote}</p>}</section>}
+        {st === "cancelled" && <section className="rounded-xl bg-muted p-4"><p className="font-bold text-muted-foreground">{t("status.cancelled")}</p>{cancelNote && <p className="mt-1 text-sm text-muted-foreground">{cancelNote}</p>}</section>}
 
-        {o.delivery_mode !== "pickup" && o.address && <p className="rounded-2xl bg-card p-4 text-sm text-foreground shadow-sm"><span className="block text-xs font-semibold text-muted-foreground">{t("quote.step.address")}</span>{o.address}</p>}
+        {o.delivery_mode !== "pickup" && o.address && <p className="rounded-xl bg-card p-4 text-sm text-foreground shadow-sm"><span className="block text-xs font-semibold text-muted-foreground">{t("quote.step.address")}</span>{o.address}</p>}
 
-        <section className="rounded-2xl bg-card p-4 shadow-sm">
+        <section className="rounded-xl bg-card p-4 shadow-sm">
           <div className="flex items-center justify-between"><p className="text-sm font-bold text-foreground">{t("quote.notes")}</p><button type="button" disabled={offline} onClick={() => setNoteOpen(true)} className="flex min-h-11 items-center gap-1 rounded-xl px-2 text-sm font-bold text-primary disabled:opacity-50"><StickyNote className="h-4 w-4" />{t("quote.writeNote")}</button></div>
           {d.notes.length === 0 ? <p className="mt-1 text-xs text-muted-foreground">{t("quote.noNotes")}</p> : (
             <ul className="mt-2 space-y-2">{d.notes.map((n, i) => <li key={i} className="rounded-xl bg-muted px-3 py-2"><p className="text-sm text-foreground">{n.body}</p><p className="mt-0.5 text-xs text-muted-foreground">{who(n.by)} · {indDateTime(n.at, lang)}</p></li>)}</ul>
@@ -256,7 +256,7 @@ function OrderPage() {
         </section>
 
         {d.history.length > 0 && (
-          <details className="rounded-2xl bg-card p-4 shadow-sm"><summary className="cursor-pointer text-sm font-bold text-foreground">{t("quote.history")}</summary>
+          <details className="rounded-xl bg-card p-4 shadow-sm"><summary className="cursor-pointer text-sm font-bold text-foreground">{t("quote.history")}</summary>
             <ul className="mt-2 space-y-1.5">{d.history.map((h, i) => <li key={i} className="text-xs text-muted-foreground"><span className="font-semibold text-foreground">{t(`quote.status.${h.status ?? ""}`, { defaultValue: h.status ?? "" })}</span> · {who(h.by)} · {indDateTime(h.at, lang)}{h.note ? ` — ${h.note}` : ""}</li>)}</ul>
           </details>
         )}

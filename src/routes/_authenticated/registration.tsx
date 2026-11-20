@@ -216,7 +216,7 @@ function Wizard() {
           <div className="flex justify-center">
             <Logo />
           </div>
-          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
             <h1 className="text-xl font-bold text-primary">{t("registration.rejectedTitle")}</h1>
             {reg.rejectionReason && (
               <p className="mt-2 text-sm text-muted-foreground">
@@ -265,7 +265,7 @@ function TypeStep({ types, selected, error, onSelect, onNext }: { types: Custome
       <div className="flex flex-col gap-3">
         {(types ?? []).map((ty) => {
           const Icon = TYPE_ICONS[ty.iconKey] ?? Package;
-          return <Button key={ty.code} variant="outline" disabled={!ty.selectable} aria-pressed={selected === ty.code} onClick={() => onSelect(ty.code)} className={`h-auto min-h-20 justify-start gap-4 whitespace-normal rounded-2xl p-4 text-left ${selected === ty.code ? "border-secondary bg-secondary/10" : "bg-card"}`}>
+          return <Button key={ty.code} variant="outline" disabled={!ty.selectable} aria-pressed={selected === ty.code} onClick={() => onSelect(ty.code)} className={`h-auto min-h-20 justify-start gap-4 whitespace-normal rounded-xl p-4 text-left ${selected === ty.code ? "border-secondary bg-secondary/10" : "bg-card"}`}>
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-secondary"><Icon className="h-6 w-6" /></span>
             <span className="min-w-0"><span className="block text-base font-bold text-primary">{pl(ty.name, lang)}</span>{pl(ty.description, lang) && <span className="mt-0.5 block text-sm text-muted-foreground">{pl(ty.description, lang)}</span>}{!ty.selectable && <span className="mt-1 block text-xs text-muted-foreground">{t("registration.notAvailable")}</span>}</span>
           </Button>;
@@ -870,7 +870,7 @@ function DocsStep({
 
       {blocks.map((block) =>
         block.kind === "single" ? (
-          <div key={block.req.code} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <div key={block.req.code} className="rounded-xl border border-border bg-card p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between gap-2">
               <p className="text-sm font-bold text-primary">{pl(block.req.name, lang)}</p>
               <span className={badgeClass}>{badge(block.req.requirement)}</span>
@@ -878,7 +878,7 @@ function DocsStep({
             {uploadRow(block.req.code)}
           </div>
         ) : (
-          <div key={block.group} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <div key={block.group} className="rounded-xl border border-border bg-card p-4 shadow-sm">
             <div className="mb-1 flex items-center justify-between gap-2">
               <p className="text-sm font-bold text-primary">
                 {block.reqs.map((r) => pl(r.name, lang)).join(" / ")}

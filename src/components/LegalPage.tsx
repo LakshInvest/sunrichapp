@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next";
 import { useRouter } from "@tanstack/react-router";
 import ReactMarkdown from "react-markdown";
 import { ArrowLeft, Languages, Mail, Phone } from "lucide-react";
-import { fetchAppInfo, fillPlaceholders, type AppInfo } from "@/lib/app-info";
+import { fetchAppInfo, type AppInfo } from "@/lib/app-info";
+import { COMPANY, COMPANY_ADDRESS, PRIVACY_MD, SUPPORT_EMAIL, SUPPORT_PHONE, TERMS_MD } from "@/lib/legal-text";
 import { LANG_KEY, applyLang, type Lang } from "@/lib/i18n";
 import { ErrorState } from "@/components/catalog/states";
 
@@ -80,11 +81,11 @@ export function LegalPage({
         ) : (
           <>
             {kind && i18n.language !== "en" && (
-              <p className="mb-4 rounded-xl bg-secondary/10 p-3 text-sm text-foreground">{t("legal.englishOnly")}</p>
+              <p className="mb-4 rounded-xl bg-secondary/10 p-3 text-sm text-foreground">{t("legal.readInEnglish")}</p>
             )}
             {kind && (
               <div className="legal-md">
-                <ReactMarkdown>{fillPlaceholders(kind === "privacy" ? info.privacyMd : info.termsMd, info, t("legal.notSet"))}</ReactMarkdown>
+                <ReactMarkdown>{kind === "privacy" ? PRIVACY_MD : TERMS_MD}</ReactMarkdown>
               </div>
             )}
             {children?.(info)}
@@ -98,24 +99,25 @@ export function LegalPage({
 
 export function SupportBlock({ info }: { info: AppInfo }) {
   const { t } = useTranslation();
-  const phone = info.supportPhone ?? info.supportWhatsapp;
+  void info;
+  const phone = SUPPORT_PHONE;
   return (
     <section className="mt-8 rounded-xl border border-border bg-card p-4">
       <h2 className="font-bold text-primary">{t("legal.contact")}</h2>
-      <p className="mt-1 text-sm">{info.company}</p>
-      {info.address && <p className="text-sm text-muted-foreground">{info.address}</p>}
+      <p className="mt-1 text-sm">{COMPANY}</p>
+      <p className="text-sm text-muted-foreground">{COMPANY_ADDRESS}</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {phone && (
-          <a href={`tel:${phone}`} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground">
+          <a href={`tel:${phone.replace(/\s/g, "")}`} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground">
             <Phone className="h-4 w-4" aria-hidden /> {phone}
           </a>
         )}
-        {info.supportEmail && (
-          <a href={`mailto:${info.supportEmail}`} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold">
-            <Mail className="h-4 w-4" aria-hidden /> {info.supportEmail}
+        {SUPPORT_EMAIL && (
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold">
+            <Mail className="h-4 w-4" aria-hidden /> {SUPPORT_EMAIL}
           </a>
         )}
-        {!phone && !info.supportEmail && <p className="text-sm text-muted-foreground">{t("legal.askInApp")}</p>}
+        
       </div>
     </section>
   );

@@ -98,7 +98,7 @@ function Devices() {
         ) : list.length === 0 ? (
           <EmptyState title={t("devices.empty")} icon={Smartphone} />
         ) : (
-          <ul className="mt-4 divide-y divide-border rounded-2xl border border-border bg-card">
+          <ul className="mt-4 divide-y divide-border rounded-xl border border-border bg-card">
             {list.map((d) => {
               const self = d.device_id === mine;
               return (

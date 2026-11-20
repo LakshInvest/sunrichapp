@@ -47,7 +47,7 @@ export function InAppPushHost() {
         startX.current = null;
       }}
     >
-      <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3 shadow-xl">
+      <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-3 shadow-xl">
         <button
           type="button"
           className="flex min-h-11 min-w-0 flex-1 items-start gap-3 text-left"

@@ -52,12 +52,12 @@ export function SchemeOffers({ products }: { products: CatalogProduct[] }) {
 export function OffersList({ products }: { products: CatalogProduct[] }) {
   const { data, error, refetch, isLoading } = useSchemes(); const { t } = useTranslation(); const { lang } = useLang(); const rule = useRule();
   if (error) return <div><p role="alert" className="text-sm text-destructive">{serverMessage(error, t("offers.failed"))}</p><Button variant="ghost" onClick={() => void refetch()}>{t("common.retry")}</Button></div>;
-  if (isLoading || !data) return <div className="space-y-3">{[0, 1].map((i) => <div key={i} className="h-48 animate-pulse rounded-2xl bg-muted" />)}</div>;
+  if (isLoading || !data) return <div className="space-y-3">{[0, 1].map((i) => <div key={i} className="h-48 animate-pulse rounded-xl bg-muted" />)}</div>;
   if (!data.length) return <p className="pt-10 text-center text-sm text-muted-foreground">{t("quote.noOffers")}</p>;
   return <ul className="space-y-3">{data.map((s, i) => {
     const Icon = icons[s.scheme_type] ?? Gift;
     const items = schemeProducts(s, products, lang);
-    return <li key={s.id ?? s.scheme_id ?? i} className="overflow-hidden rounded-2xl bg-card shadow-sm">
+    return <li key={s.id ?? s.scheme_id ?? i} className="overflow-hidden rounded-xl bg-card shadow-sm">
       {s.image_url ? <SmartImage src={s.image_url} alt="" width={420} className="aspect-[2/1] w-full object-cover" /> : <div className="flex aspect-[3/1] items-center justify-center bg-secondary/10"><Icon className="h-10 w-10 text-secondary" /></div>}
       <div className="p-4">
         <p className="text-base font-bold text-foreground">{schemeText(s, lang)}</p>

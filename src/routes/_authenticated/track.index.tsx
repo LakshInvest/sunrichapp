@@ -65,7 +65,7 @@ function MyOrders() {
       </header>
       <div className="px-5 pb-28 pt-2">
         {error && orders == null ? <ErrorState message={error} onRetry={() => void load()} /> :
-         orders == null ? <div className="space-y-3">{[0, 1, 2].map((i) => <div key={i} className="h-24 animate-pulse rounded-2xl bg-muted" />)}</div> :
+         orders == null ? <div className="space-y-3">{[0, 1, 2].map((i) => <div key={i} className="h-24 animate-pulse rounded-xl bg-muted" />)}</div> :
          orders.length === 0 ? (
           <div className="pt-10 text-center">
             <EmptyState title={t("track.emptyTitle")} body={t("track.emptyBody")} />
@@ -77,7 +77,7 @@ function MyOrders() {
               const packs = o.lines.filter((l) => !l.isFree).reduce((s, l) => s + l.qty, 0);
               return (
                 <li key={o.id}>
-                  <button type="button" onClick={() => void navigate({ to: "/track/$id", params: { id: o.id } })} className={`block w-full rounded-2xl bg-card p-4 text-left shadow-sm ${needsAction(o.status) ? "ring-2 ring-secondary/60" : ""}`}>
+                  <button type="button" onClick={() => void navigate({ to: "/track/$id", params: { id: o.id } })} className={`block w-full rounded-xl bg-card p-4 text-left shadow-sm ${needsAction(o.status) ? "ring-2 ring-secondary/60" : ""}`}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0"><p className="truncate text-sm font-bold text-primary">{o.orderNo}</p><p className="text-xs text-muted-foreground">{indDate(o.createdAt, lang)}</p></div>
                       <div className="flex shrink-0 flex-col items-end gap-1">

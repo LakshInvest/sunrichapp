@@ -38,7 +38,7 @@ export function RateOrderCard({
   };
 
   return (
-    <section className="rounded-2xl border border-accent/40 bg-accent/5 p-4 shadow-sm">
+    <section className="rounded-xl border border-accent/40 bg-accent/5 p-4 shadow-sm">
       <p className="text-sm font-bold text-foreground">{t("feedback.title")}</p>
       <p className="text-xs text-muted-foreground">{t("feedback.sub", { no: orderNo })}</p>
       <div className="mt-2 flex gap-1" role="radiogroup" aria-label={t("feedback.title")}>

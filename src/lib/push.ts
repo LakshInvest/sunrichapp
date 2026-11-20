@@ -34,9 +34,21 @@ export function declinePush() {
   setAsk("no");
 }
 
+let currentToken: string | null = null;
+const APP_VERSION = "1.0.0";
+
 async function saveToken(token: string) {
+  currentToken = token;
   const { data } = await supabase.auth.getSession();
   if (!data.session) return;
+  const lang = (i18n.language || "en").slice(0, 2);
+  // New registration (Prompt-74) alongside the existing one; neither blocks the other.
+  void supabase.rpc("my_push_token_save", {
+    p_token: token,
+    p_platform: "android",
+    p_lang: ["en", "hi", "mr"].includes(lang) ? lang : "en",
+    p_app_version: APP_VERSION,
+  });
   await supabase.rpc("save_my_push_token", {
     p_device_id: getDeviceId(),
     p_token: token,
@@ -78,7 +90,7 @@ async function register() {
   const { PushNotifications } = await import("@capacitor/push-notifications");
   await PushNotifications.createChannel({
     id: "orders",
-    name: "Orders",
+    name: "Order updates",
     description: "Order, delivery and payment updates",
     importance: 4,
     visibility: 1,
@@ -141,5 +153,17 @@ export async function refreshPushToken(): Promise<void> {
     if (perm.receive === "granted") await register();
   } catch {
     /* plugin missing in this build */
+  }
+}
+
+/** Called before sign-out and when the Account switch is turned off. */
+export async function removePushToken(): Promise<void> {
+  if (!currentToken) return;
+  const token = currentToken;
+  currentToken = null;
+  try {
+    await supabase.rpc("my_push_token_remove", { p_token: token });
+  } catch {
+    /* sign out anyway */
   }
 }

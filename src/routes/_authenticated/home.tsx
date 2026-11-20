@@ -406,7 +406,7 @@ function Home() {
                 type="button"
                 key={banner.id}
                 onClick={() => openBanner(banner.linkType, banner.linkValue)}
-                className="relative min-h-32 w-[82%] shrink-0 snap-center overflow-hidden rounded-2xl bg-primary text-left shadow-md shadow-primary/10 transition active:scale-[0.99]"
+                className="relative min-h-32 w-[82%] shrink-0 snap-center overflow-hidden rounded-xl bg-primary text-left shadow-md shadow-primary/10 transition active:scale-[0.99]"
               >
                 {banner.imageUrl && (
                   <img

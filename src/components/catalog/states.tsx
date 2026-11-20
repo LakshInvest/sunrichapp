@@ -20,7 +20,7 @@ export function GridSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="grid grid-cols-2 gap-3 px-5">
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="rounded-2xl border border-border bg-card p-2.5">
+        <div key={i} className="rounded-xl border border-border bg-card p-2.5">
           <Skeleton className="aspect-square w-full rounded-xl" />
           <Skeleton className="mt-2 h-4 w-4/5" />
           <Skeleton className="mt-1 h-3 w-1/2" />
@@ -47,7 +47,7 @@ export function ChipsSkeleton() {
 export function BannerSkeleton() {
   return (
     <div className="mt-5 px-5">
-      <Skeleton className="h-32 w-full rounded-2xl" />
+      <Skeleton className="h-32 w-full rounded-xl" />
     </div>
   );
 }

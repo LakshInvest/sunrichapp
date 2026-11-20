@@ -141,7 +141,7 @@ export function ProductCard({
   const name = fixName(loc(product.name, lang));
   const pack = formatPack(loc(product.packLabel, lang), product.unitsPerSellUnit, product.volumeMl, product.sellUnit);
   return (
-    <div className="flex h-full flex-col rounded-2xl bg-card p-2 shadow-[0_1px_8px_-2px_color-mix(in_oklab,var(--primary)_14%,transparent)]">
+    <div className="flex h-full flex-col rounded-xl bg-card p-2 shadow-[0_1px_8px_-2px_color-mix(in_oklab,var(--primary)_14%,transparent)]">
       <button type="button" onClick={onOpen} onPointerDown={prefetch} aria-label={name} className="block aspect-square w-full overflow-hidden rounded-xl bg-card">
         <SmartImage width={400} src={product.imageUrl ?? product.images[0] ?? null} alt={name} caption={pack || undefined} className="h-full w-full bg-card object-contain mix-blend-multiply" />
       </button>

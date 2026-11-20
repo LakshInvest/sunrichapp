@@ -147,7 +147,7 @@ function QuoteFlow() {
             {rows.map(({ product, qty }) => {
               const name = fixName(loc(product.name, lang));
               return (
-                <li key={product.id} className="flex items-center gap-3 rounded-2xl bg-card p-3 shadow-sm">
+                <li key={product.id} className="flex items-center gap-3 rounded-xl bg-card p-3 shadow-sm">
                   <SmartImage width={64} src={product.imageUrl ?? product.images[0] ?? null} alt="" className="h-14 w-14 shrink-0 rounded-xl bg-card object-contain" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-bold text-foreground">{name}</p>
@@ -167,7 +167,7 @@ function QuoteFlow() {
         {step === "mode" && (
           <div className="grid gap-3">
             {(["sunrich", "pickup"] as const).map((m) => (
-              <button key={m} type="button" aria-pressed={mode === m} onClick={() => setMode(m)} className={`flex min-h-24 items-center gap-4 rounded-2xl border-2 bg-card p-4 text-left shadow-sm transition active:scale-[0.99] ${mode === m ? "border-secondary" : "border-transparent"}`}>
+              <button key={m} type="button" aria-pressed={mode === m} onClick={() => setMode(m)} className={`flex min-h-24 items-center gap-4 rounded-xl border-2 bg-card p-4 text-left shadow-sm transition active:scale-[0.99] ${mode === m ? "border-secondary" : "border-transparent"}`}>
                 <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-primary">{m === "sunrich" ? <Truck className="h-6 w-6" /> : <Factory className="h-6 w-6" />}</span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-base font-bold text-foreground">{t(m === "sunrich" ? "quote.modeDelivery" : "quote.modePickup")}</span>
@@ -182,20 +182,20 @@ function QuoteFlow() {
         {step === "address" && (
           <div className="space-y-2">
             {addresses?.length === 0 && (
-              <div className="flex w-full items-start gap-3 rounded-2xl border-2 border-secondary bg-card p-4 text-left shadow-sm">
+              <div className="flex w-full items-start gap-3 rounded-xl border-2 border-secondary bg-card p-4 text-left shadow-sm">
                 <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-secondary" />
                 <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-foreground">{t("quote.shopAddress")}</span>{shopAddr && <span className="block text-xs text-muted-foreground">{shopAddr}</span>}</span>
                 <Check className="h-5 w-5 text-secondary" />
               </div>
             )}
-            {addresses === null ? <div className="h-20 animate-pulse rounded-2xl bg-muted" /> : addresses.map((a) => (
-              <button key={a.id} type="button" aria-pressed={addressId === a.id} onClick={() => setAddressId(a.id)} className={`flex w-full items-start gap-3 rounded-2xl border-2 bg-card p-4 text-left shadow-sm ${addressId === a.id ? "border-secondary" : "border-transparent"}`}>
+            {addresses === null ? <div className="h-20 animate-pulse rounded-xl bg-muted" /> : addresses.map((a) => (
+              <button key={a.id} type="button" aria-pressed={addressId === a.id} onClick={() => setAddressId(a.id)} className={`flex w-full items-start gap-3 rounded-xl border-2 bg-card p-4 text-left shadow-sm ${addressId === a.id ? "border-secondary" : "border-transparent"}`}>
                 <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-secondary" />
                 <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-foreground">{t(labelKey(a.label))}</span><span className="block text-xs text-muted-foreground">{addressText(a)}</span></span>
                 {addressId === a.id && <Check className="h-5 w-5 text-secondary" />}
               </button>
             ))}
-            <button type="button" onClick={() => void navigate({ to: "/addresses" })} className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-secondary text-sm font-bold text-primary"><Plus className="h-4 w-4" />{t("quote.newAddress")}</button>
+            <button type="button" onClick={() => void navigate({ to: "/addresses" })} className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-secondary text-sm font-bold text-primary"><Plus className="h-4 w-4" />{t("quote.newAddress")}</button>
           </div>
         )}
 
@@ -204,12 +204,12 @@ function QuoteFlow() {
             <div className="grid grid-cols-2 gap-2">
               {[1, 2].map((d) => {
                 const iso = addDaysIso(bounds.min, d);
-                return <button key={d} type="button" aria-pressed={date === iso} onClick={() => setDate(iso)} className={`min-h-16 rounded-2xl border-2 bg-card p-3 text-center shadow-sm ${date === iso ? "border-secondary" : "border-transparent"}`}><span className="block text-base font-bold text-foreground">{t(d === 1 ? "quote.tomorrow" : "quote.dayAfter")}</span><span className="text-xs text-muted-foreground">{indDate(iso, lang)}</span></button>;
+                return <button key={d} type="button" aria-pressed={date === iso} onClick={() => setDate(iso)} className={`min-h-16 rounded-xl border-2 bg-card p-3 text-center shadow-sm ${date === iso ? "border-secondary" : "border-transparent"}`}><span className="block text-base font-bold text-foreground">{t(d === 1 ? "quote.tomorrow" : "quote.dayAfter")}</span><span className="text-xs text-muted-foreground">{indDate(iso, lang)}</span></button>;
               })}
             </div>
             <Popover>
               <PopoverTrigger asChild>
-                <button type="button" className="mt-3 flex min-h-14 w-full items-center gap-3 rounded-2xl bg-card px-4 text-left shadow-sm"><CalendarDays className="h-5 w-5 text-secondary" /><span className="flex-1 text-sm font-semibold text-foreground">{indDate(date, lang)}</span><span className="text-xs font-bold text-primary">{t("quote.pickDate")}</span></button>
+                <button type="button" className="mt-3 flex min-h-14 w-full items-center gap-3 rounded-xl bg-card px-4 text-left shadow-sm"><CalendarDays className="h-5 w-5 text-secondary" /><span className="flex-1 text-sm font-semibold text-foreground">{indDate(date, lang)}</span><span className="text-xs font-bold text-primary">{t("quote.pickDate")}</span></button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="center">
                 <Calendar mode="single" selected={new Date(`${date}T00:00:00`)} onSelect={(d) => d && setDate(format(d, "yyyy-MM-dd"))} disabled={(d) => !isAllowedDate(format(d, "yyyy-MM-dd"))} initialFocus className="p-3 pointer-events-auto" />
@@ -220,14 +220,14 @@ function QuoteFlow() {
 
         {step === "note" && (
           <div>
-            <textarea value={note} onChange={(e) => setNote(e.target.value.slice(0, 500))} rows={5} placeholder={t("quote.notePlaceholder")} className="w-full rounded-2xl border border-input bg-card p-4 text-base text-foreground outline-none focus:border-secondary" />
+            <textarea value={note} onChange={(e) => setNote(e.target.value.slice(0, 500))} rows={5} placeholder={t("quote.notePlaceholder")} className="w-full rounded-xl border border-input bg-card p-4 text-base text-foreground outline-none focus:border-secondary" />
             <button type="button" onClick={() => { setNote(""); go(1); }} className="mt-2 min-h-11 w-full text-sm font-semibold text-muted-foreground">{t("quote.skip")}</button>
           </div>
         )}
 
         {step === "review" && (
           <div className="space-y-3">
-            <section className="rounded-2xl bg-card p-4 shadow-sm">
+            <section className="rounded-xl bg-card p-4 shadow-sm">
               <ul className="space-y-1.5">{rows.map(({ product, qty }) => <li key={product.id} className="flex justify-between gap-3 text-sm"><span className="min-w-0 truncate text-foreground">{fixName(loc(product.name, lang))}</span><span className="shrink-0 font-semibold text-foreground">×{qty}</span></li>)}</ul>
               <button type="button" onClick={() => setStep("cart")} className="mt-2 text-xs font-bold text-primary">{t("quote.edit")}</button>
             </section>
@@ -255,7 +255,7 @@ function QuoteFlow() {
 
 function ReviewRow({ icon, label, value, onEdit, editLabel }: { icon: ReactNode; label: string; value: string; onEdit: () => void; editLabel: string }) {
   return (
-    <section className="flex items-start gap-3 rounded-2xl bg-card p-4 shadow-sm">
+    <section className="flex items-start gap-3 rounded-xl bg-card p-4 shadow-sm">
       <span className="mt-0.5 text-secondary">{icon}</span>
       <div className="min-w-0 flex-1"><p className="text-xs font-semibold text-muted-foreground">{label}</p><p className="break-words text-sm font-semibold text-foreground">{value}</p></div>
       <button type="button" onClick={onEdit} className="text-xs font-bold text-primary">{editLabel}</button>

@@ -41,7 +41,27 @@ export type KhataProof = {
   balanceAfter: number | null;
   reviewedAt: string | null;
   createdAt: string;
+  orderId?: string | null;
+  orderStatus?: string | null;
 };
+
+/** Order statuses in which the customer still has to pay. */
+export const NEEDS_PAYMENT = ["quote_accepted", "payment_rejected"];
+
+/**
+ * Should a rejected payment card stay at the top of Khata (Prompt-77 §5)?
+ * Only while its order still needs payment; gone once another proof for the
+ * same order is pending/verified, the order is paid or cancelled, or the
+ * customer tapped Hide. Proofs without an order keep the 30-day window.
+ */
+export function showRejectedCard(p: KhataProof, all: KhataProof[], hidden: Set<string>, now = Date.now()): boolean {
+  if (p.status !== "rejected" || hidden.has(p.id)) return false;
+  if (p.orderId) {
+    if (!p.orderStatus || !NEEDS_PAYMENT.includes(p.orderStatus)) return false;
+    return !all.some((o) => o.id !== p.id && o.orderId === p.orderId && (o.status === "verified" || o.status === "pending"));
+  }
+  return (p.reviewedAt ?? p.createdAt) > new Date(now - 30 * 864e5).toISOString();
+}
 
 const n = (v: unknown) => Number(v ?? 0) || 0;
 const round2 = (v: number) => Math.round(v * 100) / 100;
@@ -169,7 +189,7 @@ export async function fetchKhataEntries(from: string, to: string): Promise<Khata
 export async function fetchKhataProofs(): Promise<KhataProof[]> {
   const { data, error } = await supabase
     .from("payment_proofs")
-    .select("id, amount, method, reference, paid_on, status, reject_reason, balance_after, reviewed_at, created_at")
+    .select("id, amount, method, reference, paid_on, status, reject_reason, balance_after, reviewed_at, created_at, order_id, orders!payment_proofs_order_id_fkey(status)")
     .eq("customer_id", await ownCustomerFilter())
     .order("created_at", { ascending: false })
     .limit(50);
@@ -185,6 +205,8 @@ export async function fetchKhataProofs(): Promise<KhataProof[]> {
     balanceAfter: r.balance_after == null ? null : n(r.balance_after),
     reviewedAt: (r.reviewed_at as string) ?? null,
     createdAt: String(r.created_at ?? ""),
+    orderId: (r.order_id as string | null) ?? null,
+    orderStatus: ((r as { orders?: { status?: string } | null }).orders?.status as string | undefined) ?? null,
   }));
 }
 

@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { ArrowLeft, Check, Clock, Download, FileText, HelpCircle, Loader2, Minus, Phone, Plus, RefreshCw, StickyNote, Truck, UserRound } from "lucide-react";
+import { ArrowLeft, Check, Clock, Download, FileText, HelpCircle, Loader2, Phone, RefreshCw, StickyNote, Truck, UserRound } from "lucide-react";
 import en from "@/locales/en.json";
 import { PageShell } from "@/components/PageShell";
 import { SheetDrawer } from "@/components/SheetDrawer";
@@ -19,9 +19,9 @@ import { requestDataRefresh } from "@/lib/data-refresh";
 import { supabase } from "@/integrations/supabase/client";
 import { billPdfUrl, discountLabel, fetchOrderExtras, type OrderExtras } from "@/lib/order-extras";
 import { getPodUrls } from "@/lib/pod.functions";
-import { isNative, shareLink } from "@/lib/native";
+import { isNative } from "@/lib/native";
 import {
-  TONE_CLASS, TRACK_STEPS, addOrderNote, changedQty, countdown, fetchOrderDetail, requoteOrder, respondQuote, statusTone, trackStep, whoKey, type QuoteDetail,
+  TONE_CLASS, TRACK_STEPS, addOrderNote, countdown, fetchOrderDetail, requoteOrder, respondQuote, statusTone, trackStep, whoKey, type QuoteDetail,
 } from "@/lib/quote-flow";
 
 export const Route = createFileRoute("/_authenticated/track/$id")({
@@ -49,8 +49,11 @@ function OrderPage() {
   const deva = lang === "en" ? "" : "font-deva";
   const [d, setD] = useState<QuoteDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [edits, setEdits] = useState<Record<string, number>>({});
   const [busy, setBusy] = useState(false);
+  const [askOpen, setAskOpen] = useState(false);
+  const [askNote, setAskNote] = useState("");
+  const [doneShown, setDoneShown] = useState(false);
+  const [payPhase, setPayPhase] = useState<"mode" | "pay">("mode");
   const [rejectOpen, setRejectOpen] = useState<"ask" | "reason" | null>(null);
   const [reason, setReason] = useState("");
   const [noteOpen, setNoteOpen] = useState(false);
@@ -78,12 +81,13 @@ function OrderPage() {
     }
   }, [x, pods]);
   const openBill = async (path: string, no: string | null) => {
+    // Android app: in-app viewer so ✕ / Back returns to this order.
+    if (isNative()) { void navigate({ to: "/bill", search: { path, ...(no ? { no } : {}), order: id } }); return; }
     setPdfBusy(path);
     try {
       const url = await billPdfUrl(path);
       if (!url) throw new Error("no url");
-      if (isNative()) await shareLink({ title: no ?? t("quote.bill"), url });
-      else window.open(url, "_blank", "noopener");
+      window.open(url, "_blank", "noopener");
     } catch (e) { toast.error(serverMessage(e, t("quote.billError"))); }
     finally { setPdfBusy(null); }
   };
@@ -92,7 +96,7 @@ function OrderPage() {
   const act = async (fn: () => Promise<unknown>, ok?: string) => {
     if (busy || offline) return;
     setBusy(true);
-    try { await fn(); if (ok) toast.success(ok); setEdits({}); requestDataRefresh(); await load(); }
+    try { await fn(); if (ok) toast.success(ok); requestDataRefresh(); await load(); }
     catch (e) { toast.error(serverMessage(e, t("quote.actionError"))); }
     finally { setBusy(false); }
   };
@@ -117,8 +121,8 @@ function OrderPage() {
   const lastReject = d.payments[0]?.status === "rejected" ? d.payments[0] : d.payments.find((p) => p.reject_reason);
   const cancelNote = [...d.history].reverse().find((h) => h.status === "cancelled")?.note;
   const who = (by: string | null) => t(`quote.who.${whoKey(by)}`);
-  const qtyOf = (lineId: string, q: number) => edits[lineId] ?? q;
   const step = trackStep(st);
+  const flowStep = doneShown ? 4 : st === "quote_sent" ? 1 : st === "quote_accepted" || st === "payment_rejected" ? (payPhase === "pay" ? 3 : 2) : 0;
 
   const itemsPlain = (
     <ul className="space-y-1.5">{d.items.map((i) => <li key={i.line_id} className="flex justify-between gap-3 text-sm"><span className="min-w-0 truncate text-foreground">{i.name}{i.pack_label ? <span className="text-muted-foreground"> · {i.pack_label}</span> : null}</span><span className="shrink-0 font-semibold">×{i.qty}{i.is_free && <FreeTag t={t} />}</span></li>)}</ul>
@@ -143,38 +147,48 @@ function OrderPage() {
           </section>
         )}
 
+        {flowStep > 0 && (
+          <div aria-label={t("quote.flowStep", { n: flowStep })}>
+            <p className="text-xs font-semibold text-muted-foreground">{t("quote.flowStep", { n: flowStep })} · {t(["", "quote.stepCheck", "quote.stepMode", "quote.stepPay", "quote.stepDone"][flowStep] ?? "")}</p>
+            <div className="mt-1.5 grid grid-cols-4 gap-1">{[1, 2, 3, 4].map((n) => <span key={n} className={`h-1.5 rounded-full ${n <= flowStep ? "bg-secondary" : "bg-muted"}`} />)}</div>
+          </div>
+        )}
+
+        {doneShown && (
+          <section className="rounded-xl bg-card p-6 text-center shadow-sm">
+            <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success/15"><Check className="h-8 w-8 text-success" /></span>
+            <p className="mt-3 text-lg font-bold text-primary">{t("quote.doneTitle")}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{t("quote.doneBody")}</p>
+            <div className="mt-5 grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => setDoneShown(false)} className="min-h-12 rounded-xl border border-border text-base font-bold text-foreground">{t("quote.viewOrder")}</button>
+              <button type="button" onClick={() => void navigate({ to: "/home" })} className="min-h-12 rounded-xl bg-primary text-base font-bold text-primary-foreground">{t("quote.goHome")}</button>
+            </div>
+          </section>
+        )}
+
         {st === "quote_sent" && (
           <section className="rounded-xl bg-card p-4 shadow-sm">
             <div className="flex items-center justify-between gap-2"><p className="text-lg font-bold text-primary">{t("quote.rateCame")}</p>{left && <span className="rounded-full bg-warning/20 px-2.5 py-1 text-xs font-bold text-warning-foreground">{t("quote.timeLeft", { h: left.hours, m: left.minutes })}</span>}</div>
             <ul className="mt-3 divide-y divide-border">
-              {paid.map((i) => {
-                const q = qtyOf(i.line_id, i.qty);
-                return (
-                  <li key={i.line_id} className="py-2.5">
-                    <div className="flex justify-between gap-3"><span className="min-w-0 text-sm font-semibold text-foreground">{i.name}{i.pack_label ? <span className="font-normal text-muted-foreground"> · {i.pack_label}</span> : null}</span><span className="shrink-0 text-sm font-bold text-foreground">{formatINR((i.rate ?? 0) * q)}</span></div>
-                    <div className="mt-1.5 flex items-center justify-between gap-2">
-                      <span className="text-xs text-muted-foreground">{formatINR(i.rate ?? 0)} × {q}</span>
-                      <span className="flex items-center rounded-full border border-border">
-                        <button type="button" aria-label={t("home.decreaseQty")} onClick={() => setEdits((e) => ({ ...e, [i.line_id]: Math.max(0, q - 1) }))} className="flex h-11 w-11 items-center justify-center"><Minus className="h-4 w-4" /></button>
-                        <input inputMode="numeric" aria-label={t("home.typeQty")} value={q} onChange={(e) => setEdits((x) => ({ ...x, [i.line_id]: parseInt(e.target.value.replace(/\D/g, "") || "0", 10) }))} className="w-10 bg-transparent text-center text-sm font-bold outline-none" />
-                        <button type="button" aria-label={t("home.increaseQty")} onClick={() => setEdits((e) => ({ ...e, [i.line_id]: q + 1 }))} className="flex h-11 w-11 items-center justify-center"><Plus className="h-4 w-4" /></button>
-                      </span>
-                    </div>
-                  </li>
-                );
-              })}
-              {free.map((i) => <li key={i.line_id} className="flex justify-between gap-3 py-2.5 text-sm"><span className="min-w-0 text-foreground">{i.name}<span className="block text-xs font-bold text-success">{t("quote.freeOffer", { count: i.qty })}</span>{i.scheme ? <span className="block text-xs text-muted-foreground">{i.scheme}</span> : null}</span><span className="shrink-0 font-bold text-success">{formatINR(0)}</span></li>)}
+              {paid.map((i) => (
+                <li key={i.line_id} className="flex items-start justify-between gap-3 py-2.5">
+                  <span className="min-w-0">
+                    <span className="block text-sm font-bold text-foreground">{i.name}</span>
+                    <span className="block text-xs text-muted-foreground">{[i.pack_label && i.pack_label !== i.name ? i.pack_label : null, t("quote.packs", { count: i.qty })].filter(Boolean).join(" · ")}</span>
+                  </span>
+                  <span className="shrink-0 text-sm font-bold text-foreground">{formatINR((i.rate ?? 0) * i.qty)}</span>
+                </li>
+              ))}
+              {free.map((i) => <li key={i.line_id} className="flex justify-between gap-3 py-2.5 text-sm"><span className="min-w-0 text-foreground"><span className="font-bold">{i.name}</span><span className="block text-xs font-bold text-success">{t("quote.freeOffer", { count: i.qty })}</span>{i.scheme ? <span className="block text-xs text-muted-foreground">{i.scheme}</span> : null}</span><span className="shrink-0 font-bold text-success">{formatINR(0)}</span></li>)}
             </ul>
             <div className="mt-2 space-y-1 border-t border-border pt-3">
               {x?.totals?.subtotal != null && <p className="flex justify-between gap-3 text-sm"><span className="text-muted-foreground">{t("quote.subtotal")}</span><span className="font-semibold text-foreground">{formatINR(x.totals.subtotal)}</span></p>}
-              {(x?.discounts ?? []).filter((dc) => dc.amount).map((dc, k) => <p key={k} className="flex justify-between gap-3 text-sm font-semibold text-success"><span className="min-w-0">{discountLabel(dc, t("quote.discount"))}</span><span className="shrink-0">−{formatINR(dc.amount)}</span></p>)}
-              <p className="flex items-end justify-between gap-3"><span className="text-sm font-semibold text-muted-foreground">{t("quote.grandTotal")}</span><span className="text-2xl font-bold text-primary">{formatINR(x?.totals?.grand_total ?? o.grand_total ?? 0)}</span></p>
+              {(x?.discounts ?? []).filter((dc) => dc.amount).map((dc, k) => <p key={k} className="flex justify-between gap-3 text-sm font-semibold text-success"><span className="min-w-0">− {discountLabel(dc, t("quote.discount"))}</span><span className="shrink-0">−{formatINR(dc.amount)}</span></p>)}
+              <p className="flex items-end justify-between gap-3"><span className="text-sm font-bold text-foreground">{t("quote.grandTotal")}</span><span className="text-2xl font-bold text-primary">{formatINR(x?.totals?.grand_total ?? o.grand_total ?? 0)}</span></p>
             </div>
-            {Object.keys(edits).length > 0 && <p className="mt-1 text-xs text-muted-foreground">{t("quote.qtyChangedNote")}</p>}
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <button type="button" disabled={busy || offline} onClick={() => setRejectOpen("ask")} className="min-h-12 rounded-xl border border-border text-base font-bold text-foreground disabled:opacity-50">{t("quote.reject")}</button>
-              <button type="button" disabled={busy || offline} onClick={() => void act(() => respondQuote(id, true, { qty: changedQty(d.items, edits) }), t("quote.approved"))} className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary text-base font-bold text-primary-foreground disabled:opacity-50">{busy && <Loader2 className="h-4 w-4 animate-spin" />}{t("quote.approve")}</button>
-            </div>
+            <button type="button" disabled={busy || offline} onClick={() => void act(() => respondQuote(id, true, {}), t("quote.approved"))} className="mt-4 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-primary text-base font-bold text-primary-foreground disabled:opacity-50">{busy && <Loader2 className="h-4 w-4 animate-spin" />}{t("quote.approve")}</button>
+            <button type="button" disabled={busy || offline} onClick={() => setRejectOpen("ask")} className="mt-2 min-h-12 w-full rounded-xl border border-border text-base font-bold text-foreground disabled:opacity-50">{t("quote.reject")}</button>
+            <button type="button" disabled={busy || offline} onClick={() => setAskOpen(true)} className="mt-1 min-h-11 w-full text-sm font-bold text-primary underline-offset-2 hover:underline disabled:opacity-50">{t("quote.askNewRate")}</button>
           </section>
         )}
 
@@ -186,10 +200,10 @@ function OrderPage() {
           </section>
         )}
 
-        {(st === "quote_accepted" || st === "payment_rejected") && (
+        {!doneShown && (st === "quote_accepted" || st === "payment_rejected") && (
           <>
             {st === "payment_rejected" && <p role="alert" className="rounded-xl bg-destructive/10 p-4 text-sm font-semibold text-destructive">{t("quote.payRejected")}{lastReject?.reject_reason ? `: ${lastReject.reject_reason}` : ""}</p>}
-            <PaySection orderId={id} orderNo={o.order_no} offline={offline} onDone={() => { toast.success(t("quote.paySent")); requestDataRefresh(); void load(); }} />
+            <PaySection orderId={id} orderNo={o.order_no} offline={offline} onPhase={setPayPhase} onDone={() => { setDoneShown(true); window.scrollTo({ top: 0 }); requestDataRefresh(); void load(); }} />
           </>
         )}
 
@@ -276,6 +290,19 @@ function OrderPage() {
               <button type="button" disabled={busy || offline} onClick={() => { setRejectOpen(null); void act(() => respondQuote(id, false, { reason: reason.trim() || null })); }} className="mt-3 min-h-12 w-full rounded-xl bg-destructive font-bold text-destructive-foreground disabled:opacity-50">{t("quote.reject")}</button>
             </>
           )}
+        </div>
+      </SheetDrawer>
+
+      <SheetDrawer open={askOpen} onOpenChange={setAskOpen}>
+        <div className="px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+          <p className="text-lg font-bold text-primary">{t("quote.askNewRateTitle")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("quote.askNewRateHint")}</p>
+          <textarea autoFocus value={askNote} onChange={(e) => setAskNote(e.target.value.slice(0, 300))} rows={3} className="mt-3 w-full rounded-xl border border-input bg-card p-3 text-base" />
+          <button type="button" disabled={!askNote.trim() || busy || offline} onClick={() => {
+            const note = askNote.trim(); setAskOpen(false); setAskNote("");
+            // Same RPCs as before: note → decline this rate with the note → ask again.
+            void act(async () => { await addOrderNote(id, note); await respondQuote(id, false, { reason: note }); await requoteOrder(id); }, t("quote.askNewRateSent"));
+          }} className="mt-3 min-h-12 w-full rounded-xl bg-primary font-bold text-primary-foreground disabled:opacity-50">{t("quote.askNewRateSend")}</button>
         </div>
       </SheetDrawer>
 

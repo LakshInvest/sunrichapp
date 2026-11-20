@@ -572,16 +572,15 @@ function Home() {
                   type="button"
                   onClick={() => setAddressOpen(true)}
                   aria-label={`${headerLabel}: ${areaLabel}`}
-                  className="flex min-h-11 min-w-0 max-w-[75%] items-start gap-1.5 rounded-full bg-foreground/65 px-3 py-1.5 text-left"
+                  className="flex h-11 min-w-0 max-w-[78%] items-center gap-1.5 rounded-full bg-foreground/65 px-3 text-left"
                 >
-                  <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary-foreground/90" />
-                  <span className="min-w-0">
-                    <span className="flex items-center gap-1 text-sm font-bold text-primary-foreground">
-                      {headerLabel}
-                      <ChevronDown className="h-4 w-4" />
-                    </span>
-                    <span className={`block truncate text-xs text-primary-foreground/80 ${deva}`}>{areaLabel}</span>
+                  <MapPin className="h-4 w-4 shrink-0 text-primary-foreground/90" />
+                  <span className="flex min-w-0 items-center gap-1 whitespace-nowrap text-sm text-primary-foreground">
+                    <span className="shrink-0 font-bold">{headerLabel}</span>
+                    <span className="shrink-0 text-primary-foreground/70" aria-hidden>·</span>
+                    <span className={`min-w-0 truncate text-primary-foreground/85 ${deva}`}>{areaLabel}</span>
                   </span>
+                  <ChevronDown className="h-4 w-4 shrink-0 text-primary-foreground" />
                 </button>
                 <button
                   type="button"
@@ -609,16 +608,15 @@ function Home() {
                   type="button"
                   onClick={() => setAddressOpen(true)}
                   aria-label={`${headerLabel}: ${areaLabel}`}
-                  className="flex min-h-11 min-w-0 max-w-[75%] items-start gap-1.5 rounded-full bg-foreground/65 px-3 py-1.5 text-left"
+                  className="flex h-11 min-w-0 max-w-[78%] items-center gap-1.5 rounded-full bg-foreground/65 px-3 text-left"
                 >
-                  <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary-foreground/90" />
-                  <span className="min-w-0">
-                    <span className="flex items-center gap-1 text-sm font-bold text-primary-foreground">
-                      {headerLabel}
-                      <ChevronDown className="h-4 w-4" />
-                    </span>
-                    <span className={`block truncate text-xs text-primary-foreground/80 ${deva}`}>{areaLabel}</span>
+                  <MapPin className="h-4 w-4 shrink-0 text-primary-foreground/90" />
+                  <span className="flex min-w-0 items-center gap-1 whitespace-nowrap text-sm text-primary-foreground">
+                    <span className="shrink-0 font-bold">{headerLabel}</span>
+                    <span className="shrink-0 text-primary-foreground/70" aria-hidden>·</span>
+                    <span className={`min-w-0 truncate text-primary-foreground/85 ${deva}`}>{areaLabel}</span>
                   </span>
+                  <ChevronDown className="h-4 w-4 shrink-0 text-primary-foreground" />
                 </button>
                 <button
                   type="button"

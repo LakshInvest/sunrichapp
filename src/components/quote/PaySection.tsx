@@ -15,8 +15,11 @@ import { fetchPayOptions, paymentReady, submitOrderPayment, type PayMethod, type
 const ICON: Record<PayMethod, typeof Smartphone> = { upi: Smartphone, bank: Landmark, cash: Banknote, credit: Building2 };
 
 /** Payment after the customer approves the quote (Prompt-70 §4). */
-export function PaySection({ orderId, orderNo, offline, onDone }: { orderId: string; orderNo: string; offline: boolean; onDone: () => void }) {
+export function PaySection({ orderId, orderNo, offline, onDone, onPhase }: { orderId: string; orderNo: string; offline: boolean; onDone: () => void; onPhase?: (p: "mode" | "pay") => void }) {
   const { t } = useTranslation();
+  // One action per page: choose the mode, then pay (Prompt-77 §4).
+  const [phase, setPhaseState] = useState<"mode" | "pay">("mode");
+  const setPhase = (p: "mode" | "pay") => { setPhaseState(p); onPhase?.(p); window.scrollTo({ top: 0 }); };
   const [opts, setOpts] = useState<PayOptions | null>(null);
   const [loadErr, setLoadErr] = useState<string | null>(null);
   const [method, setMethod] = useState<PayMethod | null>(null);
@@ -38,9 +41,10 @@ export function PaySection({ orderId, orderNo, offline, onDone }: { orderId: str
     fetchPayOptions(orderId).then((o) => {
       if (!live) return;
       setOpts(o);
-      if (o.methods.length === 1) setMethod(o.methods[0] ?? null);
+      if (o.methods.length === 1) { setMethod(o.methods[0] ?? null); setPhaseState("pay"); onPhase?.("pay"); }
     }, (e) => live && setLoadErr(serverMessage(e, t("common.loadError"))));
     return () => { live = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId, t]);
 
   if (loadErr) return <p role="alert" className="rounded-xl bg-card p-4 text-sm text-destructive shadow-sm">{loadErr}</p>;
@@ -82,7 +86,10 @@ export function PaySection({ orderId, orderNo, offline, onDone }: { orderId: str
       <p className="text-xs font-semibold text-muted-foreground">{t("quote.payTitle")}</p>
       <p className="text-3xl font-bold text-primary">{formatINR(opts.amount)}</p>
       {opts.required_method && <p className="mt-1 text-xs font-semibold text-accent-foreground">{t("quote.requiredMethod", { mode: t(`quote.method.${opts.required_method}`, { defaultValue: opts.required_method }) })}</p>}
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      {phase === "mode" ? (
+      <>
+      <p className="mt-3 text-sm font-bold text-foreground">{t("quote.chooseMode")}</p>
+      <div className="mt-2 grid grid-cols-2 gap-2">
         {opts.methods.map((m) => {
           const Icon = ICON[m];
           return (
@@ -92,6 +99,16 @@ export function PaySection({ orderId, orderNo, offline, onDone }: { orderId: str
           );
         })}
       </div>
+      <button type="button" disabled={!method} onClick={() => setPhase("pay")} className="mt-4 flex min-h-[52px] w-full items-center justify-center rounded-xl bg-primary text-base font-bold text-primary-foreground disabled:opacity-50">{t("quote.modeContinue")}</button>
+      </>
+      ) : (
+      <>
+      {method && (
+        <div className="mt-3 flex items-center justify-between gap-2 rounded-xl bg-muted px-3 py-2">
+          <span className="text-sm font-bold text-foreground">{t(`quote.method.${method}`)}</span>
+          {opts.methods.length > 1 && <button type="button" onClick={() => setPhase("mode")} className="min-h-11 px-2 text-sm font-bold text-primary">{t("quote.changeMode")}</button>}
+        </div>
+      )}
 
       {method === "upi" && (
         <div className="mt-4">
@@ -139,8 +156,10 @@ export function PaySection({ orderId, orderNo, offline, onDone }: { orderId: str
       {err && <p role="alert" className="mt-3 text-sm font-medium text-destructive">{err}</p>}
       {method && (
         <button type="button" disabled={!ready || sending || offline} onClick={() => void submit()} className="mt-4 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-primary text-base font-bold text-primary-foreground disabled:opacity-50">
-          {sending && <Loader2 className="h-4 w-4 animate-spin" />}{t(method === "credit" ? "quote.creditYes" : "quote.submitPay")}
+          {sending && <Loader2 className="h-4 w-4 animate-spin" />}{t(method === "credit" ? "quote.creditYes" : "quote.sendPayment")}
         </button>
+      )}
+      </>
       )}
     </section>
   );

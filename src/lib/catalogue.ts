@@ -240,6 +240,28 @@ export function publishKhataSummary(summary: { due: number; advance: number; bal
   setHomeExtras({ ...homeExtras, khata: { due: summary.due, advance: summary.advance, balance: summary.balance, credit_limit: summary.creditLimit, available: summary.available, overdue: summary.overdue, oldest_unpaid: summary.oldestUnpaid, pending_payments: summary.pendingPayments } });
 }
 
+/**
+ * Which get_home banners show: server already filters is_active and dates;
+ * repeat the date check (timestamps are absolute, so India time is implied),
+ * empty end = no end, type targeting only when the store's type is known,
+ * no image = skip, then saved sort_order.
+ */
+export function pickBanners(rows: Record<string, unknown>[], customerTypeId: string | null, now: number) {
+  return rows
+    .filter((b) => {
+      if (b["is_active"] === false) return false;
+      if (typeof b["image_url"] !== "string" || !String(b["image_url"]).trim()) return false;
+      const start = b["start_at"] ? new Date(String(b["start_at"])).getTime() : null;
+      const end = b["end_at"] ? new Date(String(b["end_at"])).getTime() : null;
+      if (start !== null && !Number.isNaN(start) && start > now) return false;
+      if (end !== null && !Number.isNaN(end) && end < now) return false;
+      const ids = Array.isArray(b["customer_type_ids"]) ? (b["customer_type_ids"] as string[]) : null;
+      if (ids && ids.length > 0 && customerTypeId && !ids.includes(customerTypeId)) return false;
+      return true;
+    })
+    .sort((a, b) => (Number(a["sort_order"]) || 0) - (Number(b["sort_order"]) || 0));
+}
+
 async function loadCatalogue(): Promise<CatalogData> {
   const now = Date.now();
   // One round trip: get_home() returns hero, sections, categories, banners
@@ -249,8 +271,14 @@ async function loadCatalogue(): Promise<CatalogData> {
   const uid = sess.session?.user.id;
   const [{ data: home, error: homeErr }, typeRes] = await Promise.all([
     supabase.rpc("get_home"),
+    // Banner targeting uses the customer the server answers for
+    // (my_customer_id: own shop, or the salesman's picked store).
     uid
-      ? supabase.from("user_profiles").select("customers(customer_type_id)").eq("id", uid).maybeSingle()
+      ? Promise.resolve(supabase.rpc("my_customer_id")).then(async ({ data: cid }) =>
+          cid
+            ? supabase.from("customers").select("customer_type_id").eq("id", cid as string).maybeSingle()
+            : { data: null },
+        )
       : Promise.resolve({ data: null }),
   ]);
   if (homeErr) throw new Error(homeErr.message);
@@ -260,8 +288,7 @@ async function loadCatalogue(): Promise<CatalogData> {
   const categories = arr("categories");
   const heroRows = (h["hero"] as Record<string, unknown> | null) ?? null;
   const sectionRows = arr("sections") as unknown as { key: string }[];
-  const custRel = (typeRes.data as { customers?: { customer_type_id?: string | null } | null } | null)?.customers;
-  const customerTypeId: string | null = custRel?.customer_type_id ?? null;
+  const customerTypeId: string | null = (typeRes.data as { customer_type_id?: string | null } | null)?.customer_type_id ?? null;
   setHomeExtras({
     khata: (h["khata"] as Record<string, unknown> | null) ?? null,
     defaultAddress: (h["default_address"] as Record<string, unknown> | null) ?? null,
@@ -274,16 +301,7 @@ async function loadCatalogue(): Promise<CatalogData> {
       : {}),
   });
 
-  const banners: CatalogBanner[] = (arr("banners") as Record<string, unknown>[])
-    .filter((b: Record<string, unknown>) => {
-      const start = b["start_at"] ? new Date(String(b["start_at"])).getTime() : null;
-      const end = b["end_at"] ? new Date(String(b["end_at"])).getTime() : null;
-      if (start !== null && start > now) return false;
-      if (end !== null && end < now) return false;
-      const ids = Array.isArray(b["customer_type_ids"]) ? (b["customer_type_ids"] as string[]) : null;
-      if (ids && ids.length > 0 && (!customerTypeId || !ids.includes(customerTypeId))) return false;
-      return true;
-    })
+  const banners: CatalogBanner[] = pickBanners(arr("banners") as Record<string, unknown>[], customerTypeId, now)
     .map((b: Record<string, unknown>) => ({
       id: String(b["id"]),
       imageUrl: (b["image_url"] as string) ?? null,

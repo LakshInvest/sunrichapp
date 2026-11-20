@@ -10,7 +10,7 @@ import { PageShell } from "@/components/PageShell";
 import { BottomNav } from "@/components/BottomNav";
 import { KhataBalanceCard } from "@/components/KhataBalanceCard";
 import { SheetDrawer } from "@/components/SheetDrawer";
-import { entryLabel, entryTone, type KhataEntryKind } from "@/lib/khata";
+import { entryLabel, entryTone, showRejectedCard, type KhataEntryKind } from "@/lib/khata";
 import { ArrowDownLeft, ArrowUpRight, CircleDot, FileMinus, FilePlus, Receipt as ReceiptIcon, Scale, Wallet, type LucideIcon } from "lucide-react";
 
 const KIND_ICON: Record<KhataEntryKind, LucideIcon> = {
@@ -106,9 +106,12 @@ function KhataPage() {
     setSum(fresh);
   });
 
-  // Pending at the top; rejected ones from the last 30 days so the reason is seen.
-  const cutoff = new Date(Date.now() - 30 * 864e5).toISOString();
-  const topProofs = proofs.filter((p) => p.status === "pending" || (p.status === "rejected" && (p.reviewedAt ?? p.createdAt) > cutoff));
+  // Pending at the top; rejected ones only while their order still needs payment.
+  const [hidden, setHidden] = useState<Set<string>>(() => new Set());
+  useEffect(() => { try { setHidden(new Set(JSON.parse(localStorage.getItem(HIDE_KEY) ?? "[]") as string[])); } catch { /* ignore */ } }, []);
+  const hideProof = (pid: string) => setHidden((h) => { const n = new Set(h).add(pid); try { localStorage.setItem(HIDE_KEY, JSON.stringify([...n].slice(-100))); } catch { /* ignore */ } return n; });
+  const topProofs = proofs.filter((p) => p.status === "pending" || showRejectedCard(p, proofs, hidden));
+  const rejectedHistory = proofs.filter((p) => p.status === "rejected");
   const full = rows ? filterEntries(passbookRows(rows), filter) : null;
   const list = full ? full.slice(0, shown) : null;
   useEffect(() => setShown(30), [filter]);
@@ -140,7 +143,7 @@ function KhataPage() {
         {topProofs.length > 0 && (
           <section className="space-y-2" aria-label={t("khata.pendingTag")}>
             {topProofs.map((p) => (
-              <ProofRow key={p.id} p={p} />
+              <ProofRow key={p.id} p={p} onHide={() => hideProof(p.id)} />
             ))}
           </section>
         )}
@@ -211,6 +214,16 @@ function KhataPage() {
             </div>
           )}
           {full && shown < full.length && <div ref={moreRef} className="h-10" aria-hidden />}
+          {filter !== "bills" && rejectedHistory.length > 0 && (!full || shown >= full.length) && (
+            <ul className="mt-3 divide-y divide-border rounded-xl bg-muted/60" data-testid="passbook-rejected">
+              {rejectedHistory.map((p) => (
+                <li key={p.id} className="flex items-center justify-between gap-3 px-4 py-2.5 text-muted-foreground">
+                  <span className="min-w-0 truncate text-sm">{t("khata.kind.payment")} · {dateLabel(p.paidOn || p.createdAt, lang)}</span>
+                  <span className="shrink-0 text-right text-xs"><span className="block font-semibold line-through">{formatINR(p.amount)}</span>{t("khata2.notAccepted")}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       </div>
 
@@ -244,7 +257,9 @@ function groupByDate(rows: KhataEntry[]): [string, KhataEntry[]][] {
   return [...m.entries()];
 }
 
-function ProofRow({ p }: { p: KhataProof }) {
+const HIDE_KEY = "sunrich.khata.hiddenRejected";
+
+function ProofRow({ p, onHide }: { p: KhataProof; onHide: () => void }) {
   const { t } = useTranslation();
   const { lang } = useLang();
   const pending = p.status === "pending";
@@ -275,9 +290,12 @@ function ProofRow({ p }: { p: KhataProof }) {
       ) : (
         <>
           <span className="mt-1 block text-xs font-medium text-destructive">✕ {t("khata2.rejected", { reason: p.rejectReason || t("khata2.noReason") })}</span>
-          <Link to="/khata/pay" className="mt-2 inline-flex min-h-11 items-center rounded-full border border-destructive/40 px-4 text-xs font-bold text-destructive">
-            {t("khata2.sendAgain")}
-          </Link>
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <Link to={p.orderId ? "/track/$id" : "/khata/pay"} params={p.orderId ? { id: p.orderId } : {}} className="inline-flex min-h-11 items-center rounded-full border border-destructive/40 px-4 text-xs font-bold text-destructive">
+              {t("khata2.sendAgain")}
+            </Link>
+            <button type="button" onClick={onHide} className="inline-flex min-h-11 items-center gap-1 px-2 text-xs font-semibold text-muted-foreground">✕ {t("khata2.hide")}</button>
+          </div>
         </>
       )}
     </div>

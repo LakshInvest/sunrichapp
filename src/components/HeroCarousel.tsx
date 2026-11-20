@@ -8,7 +8,7 @@ import { sizedUrl } from "@/components/SmartImage";
  * + bell) sits on a soft dark gradient so it reads on any image.
  */
 export function HeroCarousel({
-  banners,
+  banners: allBanners,
   lang,
   onOpen,
   overlay,
@@ -23,6 +23,9 @@ export function HeroCarousel({
   safeTop?: boolean;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
+  // A banner whose image fails (also after the full-size retry) is skipped.
+  const [failed, setFailed] = useState<Set<string>>(() => new Set());
+  const banners = allBanners.filter((b) => !failed.has(b.id));
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const go = useCallback((i: number) => {
@@ -74,6 +77,7 @@ export function HeroCarousel({
                   onError={(e) => {
                     const img = e.currentTarget;
                     if (b.imageUrl && img.src !== b.imageUrl) img.src = b.imageUrl;
+                    else setFailed((f) => new Set(f).add(b.id));
                   }}
                   className="absolute inset-0 h-full w-full object-cover"
                 />

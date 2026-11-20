@@ -1306,7 +1306,9 @@
     "rejected": "नाकारले: {{reason}}",
     "noReason": "कारण दिले नाही",
     "sendAgain": "पुन्हा पाठवा",
-    "verifying": "पडताळणीत"
+    "verifying": "पडताळणीत",
+    "hide": "लपवा",
+    "notAccepted": "स्वीकारले नाही"
   },
   "orders2": {
     "delivery": "डिलिव्हरी",
@@ -1619,7 +1621,24 @@
     "billSoon": "बिल PDF लवकरच तयार होईल",
     "billError": "बिल उघडले नाही. पुन्हा प्रयत्न करा.",
     "einv": "ई-इनव्हॉइस ✓",
-    "ewb": "ई-वे बिल {{no}}"
+    "ewb": "ई-वे बिल {{no}}",
+    "flowStep": "पायरी {{n}} / 4",
+    "stepCheck": "दर तपासा",
+    "stepMode": "पेमेंटची पद्धत",
+    "stepPay": "पेमेंट",
+    "stepDone": "पूर्ण",
+    "askNewRate": "नवीन दर मागा",
+    "askNewRateTitle": "नवीन दर मागा",
+    "askNewRateHint": "काय बदलायचे ते सांगा, उदा. संख्या किंवा डिलिव्हरीची तारीख.",
+    "askNewRateSend": "विनंती पाठवा",
+    "askNewRateSent": "विनंती पाठवली. आम्ही नवीन दर पाठवू.",
+    "doneTitle": "पेमेंट पाठवले",
+    "doneBody": "पेमेंट पाठवले. आम्ही ते तपासून खात्री करू.",
+    "goHome": "होम",
+    "chooseMode": "पेमेंटची पद्धत निवडा",
+    "modeContinue": "पुढे जा",
+    "sendPayment": "पेमेंट पाठवा",
+    "changeMode": "पद्धत बदला"
   },
   "appNotice": {
     "request_received": {
@@ -1662,5 +1681,13 @@
       "title": "अपडेट",
       "line": "{{order_no}} वर अपडेट आहे."
     }
+  },
+  "billView": {
+    "title": "बिल",
+    "share": "शेअर करा",
+    "download": "डाउनलोड करा",
+    "close": "बंद करा",
+    "loading": "बिल उघडत आहे…",
+    "error": "बिल उघडता आले नाही. कृपया पुन्हा प्रयत्न करा."
   }
 }

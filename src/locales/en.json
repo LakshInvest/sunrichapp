@@ -1306,7 +1306,9 @@
     "rejected": "Rejected: {{reason}}",
     "noReason": "no reason given",
     "sendAgain": "Send again",
-    "verifying": "Being verified"
+    "verifying": "Being verified",
+    "hide": "Hide",
+    "notAccepted": "Not accepted"
   },
   "orders2": {
     "delivery": "Delivery",
@@ -1619,7 +1621,24 @@
     "billSoon": "Bill PDF will be ready soon",
     "billError": "Could not open the bill. Please try again.",
     "einv": "E-invoice ✓",
-    "ewb": "E-way bill {{no}}"
+    "ewb": "E-way bill {{no}}",
+    "flowStep": "Step {{n}} of 4",
+    "stepCheck": "Check rate",
+    "stepMode": "Payment mode",
+    "stepPay": "Pay",
+    "stepDone": "Done",
+    "askNewRate": "Ask new rate",
+    "askNewRateTitle": "Ask for a new rate",
+    "askNewRateHint": "Tell us what to change, e.g. quantity or delivery date.",
+    "askNewRateSend": "Send request",
+    "askNewRateSent": "Request sent. We will send a new rate.",
+    "doneTitle": "Payment sent",
+    "doneBody": "Payment sent. We will check it and confirm.",
+    "goHome": "Home",
+    "chooseMode": "Choose how you will pay",
+    "modeContinue": "Continue",
+    "sendPayment": "Send payment",
+    "changeMode": "Change mode"
   },
   "appNotice": {
     "request_received": {
@@ -1662,5 +1681,13 @@
       "title": "Update",
       "line": "There is an update on {{order_no}}."
     }
+  },
+  "billView": {
+    "title": "Bill",
+    "share": "Share",
+    "download": "Download",
+    "close": "Close",
+    "loading": "Opening bill…",
+    "error": "Could not open the bill. Please try again."
   }
 }

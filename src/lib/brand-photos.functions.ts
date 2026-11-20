@@ -1,9 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { brandVisibility } from "./brand-photos";
 
-export type LoginTexts = Partial<Record<"login_title" | "login_subtitle" | "pin_title" | "otp_title" | "otp_subtitle", { en: string | null; hi: string | null; mr: string | null }>>;
+export type LoginTexts = Partial<Record<"login_title" | "login_subtitle" | "login_tagline" | "pin_title" | "otp_title" | "otp_subtitle", { en: string | null; hi: string | null; mr: string | null }>>;
 export type BrandPhotos = { login: string | null; launch: string | null; hero: string | null; logo?: string | null; texts?: LoginTexts; visibility?: ReturnType<typeof brandVisibility> };
-const TEXT_KEYS = ["login_title", "login_subtitle", "pin_title", "otp_title", "otp_subtitle"] as const;
+const TEXT_KEYS = ["login_title", "login_subtitle", "login_tagline", "pin_title", "otp_title", "otp_subtitle"] as const;
 const txt = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
 
 const url = (v: unknown) => (typeof v === "string" && /^https:\/\//.test(v.trim()) ? v.trim() : null);

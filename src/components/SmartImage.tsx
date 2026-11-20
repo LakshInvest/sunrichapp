@@ -1,3 +1,4 @@
+import { Milk } from "lucide-react";
 import { useState } from "react";
 
 /**
@@ -25,18 +26,9 @@ export function SmartImage({
   const [loaded, setLoaded] = useState(false);
 
   if (!src || failed) {
-    const letter = alt.trim().charAt(0).toUpperCase();
     return (
-      <div
-        role="img"
-        aria-label={alt}
-        className={`flex items-center justify-center bg-gradient-to-br from-secondary/25 via-secondary/10 to-primary/15 ${className ?? ""}`}
-      >
-        {letter && (
-          <span aria-hidden className="text-3xl font-bold text-primary/40">
-            {letter}
-          </span>
-        )}
+      <div role="img" aria-label={alt} className={`flex items-center justify-center bg-muted ${className ?? ""}`}>
+        <Milk aria-hidden strokeWidth={1.25} className="h-1/3 max-h-12 w-auto text-muted-foreground/60" />
       </div>
     );
   }

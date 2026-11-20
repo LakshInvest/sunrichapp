@@ -1,4 +1,3 @@
-import logoWhite from "@/assets/brand/sunrich-logo-white.png.asset.json";
 import appIcon from "@/assets/brand/sunrich-app-icon-final.png.asset.json";
 import { markFirstScreen } from "@/lib/native";
 import { AppLoader } from "@/components/AppLoader";
@@ -825,11 +824,21 @@ function Login() {
             onError={() => setLoginImage(null)}
           />
         )}
-        <div aria-hidden className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-foreground/60 to-transparent" />
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-foreground/45 to-transparent" />
+        {loginImage ? (
+          <div aria-hidden className="absolute inset-0 bg-foreground/35" />
+        ) : (
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-primary to-primary/80" />
+        )}
         <div className="absolute inset-x-0 top-[calc(env(safe-area-inset-top)+2.5rem)] flex flex-col items-center text-primary-foreground drop-shadow">
-          {visibility.loginShowLogo !== false && <img src={logoImage ?? logoWhite.url} alt="Sunrich" className="h-auto w-[45vw] max-w-[220px]" onError={() => setLogoImage(null)} />}
-          {visibility.loginShowTagline !== false && <p className="mt-1.5 font-deva text-[15px] font-semibold">शुद्ध पियो, खूब जियो</p>}
+          {visibility.loginShowLogo !== false &&
+            (logoImage ? (
+              <img src={logoImage} alt="Sunrich" className="h-auto w-[45vw] max-w-[220px]" onError={() => setLogoImage(null)} />
+            ) : (
+              <span className="text-[32px] font-extrabold tracking-[0.12em]">SUNRICH</span>
+            ))}
+          {visibility.loginShowTagline !== false && loginText(texts, "login_tagline", lang) && (
+            <p className="mt-1.5 font-deva text-[15px] font-semibold">{loginText(texts, "login_tagline", lang)}</p>
+          )}
         </div>
       </div>
 

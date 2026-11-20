@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_requests: {
+        Row: {
+          company_id: string
+          created_at: string
+          customer_id: string | null
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          id: string
+          mobile: string
+          reason: string | null
+          source: string
+          status: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          customer_id?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          mobile: string
+          reason?: string | null
+          source: string
+          status?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          customer_id?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          mobile?: string
+          reason?: string | null
+          source?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_deletion_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_appearance: {
         Row: {
           app: string
@@ -210,6 +260,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      app_push_tokens: {
+        Row: {
+          app_version: string | null
+          company_id: string
+          created_at: string
+          customer_id: string | null
+          lang: string
+          platform: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app_version?: string | null
+          company_id: string
+          created_at?: string
+          customer_id?: string | null
+          lang?: string
+          platform?: string
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app_version?: string | null
+          company_id?: string
+          created_at?: string
+          customer_id?: string | null
+          lang?: string
+          platform?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       app_settings: {
         Row: {
@@ -10920,6 +11006,13 @@ export type Database = {
         }
         Returns: string
       }
+      _customer_push_tokens: {
+        Args: { p_customer: string }
+        Returns: {
+          lang: string
+          token: string
+        }[]
+      }
       _doc_no: {
         Args: {
           p_fallback: string
@@ -11272,6 +11365,11 @@ export type Database = {
         }
       }
       _notify_key: { Args: never; Returns: string }
+      _notify_push_messages: { Args: { p_log_id: number }; Returns: Json }
+      _notify_push_text: {
+        Args: { p_event: string; p_lang: string; v: Json }
+        Returns: Json
+      }
       _notify_register: { Args: { p_url: string }; Returns: string }
       _notify_tick: { Args: never; Returns: undefined }
       _notify_values: { Args: { p_log_id: number }; Returns: Json }
@@ -11403,6 +11501,7 @@ export type Database = {
             }
             Returns: Json
           }
+      _push_token_drop: { Args: { p_token: string }; Returns: undefined }
       _receipt_alloc_snapshot: { Args: { p_receipt_id: string }; Returns: Json }
       _refresh_invoice_paid: {
         Args: { p_invoice_id: string }
@@ -11650,6 +11749,10 @@ export type Database = {
           full_name: string
           id: string
         }[]
+      }
+      cc_account_deletion_decide: {
+        Args: { p_approve: boolean; p_id: string; p_note?: string }
+        Returns: Json
       }
       cc_allocate_order: {
         Args: { p_note?: string; p_order_id: string; p_parts: Json }
@@ -12862,6 +12965,20 @@ export type Database = {
         }[]
       }
       my_product: { Args: { p_id: string }; Returns: Json }
+      my_push_token_remove: { Args: { p_token: string }; Returns: undefined }
+      my_push_token_save: {
+        Args: {
+          p_app_version?: string
+          p_lang?: string
+          p_platform?: string
+          p_token: string
+        }
+        Returns: Json
+      }
+      my_request_account_deletion: {
+        Args: { p_reason?: string }
+        Returns: Json
+      }
       my_schemes: { Args: never; Returns: Json }
       my_session_is_valid: { Args: never; Returns: boolean }
       my_staff_qr: { Args: never; Returns: string }
@@ -13023,6 +13140,10 @@ export type Database = {
         }[]
       }
       public_app_info: { Args: never; Returns: Json }
+      public_request_account_deletion: {
+        Args: { p_mobile: string; p_reason?: string }
+        Returns: Json
+      }
       quote_my_order: {
         Args: { p_lines: Json; p_mode?: string }
         Returns: Json

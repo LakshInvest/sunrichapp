@@ -6,6 +6,7 @@ import { formatINR } from "@/lib/catalogue";
 import { CopyRow } from "@/components/PaymentProofSheet";
 import { openUpi, upiLink } from "@/lib/upi";
 import { prepareUpload } from "@/lib/image-compress";
+import { isNative, pickPhoto } from "@/lib/native";
 import { getMyCustomerId } from "@/lib/my-customer";
 import { supabase } from "@/integrations/supabase/client";
 import { serverMessage } from "@/lib/form-errors";
@@ -25,6 +26,12 @@ export function PaySection({ orderId, orderNo, offline, onDone }: { orderId: str
   const [sending, setSending] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  // Android: system photo picker (no storage permission). Web: file input.
+  const pickScreenshot = async () => {
+    if (!isNative()) return fileInput.current?.click();
+    const f = await pickPhoto("photos");
+    if (f) setFile(f);
+  };
 
   useEffect(() => {
     let live = true;
@@ -117,7 +124,7 @@ export function PaySection({ orderId, orderNo, offline, onDone }: { orderId: str
           {file ? (
             <div className="flex items-center gap-2 rounded-xl bg-muted px-3 py-2 text-sm"><Check className="h-4 w-4 text-success" /><span className="min-w-0 flex-1 truncate">{file.name}</span><button type="button" aria-label={t("cart.remove")} onClick={() => setFile(null)}><X className="h-4 w-4" /></button></div>
           ) : (
-            <button type="button" onClick={() => fileInput.current?.click()} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-border text-sm font-semibold text-foreground"><Camera className="h-4 w-4" />{t("quote.screenshot")}</button>
+            <button type="button" onClick={() => void pickScreenshot()} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-border text-sm font-semibold text-foreground"><Camera className="h-4 w-4" />{t("quote.screenshot")}</button>
           )}
         </div>
       )}

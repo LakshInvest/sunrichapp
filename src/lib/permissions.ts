@@ -85,6 +85,10 @@ export async function checkPermission(kind: PermissionKind): Promise<PermissionA
 export async function requestPermission(kind: PermissionKind): Promise<PermissionAnswer> {
   const now = await checkPermission(kind);
   if (now !== "prompt") return now;
+  if (isNative()) {
+    const { askReason } = await import("@/components/PermissionReason");
+    if (!(await askReason(kind))) return "prompt";
+  }
   try {
     if (kind === "notifications") {
       if (isNative()) {

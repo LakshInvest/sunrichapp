@@ -151,7 +151,7 @@ function OrderPage() {
                 const q = qtyOf(i.line_id, i.qty);
                 return (
                   <li key={i.line_id} className="py-2.5">
-                    <div className="flex justify-between gap-3"><span className="min-w-0 text-sm font-semibold text-foreground">{i.name}{i.pack_label ? <span className="font-normal text-muted-foreground"> · {i.pack_label}</span> : null}</span><span className="shrink-0 text-sm font-bold text-foreground">{formatINR(q === i.qty ? i.total ?? 0 : (i.rate ?? 0) * q)}</span></div>
+                    <div className="flex justify-between gap-3"><span className="min-w-0 text-sm font-semibold text-foreground">{i.name}{i.pack_label ? <span className="font-normal text-muted-foreground"> · {i.pack_label}</span> : null}</span><span className="shrink-0 text-sm font-bold text-foreground">{formatINR((i.rate ?? 0) * q)}</span></div>
                     <div className="mt-1.5 flex items-center justify-between gap-2">
                       <span className="text-xs text-muted-foreground">{formatINR(i.rate ?? 0)} × {q}</span>
                       <span className="flex items-center rounded-full border border-border">
@@ -160,7 +160,6 @@ function OrderPage() {
                         <button type="button" aria-label={t("home.increaseQty")} onClick={() => setEdits((e) => ({ ...e, [i.line_id]: q + 1 }))} className="flex h-11 w-11 items-center justify-center"><Plus className="h-4 w-4" /></button>
                       </span>
                     </div>
-                    {!!i.discount && <p className="mt-1 text-xs font-semibold text-success">{t("quote.discount")} −{formatINR(i.discount)}</p>}
                   </li>
                 );
               })}

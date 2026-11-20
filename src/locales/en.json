@@ -371,7 +371,9 @@
     "deletePoint3": "Bills and tax records are kept for the time required by law.",
     "deletePoint4": "Unpaid bills must be cleared first.",
     "deletePending": "Delete request received – we will close your account within 7 days",
-    "deleteMine": "Delete my account"
+    "deleteMine": "Delete my account",
+    "pushRow": "Phone notifications",
+    "pushDenied": "Notifications are off for Sunrich. Turn them on in phone settings."
   },
   "register": {
     "title": "Complete your registration",
@@ -1065,7 +1067,9 @@
     "yes": "Yes, notify me",
     "no": "Not now",
     "foregroundTitle": "Sunrich update",
-    "foregroundBody": "Tap to see the update."
+    "foregroundBody": "Tap to see the update.",
+    "channelName": "Order updates",
+    "channelDesc": "Rate, payment and delivery updates"
   },
   "pod": {
     "otpTitle": "Delivery code",
@@ -1393,7 +1397,14 @@
     "cameraReason": "Payment screenshot or photo",
     "allow": "Allow",
     "later": "Later",
-    "settings": "Open settings"
+    "settings": "Open settings",
+    "why": {
+      "camera": "To take a photo of your payment slip.",
+      "location": "To fill your delivery address correctly.",
+      "notifications": "To tell you when your rate, payment and delivery are ready."
+    },
+    "continue": "Continue",
+    "notNow": "Not now"
   },
   "messages": {
     "ok": "OK",
@@ -1408,7 +1419,9 @@
     "offlineTitle": "No internet",
     "offlineText": "Check your connection and try again.",
     "cameraTitle": "Camera is off",
-    "cameraText": "Turn on camera for Sunrich in settings."
+    "cameraText": "Turn on camera for Sunrich in settings.",
+    "notificationsTitle": "Notifications are off",
+    "notificationsText": "Notifications are off for Sunrich. Turn them on in phone settings."
   },
   "product3": {
     "share": "Share",

@@ -27,6 +27,7 @@ import { clearGate } from "@/lib/gate-cache";
 import { clearUserCaches } from "@/lib/swr-cache";
 import { AppGate } from "@/components/AppGate";
 import { MessageCardHost, showMessage } from "@/components/MessageCard";
+import { PermissionReasonHost } from "@/components/PermissionReason";
 import { InAppPushHost } from "@/components/InAppPush";
 import { refreshPushToken } from "@/lib/push";
 import { requestDataRefresh, onDataRefresh, setRefreshForeground } from "@/lib/data-refresh";
@@ -166,6 +167,7 @@ function RootComponent() {
     const remove: (() => void)[] = [];
     void import("@/lib/native").then(async ({ isNative }) => {
       if (!isNative() || stopped) return;
+      void import("@/lib/push").then((m) => m.ensureOrderChannel());
       const { App } = await import("@capacitor/app");
       const { Network } = await import("@capacitor/network");
       const handles = await Promise.all([
@@ -240,6 +242,7 @@ function RootComponent() {
       <Outlet />
       <AppGate />
       <MessageCardHost />
+      <PermissionReasonHost />
       <InAppPushHost />
       {askExit && (
         <div role="alertdialog" aria-modal className="fixed inset-0 z-[80] flex items-center justify-center bg-primary/60 px-6 backdrop-blur-sm">

@@ -206,7 +206,11 @@ export async function locateDevice(request = false): Promise<LocateResult> {
     if (isNative()) {
       const { Geolocation } = await import("@capacitor/geolocation");
       let perm = await Geolocation.checkPermissions();
-      if (request && perm.location !== "granted" && perm.coarseLocation !== "granted" && perm.location !== "denied") perm = await Geolocation.requestPermissions();
+      if (request && perm.location !== "granted" && perm.coarseLocation !== "granted" && perm.location !== "denied") {
+        const { askReason } = await import("@/components/PermissionReason");
+        if (!(await askReason("location"))) return { ok: false, reason: "denied" };
+        perm = await Geolocation.requestPermissions();
+      }
       if (!perm || (perm.location !== "granted" && perm.coarseLocation !== "granted")) return { ok: false, reason: "denied" };
       const p = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });
       return { ok: true, lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy ?? null };
@@ -327,7 +331,7 @@ export async function notifyLocal(title: string, body: string, url?: string): Pr
   const { LocalNotifications } = await import("@capacitor/local-notifications");
   const perm = await LocalNotifications.checkPermissions();
   if (perm.display !== "granted") return;
-  await LocalNotifications.createChannel({ id: "orders", name: "Orders", importance: 4 }).catch(() => undefined);
+  await LocalNotifications.createChannel({ id: "orders", name: (await import("@/lib/i18n")).default.t("push.channelName"), importance: 4, sound: "default" }).catch(() => undefined);
   await LocalNotifications.schedule({
     notifications: [{ id: Date.now() % 2147483647, title, body, channelId: "orders", extra: { url } }],
   });

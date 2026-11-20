@@ -32,7 +32,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { clearSales, useSales } from "@/lib/sales";
-import { removePushToken } from "@/lib/push";
+import { disablePush, enablePush, pushSwitchOn, removePushToken } from "@/lib/push";
+import { isNative as isNativeApp, openAppSettings } from "@/lib/native";
+import { showMessage } from "@/components/MessageCard";
+import { Switch } from "@/components/ui/switch";
+import { BellRing } from "lucide-react";
 
 const DELETE_KEY = "sunrich.deleteRequested";
 import { clearMyPhoto } from "@/lib/profile.functions";
@@ -323,6 +327,22 @@ function Account() {
     }
   };
 
+  const [nativeApp, setNativeApp] = useState(false);
+  const [pushOn, setPushOn] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
+  useEffect(() => { setNativeApp(isNativeApp()); setPushOn(pushSwitchOn()); }, []);
+  const togglePush = async (v: boolean) => {
+    setPushBusy(true);
+    try {
+      if (!v) { await disablePush(); setPushOn(false); return; }
+      const r = await enablePush();
+      setPushOn(r === "on");
+      if (r === "denied") showMessage({ kind: "notifications", textKey: "account.pushDenied", buttonKey: "permissions.settings", onAction: () => void openAppSettings() });
+    } finally {
+      setPushBusy(false);
+    }
+  };
+
   const signOut = async () => {
     await clearSales();
     await queryClient.cancelQueries();
@@ -493,6 +513,16 @@ function Account() {
             ))}
           </div>
         </div>
+        {nativeApp && (
+          <>
+            <Separator />
+            <div className="flex min-h-14 items-center gap-3 px-4">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary/10"><BellRing className="h-5 w-5 text-secondary" aria-hidden /></span>
+              <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-foreground">{t("account.pushRow")}</span>
+              <Switch aria-label={t("account.pushRow")} checked={pushOn} disabled={pushBusy} onCheckedChange={(v) => void togglePush(v)} />
+            </div>
+          </>
+        )}
         <Separator />
         <MenuItem icon={Info} label={t("account.about")} onClick={() => setAboutOpen(true)} />
       </section>

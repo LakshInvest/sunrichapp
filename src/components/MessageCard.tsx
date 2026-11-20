@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 
-export type MessageKind = "delivery" | "payment" | "stock" | "hold" | "offline" | "camera";
+export type MessageKind = "delivery" | "payment" | "stock" | "hold" | "offline" | "camera" | "notifications";
 
 export type MessageOptions = {
   kind: MessageKind;
@@ -32,6 +32,7 @@ const ART: Record<MessageKind, string> = {
   stock: "M12 22l18-9 18 9v20l-18 9-18-9z M12 22l18 9 18-9 M30 31v20",
   hold: "M30 9l18 7v13c0 12-18 22-18 22S12 41 12 29V16z M25 25v12 M35 25v12",
   offline: "M10 25q20-16 40 0 M17 33q13-10 26 0 M25 41q5-4 10 0 M30 48h.1",
+  notifications: "M20 40V27a10 10 0 0 1 20 0v13l4 4H16z M26 48h8",
   camera: "M10 20h10l4-5h12l4 5h10v26H10z M30 40a7 7 0 1 0 0-14 7 7 0 0 0 0 14",
 };
 

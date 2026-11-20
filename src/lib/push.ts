@@ -58,6 +58,24 @@ async function saveToken(token: string) {
   });
 }
 
+/** Android channel "orders" (server sends channel_id "orders"). Safe to call often; renames follow the app language. */
+export async function ensureOrderChannel(): Promise<void> {
+  if (!isNative()) return;
+  try {
+    const { PushNotifications } = await import("@capacitor/push-notifications");
+    await PushNotifications.createChannel({
+      id: "orders",
+      name: i18n.t("push.channelName"),
+      description: i18n.t("push.channelDesc"),
+      importance: 4,
+      visibility: 1,
+      sound: "default",
+    });
+  } catch {
+    /* plugin missing in this build */
+  }
+}
+
 let listening = false;
 // Set just before the native register call and cleared once it answers. If
 // the app died mid-register (no google-services.json → Firebase missing), the
@@ -88,13 +106,7 @@ async function register() {
     return;
   }
   const { PushNotifications } = await import("@capacitor/push-notifications");
-  await PushNotifications.createChannel({
-    id: "orders",
-    name: "Order updates",
-    description: "Order, delivery and payment updates",
-    importance: 4,
-    visibility: 1,
-  }).catch(() => undefined);
+  await ensureOrderChannel();
   if (!listening) {
     listening = true;
     await PushNotifications.addListener("registration", (t) => {
@@ -165,5 +177,44 @@ export async function removePushToken(): Promise<void> {
     await supabase.rpc("my_push_token_remove", { p_token: token });
   } catch {
     /* sign out anyway */
+  }
+}
+
+/** Account switch: remembered on the device. */
+export function pushSwitchOn(): boolean {
+  return pushAskState() === "yes";
+}
+
+/** Switch ON → reason sheet → Android ask → register → my_push_token_save. "denied" means only Settings can fix it. */
+export async function enablePush(): Promise<"on" | "denied" | "cancelled"> {
+  if (!isNative()) return "denied";
+  const { checkPermission } = await import("@/lib/permissions");
+  let p = await checkPermission("notifications");
+  if (p === "prompt") {
+    const { askReason } = await import("@/components/PermissionReason");
+    if (!(await askReason("notifications"))) return "cancelled";
+    const { PushNotifications } = await import("@capacitor/push-notifications");
+    try {
+      p = (await PushNotifications.requestPermissions()).receive === "granted" ? "granted" : "denied";
+    } catch {
+      p = "denied";
+    }
+    await checkPermission("notifications");
+  }
+  if (p !== "granted") return "denied";
+  setAsk("yes");
+  await register();
+  return "on";
+}
+
+/** Switch OFF → my_push_token_remove; stays off across restarts. */
+export async function disablePush(): Promise<void> {
+  setAsk("no");
+  await removePushToken();
+  try {
+    const { PushNotifications } = await import("@capacitor/push-notifications");
+    await PushNotifications.unregister();
+  } catch {
+    /* ignore */
   }
 }

@@ -1081,78 +1081,198 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_debit_note_lines: {
+        Row: {
+          cgst: number
+          description: string
+          gst_rate: number
+          hsn_code: string | null
+          id: string
+          igst: number
+          invoice_line_id: string | null
+          line_total: number
+          note_id: string
+          product_id: string | null
+          qty: number
+          sgst: number
+          sort_order: number
+          taxable_value: number
+          unit_price: number
+        }
+        Insert: {
+          cgst?: number
+          description: string
+          gst_rate: number
+          hsn_code?: string | null
+          id?: string
+          igst?: number
+          invoice_line_id?: string | null
+          line_total: number
+          note_id: string
+          product_id?: string | null
+          qty?: number
+          sgst?: number
+          sort_order?: number
+          taxable_value: number
+          unit_price?: number
+        }
+        Update: {
+          cgst?: number
+          description?: string
+          gst_rate?: number
+          hsn_code?: string | null
+          id?: string
+          igst?: number
+          invoice_line_id?: string | null
+          line_total?: number
+          note_id?: string
+          product_id?: string | null
+          qty?: number
+          sgst?: number
+          sort_order?: number
+          taxable_value?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_debit_note_lines_invoice_line_id_fkey"
+            columns: ["invoice_line_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_invoice_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_note_lines_invoice_line_id_fkey"
+            columns: ["invoice_line_id"]
+            isOneToOne: false
+            referencedRelation: "invoice_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_note_lines_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_credit_debit_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_note_lines_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "credit_debit_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_note_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_debit_notes: {
         Row: {
+          ack_date: string | null
+          ack_no: string | null
           approved_at: string | null
           approved_by: string | null
           company_id: string
           created_at: string
           created_by: string | null
           customer_id: string
+          einv_error: string | null
+          einv_status: string
           firm_id: string
+          gst_mode: string | null
           gst_rate: number
           id: string
           invoice_id: string | null
+          irn: string | null
           note_date: string
           note_no: string
           note_type: string
           order_id: string | null
           reason: string
           reject_reason: string | null
+          seller_gstin: string | null
+          signed_qr: string | null
           status: string
+          stock_back: boolean
           stop_id: string | null
           tax_amount: number
           taxable_value: number
           total: number
           trip_id: string | null
+          unit_id: string | null
         }
         Insert: {
+          ack_date?: string | null
+          ack_no?: string | null
           approved_at?: string | null
           approved_by?: string | null
           company_id: string
           created_at?: string
           created_by?: string | null
           customer_id: string
+          einv_error?: string | null
+          einv_status?: string
           firm_id: string
+          gst_mode?: string | null
           gst_rate?: number
           id?: string
           invoice_id?: string | null
+          irn?: string | null
           note_date?: string
           note_no: string
           note_type: string
           order_id?: string | null
           reason: string
           reject_reason?: string | null
+          seller_gstin?: string | null
+          signed_qr?: string | null
           status?: string
+          stock_back?: boolean
           stop_id?: string | null
           tax_amount?: number
           taxable_value: number
           total: number
           trip_id?: string | null
+          unit_id?: string | null
         }
         Update: {
+          ack_date?: string | null
+          ack_no?: string | null
           approved_at?: string | null
           approved_by?: string | null
           company_id?: string
           created_at?: string
           created_by?: string | null
           customer_id?: string
+          einv_error?: string | null
+          einv_status?: string
           firm_id?: string
+          gst_mode?: string | null
           gst_rate?: number
           id?: string
           invoice_id?: string | null
+          irn?: string | null
           note_date?: string
           note_no?: string
           note_type?: string
           order_id?: string | null
           reason?: string
           reject_reason?: string | null
+          seller_gstin?: string | null
+          signed_qr?: string | null
           status?: string
+          stock_back?: boolean
           stop_id?: string | null
           tax_amount?: number
           taxable_value?: number
           total?: number
           trip_id?: string | null
+          unit_id?: string | null
         }
         Relationships: [
           {
@@ -1230,6 +1350,13 @@ export type Database = {
             columns: ["trip_id"]
             isOneToOne: false
             referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_debit_notes_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
             referencedColumns: ["id"]
           },
         ]
@@ -3925,6 +4052,7 @@ export type Database = {
           id: string
           invoice_id: string | null
           mode: string | null
+          note_id: string | null
           ok: boolean
           request: Json | null
           response: Json | null
@@ -3938,6 +4066,7 @@ export type Database = {
           id?: string
           invoice_id?: string | null
           mode?: string | null
+          note_id?: string | null
           ok?: boolean
           request?: Json | null
           response?: Json | null
@@ -3951,6 +4080,7 @@ export type Database = {
           id?: string
           invoice_id?: string | null
           mode?: string | null
+          note_id?: string | null
           ok?: boolean
           request?: Json | null
           response?: Json | null
@@ -4100,6 +4230,9 @@ export type Database = {
           bank_account_id: string | null
           billing_address: string | null
           business_name: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
           cgst: number
           challan_no: string | null
           company_id: string
@@ -4122,6 +4255,9 @@ export type Database = {
           ewb_valid_till: string | null
           ewb_vehicle_no: string | null
           firm_id: string
+          gate_out_at: string | null
+          gate_out_by: string | null
+          gate_token: string | null
           grand_total: number
           gst_mode: string | null
           id: string
@@ -4132,6 +4268,8 @@ export type Database = {
           is_interstate: boolean
           order_id: string
           payment_status: string
+          pdf_at: string | null
+          pdf_path: string | null
           place_of_supply: string | null
           round_off: number
           seller_gstin: string | null
@@ -4150,6 +4288,9 @@ export type Database = {
           bank_account_id?: string | null
           billing_address?: string | null
           business_name?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           cgst?: number
           challan_no?: string | null
           company_id: string
@@ -4172,6 +4313,9 @@ export type Database = {
           ewb_valid_till?: string | null
           ewb_vehicle_no?: string | null
           firm_id: string
+          gate_out_at?: string | null
+          gate_out_by?: string | null
+          gate_token?: string | null
           grand_total?: number
           gst_mode?: string | null
           id?: string
@@ -4182,6 +4326,8 @@ export type Database = {
           is_interstate?: boolean
           order_id: string
           payment_status?: string
+          pdf_at?: string | null
+          pdf_path?: string | null
           place_of_supply?: string | null
           round_off?: number
           seller_gstin?: string | null
@@ -4200,6 +4346,9 @@ export type Database = {
           bank_account_id?: string | null
           billing_address?: string | null
           business_name?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           cgst?: number
           challan_no?: string | null
           company_id?: string
@@ -4222,6 +4371,9 @@ export type Database = {
           ewb_valid_till?: string | null
           ewb_vehicle_no?: string | null
           firm_id?: string
+          gate_out_at?: string | null
+          gate_out_by?: string | null
+          gate_token?: string | null
           grand_total?: number
           gst_mode?: string | null
           id?: string
@@ -4232,6 +4384,8 @@ export type Database = {
           is_interstate?: boolean
           order_id?: string
           payment_status?: string
+          pdf_at?: string | null
+          pdf_path?: string | null
           place_of_supply?: string | null
           round_off?: number
           seller_gstin?: string | null
@@ -4385,36 +4539,42 @@ export type Database = {
       notification_events: {
         Row: {
           aisensy_campaign: string | null
+          attach_bill_pdf: boolean
           audience: string
           company_id: string
           event_key: string
           name: string
           push_enabled: boolean
           sort_order: number
+          template_params: string[]
           updated_at: string
           updated_by: string | null
           whatsapp_enabled: boolean
         }
         Insert: {
           aisensy_campaign?: string | null
+          attach_bill_pdf?: boolean
           audience?: string
           company_id: string
           event_key: string
           name: string
           push_enabled?: boolean
           sort_order?: number
+          template_params?: string[]
           updated_at?: string
           updated_by?: string | null
           whatsapp_enabled?: boolean
         }
         Update: {
           aisensy_campaign?: string | null
+          attach_bill_pdf?: boolean
           audience?: string
           company_id?: string
           event_key?: string
           name?: string
           push_enabled?: boolean
           sort_order?: number
+          template_params?: string[]
           updated_at?: string
           updated_by?: string | null
           whatsapp_enabled?: boolean
@@ -4423,6 +4583,7 @@ export type Database = {
       }
       notification_log: {
         Row: {
+          attempts: number
           channel: string
           company_id: string
           created_at: string
@@ -4430,12 +4591,18 @@ export type Database = {
           error: string | null
           event_key: string
           id: number
+          next_try_at: string
           order_id: string | null
           payload: Json | null
+          read_at: string | null
+          request: Json | null
+          response: Json | null
+          sent_at: string | null
           status: string
           to_mobile: string | null
         }
         Insert: {
+          attempts?: number
           channel: string
           company_id: string
           created_at?: string
@@ -4443,12 +4610,18 @@ export type Database = {
           error?: string | null
           event_key: string
           id?: number
+          next_try_at?: string
           order_id?: string | null
           payload?: Json | null
+          read_at?: string | null
+          request?: Json | null
+          response?: Json | null
+          sent_at?: string | null
           status: string
           to_mobile?: string | null
         }
         Update: {
+          attempts?: number
           channel?: string
           company_id?: string
           created_at?: string
@@ -4456,12 +4629,71 @@ export type Database = {
           error?: string | null
           event_key?: string
           id?: number
+          next_try_at?: string
           order_id?: string | null
           payload?: Json | null
+          read_at?: string | null
+          request?: Json | null
+          response?: Json | null
+          sent_at?: string | null
           status?: string
           to_mobile?: string | null
         }
         Relationships: []
+      }
+      order_discounts: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          line_id: string | null
+          note: string
+          order_id: string
+          product_id: string | null
+          value: number
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind: string
+          line_id?: string | null
+          note: string
+          order_id: string
+          product_id?: string | null
+          value: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          line_id?: string | null
+          note?: string
+          order_id?: string
+          product_id?: string | null
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_discounts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "cc70_report_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_discounts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_feedback: {
         Row: {
@@ -6474,6 +6706,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sample_data_log: {
+        Row: {
+          created_at: string
+          id: number
+          kind: string
+          label: string | null
+          ref_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          kind: string
+          label?: string | null
+          ref_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          kind?: string
+          label?: string | null
+          ref_id?: string
+        }
+        Relationships: []
       }
       scheme_combo_items: {
         Row: {
@@ -10676,6 +10932,10 @@ export type Database = {
         Args: { p_invoice_id: string; p_over?: Json }
         Returns: Json
       }
+      _einv_payload_parties: {
+        Args: { p_invoice_id: string; p_over?: Json }
+        Returns: Json
+      }
       _eligible_schemes: {
         Args: { p_customer_id: string; p_office: boolean }
         Returns: {
@@ -10727,7 +10987,82 @@ export type Database = {
         Args: { p_invoice_id: string; p_opt?: Json }
         Returns: Json
       }
+      _ewb_payload_b2c: {
+        Args: { p_invoice_id: string; p_opt?: Json }
+        Returns: Json
+      }
+      _ewb_vehicle_payload: {
+        Args: { p_invoice_id: string; p_opt: Json }
+        Returns: Json
+      }
       _fifo_allocate: { Args: { p_receipt_id: string }; Returns: number }
+      _gate_find: {
+        Args: { p_code: string }
+        Returns: {
+          ack_date: string | null
+          ack_no: string | null
+          amount_paid: number
+          bank_account_id: string | null
+          billing_address: string | null
+          business_name: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          cgst: number
+          challan_no: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          customer_gstin: string | null
+          customer_id: string
+          customer_name: string | null
+          deposit_total: number
+          discount_total: number
+          due_date: string | null
+          einv_cancel_reason: string | null
+          einv_cancelled_at: string | null
+          einv_error: string | null
+          einv_status: string
+          eway_bill_no: string | null
+          ewb_date: string | null
+          ewb_error: string | null
+          ewb_status: string
+          ewb_valid_till: string | null
+          ewb_vehicle_no: string | null
+          firm_id: string
+          gate_out_at: string | null
+          gate_out_by: string | null
+          gate_token: string | null
+          grand_total: number
+          gst_mode: string | null
+          id: string
+          igst: number
+          invoice_date: string
+          invoice_no: string
+          irn: string | null
+          is_interstate: boolean
+          order_id: string
+          payment_status: string
+          pdf_at: string | null
+          pdf_path: string | null
+          place_of_supply: string | null
+          round_off: number
+          seller_gstin: string | null
+          sgst: number
+          shipment_id: string | null
+          signed_qr: string | null
+          status: string
+          taxable_value: number
+          trip_id: string | null
+          unit_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "invoices"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       _gate_log: {
         Args: { p_kind: string; p_label: string; p_mode: string; p_ref: string }
         Returns: undefined
@@ -10735,6 +11070,10 @@ export type Database = {
       _gate_secret: { Args: never; Returns: string }
       _gate_staff_hit: { Args: { p_id: string }; Returns: Json }
       _gate_vehicle_hit: { Args: { p_vehicle: string }; Returns: Json }
+      _gate_view: {
+        Args: { i: Database["public"]["Tables"]["invoices"]["Row"] }
+        Returns: Json
+      }
       _generate_invoice: {
         Args: { p_order_id: string; p_trip_id: string }
         Returns: string
@@ -10748,6 +11087,20 @@ export type Database = {
           p_error: string
           p_invoice_id: string
           p_mode: string
+          p_ok: boolean
+          p_request: Json
+          p_response: Json
+          p_user: string
+        }
+        Returns: Json
+      }
+      _gst_save_note: {
+        Args: {
+          p_action: string
+          p_data: Json
+          p_error: string
+          p_mode: string
+          p_note_id: string
           p_ok: boolean
           p_request: Json
           p_response: Json
@@ -10807,6 +11160,122 @@ export type Database = {
         Returns: undefined
       }
       _nf_sync_parent: { Args: { p_parent: string }; Returns: undefined }
+      _nf_unit_visible: { Args: { p_unit_id: string }; Returns: boolean }
+      _note_apply: { Args: { p_note_id: string }; Returns: undefined }
+      _note_payload: {
+        Args: { p_note_id: string; p_over?: Json }
+        Returns: Json
+      }
+      _notify_claim: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempts: number
+          channel: string
+          company_id: string
+          created_at: string
+          customer_id: string | null
+          error: string | null
+          event_key: string
+          id: number
+          next_try_at: string
+          order_id: string | null
+          payload: Json | null
+          read_at: string | null
+          request: Json | null
+          response: Json | null
+          sent_at: string | null
+          status: string
+          to_mobile: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "notification_log"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      _notify_done: {
+        Args: {
+          p_error?: string
+          p_log_id: number
+          p_ok: boolean
+          p_request?: Json
+          p_response?: Json
+        }
+        Returns: undefined
+      }
+      _notify_invoice: {
+        Args: { p_log_id: number }
+        Returns: {
+          ack_date: string | null
+          ack_no: string | null
+          amount_paid: number
+          bank_account_id: string | null
+          billing_address: string | null
+          business_name: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          cgst: number
+          challan_no: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          customer_gstin: string | null
+          customer_id: string
+          customer_name: string | null
+          deposit_total: number
+          discount_total: number
+          due_date: string | null
+          einv_cancel_reason: string | null
+          einv_cancelled_at: string | null
+          einv_error: string | null
+          einv_status: string
+          eway_bill_no: string | null
+          ewb_date: string | null
+          ewb_error: string | null
+          ewb_status: string
+          ewb_valid_till: string | null
+          ewb_vehicle_no: string | null
+          firm_id: string
+          gate_out_at: string | null
+          gate_out_by: string | null
+          gate_token: string | null
+          grand_total: number
+          gst_mode: string | null
+          id: string
+          igst: number
+          invoice_date: string
+          invoice_no: string
+          irn: string | null
+          is_interstate: boolean
+          order_id: string
+          payment_status: string
+          pdf_at: string | null
+          pdf_path: string | null
+          place_of_supply: string | null
+          round_off: number
+          seller_gstin: string | null
+          sgst: number
+          shipment_id: string | null
+          signed_qr: string | null
+          status: string
+          taxable_value: number
+          trip_id: string | null
+          unit_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "invoices"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      _notify_key: { Args: never; Returns: string }
+      _notify_register: { Args: { p_url: string }; Returns: string }
+      _notify_tick: { Args: never; Returns: undefined }
+      _notify_values: { Args: { p_log_id: number }; Returns: Json }
+      _notify_whatsapp_body: { Args: { p_log_id: number }; Returns: Json }
       _open_bills: {
         Args: { p_customer_id: string; p_firm_id: string }
         Returns: {
@@ -10819,6 +11288,37 @@ export type Database = {
       _optimise_trip: {
         Args: { p_method?: string; p_trip_id: string }
         Returns: undefined
+      }
+      _p4_alert: {
+        Args: {
+          p_body: string
+          p_company: string
+          p_customer: string
+          p_kind: string
+          p_new: number
+          p_old: number
+          p_order: string
+          p_reason: string
+          p_title: string
+        }
+        Returns: undefined
+      }
+      _p4_apply_discounts: { Args: { p_order_id: string }; Returns: undefined }
+      _p4_discount_after: {
+        Args: {
+          o: Database["public"]["Tables"]["orders"]["Row"]
+          p_old: number
+          p_text: string
+        }
+        Returns: undefined
+      }
+      _p4_discount_ok: {
+        Args: { o: Database["public"]["Tables"]["orders"]["Row"] }
+        Returns: undefined
+      }
+      _p4_state_code: {
+        Args: { p_company: string; p_state: string }
+        Returns: string
       }
       _photo_days: {
         Args: { p_company: string; p_type: string }
@@ -10912,6 +11412,16 @@ export type Database = {
         Args: { p_opening_id: string }
         Returns: undefined
       }
+      _rpt_col: {
+        Args: {
+          p_key: string
+          p_label: string
+          p_total?: boolean
+          p_type?: string
+        }
+        Returns: Json
+      }
+      _rpt_ok: { Args: never; Returns: undefined }
       _sales_can_use: { Args: { p_customer_id: string }; Returns: boolean }
       _scheme_free_line: {
         Args: {
@@ -11200,6 +11710,10 @@ export type Database = {
         }[]
       }
       cc_can_edit_delivery_appearance: { Args: never; Returns: boolean }
+      cc_cancel_invoice: {
+        Args: { p_invoice_id: string; p_reason: string; p_reopen?: boolean }
+        Returns: Json
+      }
       cc_cash_mismatch: {
         Args: { p_id: string; p_reason: string; p_received: number }
         Returns: undefined
@@ -11234,7 +11748,24 @@ export type Database = {
         }
         Returns: Json
       }
+      cc_create_note: {
+        Args: {
+          p_amount?: number
+          p_gst_rate?: number
+          p_invoice_id: string
+          p_lines?: Json
+          p_reason: string
+          p_stock_back?: boolean
+          p_type: string
+        }
+        Returns: Json
+      }
       cc_customer_profile: { Args: { p_customer_id: string }; Returns: Json }
+      cc_dashboard: { Args: { p_from?: string; p_to?: string }; Returns: Json }
+      cc_decide_note: {
+        Args: { p_approve: boolean; p_note_id: string; p_reason?: string }
+        Returns: Json
+      }
       cc_delete_scheme: { Args: { p_id: string }; Returns: boolean }
       cc_delivery_appearance: { Args: never; Returns: Json }
       cc_dispatch_orders: {
@@ -11269,6 +11800,10 @@ export type Database = {
       }
       cc_get_scheme: { Args: { p_id: string }; Returns: Json }
       cc_handover_expected: { Args: { p_id: string }; Returns: Json }
+      cc_invoice_pdf_saved: {
+        Args: { p_invoice_id: string; p_path: string }
+        Returns: Json
+      }
       cc_list_drivers: {
         Args: { p_date?: string; p_unit_id?: string }
         Returns: {
@@ -11279,6 +11814,16 @@ export type Database = {
           unit_id: string
           user_id: string
         }[]
+      }
+      cc_list_facets: {
+        Args: {
+          p_from?: string
+          p_parts?: boolean
+          p_search?: string
+          p_statuses?: string[]
+          p_to?: string
+        }
+        Returns: Json
       }
       cc_list_salesmen: {
         Args: never
@@ -11382,6 +11927,29 @@ export type Database = {
         }[]
       }
       cc_notifications: { Args: never; Returns: Json }
+      cc_notify_event_save: {
+        Args: {
+          p_attach_bill_pdf?: boolean
+          p_campaign: string
+          p_event_key: string
+          p_params: string[]
+          p_push: boolean
+          p_whatsapp: boolean
+        }
+        Returns: Json
+      }
+      cc_notify_retry: { Args: { p_log_id: number }; Returns: Json }
+      cc_notify_summary: { Args: { p_days?: number }; Returns: Json }
+      cc_order_discount: {
+        Args: {
+          p_kind: string
+          p_line_id?: string
+          p_note?: string
+          p_order_id: string
+          p_value: number
+        }
+        Returns: Json
+      }
       cc_pending_sync: {
         Args: { p_min_minutes?: number; p_trip_id?: string }
         Returns: {
@@ -11461,6 +12029,9 @@ export type Database = {
         Args: { p_note_id: string; p_reason: string }
         Returns: undefined
       }
+      cc_remove_discount: { Args: { p_discount_id: string }; Returns: Json }
+      cc_report: { Args: { p_filters?: Json; p_key: string }; Returns: Json }
+      cc_report_list: { Args: never; Returns: Json }
       cc_resolve_gate_problem: {
         Args: { p_id: string; p_note: string }
         Returns: undefined
@@ -11959,6 +12530,10 @@ export type Database = {
         Args: { p_odometer?: number; p_qr_token: string }
         Returns: string
       }
+      gate_out_challan: {
+        Args: { p_code: string; p_note?: string; p_vehicle_seen?: string }
+        Returns: Json
+      }
       gate_overdue_hours: { Args: never; Returns: number }
       gate_parcel_handover: {
         Args: { p_entry_id: string; p_received_by: string }
@@ -12010,6 +12585,7 @@ export type Database = {
         }[]
       }
       gate_request_status: { Args: { p_request_id: string }; Returns: Json }
+      gate_scan_challan: { Args: { p_code: string }; Returns: Json }
       gate_scan_lookup: { Args: { p_token: string }; Returns: Json }
       gate_staff_directory: {
         Args: never
@@ -12264,8 +12840,11 @@ export type Database = {
         }[]
       }
       my_khata_summary: { Args: never; Returns: Json }
+      my_notifications: { Args: { p_limit?: number }; Returns: Json }
+      my_notifications_read: { Args: { p_ids?: number[] }; Returns: number }
       my_order_detail: { Args: { p_order_id: string }; Returns: Json }
       my_order_dispatch: { Args: { p_order_id: string }; Returns: Json }
+      my_order_extras: { Args: { p_order_id: string }; Returns: Json }
       my_order_truck: {
         Args: { p_order_id: string }
         Returns: {

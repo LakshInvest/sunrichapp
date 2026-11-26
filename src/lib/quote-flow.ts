@@ -155,12 +155,25 @@ export function respondQuote(orderId: string, accept: boolean, opts: { qty?: { l
 }
 export const requoteOrder = (orderId: string) => call<unknown>("requote_my_order", { p_order_id: orderId });
 export const addOrderNote = (orderId: string, body: string) => call<unknown>("add_order_note", { p_order_id: orderId, p_body: body });
+const PAY_METHODS = ["upi", "bank", "cash", "credit"] as const;
+/** Modes the customer may pick: the office-set mode wins; otherwise CC's my_payment_modes (Prompt-80 §1). */
+export function allowedPayMethods(orderMethods: unknown[], ccModes: unknown, required: string | null): PayMethod[] {
+  if (required && (PAY_METHODS as readonly string[]).includes(required)) return [required as PayMethod];
+  const base = orderMethods.filter((m): m is PayMethod => (PAY_METHODS as readonly unknown[]).includes(m));
+  if (!Array.isArray(ccModes)) return base;
+  const cc = new Set(ccModes.map(String));
+  return (base.length ? base : [...PAY_METHODS]).filter((m) => cc.has(m));
+}
 export async function fetchPayOptions(orderId: string): Promise<PayOptions> {
-  const d = await call<any>("my_payment_options", { p_order_id: orderId });
+  const [d, modes] = await Promise.all([
+    call<any>("my_payment_options", { p_order_id: orderId }),
+    call<unknown>("my_payment_modes", {}).catch(() => null),
+  ]);
+  const required = d?.required_method ?? null;
   return {
     amount: Number(d?.amount ?? 0),
-    methods: (Array.isArray(d?.methods) ? d.methods : []).filter((m: string) => ["upi", "bank", "cash", "credit"].includes(m)),
-    required_method: d?.required_method ?? null,
+    methods: allowedPayMethods(Array.isArray(d?.methods) ? d.methods : [], modes, required),
+    required_method: required,
     proof_required: d?.proof_required === true,
     pay_to: d?.pay_to ?? null,
   };

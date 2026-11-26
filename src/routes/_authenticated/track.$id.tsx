@@ -159,6 +159,7 @@ function OrderPage() {
             <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success/15"><Check className="h-8 w-8 text-success" /></span>
             <p className="mt-3 text-lg font-bold text-primary">{t("quote.doneTitle")}</p>
             <p className="mt-1 text-sm text-muted-foreground">{t("quote.doneBody")}</p>
+            {d.payments[0] && <p className="mt-2 text-xs text-muted-foreground">{t(`quote.method.${d.payments[0].method}`, { defaultValue: d.payments[0].method })} · {formatINR(d.payments[0].amount ?? 0)}</p>}
             <div className="mt-5 grid grid-cols-2 gap-2">
               <button type="button" onClick={() => setDoneShown(false)} className="min-h-12 rounded-xl border border-border text-base font-bold text-foreground">{t("quote.viewOrder")}</button>
               <button type="button" onClick={() => void navigate({ to: "/home" })} className="min-h-12 rounded-xl bg-primary text-base font-bold text-primary-foreground">{t("quote.goHome")}</button>
@@ -207,7 +208,7 @@ function OrderPage() {
           </>
         )}
 
-        {st === "payment_submitted" && (
+        {!doneShown && st === "payment_submitted" && (
           <section className="rounded-xl bg-card p-5 text-center shadow-sm">
             <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent/20"><Loader2 className="h-7 w-7 animate-spin text-accent-foreground" /></span>
             <p className="mt-3 text-lg font-bold text-primary">{t("quote.payChecking")}</p>
@@ -215,6 +216,8 @@ function OrderPage() {
           </section>
         )}
 
+        {/* Steps 2–4 of the rate flow show only the step card (Prompt-80 §2). */}
+        {flowStep < 2 && (<>
         {step >= 0 && (
           <section className="rounded-xl bg-card p-4 shadow-sm">
             <ol className="space-y-3">
@@ -273,6 +276,7 @@ function OrderPage() {
             <ul className="mt-2 space-y-1.5">{d.history.map((h, i) => <li key={i} className="text-xs text-muted-foreground"><span className="font-semibold text-foreground">{t(`quote.status.${h.status ?? ""}`, { defaultValue: h.status ?? "" })}</span> · {who(h.by)} · {indDateTime(h.at, lang)}{h.note ? ` — ${h.note}` : ""}</li>)}</ul>
           </details>
         )}
+        </>)}
       </div>
 
       <SheetDrawer open={rejectOpen !== null} onOpenChange={(v) => !v && setRejectOpen(null)}>

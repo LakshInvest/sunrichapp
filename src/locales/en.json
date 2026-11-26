@@ -1537,7 +1537,7 @@
       "rate": "Rate approved"
     },
     "payTitle": "Amount to pay",
-    "requiredMethod": "Sunrich has asked for payment by {{mode}}",
+    "requiredMethod": "Payment mode: {{mode}} (set by Sunrich)",
     "method": {
       "upi": "UPI apps",
       "bank": "Bank transfer",

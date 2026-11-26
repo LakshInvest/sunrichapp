@@ -17,6 +17,7 @@ import { IST_TZ } from "@/lib/ist";
 import { BrandedInvoice } from "@/components/BrandedInvoice";
 import { GstBillDetails, useOrderDispatch } from "@/components/GstBillDetails";
 import type { OrderDispatch } from "@/lib/dispatch";
+import { formatPack } from "@/lib/pack-label";
 
 export const Route = createFileRoute("/_authenticated/invoice/$id")({
   head: () => ({
@@ -44,7 +45,7 @@ function shareText(inv: Invoice, firm: InvoiceFirm | null, d: OrderDispatch | nu
     d?.einvoice ? `IRN ${d.einvoice.irn}${d.einvoice.ackNo ? ` · Ack ${d.einvoice.ackNo}` : ""}` : "",
     d?.ewayBill ? `E-way bill ${d.ewayBill.no}${d.ewayBill.validTill ? ` · valid till ${fmtDate(d.ewayBill.validTill)}` : ""}` : "",
     "",
-    ...inv.lines.map((l) => `${l.description} × ${l.qty} = ${formatINR(l.total)}`),
+    ...inv.lines.map((l) => [l.description, formatPack(l.description), `× ${l.qty} = ${formatINR(l.total)}`].filter(Boolean).join(" · ")),
     "",
     `Total ${formatINR(inv.grandTotal)}`,
     inv.balance > 0 ? `Balance due ${formatINR(inv.balance)}` : "Paid",

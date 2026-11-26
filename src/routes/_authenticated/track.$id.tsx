@@ -13,6 +13,7 @@ import { useOffline } from "@/hooks/use-offline";
 import { useDataRefresh } from "@/hooks/use-data-refresh";
 import { useAppSettings } from "@/lib/app-settings";
 import { formatINR } from "@/lib/catalogue";
+import { formatPack } from "@/lib/pack-label";
 import { serverMessage } from "@/lib/form-errors";
 import { indDate, indDateTime } from "@/lib/order-format";
 import { requestDataRefresh } from "@/lib/data-refresh";
@@ -125,7 +126,7 @@ function OrderPage() {
   const flowStep = doneShown ? 4 : st === "quote_sent" ? 1 : st === "quote_accepted" || st === "payment_rejected" ? (payPhase === "pay" ? 3 : 2) : 0;
 
   const itemsPlain = (
-    <ul className="space-y-1.5">{d.items.map((i) => <li key={i.line_id} className="flex justify-between gap-3 text-sm"><span className="min-w-0 truncate text-foreground">{i.name}{i.pack_label ? <span className="text-muted-foreground"> · {i.pack_label}</span> : null}</span><span className="shrink-0 font-semibold">×{i.qty}{i.is_free && <FreeTag t={t} />}</span></li>)}</ul>
+    <ul className="space-y-1.5">{d.items.map((i) => <li key={i.line_id} className="flex justify-between gap-3 text-sm"><span className="min-w-0 text-foreground">{i.name}<span className="block text-xs text-muted-foreground">{formatPack(i.pack_label, null, null, null, i.name)}</span></span><span className="shrink-0 font-semibold">×{i.qty}{i.is_free && <FreeTag t={t} />}</span></li>)}</ul>
   );
 
   return (
@@ -175,12 +176,12 @@ function OrderPage() {
                 <li key={i.line_id} className="flex items-start justify-between gap-3 py-2.5">
                   <span className="min-w-0">
                     <span className="block text-sm font-bold text-foreground">{i.name}</span>
-                    <span className="block text-xs text-muted-foreground">{[i.pack_label && i.pack_label !== i.name ? i.pack_label : null, t("quote.packs", { count: i.qty })].filter(Boolean).join(" · ")}</span>
+                    <span className="block text-xs text-muted-foreground">{[formatPack(i.pack_label, null, null, null, i.name), t("quote.packs", { count: i.qty })].filter(Boolean).join(" · ")}</span>
                   </span>
                   <span className="shrink-0 text-sm font-bold text-foreground">{formatINR((i.rate ?? 0) * i.qty)}</span>
                 </li>
               ))}
-              {free.map((i) => <li key={i.line_id} className="flex justify-between gap-3 py-2.5 text-sm"><span className="min-w-0 text-foreground"><span className="font-bold">{i.name}</span><span className="block text-xs font-bold text-success">{t("quote.freeOffer", { count: i.qty })}</span>{i.scheme ? <span className="block text-xs text-muted-foreground">{i.scheme}</span> : null}</span><span className="shrink-0 font-bold text-success">{formatINR(0)}</span></li>)}
+              {free.map((i) => <li key={i.line_id} className="flex justify-between gap-3 py-2.5 text-sm"><span className="min-w-0 text-foreground"><span className="font-bold">{i.name}</span><span className="block text-xs text-muted-foreground">{formatPack(i.pack_label, null, null, null, i.name)}</span><span className="block text-xs font-bold text-success">{t("quote.freeOffer", { count: i.qty })}</span>{i.scheme ? <span className="block text-xs text-muted-foreground">{i.scheme}</span> : null}</span><span className="shrink-0 font-bold text-success">{formatINR(0)}</span></li>)}
             </ul>
             <div className="mt-2 space-y-1 border-t border-border pt-3">
               {x?.totals?.subtotal != null && <p className="flex justify-between gap-3 text-sm"><span className="text-muted-foreground">{t("quote.subtotal")}</span><span className="font-semibold text-foreground">{formatINR(x.totals.subtotal)}</span></p>}

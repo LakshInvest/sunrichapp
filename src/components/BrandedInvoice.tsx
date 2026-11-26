@@ -5,6 +5,8 @@ import { upiLink, type Invoice } from "@/lib/billing";
 import type { InvoiceFirm } from "@/lib/invoice.functions";
 import { IST_TZ } from "@/lib/ist";
 import { amountInWords } from "@/lib/amount-words";
+import { formatPack } from "@/lib/pack-label";
+import { Logo } from "@/components/Logo";
 
 /**
  * Customer copy of the Command Center A4 invoice. Every label, colour and
@@ -52,7 +54,7 @@ export function BrandedInvoice({ inv, firm, lang, gst: gstBlock }: { inv: Invoic
       <header className="flex items-start gap-3 p-4" style={{ background: head, color: "#fff" }}>
         {firm?.logoUrl && <img src={firm.logoUrl} alt="" className="h-12 w-12 shrink-0 rounded-lg bg-card object-contain p-1" />}
         <div className="min-w-0 flex-1">
-          <p className="text-base font-bold leading-tight">{firm?.legalName ?? "Sunrich"}</p>
+          {firm?.legalName ? <p className="text-base font-bold leading-tight">{firm.legalName}</p> : <Logo variant="white" size="md" />}
           {d["tagline"] != null && <p className="opacity-80">{loc(d["tagline"], lang, "")}</p>}
         </div>
         <p className="shrink-0 text-right text-sm font-extrabold tracking-wide">{loc(d["title"], lang, "TAX INVOICE")}</p>
@@ -101,7 +103,7 @@ export function BrandedInvoice({ inv, firm, lang, gst: gstBlock }: { inv: Invoic
           <tbody>
             {inv.lines.map((l) => (
               <tr key={l.id} className="border-b border-border align-top">
-                <td className="p-1.5 font-semibold">{l.description}</td>
+                <td className="p-1.5 font-semibold">{l.description}<span className="block font-normal text-muted-foreground">{formatPack(l.description)}</span></td>
                 {on("showHsn") && <td className="p-1.5">{l.hsn ?? "—"}</td>}
                 <td className="p-1.5 text-right">{l.qty}</td>
                 <td className="p-1.5 text-right">{formatINR(l.rate)}</td>

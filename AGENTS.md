@@ -11,6 +11,8 @@
 
 ## Architecture rules
 
+- Share pack formatting in `pack-label.ts` and wordmark fallbacks/cache in `brand.ts`. Why: all screens must agree and cold opens must retain the real logo.
+
 - Order-list summaries and filter counts share pure rules in `quote-flow.ts`; counts use the same membership as filtered lists to prevent drift.
 
 Subdirectories `src/lib/` and `src/routes/` have their own `AGENTS.md`; read them before changing files there.

@@ -147,7 +147,7 @@ export function ProductCard({
       </button>
       <button type="button" onClick={onOpen} className="mt-1 min-h-11 text-left">
         <p className="truncate text-sm font-bold leading-snug text-foreground">{name}</p>
-        <p className="truncate text-xs leading-tight text-muted-foreground">{pack || "\u00a0"}</p>
+        <p className="min-h-8 text-xs leading-4 text-muted-foreground">{pack || "\u00a0"}</p>
       </button>
       <SchemeBadge product={product} />
       <div className="mt-1 flex h-11 items-center gap-2">

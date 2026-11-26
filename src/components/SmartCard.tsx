@@ -48,7 +48,7 @@ export function SmartCard({
         {pick.kind === "overdue" && <span className="text-destructive">{t("smart.overdue", { amount: formatINR(overdue) })}</span>}
         {pick.kind === "dispatched" && t("smart.dispatched")}
         {pick.kind === "reorder" && lastDelivered && (
-          <span className="block truncate">
+          <span className="block break-words">
             {lastDelivered.lines.map((l) => lineShort(l.packLabel, l.productName, l.qty)).join(", ")}
           </span>
         )}

@@ -1,3 +1,9 @@
+# Prompt-82
+- [x] Real white AQUA wordmark on login and cold launch at 180px, settings-driven logo preference and regular-logo white filter; image fallback instead of typed branding. Shared Logo and invoice fallback checked in code; About/offline icons preserved.
+- [x] Full count × volume helper shared by Home/category/search cards, product/details/placeholder, cart/review, reorder, quote/free/order lines, invoice/print/share summaries. Read each display path and data reader; catalogue/order/RPC data remains unchanged. Missing details omitted, known jar volume retained; no migrations, settled-record writes, permission/settings changes, or sample orders created.
+- [x] Fresh reviewer PIN login → Home → product → add to local cart → review verified without sending an order. Login/Home/product/cart in English/Hindi/Marathi at 360/390/412/768: no horizontal overflow; launch verified before scripts. 292 tests pass; build OK; reported utils.ts ReactNode assignment absent (standard cn helper). All content-route metadata inspected.
+- [ ] Live rate/order/bill screen read-back: reviewer account has no orders or bills; requires an existing accessible quote/bill. Their rendering code and helper rules are checked, but database-function definitions and physical Android are not verified. Not published (not requested).
+
 # Prompt-81
 - [x] Compact order cards without item names; localized item/pack totals and quoted amount; counted 14px filters with overflow fade. No migrations or login changes.
 - [x] Reviewer PIN login passed. Signed-in sales access to Growth order MFOR/26-27/00001: six items/six packs/₹570, Done/All counts and order tap read-back verified. English/Hindi/Marathi at 360/390/412/768: no page overflow. 281 tests passed; preview build OK; no orders/payments created. Not published; physical Android not checked.

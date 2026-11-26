@@ -21,10 +21,10 @@ const FALLBACK: Brand = {
   accent: "#0AAAED",
 };
 
-export function brandFromInfo(info: Awaited<ReturnType<typeof fetchAppInfo>>, lang: Lang): Brand {
+export function brandFromInfo(info: Awaited<ReturnType<typeof fetchAppInfo>>, lang: Lang, photoLogo?: string | null): Brand {
   return {
     logoLight: info.logoOnLightUrl ?? FALLBACK.logoLight,
-    logoDark: info.logoOnDarkUrl ?? FALLBACK.logoDark,
+    logoDark: info.logoOnDarkUrl ?? photoLogo ?? info.logoOnLightUrl ?? FALLBACK.logoDark,
     tagline: info.loginTagline[lang] ?? info.loginTagline.en ?? FALLBACK.tagline,
     primary: info.brandPrimary ?? FALLBACK.primary,
     accent: info.brandAccent ?? FALLBACK.accent,
@@ -32,13 +32,21 @@ export function brandFromInfo(info: Awaited<ReturnType<typeof fetchAppInfo>>, la
 }
 
 /** Resolves once from the cached public_app_info read; falls back to bundled assets. */
-export function useBrand(lang: Lang = "en"): Brand {
+export function useBrand(lang: Lang = "en", photoLogo?: string | null): Brand {
   const [brand, setBrand] = useState<Brand>(FALLBACK);
   useEffect(() => {
     let alive = true;
     fetchAppInfo()
       .then((info) => {
-        if (alive) setBrand(brandFromInfo(info, lang));
+        if (alive) {
+          const next = brandFromInfo(info, lang, photoLogo);
+          setBrand(next);
+          try {
+            localStorage.setItem("sunrich.logoImg", next.logoDark);
+            document.documentElement.style.setProperty("--launch-logo", `url(${JSON.stringify(next.logoDark)})`);
+            document.documentElement.setAttribute("data-launch-logo", "");
+          } catch { /* branding still renders when storage is unavailable */ }
+        }
       })
       .catch(() => {
         /* keep fallback */
@@ -46,6 +54,6 @@ export function useBrand(lang: Lang = "en"): Brand {
     return () => {
       alive = false;
     };
-  }, [lang]);
+  }, [lang, photoLogo]);
   return brand;
 }

@@ -151,7 +151,7 @@ function QuoteFlow() {
                   <SmartImage width={64} src={product.imageUrl ?? product.images[0] ?? null} alt="" className="h-14 w-14 shrink-0 rounded-xl bg-card object-contain" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-bold text-foreground">{name}</p>
-                    <p className="truncate text-xs text-muted-foreground">{formatPack(loc(product.packLabel, lang), product.unitsPerSellUnit, product.volumeMl, product.sellUnit)}</p>
+                    <p className="text-xs text-muted-foreground">{formatPack(loc(product.packLabel, lang), product.unitsPerSellUnit, product.volumeMl, product.sellUnit)}</p>
                     <div className="mt-2 flex items-center gap-2">
                       <QtyStepper compact className="h-9 w-[110px]" qty={qty} max={product.maxOrderQty} onDec={() => setQty(product.id, qty - 1 < product.minOrderQty ? 0 : qty - 1)} onInc={() => setQty(product.id, clampQty(product, qty + 1))} onSet={(n) => setQty(product.id, n === 0 ? 0 : clampQty(product, n))} />
                       <button type="button" onClick={() => setQty(product.id, 0)} aria-label={t("cart.remove")} className="ml-auto flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground active:scale-95"><Trash2 className="h-4 w-4" /></button>
@@ -228,7 +228,7 @@ function QuoteFlow() {
         {step === "review" && (
           <div className="space-y-3">
             <section className="rounded-xl bg-card p-4 shadow-sm">
-              <ul className="space-y-1.5">{rows.map(({ product, qty }) => <li key={product.id} className="flex justify-between gap-3 text-sm"><span className="min-w-0 truncate text-foreground">{fixName(loc(product.name, lang))}</span><span className="shrink-0 font-semibold text-foreground">×{qty}</span></li>)}</ul>
+              <ul className="space-y-1.5">{rows.map(({ product, qty }) => <li key={product.id} className="flex justify-between gap-3 text-sm"><span className="min-w-0 text-foreground">{fixName(loc(product.name, lang))}<span className="block text-xs text-muted-foreground">{formatPack(loc(product.packLabel, lang), product.unitsPerSellUnit, product.volumeMl, product.sellUnit)}</span></span><span className="shrink-0 font-semibold text-foreground">×{qty}</span></li>)}</ul>
               <button type="button" onClick={() => setStep("cart")} className="mt-2 text-xs font-bold text-primary">{t("quote.edit")}</button>
             </section>
             <ReviewRow icon={mode === "pickup" ? <Factory className="h-5 w-5" /> : <Truck className="h-5 w-5" />} label={t(mode === "pickup" ? "quote.modePickup" : "quote.modeDelivery")} value={mode === "pickup" ? plant : address ? addressText(address) : shopAddr || t("quote.shopAddress")} onEdit={() => setStep(mode === "pickup" ? "mode" : "address")} editLabel={t("quote.edit")} />

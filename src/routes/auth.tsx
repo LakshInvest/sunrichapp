@@ -1,4 +1,5 @@
 import appIcon from "@/assets/brand/sunrich-app-icon-final.png.asset.json";
+import whiteLogo from "@/assets/brand/sunrich-logo-white.png.asset.json";
 import { markFirstScreen } from "@/lib/native";
 import { AppLoader } from "@/components/AppLoader";
 import { BottleLoader } from "@/components/BottleLoader";
@@ -340,20 +341,18 @@ function Login() {
   const { t } = useTranslation();
   const { lang } = useLang();
   const navigate = useNavigate();
-  const brand = useBrand(lang);
   // Login photo from Command Center (cached from the last settings read; works signed out).
   const appSettings = useAppSettings();
   const brandPhotos = useServerFn(getBrandPhotos);
   const [loginImage, setLoginImage] = useState<string | null>(null);
   const [photos, setPhotos] = useState<BrandPhotos | null>(null);
-  const [logoImage, setLogoImage] = useState<string | null>(null);
+  const brand = useBrand(lang, photos?.logo);
   const [texts, setTexts] = useState<BrandPhotos["texts"] | null>(null);
   const [visibility, setVisibility] = useState(brandVisibility);
   useEffect(() => {
     try {
       const flags = localStorage.getItem("sunrich.brandVisibility");
       setVisibility(photos?.visibility ?? (flags ? JSON.parse(flags) : brandVisibility()));
-      setLogoImage(photos ? (photos.logo ?? null) : localStorage.getItem("sunrich.logoImg"));
       const raw = photos ? null : localStorage.getItem("sunrich.loginTexts");
       setTexts(photos ? (photos.texts ?? null) : raw ? (JSON.parse(raw) as BrandPhotos["texts"]) : null);
     } catch {
@@ -830,12 +829,9 @@ function Login() {
           <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-primary to-primary/80" />
         )}
         <div className="absolute inset-x-0 top-[calc(env(safe-area-inset-top)+2.5rem)] flex flex-col items-center text-primary-foreground drop-shadow">
-          {visibility.loginShowLogo !== false &&
-            (logoImage ? (
-              <img src={logoImage} alt="Sunrich" className="h-auto w-[45vw] max-w-[220px]" onError={() => setLogoImage(null)} />
-            ) : (
-              <span className="text-[32px] font-extrabold tracking-[0.12em]">SUNRICH</span>
-            ))}
+          {visibility.loginShowLogo !== false && (
+            <img src={brand.logoDark} alt="Sunrich" className="h-auto w-[180px] max-w-[calc(100%-40px)] brightness-0 invert" onError={(e) => { if (!e.currentTarget.src.endsWith(whiteLogo.url)) e.currentTarget.src = whiteLogo.url; }} />
+          )}
           {visibility.loginShowTagline !== false && loginText(texts, "login_tagline", lang) && (
             <p className="mt-1.5 font-deva text-[15px] font-semibold">{loginText(texts, "login_tagline", lang)}</p>
           )}

@@ -1375,6 +1375,7 @@
     "someoneElse": "Deliver to someone else?"
   },
   "packUnit": {
+    "jar": "Jar",
     "packOf": "Pack of {{n}}",
     "boxOf": "Box of {{n}}",
     "caseOf": "Case of {{n}}",

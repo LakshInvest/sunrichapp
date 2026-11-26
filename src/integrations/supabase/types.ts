@@ -306,6 +306,10 @@ export type Database = {
           allow_cancel_before: string
           allow_order_notes: boolean
           app_logo_url: string | null
+          app_pay_bank: boolean
+          app_pay_cash: boolean
+          app_pay_credit: boolean
+          app_pay_upi: boolean
           appearance_changed_at: Json
           auto_plan_last_date: string | null
           closed_weekdays: number[]
@@ -393,6 +397,10 @@ export type Database = {
           allow_cancel_before?: string
           allow_order_notes?: boolean
           app_logo_url?: string | null
+          app_pay_bank?: boolean
+          app_pay_cash?: boolean
+          app_pay_credit?: boolean
+          app_pay_upi?: boolean
           appearance_changed_at?: Json
           auto_plan_last_date?: string | null
           closed_weekdays?: number[]
@@ -480,6 +488,10 @@ export type Database = {
           allow_cancel_before?: string
           allow_order_notes?: boolean
           app_logo_url?: string | null
+          app_pay_bank?: boolean
+          app_pay_cash?: boolean
+          app_pay_credit?: boolean
+          app_pay_upi?: boolean
           appearance_changed_at?: Json
           auto_plan_last_date?: string | null
           closed_weekdays?: number[]
@@ -4622,6 +4634,18 @@ export type Database = {
         }
         Relationships: []
       }
+      name_acronyms: {
+        Row: {
+          word: string
+        }
+        Insert: {
+          word: string
+        }
+        Update: {
+          word?: string
+        }
+        Relationships: []
+      }
       notification_events: {
         Row: {
           aisensy_campaign: string | null
@@ -6678,6 +6702,29 @@ export type Database = {
           },
         ]
       }
+      role_extra_powers: {
+        Row: {
+          power_key: string
+          role_id: string
+        }
+        Insert: {
+          power_key: string
+          role_id: string
+        }
+        Update: {
+          power_key?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_extra_powers_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           action: string
@@ -6704,8 +6751,35 @@ export type Database = {
           },
         ]
       }
+      role_tab_access: {
+        Row: {
+          level: string
+          role_id: string
+          tab_key: string
+        }
+        Insert: {
+          level?: string
+          role_id: string
+          tab_key: string
+        }
+        Update: {
+          level?: string
+          role_id?: string
+          tab_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_tab_access_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roles: {
         Row: {
+          app: string
           approval_limit: number | null
           code: string
           company_id: string
@@ -6718,9 +6792,11 @@ export type Database = {
           name: string
           name_hi: string | null
           name_mr: string | null
+          plant_scope: string
           updated_at: string
         }
         Insert: {
+          app?: string
           approval_limit?: number | null
           code: string
           company_id: string
@@ -6733,9 +6809,11 @@ export type Database = {
           name: string
           name_hi?: string | null
           name_mr?: string | null
+          plant_scope?: string
           updated_at?: string
         }
         Update: {
+          app?: string
           approval_limit?: number | null
           code?: string
           company_id?: string
@@ -6748,6 +6826,7 @@ export type Database = {
           name?: string
           name_hi?: string | null
           name_mr?: string | null
+          plant_scope?: string
           updated_at?: string
         }
         Relationships: [
@@ -11511,6 +11590,18 @@ export type Database = {
         Args: { p_opening_id: string }
         Returns: undefined
       }
+      _role_apply: { Args: { p_role_id: string }; Returns: number }
+      _role_lvl: { Args: { p: string }; Returns: number }
+      _role_tab_map: {
+        Args: never
+        Returns: {
+          action: string
+          key: string
+          kind: string
+          lvl: number
+          module: string
+        }[]
+      }
       _rpt_col: {
         Args: {
           p_key: string
@@ -11580,6 +11671,13 @@ export type Database = {
           p_to: Database["public"]["Enums"]["order_status"]
         }
         Returns: undefined
+      }
+      _ship_transporter: {
+        Args: { p: Json; p_co: string }
+        Returns: {
+          t_id: string
+          t_name: string
+        }[]
       }
       _stop_credit_note: { Args: { p_stop_id: string }; Returns: undefined }
       _title_name: { Args: { p: string }; Returns: string }
@@ -12058,6 +12156,20 @@ export type Database = {
         }
         Returns: Json
       }
+      cc_outstanding_as_on: {
+        Args: { p_date?: string; p_firm_id?: string }
+        Returns: {
+          bills: number
+          customer_id: string
+          customer_name: string
+          due_0_30: number
+          due_31_60: number
+          due_61_90: number
+          due_90_plus: number
+          oldest_bill_date: string
+          total_due: number
+        }[]
+      }
       cc_pending_sync: {
         Args: { p_min_minutes?: number; p_trip_id?: string }
         Returns: {
@@ -12144,6 +12256,9 @@ export type Database = {
         Args: { p_id: string; p_note: string }
         Returns: undefined
       }
+      cc_role_delete: { Args: { p_role_id: string }; Returns: Json }
+      cc_role_list: { Args: never; Returns: Json }
+      cc_role_save: { Args: { p: Json; p_role_id: string }; Returns: Json }
       cc_save_photo_settings: { Args: { p: Json }; Returns: undefined }
       cc_save_scheme: { Args: { p: Json }; Returns: string }
       cc_scheme_preview: {
@@ -12270,6 +12385,10 @@ export type Database = {
       cc_update_ticket: {
         Args: { p_assigned_to?: string; p_status?: string; p_ticket_id: string }
         Returns: undefined
+      }
+      cc_user_remove: {
+        Args: { p_confirm_name: string; p_user_id: string }
+        Returns: Json
       }
       cc69_assert_driver: {
         Args: { p_trip: Database["public"]["Tables"]["trips"]["Row"] }
@@ -12970,6 +13089,7 @@ export type Database = {
           recorded_at: string
         }[]
       }
+      my_payment_modes: { Args: never; Returns: Json }
       my_payment_options: { Args: { p_order_id: string }; Returns: Json }
       my_permissions: {
         Args: never
@@ -12997,6 +13117,7 @@ export type Database = {
       my_session_is_valid: { Args: never; Returns: boolean }
       my_staff_qr: { Args: never; Returns: string }
       my_staff_session_verified: { Args: never; Returns: boolean }
+      my_tabs: { Args: never; Returns: Json }
       my_trip_account: {
         Args: { p_limit?: number; p_month: string; p_offset?: number }
         Returns: Json

@@ -11,6 +11,8 @@
 
 ## Architecture rules
 
+- Order-list summaries and filter counts share pure rules in `quote-flow.ts`; counts use the same membership as filtered lists to prevent drift.
+
 Subdirectories `src/lib/` and `src/routes/` have their own `AGENTS.md`; read them before changing files there.
 
 - Backend is user-managed and pre-seeded: never create or alter tables, functions, policies or buckets; use existing RPCs/RLS only. Why: the schema is owned outside this app.

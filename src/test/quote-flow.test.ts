@@ -1,9 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { changedQty, countdown, isAllowedDate, needsAction, paymentReady, quoteDateBounds, sortForAction, statusTone, trackStep, whoKey } from "@/lib/quote-flow";
+import { changedQty, countdown, isAllowedDate, matchesOrderFilter, orderFilterCounts, orderItemCounts, needsAction, paymentReady, quoteDateBounds, showTotal, sortForAction, statusTone, trackStep, whoKey } from "@/lib/quote-flow";
 
 const now = new Date("2026-11-19T12:00:00Z"); // 19 Nov IST
 
 describe("quote flow rules", () => {
+  it("summarises six ordered products as six items and six packs", () => {
+    expect(orderItemCounts(Array.from({ length: 6 }, (_, n) => ({ name: String(n), qty: 1, isFree: false })))).toEqual({ items: 6, packs: 6 });
+    expect(orderItemCounts([{ name: "Water", qty: 3, isFree: false }, { name: "Gift", qty: 2, isFree: true }])).toEqual({ items: 1, packs: 3 });
+  });
+  it("shows the example 570 total only once the rate is known", () => {
+    expect(showTotal("quote_requested", 570)).toBe(false);
+    expect(showTotal("quote_sent", 570)).toBe(true);
+    expect(showTotal("quote_sent", null)).toBe(false);
+  });
+  it("counts each filter using the same membership as its visible list", () => {
+    const orders = [{ status: "quote_requested" }, { status: "quote_sent" }, { status: "dispatched" }, { status: "delivered" }];
+    expect(orderFilterCounts(orders)).toEqual({ all: 4, action: 1, active: 3, done: 1 });
+    expect(orderFilterCounts([])).toEqual({ all: 0, action: 0, active: 0, done: 0 });
+    expect(orders.filter((o) => matchesOrderFilter(o.status, "action"))).toEqual([{ status: "quote_sent" }]);
+  });
   it("default date is tomorrow, range today..+30", () => {
     expect(quoteDateBounds(now)).toEqual({ min: "2026-11-19", max: "2026-12-19", def: "2026-11-20" });
   });

@@ -1557,6 +1557,8 @@
     "creditYes": "Yes, order on credit",
     "submitPay": "Send payment",
     "payError": "Could not send the payment. Please try again.",
+    "itemCount_one": "{{count}} item",
+    "itemCount_other": "{{count}} items",
     "actionNeeded": "Action needed",
     "filter": {
       "all": "All",

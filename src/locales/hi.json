@@ -1557,6 +1557,8 @@
     "creditYes": "हाँ, उधारी पे ऑर्डर करें",
     "submitPay": "पेमेंट भेजें",
     "payError": "पेमेंट नहीं भेज पाए। फिर कोशिश करें।",
+    "itemCount_one": "{{count}} वस्तु",
+    "itemCount_other": "{{count}} वस्तुएँ",
     "actionNeeded": "ध्यान दें",
     "filter": {
       "all": "सभी",

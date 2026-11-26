@@ -1,3 +1,7 @@
+# Prompt-81
+- [x] Compact order cards without item names; localized item/pack totals and quoted amount; counted 14px filters with overflow fade. No migrations or login changes.
+- [x] Reviewer PIN login passed. Signed-in sales access to Growth order MFOR/26-27/00001: six items/six packs/₹570, Done/All counts and order tap read-back verified. English/Hindi/Marathi at 360/390/412/768: no page overflow. 281 tests passed; preview build OK; no orders/payments created. Not published; physical Android not checked.
+
 # Prompt-70
 - [x] Prices removed from Home/category/product/cart bar; "Price on request" gone; any product can be added.
 - [x] Step flow cart → mode → address → date → note → review → request_quote → success; tested as 9999900000 (MFOR/26-27/00006, 00007) and salesman 9999900003 for Demo Retailer (00008, "Order by salesman").

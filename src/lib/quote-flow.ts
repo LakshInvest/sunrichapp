@@ -190,6 +190,24 @@ export function raiseTicket(a: { category: string; subject: string; message: str
 /* ---------- Orders tab ---------- */
 export type MainOrder = { id: string; orderNo: string; status: string; createdAt: string; grandTotal: number | null; deliveryMode: QuoteMode; deliveryDate: string | null; placedByKind: string | null; lines: { name: string; qty: number; isFree: boolean }[] };
 
+export type OrderFilter = "all" | "action" | "active" | "done";
+export function matchesOrderFilter(status: string, filter: OrderFilter): boolean {
+  const done = ["delivered", "closed", "cancelled", "rejected", "quote_rejected"].includes(status);
+  return filter === "all" || (filter === "action" ? needsAction(status) : filter === "done" ? done : !done);
+}
+export function orderFilterCounts(orders: Pick<MainOrder, "status">[]): Record<OrderFilter, number> {
+  return {
+    all: orders.length,
+    action: orders.filter((o) => matchesOrderFilter(o.status, "action")).length,
+    active: orders.filter((o) => matchesOrderFilter(o.status, "active")).length,
+    done: orders.filter((o) => matchesOrderFilter(o.status, "done")).length,
+  };
+}
+export function orderItemCounts(lines: MainOrder["lines"]): { items: number; packs: number } {
+  const paid = lines.filter((line) => !line.isFree && line.qty > 0);
+  return { items: paid.length, packs: paid.reduce((sum, line) => sum + line.qty, 0) };
+}
+
 /** Total is shown only once a quote has come. */
 export function showTotal(status: string, total: number | null): boolean {
   return total != null && total > 0 && !["quote_requested"].includes(status);
